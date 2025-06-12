@@ -1,0 +1,14 @@
+.indicators {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 33% 66%;
+}
+
+.card {
+    margin: 2vh;
+}
+.card >*{
+    margin-top: 0;
+    margin-bottom: 0;
+}
