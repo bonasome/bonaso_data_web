@@ -1,4 +1,6 @@
+import React from 'react';
 import Home from '../components/Home';
+import Navbar from '../components/Navbar';
 //auth
 import Login from '../components/auth/Login';
 import Logout from '../components/auth/Logout';
@@ -12,21 +14,31 @@ import RedirectIfNoPerm from '../authRedirect/RedirectIfNoPerm';
 
 //respondents
 import RespondentsLayout from '../layouts/RespondentLayout';
-import Respondents from '../components/respondents/Respondents';
+import RespondentsIndex from '../components/respondents/RespondentsIndex';
 import CreateRespondent from '../components/respondents/CreateRespondent';
-import ViewRespondent from '../components/respondents/ViewRespondent';
 import EditRespondent from '../components/respondents/EditRespondent';
-
-//indicators 
-import IndicatorsLayout from '../layouts/IndicatorsLayout';
-import { IndicatorDetail } from '../components/indicators/Indicators';
-import CreateIndicator from '../components/indicators/CreateIndicator'
+import RespondentDetail from '../components/respondents/RespondentDetail';
 
 //projects
-import ProjectsLayout from '../layouts/ProjectsLayout';
-import Projects from '../components/projects/Projects';
+import ProjectLayout from '../layouts/ProjectLayout';
+import ProjectsIndex from '../components/projects/ProjectsIndex';
+import ProjectDetail from '../components/projects/ProjectDetail';
 import CreateProject from '../components/projects/CreateProject';
-import ViewProject from '../components/projects/ViewProject';
+import EditProject from '../components/projects/EditProject';
+
+//template manager
+import BatchRecord from '../components/batchRecord/BatchRecord';
+
+//organizations
+import OrganizationsIndex from '../components/organizations/OrganizationsIndex';
+import CreateOrganization from '../components/organizations/CreateOrganization';
+import EditOrganization from '../components/organizations/EditOrganization';
+
+//indicators
+import IndicatorsIndex from '../components/indicators/IndicatorsIndex';
+import CreateIndicator from '../components/indicators/CreateIndicator';
+import EditIndicator from '../components/indicators/EditIndicator';
+import IndicatorDetail from '../components/indicators/IndicatorDetail';
 
 function Router() {
     return (
@@ -35,6 +47,7 @@ function Router() {
             path='/'
             element={
             <RedirectIfNotAuthenticated>
+                <Navbar />
                 <Home />
             </RedirectIfNotAuthenticated>
             }
@@ -44,43 +57,122 @@ function Router() {
             path='/respondents' 
             element = {
                 <RedirectIfNotAuthenticated>
+                    <Navbar />
                     <RespondentsLayout />
                 </RedirectIfNotAuthenticated>
             }
         >
-            <Route index element={<Respondents />}/>
-            <Route path='create' element={<CreateRespondent />} />
+            <Route index element={<RespondentsIndex />}/>
+            <Route path=':id' element={<RespondentDetail />} />
+            <Route path='new' element={<CreateRespondent />} />
             <Route path=':id/edit' element={<EditRespondent />} />
         </Route>
-
+        
         <Route 
-            path='/indicators' 
+            path='/batch-record' 
             element = {
                 <RedirectIfNotAuthenticated>
-                    <RedirectIfNoPerm level={'admin'}>
-                        <IndicatorsLayout />
-                    </RedirectIfNoPerm>
+                    <Navbar />
+                    <RespondentsLayout />
                 </RedirectIfNotAuthenticated>
             }
         >
-            <Route index element={<IndicatorDetail />}/>
-            <Route path='create' element={<CreateIndicator />} />
+            <Route index element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <BatchRecord />
+                </RedirectIfNoPerm>
+                }/>
         </Route>
 
         <Route 
             path='/projects' 
             element = {
                 <RedirectIfNotAuthenticated>
-                    <RedirectIfNoPerm level={'admin'}>
-                        <ProjectsLayout />
-                    </RedirectIfNoPerm>
+                        <Navbar />
+                        <ProjectLayout />
                 </RedirectIfNotAuthenticated>
             }
         >
-            <Route index element={<Projects />}/>
-            <Route path='create' element={<CreateProject />} />
-            <Route path=':id/view' element={<ViewProject />} />
+            <Route index element={<ProjectsIndex />}/>
+            <Route path=':id' element = {<ProjectDetail />} />
+            <Route path='new' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <CreateProject />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path=':id/edit' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <EditProject />
+                </RedirectIfNoPerm>
+            }/>
+
         </Route>
+
+        <Route 
+            path='/organizations' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <RespondentsLayout />
+                </RedirectIfNotAuthenticated>
+            }
+        >
+            <Route index element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <OrganizationsIndex />
+                </RedirectIfNoPerm>
+                }/>
+            <Route path=':id' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <OrganizationsIndex />
+                </RedirectIfNoPerm>
+                }/>
+            
+            <Route path='new' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <CreateOrganization/>
+                </RedirectIfNoPerm>
+                }/>
+            <Route path=':id/edit' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']} org={true}>
+                    <EditOrganization />
+                </RedirectIfNoPerm>
+                }/>
+        </Route>
+        
+        <Route 
+            path='/indicators' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <RespondentsLayout />
+                </RedirectIfNotAuthenticated>
+            }
+        >
+            <Route index element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <IndicatorsIndex />
+                </RedirectIfNoPerm>
+                }/>
+            <Route path=':id' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <IndicatorDetail />
+                </RedirectIfNoPerm>
+                }/>
+            
+            <Route path='new' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <CreateIndicator/>
+                </RedirectIfNoPerm>
+                }/>
+            <Route path=':id/edit' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <EditIndicator />
+                </RedirectIfNoPerm>
+                }/>
+        </Route>
+        
+
 
         <Route path='/users' element={<AuthLayout />}>
             <Route

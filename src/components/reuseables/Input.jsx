@@ -1,9 +1,10 @@
-import styles from '../../styles/reuseableComponents.module.css'
-import { useState } from 'react'
+import React from 'react';
+import { useState, useEffect } from 'react'
 import validate from '../../../services/validate'
 
-export default function Input({ name, label=null, type='text', callback=null, required=false, placeholder='', maxLength=null }){
+export default function Input({ name, label=null, type='text', callback=null, required=false, placeholder='', maxLength=null, value=null }){
     const validTypes = ['number', 'text', 'email', 'phone', 'date']
+    const [inputValue, setInputValue] = useState('');
     let inputType = type
     let phone = false;
     let autoPlaceholder = placeholder
@@ -28,17 +29,25 @@ export default function Input({ name, label=null, type='text', callback=null, re
     };
 
     const [errors, setErrors] = useState([]);
+    useEffect(() => {
+        setInputValue(value || '')
+    }, [value])
 
     const checkInput = (event) => {
         let inputErrors = validate(event.target, phone)
         setErrors(inputErrors);
     }
 
+    const handleChange = (event) => {
+        const newVal = event.target.value
+        setInputValue(newVal)
+        if (callback) callback(event)
+    }
     return(
-        <div className={styles.input}>
+        <div>
             <label htmlFor={name}>{title}</label>
-            <input type={inputType} id={name} name={name} onChange={(event) => callback(event)} onKeyUp={(event) => checkInput(event)} placeholder={autoPlaceholder} required={required} max={maxLength ? maxLength : null}/>
-            <div className={styles.errors}>
+            <input type={inputType} id={name} name={name} onChange={handleChange} onKeyUp={(event) => checkInput(event)} placeholder={autoPlaceholder} required={required} max={maxLength ? maxLength : null} value={inputValue}/>
+            <div>
                 {errors && <ul>{errors.map((e)=><li key={e}>{e}</li>)}</ul>}
             </div>
         </div>

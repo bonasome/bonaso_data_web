@@ -1,13 +1,13 @@
 export default function validate (target, phone=false) {
     const name = target.name
     const value = target.value
-    const required = target.required
-    const type = target.type
-    const max = target.max
+    const required = target.required || false
+    const type = target.type || 'text'
+    const max = target.max || null
     let field = name.charAt(0).toUpperCase() + name.slice(1);
 
     let errors = []
-    if(required == true){
+    if(required == true || required == 'true'){
         if(value == '' || value == null || value == undefined){
             errors.push(`${field} is required.`)
         }

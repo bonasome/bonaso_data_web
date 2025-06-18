@@ -1,175 +1,146 @@
-import { useEffect, useState, useCallback } from 'react';
-import Checkbox from '../reuseables/Checkbox';
-import SimpleSelect from '../reuseables/SimpleSelect';
-import styles from '../../styles/createRespondent.module.css'
-import Input from '../reuseables/Input';
+import React from 'react';
+import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import fetchWithAuth from '../../../services/fetchWithAuth.js';
-import validate from '../../../services/validate.js'
-const initialFormState = {
-    isAnonymous: false,
-    id_no: '',
-    first_name: '',
-    last_name: '',
-    sex: 'F',
-    age_range: 'under_18',
-    dob: '',
-    ward: '',
-    village: '',
-    district: 'Central',
-    citizenship: 'Motswana',
-    kp_status: [],
-    email: '',
-    phone_number: '',
-};
+import errorStyles from '../../styles/errors.module.css'
+import Loading from '../reuseables/Loading';
+import DynamicForm from '../reuseables/DynamicForm';
+import fetchWithAuth from "../../../services/fetchWithAuth";
+import { useRespondents } from '../../contexts/RespondentsContext';
 
-
-function CreateRespondent() {
-    const [formData, setFormData] = useState(initialFormState);
-    const [isLoading, setIsLoading] = useState(true);
-    const [options, setOptions] = useState({
-        sexOptions: [],
-        sexLabels: [],
-        kpOptions: [],
-        kpLabels: [],
-        ageRangeOptions: [],
-        ageRangeLabels: [],
-        districtOptions: [],
-        districtLabels: [],
-    });
-    const {
-        sexOptions = [],
-        sexLabels = [],
-        kpOptions = [],
-        kpLabels = [],
-        ageRangeOptions = [],
-        ageRangeLabels = [],
-        districtOptions = [],
-        districtLabels = [],
-    } = options;
-
-    const toggleAnonymous = useCallback(() => {
-        setFormData(prev => ({ ...prev, isAnonymous: !prev.isAnonymous }));
-    }, []);
+export default function CreateRespondent(){
+    const navigate = useNavigate();
+    const [formConfig, setFormConfig] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [errors, setErrors] = useState([]);
+    const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
 
     useEffect(() => {
-        const getOptions = async() => {
-            try{
-                const response = await fetchWithAuth(`respondents/api/get-model-info/`);
-                const data = await response.json();
-                setOptions({
-                    sexOptions: data.values.sex,
-                    sexLabels: data.labels.sex,
-                    kpOptions: data.values.kp,
-                    kpLabels: data.labels.kp,
-                    ageRangeOptions: data.values.age_range,
-                    ageRangeLabels: data.labels.age_range,
-                    districtOptions: data.values.district,
-                    districtLabels: data.labels.district,
-                });
-                setIsLoading(false);
+        const getRespondentMeta = async () => {
+            console.log(respondentsMeta)
+            if(Object.keys(respondentsMeta).length !== 0){
+                setLoading(false)
+                return;
             }
-            catch(err){
-                console.warn('Failed to get options from server: ', err);
-                setIsLoading(false);
-            }
-        }
-        getOptions()
-    }, [])
-    
-    const handleChange = useCallback((e) => {
-        const { name, value, multiple, options } = e.target;
-        if (multiple) {
-            const selected = [];
-            for (let i = 0; i < options.length; i++) {
-                if (options[i].selected && options[i].value != ''){
-                    selected.push(options[i].value);
+            else{
+                try{
+                    console.log('fetching respondents meta...');
+                    const response = await fetchWithAuth(`/api/record/respondents/meta/`);
+                    const data = await response.json();
+                    setRespondentsMeta(data);
+                    setLoading(false);
+                }
+                catch(err){
+                    console.error('Failed to fetch respondent model information: ', err)
+                    setLoading(false)
                 }
             }
-            setFormData(prev => ({ ...prev, [name]: selected }));
-        return;
         }
-        setFormData(prev => ({ ...prev, [name]: value }));
-    }, []);
+        getRespondentMeta();
+    }, [respondentsMeta, setRespondentsMeta])
 
-    const navigate = useNavigate();
-    const [errors, setErrors] = useState([]);
+    useEffect(() => {
+        setFormConfig([
+            //always show
+            {name: 'is_anonymous', label: 'Does this respondent want to remain anonymous', type: 'checkbox', required: true, switchpath: true},
+            
+            //show if not anonymous
 
-    const handleSubmit = async (e) => {
-        let newErrors = []
-        e.preventDefault();
-        console.log('Submitting form with data:', formData);
-        Array.from(e.target).forEach(target =>{
-            const fieldErrors = validate(target);
-            if(fieldErrors.length > 0) newErrors.push(...fieldErrors);
-        });
-        if (newErrors.length > 0) {
-            setErrors(newErrors);
+             // Conditionally include 'id_no'
+            { name: 'id_no', label: 'ID/Passport Number', type: 'text', required: true, hideonpath: true},
+            {name: 'first_name', label: 'First Name', type: 'text', required: true, hideonpath: true},
+            {name: 'last_name', label: 'Surname', type: 'text', required: true, hideonpath: true},
+
+            //always show
+            {name: 'sex', label: 'Sex', type: 'select', required: true, constructors: {
+                values: respondentsMeta.sexs,
+                multiple: false,
+                labels: respondentsMeta.sex_labels
+            }},
+            //show ONLY if anonymous
+            {name: 'age_range', label: 'Age Range', type: 'select', required: true, showonpath:true, constructors: {
+                values: respondentsMeta.age_ranges,
+                multiple: false, showonpath: true,
+                labels: respondentsMeta.age_range_labels
+            }},
+            //show if not anonymous
+            {name: 'dob', label: 'Date of Birth', type: 'date', required: true, hideonpath: true},
+            {name: 'ward', label: 'Ward', type: 'text', required: false, hideonpath: true},
+
+            //always show
+            {name: 'village', label: 'Village', type: 'text', required: true},
+            {name: 'district', label: 'District', type: 'select', required: true, constructors: {
+                values: respondentsMeta.districts,
+                multiple: false,
+                labels: respondentsMeta.district_labels
+            }},
+            {name: 'citizenship', label: 'Citizenship', type: 'text', value:'Motswana', required: true },
+            
+            //show if not anonymous
+            {name: 'email', label: 'Email', type: 'email', required: false, hideonpath: true},
+            {name: 'phone_number', label: 'Phone Number', type: 'number', required: false, hideonpath: true},
+        
+        ])
+    }, [respondentsMeta])
+
+    const handleCancel = () => {
+        navigate('/respondents')
+    }
+    const handleSubmit = async(data) => {
+        console.log('submitting data...', data)
+        const submissionErrors = []
+        if(data.is_anonymous == ''){
+            data.is_anonymous = false
+        }
+        if(data.is_anonymous){
+            data.first_name = null,
+            data.last_name = null,
+            data.dob = null,
+            data.ward = null,
+            data.email = null,
+            data.phone = null,
+            data.id_no = null
+        }
+        else if(!data.is_anonymous){
+            data.age_range = null;
+            if(data.dob && isNaN(Date.parse(data.dob)) || new Date(data.dob) > new Date()){
+                submissionErrors.push('Date of birth must be a valid date and may not be in the future.');
+            }
+        }
+        if(submissionErrors.length > 0){
+            setErrors(submissionErrors);
             return;
         }
-        const response = await fetchWithAuth('respondents/api/create/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': "application/json",
-            },
-            body: JSON.stringify({formData})
-        });
-        const data = await response.json();
-        if(data.status == 'success'){
-            navigate(`/respondents`);
-        }
-    };
 
-    if(isLoading){
-        return(<p>Loading...</p>)
+        try{
+            const url = '/api/record/respondents/'; 
+            const response = await fetchWithAuth(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify(data)
+            });
+            const returnData = await response.json();
+            if(response.ok){
+                setRespondentDetails(prev => [...prev, returnData])
+                navigate(`/respondents/${returnData.id}`);
+            }
+            else{
+                console.log(returnData);
+            }
+        }
+        catch(err){
+            console.error('Could not record respondent: ', err)
+        }
     }
+
+    if(loading) return <Loading />
+
     return(
         <div>
-            <div className={styles.header}>
-                <h1>Creating New Respondent</h1>
-            </div>
-            <div className={styles.fields}>
-                <form onSubmit={handleSubmit}>
-                    <Checkbox label={'Does this person wish to remain anonymous?'} name={'isAnonymous'} callback={toggleAnonymous} required={true}/>
-                    {!formData.isAnonymous && (
-                        <div>
-                            <h3>Basic Information</h3>
-                            <Input name={'id_no'} label={'ID or Passport Number'} type={'text'} required={true} callback={handleChange} maxLength={255} />
-                            <Input name={'first_name'} label={'First Name'} type={'text'} required={true} placeholder={'if applicable, include middle names or middle initials...'} callback={handleChange} maxLength={150}/>
-                            <Input name={'last_name'} label={'Surname'} type={'text'} required={true} callback={handleChange} maxLength={150}/>
-                        </div>
-                    )}
-                    {formData.isAnonymous && (
-                        <div>
-                            <h3>Essential Information for Anonymous Respondents</h3>
-                            <SimpleSelect name={'age_range'} label={'Respondent Age Range'} optionValues={ageRangeOptions} optionLabels={ageRangeLabels} nullOption={false}  callback={handleChange} required={true} />
-                        </div>
-                    )}
-                    <SimpleSelect name={'sex'} optionValues={sexOptions} optionLabels={sexLabels} label={'Respondent Sex'} nullOption={false} callback={handleChange} required={true}/>
-                    {!formData.isAnonymous && (
-                        <div>
-                            <Input name={'dob'} label={'Date of Birth'} type={'date'} required = {true} callback={handleChange} />
-                            <Input name={'ward'} label={'Ward'} type={'text'} required={false} callback={handleChange} maxLength={255}/>
-                        </div>
-                    )}
-                    <Input name={'village'} label={'Village'} type={'text'} required={true} placeholder={'e.g. Lobatse, Good Hope, Maun'} callback={handleChange} maxLength={255}/>
-                    <SimpleSelect name={'district'} label={'District'} optionValues={districtOptions} optionLabels={districtLabels} nullOption={false} callback={handleChange} required={true} />
-                    <Input name={'citizenship'} label={'Citizenship/Nationality'} type={'text'} required={true}  callback={handleChange} maxLength={255}/>
-                    <SimpleSelect name={'kp_status'} optionValues={kpOptions} optionLabels={kpLabels} search={true} label={'Key Population Status'} multiple={true} nullOption={true} required={false} callback={handleChange} />
-                    {!formData.isAnonymous && (
-                        <div>
-                            <h3>Contact Information</h3>
-                            <Input name={'email'} label={'Email'} type={'email'} required={false} callback={handleChange} maxLength={255}/>
-                            <Input name={'phone_number'} label={'Phone Number'} type={'phone'} required={false} callback={handleChange} maxLength={50}/>
-                        </div>
-                    )}
-                    <Input name={'comments'} label={'Comments'} type={'text'} required={false} callback={handleChange} placeholder={'notes about this respondent or things that may help you next time someone interacts with them...'}/>
-                    <button>Save Respondent</button>
-                    {errors &&  <ul>{errors.map((e)=><li key={e}>{e}</li>)}</ul>}
-                </form>
-            </div>
+            <h1>Creating a New Respondent</h1>
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors}/>
         </div>
     )
 }
-
-export default CreateRespondent

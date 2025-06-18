@@ -1,0 +1,124 @@
+import React from 'react';
+import { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
+import Loading from '../reuseables/Loading';
+import fetchWithAuth from "../../../services/fetchWithAuth";
+import { useIndicators } from '../../contexts/IndicatorsContext';
+import IndicatorForm from './IndicatorForm';
+import { useParams } from 'react-router-dom';
+import indicatorConfig from './indicatorConfig';
+
+
+export default function CreateIndicator(){
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const [formConfig, setFormConfig] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [errors, setErrors] = useState([]);
+    const [existing, setExisting] = useState(null)
+    const { indicators, setIndicators, setIndicatorDetails, indicatorDetails } = useIndicators();
+    const [indicatorIDs, setIndicatorIDs] = useState([]);
+    const [indicatorNames, setIndicatorNames] = useState([]);
+
+    useEffect(() => {
+
+        const getIndicatorDetails = async () => {
+            setLoading(true);
+            const found = indicatorDetails.find(o => o.id.toString() === id.toString());
+            if (found) {
+                setExisting(found);
+                setLoading(false);
+                return;
+            }
+            else{
+                try {
+                    console.log('fetching indicator details...');
+                    const response = await fetchWithAuth(`/api/indicators/${id}/`);
+                    const data = await response.json();
+                    setIndicatorDetails(prev => [...prev, data]);
+                    setExisting(data);
+                    setLoading(false);
+                } 
+                catch (err) {
+                    console.error('Failed to fetch indicator: ', err);
+                    setLoading(false);
+                } 
+            }
+        };
+        getIndicatorDetails();
+
+        const getIndicators = async () => {
+            if(Object.keys(indicators).length != 0){
+                const ids = indicators.filter(ind => ind.id.toString() != id.toString()).map((ind) => ind.id);
+                const names= indicators.filter(ind => ind.id.toString() != id.toString()).map((ind)=> ind.name);
+                setIndicatorIDs(ids);
+                setIndicatorNames(names);
+                setLoading(false)
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/indicators/`);
+                    const data = await response.json();
+                    if(indicators.length > 0){
+                        const ids = indicators.filter(ind => ind.id.toString() != id.toString()).map((ind) => ind.id);
+                        const names= indicators.filter(ind => ind.id.toString() != id.toString()).map((ind)=> ind.name);
+                        setIndicatorIDs(ids);
+                        setIndicatorNames(names);
+                    }
+                    setIndicators(data.results);
+                    setLoading(false)
+                }
+                catch(err){
+                    console.error('Failed to fetch indicators: ', err)
+                    setLoading(false)
+                }
+            }
+        }
+        getIndicators();
+    }, [indicators])
+
+    useEffect(() => {
+        setFormConfig(indicatorConfig(indicatorIDs, indicatorNames, existing))
+    }, [indicatorNames, indicatorIDs, existing])
+
+    const handleCancel = () => {
+        navigate(`/indicators/${id}`)
+    }
+
+    const handleSubmit = async(data) => {
+        if(!Array.isArray(data.subcategory_names)) data.subcategory_names = []
+        console.log('submitting data...', data)
+        try{
+            const response = await fetchWithAuth(`/api/indicators/${id}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify(data)
+            });
+            const returnData = await response.json();
+            if(response.ok){
+                setIndicatorDetails(prev => [...prev, returnData])
+                navigate(`/indicators/${returnData.id}`);
+            }
+            else{
+                const data = await response.json();
+                console.log(data);
+            }
+        }
+        catch(err){
+            console.error('Could not record indicator: ', err)
+        }
+    }
+
+    if(loading) return <Loading />
+
+    return(
+        <div>
+            <h1>New Indicator</h1>
+            <IndicatorForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
+        </div>
+    )
+}

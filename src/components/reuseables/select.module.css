@@ -1,0 +1,43 @@
+.select {
+    display: flex;
+    flex-direction: column;
+}
+
+.selectLabel{
+    display: flex;
+    flex-direction: column;
+    min-width: 20vw;
+    width: fit-content;
+}
+
+.selectSearch{
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-bottom: 2px;
+}
+
+select{
+    padding: 10px;
+    border: none;
+    margin: 1vw;
+    border-radius: 0;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+}
+select:focus{
+    outline: none;
+    box-shadow: 4px 4px 4px var(--bonaso-uber-dark-accent);
+}
+option{
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+option:hover{
+    background-color: var(--bonaso-dark-accent);
+    color: white;
+}
+select option:checked {
+       background-color: var(--bonaso-uber-dark-accent);
+       color: white;
+       font-weight: bold;
+}

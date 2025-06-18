@@ -1,0 +1,145 @@
+.navbar{
+    display: flex;
+    flex-direction: row;
+    background-color: var(--bonaso-uber-dark-accent);
+    width: 100vw;
+    height: 16vh;
+    box-shadow: 0 0 3px 1px var(--bonaso-light-accent);
+    z-index: 5;
+}
+
+.header{
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    width: 30vw;
+    height: 15vh;
+}
+.wideHeader{
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    width: 80vw;
+}
+.subheader{
+    text-overflow: ellipsis;
+}
+
+.headerText{
+    margin-left: 1vw;
+    margin-top: 4vh;
+    overflow:hidden;
+}
+.headerText > * {
+    margin: .1vh;
+}
+.headerLogo {
+    height: 12vh;
+    padding: 2vh;
+}
+.menu {
+    display: flex;
+    flex-direction: row;
+    margin-top: 6.5vh;
+    margin-bottom: auto;
+    margin-left: auto;
+    padding-left: 10vw;
+}
+.menu >a{
+    margin-right: 6vh;
+}
+
+.profile{
+    height: 4vw;
+    width: 4vw;
+    margin-top: -2vh;
+    margin-right: 5vh;
+    border-radius: 50%;
+    background-color: white;
+    color: var(--bonaso-uber-dark-accent);
+    text-align: center;
+}
+
+.profile:hover{
+    background-color: var(--bonaso-light-accent);
+}
+
+.profileText{
+    margin-top: 2.2vh;
+    margin-bottom: auto;
+    color: var(--bonaso-uber-dark-accent);
+}
+
+.onHoverMenu {
+    margin-left: auto;
+    margin-left: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    z-index: 1;
+    width: 5vw;
+    position: relative;
+    top: 3vh;
+}
+
+.triangle {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    border-width: 0 10px 10px 10px;
+    border-color: transparent transparent var(--bonaso-light-accent) transparent;
+    transform: rotate(0deg);
+    padding: 0;
+}
+.onHoverLinks{
+    margin: 0;
+    z-index: 1;
+    width: 5vw;
+    background-color: var(--bonaso-light-accent);
+    color: var(--bonaso-uber-dark-accent);
+}
+.hoverLink{
+    padding: 5px;
+    color: var(--bonaso-uber-dark-accent);
+}
+.hoverLink:hover{
+    background-color: var(--bonaso-uber-dark-accent);
+    color: white;
+}
+
+.slimMenu{
+    position: relative;
+    display: inline-block;
+    padding: 6vh;
+    margin-left: auto;
+}
+.menuExpanded {
+    background-color: white;
+    padding: 2vh;
+    width: fit-content;
+    height: fit-content;
+    position: absolute;
+    top: 100%;
+    margin: -6vh; 
+    right: 85%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    color: var(--bonaso-uber-dark-accent);
+}
+.menuBar {
+    padding: 1vh;
+}
+.menuBar > * {
+    color: var(--bonaso-uber-dark-accent);
+}
+
+.menuBar:hover {
+    background-color: var(--bonaso-uber-dark-accent);
+}
+.menuBar:hover >*{
+    color: white;
+}

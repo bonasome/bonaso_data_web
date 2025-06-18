@@ -1,0 +1,14 @@
+:root {
+    --bonaso-main: rgb(21, 103, 54);
+    --bonaso-dark-bg: rgb(10, 71, 34);
+    --bonaso-dark-accent: rgb(4, 40, 18);
+    --bonaso-uber-dark-accent: rgb(2, 23, 10);
+    --bonaso-light-accent: rgb(66, 171, 108);
+    --warning: rgb(73, 75, 12);
+    --warning-bg:rgb(209, 196, 117);
+    --error: rgb(114, 6, 6);
+    --error-bg: rgb(236, 112, 112);
+    --light-grey-bg: rgb(174, 171, 171);
+    --light-grey: rgb(121, 121, 121);
+    --dark-grey: rgb(57, 57, 57);
+}

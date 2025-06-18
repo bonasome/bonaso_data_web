@@ -1,0 +1,40 @@
+.respondentView{
+    display: grid;
+    grid-template-columns: 70% 30%;
+}
+
+.respondentDetails{
+    margin: 5vh;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    padding-left: 4vh;
+    padding-right: 4vh;
+    background-color: var(--bonaso-dark-accent);
+}
+
+.checkbox{
+    display: flex;
+    flex-direction: row;
+}
+
+.pregnancyDates{
+    display: flex;
+    flex-direction: row;
+}
+.interactions{
+    margin: 5vh;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    padding-left: 4vh;
+    padding-right: 4vh;
+    background-color: var(--bonaso-dark-accent);
+}
+
+.tasks{
+    background-color: var(--bonaso-dark-accent);
+    margin: 5vh;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    padding-left: 4vh;
+    padding-right: 4vh;
+}

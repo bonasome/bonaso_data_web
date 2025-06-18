@@ -1,9 +1,13 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/UserAuth'
+import styles from './login.module.css';
+import bonasoWhite from '../../assets/bonasoWhite.png'
+import Loading from '../reuseables/Loading'
 
-export default function LoginComponent() {
-    const {setLoggedIn, setUser} = useAuth();
+export default function Login() {
+    const { refreshAuth } = useAuth();
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
     const[username, setUsername] = useState('');
@@ -14,32 +18,25 @@ export default function LoginComponent() {
     const login = async () => {
         setLoading(true);
         try {
-            const dns = import.meta.env.VITE_DNS;
-            const response = await fetch(`${dns}/users/api/request-token/`, {
+            const response = await fetch(`/api/users/request-token/`, {
                 method: "POST",
+                credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     username: username,
-                    password: password
+                    password: password,
                 })
             });
-
             if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem("access", data.access);
-                localStorage.setItem("refresh", data.refresh);
-                setLoggedIn(true);
-                setUser(data.user);
-                console.log(data)
-                setLoading(false);
+                await refreshAuth();
                 console.log('Login Successful!')
                 navigate('/');
             } 
             else {
                 const errorData = await response.json();
-                setErrorMsg(errorData.message || "Login failed");
+                setErrorMsg(errorData.message || "Incorrect Username or Password. Please try again.");
                 setLoading(false);
             }
         } 
@@ -49,27 +46,32 @@ export default function LoginComponent() {
             setLoading(false);
         }
     };
+
     if(loading){
-        return(
-            <>
-                <p>Loading...</p>
-            </>
-        );
+        return <Loading />
     }
+    
     return (
         <div>
-            <div>
-            <h1>Login</h1>
-            <label>Username or Email</label>
-            <input type="text" value={username} onChange={(event) => setUsername(event.target.value)}/>
-            
-            <label>Password</label>
-            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)}/>
-            
-            <button onClick={login}>Login</button>
-            <div>
-                {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
-            </div>
+            <div className={styles.login}>
+                <div className={styles.header}>
+                    <img src={bonasoWhite} className={styles.headerImage} />
+                    <h2>Welcome Back!</h2>
+                </div>
+                <form className={styles.inputs} onSubmit={(e) => {e.preventDefault(); login()}}>
+                    <label htmlFor={'username'} className={styles.label}>Username</label>
+                    <input type="text" id='username' name={'username'} value={username} onChange={(event) => setUsername(event.target.value)}/>
+                    
+                    <label htmlFor={'password'} className={styles.label}>Password</label>
+                    <input name={'password'} id='password' type="password" value={password} onChange={(event) => setPassword(event.target.value)}/>
+                    
+                    <button type={'submit'} disabled={loading}>
+                        {loading ? 'Logging in...' : 'Login'}
+                    </button>
+                </form>
+                <div>
+                    {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
+                </div>
             </div>
         </div>
     );

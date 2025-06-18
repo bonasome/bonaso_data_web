@@ -1,6 +1,6 @@
+import React from 'react';
 import { useState, useEffect, createContext, useContext } from "react";
-import getUser from "../../services/getUser";
-
+import fetchWithAuth from '../../services/fetchWithAuth';
 const UserContext = createContext();
 
 export function UserAuth({ children }) {
@@ -9,63 +9,62 @@ export function UserAuth({ children }) {
     const [loggedIn, setLoggedIn] = useState(false);
     const [user, setUser] = useState(null);
 
+    const refreshAuth = async () => {
+        setLoading(true);
+        try {
+            const response = await fetchWithAuth(`/api/users/me/`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setUser(data);
+                setLoggedIn(true);
+            } else {
+                setUser(null);
+                setLoggedIn(false);
+            }
+        } catch (err) {
+            setUser(null);
+            setLoggedIn(false);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         const checkAuth = async () => {
             try{
-                const accessToken = localStorage.getItem('access');
-                const refreshToken = localStorage.getItem('refresh');
-                if(accessToken){
-                    const user = await getUser();
-                    setUser(user);
+                const response = await fetchWithAuth(`/api/users/me/`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+                if(response.ok){
+                    const data = await response.json()
+                    setUser(data);
                     setLoggedIn(true);
                     setLoading(false);
                 }
-                if(!accessToken && refreshToken){
-                    const response = await fetch(`${dns}/users/api/request-token/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ 'refresh': refreshToken }),
-                    });
-                    if(response.ok){
-                        const data = await response.json();
-                        localStorage.setItem('access', data.access);
-                        const user = await getUser();
-                        setUser(user);
-                        setLoggedIn(true);
-                        setLoading(false);
-                    }
-                    else{
-                        console.warn('invalid token')
-                        setLoggedIn(false);
-                        setUser(null);
-                        setLoading(false);
-                    }
-                }
-                if(!accessToken && !refreshToken){
+                else{
                     setLoggedIn(false);
                     setUser(null);
                     setLoading(false);
                 }
             }
             catch(err){
-                console.warn(`Server Error: ${err}: Logging out...`);
+                console.warn(`Your login session is not valid: ${err}: Logging out...`);
                 setLoggedIn(false);
                 setUser(null);
                 setLoading(false);
             }
-            finally{
-                setLoading(false);
-            }
         }
         checkAuth();
-    }, []);
+    }, [dns]);
+
     return(
-        <UserContext.Provider value={{ loggedIn, setLoggedIn, user, setUser, loading }}>
+        <UserContext.Provider value={{ loggedIn, setLoggedIn, user, setUser, loading, refreshAuth }}>
             { children }
         </UserContext.Provider>
     );
 }
-
 export const useAuth = () => useContext(UserContext);

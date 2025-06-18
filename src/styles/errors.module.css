@@ -1,0 +1,15 @@
+.warnings {
+    border: 2px solid var(--warning);
+    background-color: var(--warning-bg);
+    color: var(--warning);
+    padding: 1rem;
+    margin: 1vh;
+}
+
+.errors {
+    border: 2px solid var(--error);
+    background-color: var(--error-bg);
+    color: var(--error);
+    padding: 4px;
+    margin: 1vh;
+}

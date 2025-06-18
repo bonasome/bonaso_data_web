@@ -1,0 +1,40 @@
+.formElement{
+    max-width: fit-content;
+    max-height: fit-content;
+    margin: 2.5vh;
+    padding: 2vh;
+}
+label {
+    display: block;
+}
+.expanded {
+    word-wrap: break-word;
+    height: 20vh;
+    width: 30vw;
+}
+
+.field{
+    margin-top: 3vh;
+    margin-bottom: 3%;
+    padding: 2vh;
+    background-color: var(--bonaso-dark-accent);
+}
+
+.checkboxField{
+    margin-top: auto;
+    margin-bottom: auto;
+    display: flex;
+    flex-direction: row;
+    margin-top: 3vh;
+    margin-bottom: 3%;
+    padding: 2vh;
+    background-color: var(--bonaso-dark-accent);
+}
+.checkboxField > input {
+    border-radius: none;
+    outline: none   ;
+}
+.checkboxField > label {
+    vertical-align: middle;
+    margin-right: 2vw;
+}

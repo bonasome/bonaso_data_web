@@ -1,0 +1,27 @@
+.index{
+    margin: 5vh;
+    padding-bottom: 5vh;
+}
+.card{
+    background-color: var(--bonaso-dark-accent);
+    margin: 6vh;
+    padding: 3vh;
+    height: fit-content;
+    transition: transform 0.3s ease;
+}
+.card:hover{ 
+    cursor: pointer;
+    transform: scale(1.05);
+}
+
+.expandedCard{
+    background-color: var(--bonaso-dark-accent);
+    margin: 6vh;
+    padding: 3vh;
+    height: fit-content;
+    transition: transform 0.3s ease;
+}
+.expandedCard:hover{ 
+    cursor: pointer;
+    transform: scale(1.05);
+}

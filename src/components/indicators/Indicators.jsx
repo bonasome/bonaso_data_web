@@ -1,6 +1,6 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import styles from './indicators.module.css';
 
 
 export function IndicatorCard({ indicator, handleClick=null, }){
@@ -17,7 +17,7 @@ export function ProjectIndicators({ indicators, handleClick }){
     const [searchValue, setSearchValue] = useState('');
 
     return(
-        <div className={styles.indicatorsList}>
+        <div>
             <input type='text' onChange={(e)=> {setSearchValue(e.target.value)}} placeholder={'search an indicator by code, name, or description'} />
             <button onClick={() => handleClick('manageIndicators', null)}>Add An Indicator</button>
             {indicators.map((ind) => {
@@ -35,12 +35,15 @@ export function ProjectIndicators({ indicators, handleClick }){
 
 }
 
-export function IndicatorsList({ addClick=null, existing=null }){
+//general view for adding any indicator
+export function IndicatorsList({ project, handleClick, existing }){
     const [indicators, setIndicators] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [searchValue, setSearchValue] = useState('')
     const [loading, setLoading] = useState(true);
+    const [messages, setMessages] = useState([])
+
     useEffect(() => {
         const getIndicators = async() => {
             try{
@@ -68,32 +71,63 @@ export function IndicatorsList({ addClick=null, existing=null }){
     const loadMore = () => {
         if (hasMore && !loading) setPage((prev) => prev + 1);
     };
+
+    const addIndicator = async(indID) => {
+        try{
+            const response = await fetchWithAuth('projects/api/add-indicator/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify({'indicator': indID, 'project': project.id})
+            });
+            const data = await response.json();
+            setMessages(data.message);
+        }
+        catch(err){
+            console.error('Could not record project: ', err)
+        }
+    }
+
     if(loading) return <p>Loading...</p>
-    if(indicators.length == 0) {
+    if(indicators.length == 0 && searchValue == '') {
         return(
-            <p>No indicators yet. Create one!</p>
+            <div>
+                <p>No indicators exist yet. Create One!</p>
+                <button onClick={() => handleClick('createIndicator')} >Create New Indicator</button>
+            </div>
         )
     }
-    return(
-        <div className={styles.indicatorsList}>
+    const availableIndicators = indicators.filter(ind => !existing.includes(ind.id.toString()));
+    if(availableIndicators.length == 0 && searchValue ==''){
+        return(
+            <div>
+                <p>No indicators left to add!</p>
+                <button onClick={() => handleClick('createIndicator')} >Create New Indicator</button>
+            </div>
+        )
+        
+    }
+    const remainingIndicators = availableIndicators
+    return (
+        <div className={styles.indicatorList}>
+            {messages && <ul>{messages.map((msg)=><li key={msg}>{msg}</li>)}</ul>}
             <input type='text' onChange={(e)=> {setSearchValue(e.target.value); setPage}} placeholder={'search an indicator by code, name, or description'} />
-            {indicators.map((ind) => {
-                    if(existing && existing.includes(ind.code)) return
-                    return(
-                        <div key={'cont_'+ind.id}>
-                            <IndicatorCard key={ind.id} indicator={ind} />
-                            {addClick && <button key={'button_'+ind.id} onClick={() => addClick(ind.id)}>Add to Project</button>}
-                        </div>
-                    )
-                }
-            )}
-            {hasMore && (
-                <button onClick={loadMore} disabled={loading}>
-                    {loading ? 'Loading...' : 'Load More'}
-                </button>
-            )}
+            {remainingIndicators.map(ind => {
+                const code = ind.code.toLowerCase()
+                const name = ind.name.toLowerCase()
+                const desc = ind.description.toLowerCase()
+                const search = searchValue.toLowerCase()
+                if(!search == '' && !code.includes(search) && !name.includes(search) && !desc.includes(search)) return
+                return(<div key={'cont_' + ind.id}>
+                    <IndicatorCard key={ind.id} indicator={ind} />
+                    <button key={'button_' + ind.id} onClick={() => addIndicator(ind.id)}>
+                        Add to Project
+                    </button>
+                </div>)
+            })}
         </div>
-    )
+    );
 }
 
 export function IndicatorDetail({ indicator }){
