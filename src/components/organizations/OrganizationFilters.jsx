@@ -14,10 +14,10 @@ export default function OrganizationFilters({ onFilterChange, organizations=[] }
         parent_organization: null,
         project: null,
     })
-    const [orgIDs, setOrgIDs] = useState([]);
-    const [orgNames, setOrgNames] = useState([]);
-    const [projectIDs, setProjectIDs] = useState([]);
-    const [projectNames, setProjectNames] = useState([]);
+    //const [orgIDs, setOrgIDs] = useState([]);
+    //const [orgNames, setOrgNames] = useState([]);
+    //const [projectIDs, setProjectIDs] = useState([]);
+    //const [projectNames, setProjectNames] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
     const [errors, setErrors] = useState([])
     const containerRef = useRef(null);
@@ -48,6 +48,15 @@ export default function OrganizationFilters({ onFilterChange, organizations=[] }
             return () => document.removeEventListener('mousedown', handleClickOutside);
         }, [])
     
+
+    const projectIDs = useMemo(() => projects.map(p => p.id), [projects]);
+    const projectNames = useMemo(() => projects.map(p => p.name), [projects]);
+
+    const organizationIDs = useMemo(() => organizations.map(org => org.id), [organizations]);
+    const organizationNames = useMemo(() => organizations.map(org=> `${org.code}: ${org.name}`),
+        [organizations]
+    );
+
     useEffect(() => {
         if (projects.length !== 0) {
             const ids = projects.map(p => p.id);
@@ -83,8 +92,8 @@ export default function OrganizationFilters({ onFilterChange, organizations=[] }
                     <SimpleSelect
                         name='parent_org'
                         label='Parent Organization'
-                        optionValues={orgIDs}
-                        optionLabels={orgNames} search={true}
+                        optionValues={organizationIDs}
+                        optionLabels={organizationNames} search={true}
                         callback={(val) => setFilters(prev => ({...prev, parent_organization: val}))}
                     />
                     <SimpleSelect
