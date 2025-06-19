@@ -56,7 +56,7 @@ export default function OrganizationFilters({ onFilterChange, organizations=[] }
     const organizationNames = useMemo(() => organizations.map(org=> `${org.code}: ${org.name}`),
         [organizations]
     );
-
+     /*
     useEffect(() => {
         if (projects.length !== 0) {
             const ids = projects.map(p => p.id);
@@ -75,7 +75,7 @@ export default function OrganizationFilters({ onFilterChange, organizations=[] }
             if (JSON.stringify(names) !== JSON.stringify(orgNames)) setOrgNames(names);
         }
     }, [projects, organizations]);
-    
+    */
     const handleChange = () =>{
         onFilterChange(filters);
     }
