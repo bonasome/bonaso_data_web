@@ -1,3 +1,4 @@
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
 export default async function fetchWithAuth(url, options = {}) {
 
     // Only set Content-Type for methods that send a body
@@ -12,7 +13,7 @@ export default async function fetchWithAuth(url, options = {}) {
     });
 
     if (response.status === 401) {
-        const refreshResponse = await fetch('/api/users/token/refresh/', {
+        const refreshResponse = await fetch(`${BASE_URL}/api/users/token/refresh/`, {
             method: 'POST',
             credentials: 'include',
             headers: {

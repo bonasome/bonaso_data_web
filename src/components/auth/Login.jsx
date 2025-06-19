@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/UserAuth'
 import styles from './login.module.css';
 import bonasoWhite from '../../assets/bonasoWhite.png'
 import Loading from '../reuseables/Loading'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 export default function Login() {
     const { refreshAuth } = useAuth();
@@ -18,7 +19,7 @@ export default function Login() {
     const login = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`/api/users/request-token/`, {
+            const response = await fetch(`${BASE_URL}/api/users/request-token/`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
