@@ -46,7 +46,7 @@ export default function OrganizationFilters({ onFilterChange, organizations=[] }
         };
         document.addEventListener('mousedown', handleClickOutside);
             return () => document.removeEventListener('mousedown', handleClickOutside);
-        }, [projects])
+        }, [])
     
     useEffect(() => {
         if(projects.length !== 0){
