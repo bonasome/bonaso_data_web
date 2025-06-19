@@ -94,7 +94,7 @@ export default function OrganizationsIndex( { callback=null, blacklist=[] }){
             }
         };
         loadOrgs();
-    }, [page, search, parentFilter, projectFilter, setOrganizations]);
+    }, [page, search, parentFilter, projectFilter]);
 
     const setFilters = (filters) => {
         setParentFilter(filters.parent_organization);
