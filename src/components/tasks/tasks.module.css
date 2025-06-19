@@ -1,0 +1,53 @@
+.card{
+
+    margin: 3vh;
+    padding: 3vh;
+    background-color: var(--bonaso-dark-accent);
+    height: fit-content;
+    transition: transform 0.3s ease;
+}
+.card:hover{ 
+    border: none;
+    margin: 1vh;
+    cursor: pointer;
+    transform: scale(1.05);
+    background-color: var(--bonaso-uber-dark-accent);
+}
+
+.card:hover >* button{ 
+    background-color: var(--bonaso-dark-accent);
+    color: white;
+}
+
+.card:hover >* button:hover{ 
+    background-color: white;
+    color: var(--bonaso-dark-accent);
+}
+
+.tasks{
+    overflow: scroll;
+    margin: 2vh;
+    padding: 2vh;
+}
+
+.cancel {
+    margin-right: auto;
+}
+
+.dates{
+    display: flex;
+    flex-direction: row;
+}
+
+.checkbox {
+    display: flex;
+    flex-direction: row;
+}
+
+label {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+
+

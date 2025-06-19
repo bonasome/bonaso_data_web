@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import SimpleSelect from '../reuseables/SimpleSelect';
 import Loading from '../reuseables/Loading';
+import errorStyles from '../../styles/errors.module.css';
+import styles from './batchRecord.module.css';
 
 export default function BatchRecord(){
     const { user } = useAuth();
@@ -13,6 +15,9 @@ export default function BatchRecord(){
     const [targetOrg, setTargetOrg] = useState(user.organization);
     const [targetProject, setTargetProject] = useState('');
     const [loading, setLoading] = useState(true)
+    const [warnings, setWarnings] = useState([]);
+    const [errors, setErrors] = useState([]);
+    const [ok, setOK] = useState(false)
 
     const [gettingFile, setGettingFile] = useState(false);
     useEffect(() => {
@@ -46,10 +51,10 @@ export default function BatchRecord(){
     }, [])
 
     useEffect(() => {
-        const orgIDs = organizations.map((o) => (o.id));
-        const orgNames = organizations.map((o) => (o.name))
-        const pIDs = projects.map((p) => (p.id))
-        const pNames = projects.map((p) => (p.name))
+        const orgIDs = organizations?.map((o) => (o.id));
+        const orgNames = organizations?.map((o) => (o.name))
+        const pIDs = projects?.map((p) => (p.id))
+        const pNames = projects?.map((p) => (p.name))
         setSelectTools({
              orgs: {
                 names: orgNames,
@@ -63,6 +68,8 @@ export default function BatchRecord(){
     }, [projects, organizations])
 
     const handleClick = async() => {
+        setWarnings([]);
+        setErrors([]);
         setGettingFile(true);
         try{
             console.log('fetching template...')
@@ -98,38 +105,55 @@ export default function BatchRecord(){
 
         const formData = new FormData();
         formData.append('file', file); // 'file' should match the key Django expects
-        console.log(file)
         try{
-                console.log('fetching organizations...')
+                console.log('submitting file...')
                 const response = await fetchWithAuth(`/api/record/interactions/upload/`, {
                     method: 'POST',
                     body: formData,
                 });
                 const data = await response.json();
-                console.log(data.results)
-                setOrganizations(data.results)
+                if(response.ok){
+                    console.log(data)
+                    if(data.errors.length == 0 && data.warnings.length ==0){
+                        setOK(true);
+                    }
+                    setErrors(data.errors);
+                    setWarnings(data.warnings);
+                    
+                }
             }
             catch(err){
-                console.error('Failed to fetch projects: ', err);
+                console.error('File upload failed: ', err);
             }
     }
     if (loading) return <Loading />
     return(
-        <div>
-            {selectTools?.orgs && <SimpleSelect name={'organization'} label={'Select an Organization'} 
-                optionValues={selectTools.orgs.ids} optionLabels={selectTools.orgs.names}
-                defaultOption={targetOrg} callback={(val)=>setTargetOrg(val)} />}
-            {selectTools?.projects && <SimpleSelect name={'project'} label={'Select an Project'} 
-                optionValues={selectTools.projects.ids} optionLabels={selectTools.projects.names}
-                defaultOption={targetProject} callback={(val)=>setTargetProject(val)} />}
-            <button onClick={() => handleClick()} disabled={gettingFile}>Get my file!</button>
+        <div className={styles.fileUpload}>
+            <h1>Batch Uploading</h1>
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {warnings.length != 0 && <div className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {ok && <div className={errorStyles.success}><p>Upload successful!</p></div>}
+            <div className={styles.template}>
+                <i>1. Select your organization and the project to get a ready to use template for recording data. There are directions and examples in the template for your reference.</i>
+                {selectTools?.orgs && <SimpleSelect name={'organization'} label={'Select an Organization'} 
+                    optionValues={selectTools.orgs.ids} optionLabels={selectTools.orgs.names}
+                    callback={(val)=>setTargetOrg(val)} />}
+                {selectTools?.projects && <SimpleSelect name={'project'} label={'Select an Project'} 
+                    optionValues={selectTools.projects.ids} optionLabels={selectTools.projects.names}
+                    callback={(val)=>setTargetProject(val)} />}
+                <button onClick={() => handleClick()} disabled={gettingFile}>Get my file!</button>
+            </div>
+            
+            <div className={styles.upload}>
+                <i>2. Upload your completed file. If there are any issues, you will be informed and can try to upload again. </i>
+                <form onSubmit={handleSubmit}>
+                    <input type="file" onChange={handleChange} />
+                    <button type="submit">Upload</button>
+                    <button type="button">Clear</button>
+                </form>
+            </div>
+            <div className={styles.spacer}></div>
 
-            <form onSubmit={handleSubmit}>
-                <input type="file" onChange={handleChange} />
-                <button type="submit">Upload</button>
-            </form>
-
-            <p>This page allows you to download a template, fill it out, and then upload it.</p>
         </div>
     )
 }

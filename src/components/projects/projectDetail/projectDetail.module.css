@@ -1,0 +1,74 @@
+.projectDetails{
+    height: 84vh;
+    display: grid;
+    grid-template-columns: 25% 50% 25%;
+}
+
+.projectHeader{
+    padding: 5vh;
+    background-color: var(--bonaso-dark-accent);
+}
+.projectHeader:hover {
+    cursor: pointer;
+}
+
+.panel{
+    overflow-x: hidden;
+    overflow-y: scroll;
+    margin: 4vh;
+}
+
+.sidebar{
+    background-color: var(--bonaso-dark-accent);
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    padding-left: 4vh;
+    padding-right: 4vh;
+    overflow-y:scroll;
+    overflow-x: hidden;
+}
+.card{
+    margin: 2vh;
+    padding: 1vh;
+    background-color: var(--bonaso-dark-accent);
+    height: fit-content;
+    transition: transform 0.3s ease;
+}
+.card:hover{ 
+    cursor: pointer;
+    transform: scale(1.05);
+    background-color: white;
+    color: var(--bonaso-dark-accent);
+}
+
+.addTask{
+    background-color: var(--bonaso-dark-accent);
+    padding: 4vh;
+    margin-bottom: 4vh;
+}
+.dropZone{
+    background-color: var(--bonaso-dark-accent);
+}
+
+.tasksContainer {
+    padding: 3vh;
+    background-color: var(--bonaso-dark-accent);
+}
+
+.tasks > *{
+    padding: 1vh;
+    background-color: var(--bonaso-dark-accent);
+    height: fit-content;
+    transition: transform 0.3s ease;
+}
+
+.tasks:hover >*{
+    cursor: pointer;
+    transform: scale(1.05);
+    background-color: white;
+    color: var(--bonaso-dark-accent);
+}
+
+button {
+    max-height: 6vh;
+}

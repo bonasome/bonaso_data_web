@@ -22,7 +22,7 @@ import RespondentDetail from '../components/respondents/RespondentDetail';
 //projects
 import ProjectLayout from '../layouts/ProjectLayout';
 import ProjectsIndex from '../components/projects/ProjectsIndex';
-import ProjectDetail from '../components/projects/ProjectDetail';
+import ProjectDetail from '../components/projects/projectDetail/ProjectDetail';
 import CreateProject from '../components/projects/CreateProject';
 import EditProject from '../components/projects/EditProject';
 
@@ -88,13 +88,17 @@ function Router() {
             path='/projects' 
             element = {
                 <RedirectIfNotAuthenticated>
-                        <Navbar />
-                        <ProjectLayout />
+                    <Navbar />
+                    <ProjectLayout />
                 </RedirectIfNotAuthenticated>
             }
         >
             <Route index element={<ProjectsIndex />}/>
-            <Route path=':id' element = {<ProjectDetail />} />
+            <Route path=':id' element = {
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <ProjectDetail />
+                </RedirectIfNoPerm>
+            } />
             <Route path='new' element={
                 <RedirectIfNoPerm level={['admin']}>
                     <CreateProject />

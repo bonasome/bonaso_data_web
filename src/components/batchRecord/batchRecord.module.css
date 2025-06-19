@@ -1,0 +1,22 @@
+.fileUpload{
+    margin: 5vh;
+}
+
+.template{
+    margin: 3vh;
+    padding: 5vh;
+    background-color: var(--bonaso-dark-accent);
+}
+.template > *{
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+}
+.upload{
+    margin: 3vh;
+    padding: 5vh;
+    background-color: var(--bonaso-dark-accent);
+}
+
+.spacer{
+    padding: 5vh;
+}

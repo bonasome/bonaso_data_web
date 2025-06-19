@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/UserAuth';
 import Loading from '../reuseables/Loading';
 import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
@@ -9,6 +10,7 @@ import OrganizationForm from './OrganizationForm';
 
 export default function CreateOrganization(){
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [formConfig, setFormConfig] = useState([]);
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
@@ -53,7 +55,7 @@ export default function CreateOrganization(){
     useEffect(() => {
         setFormConfig([
             {name: 'name', label: 'Organization Name', type: 'text', required: true},
-            {name: 'parent_organization', label: 'Parent Organization', type: 'select', label: 'Parent Organization',  required: false, 
+            {name: 'parent_organization_id', label: 'Parent Organization', type: 'select', label: 'Parent Organization',  required: false, 
                 constructors: {
                     values: orgIDs,
                     labels: orgNames,
@@ -74,6 +76,10 @@ export default function CreateOrganization(){
 
     const handleSubmit = async(data) => {
         console.log('submitting data...', data)
+        if(user.role !== 'admin' && data.parent_organization.id == ''){
+            setErrors(['This organization must a child of you or one of your parent organizations.'])
+            return;
+        }
         try{
             const response = await fetchWithAuth('/api/organizations/', {
                 method: 'POST',

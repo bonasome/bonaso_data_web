@@ -1,0 +1,20 @@
+.checkbox > *{
+    display: flex;
+    flex-direction: row;
+}
+.modal {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    padding: 5vh;
+    top: 17vh;
+    left: 23vw;
+    width: 60vw;
+    height: 60vh;
+    border: 10px solid white;
+    background-color: var(--bonaso-uber-dark-accent);
+    z-index: 1000; /* High enough to sit above other content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

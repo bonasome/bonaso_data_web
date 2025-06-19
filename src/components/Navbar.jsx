@@ -43,7 +43,7 @@ function ThinMenu() {
     return(
         <div className={styles.menuExpanded}>
             <div className={styles.menuBar}><Link to='/respondents'>Respondents</Link></div>
-            <div className={styles.menuBar}><Link to={'/projects'}>Projects</Link></div>
+            <div className={styles.menuBar}>{['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/projects'}>Projects</Link>}</div>
             <div className={styles.menuBar}>{['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/batch-record'}>Batch Record</Link>}</div>
             <div className={styles.menuBar}>{['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/organizations'}>Organizations</Link>}</div>
             <div className={styles.menuBar}>{['admin'].includes(user.role) && <Link to={'/indicators'}>Indicators</Link>}</div>
@@ -85,7 +85,7 @@ export default function Navbar() {
                 {width > 1100 ?
                     <div className={styles.menu}>
                     <Link to='/respondents'>Respondents</Link>
-                    <Link to={'/projects'}>Projects</Link>
+                    {['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/projects'}>Projects</Link>}
                     {['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/batch-record'}>Batch Record</Link>}
                     {['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/organizations'}>Organizations</Link>}
                     {['admin'].includes(user.role) && <Link to={'/indicators'}>Indicators</Link>}

@@ -1,12 +1,13 @@
 import React from 'react';
 import { useState, useEffect } from "react";
-import CreateInteraction from './CreateInteraction';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import { useAuth } from '../../../contexts/UserAuth'
 import SimpleSelect from '../../reuseables/SimpleSelect';
 import prettyDates from '../../../../services/prettyDates';
 import IndexViewWrapper from '../../reuseables/IndexView';
 import { useInteractions } from '../../../contexts/InteractionsContext';
+import AddInteractions from './AddInteractions';
+import styles from '../respondentDetail.module.css';
 
 function InteractionCard({ interaction }){
     const { user } = useAuth();
@@ -19,11 +20,12 @@ function InteractionCard({ interaction }){
     const[number, setNumber] = useState('');
     const[availableSubcats, setAvailableSubcats] = useState([]);
     useEffect(() => {
+        console.log(interaction)
         const permCheck = () => {
             if(user.role == 'admin'){
                 setPerm(true);
             }
-            else if (interaction.task_detail.organization.id == user.organization_id){
+            else if (interaction?.task_detail?.organization?.id == user.organization_id){
                 if (user.role == 'meofficer' || user.role == 'manager'){
                     setPerm(true);
                 }
@@ -75,9 +77,10 @@ function InteractionCard({ interaction }){
             console.error('Could not save changes to interaction: ', err)
         }
     }
+
     if(edit){
         return(
-            <div>
+            <div className={styles.card}>
                 <label htmlFor='interaction_date'>Date</label>
                 <input type='date' name='interaction_date' id='interaction_date' value={interactionDate} onChange={(e)=>setInteractionDate(e.target.value)}/>
                 {interaction.numeric_component &&
@@ -96,14 +99,13 @@ function InteractionCard({ interaction }){
                     />
                 }
                 <button onClick={() => handleSubmit()}>Save Changes</button>
-                <button>Cancel</button>
-                <button>Delete Interaction</button>
+                <button onClick={() => setEdit(!edit)}>Cancel</button>
                 
             </div>
         )
     }
     return(
-        <div onClick={() => setExpanded(!expanded)}>
+        <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             <h3>{interaction.task_detail.indicator.code + ' '} {interaction.task_detail.indicator.name}</h3>
             <p>{prettyDates(interaction.interaction_date)}</p>
             {expanded && 
@@ -125,9 +127,10 @@ function InteractionCard({ interaction }){
     )
 }
 
-export default function Interactions({ id, tasks }){
-    const [loading, setLoading] = useState(true)
-    const [create, setCreate] = useState(false);
+
+export default function Interactions({ id, tasks, onUpdate }){
+    const [loading, setLoading] = useState(true);
+
     const {interactions, setInteractions} = useInteractions();
 
     const [search, setSearch] = useState('');
@@ -159,19 +162,17 @@ export default function Interactions({ id, tasks }){
         getInteractions();
     }, [id, search, page, interactionRefresh])
 
+    const onFinish = () => {
+        setInteractionRefresh(prev => prev + 1)
+    }
     if(loading) return <p>Loading...</p>
     return(
         <div>
-            <button onClick={() => setCreate(!create)}> {create ? 'Cancel' : 'Create New Interaction'}</button>
-            <div>
-                {create && <CreateInteraction id={id} tasks={tasks} interactions={interactions} onFinish={() => {setCreate(false); setInteractionRefresh(prev=>prev+1)}}/>}
-            </div>
-            <div>
+                <AddInteractions id={id} tasks={tasks} interactions={interactions} onUpdate={onUpdate} onFinish={onFinish}/>
                 <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
                     <h4>Previous Interactions</h4>
                     {interactions.map((interaction) => (<InteractionCard interaction={interaction} />))}
                 </IndexViewWrapper>
-            </div>
         </div>
     )
 }

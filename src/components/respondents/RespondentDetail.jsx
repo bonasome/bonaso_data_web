@@ -8,16 +8,18 @@ import { Link } from 'react-router-dom';
 import SensitiveInfo from './SensitiveInfo';
 import styles from './respondentDetail.module.css'
 import Interactions from './interactions/Interactions'; 
-import Tasks from './tasks/Tasks';
+import Tasks from '../tasks/Tasks';
+
+
+
 export default function RespondentDetail(){
-    
     const { id } = useParams();
     const { respondentDetails, setRespondentDetails, respondentsMeta, setRespondentsMeta } = useRespondents();
     const[activeRespondent, setActiveRespondent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [sensative, setSensative] = useState(false);
     const [labels, setLabels] = useState({});
-
+    const [added, setAdded] = useState([]);
     const[tasks, setTasks] = useState([]);
 
     useEffect(() => {
@@ -75,11 +77,13 @@ export default function RespondentDetail(){
     const loadTasks = (data) => {
         setTasks(data);
     }
-
+    const onUpdate = (data) => {
+        setAdded(data)
+    }
     if(loading) return <Loading /> 
     return(
         <div className={styles.respondentView}>
-            <div>
+            <div className={styles.mainPanel}>
                 <div className={styles.respondentDetails}>
                     {activeRespondent.is_anonymous && <h1>Anonymous Respondent {activeRespondent.uuid}</h1>}
                     {!activeRespondent.is_anonymous && <h1>{activeRespondent.first_name} {activeRespondent.last_name}</h1>}
@@ -95,11 +99,11 @@ export default function RespondentDetail(){
                 </div>
                 <div className={styles.interactions}>
                     <h2>Interactions</h2>
-                    <Interactions id={id} tasks={tasks}/>
+                    <Interactions id={id} tasks={tasks} onUpdate={onUpdate}/>
                 </div>
             </div>
-            <div className={styles.tasks}>
-                <Tasks callback={loadTasks} />
+            <div className={styles.sidebar}>
+                <Tasks className={styles.sidebar} callback={loadTasks} isDraggable={true} blacklist={added} />
             </div>
         </div>
     )
