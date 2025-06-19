@@ -18,31 +18,35 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
     const [errors, setErrors] = useState([])
     const containerRef = useRef(null);
 
+
+    const fetchedRef = useRef(false);
+    
     useEffect(() => {
-        const getProjects = async() => {
-            if (projects.length !== 0) return;
-            try{
-                console.log('fetching projects info...')
+        const getProjects = async () => {
+            if (fetchedRef.current) return;
+            fetchedRef.current = true;
+
+            try {
+                console.log('fetching projects info...');
                 const response = await fetchWithAuth(`/api/manage/projects/`);
                 const data = await response.json();
                 setProjects(data.results);
                 setLoading(false);
+            } catch (err) {
+                console.error('Failed to fetch projects: ', err);
+                setLoading(false);
             }
-            catch(err){
-                console.error('Failed to fetch projects: ', err)
-                setLoading(false)
-            }
-        }
+        };
         getProjects();
-        
+
         const handleClickOutside = (e) => {
             if (containerRef.current && !containerRef.current.contains(e.target)) {
                 setShowFilters(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
-            return () => document.removeEventListener('mousedown', handleClickOutside);
-        }, [])
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
     
     const projectIDs = useMemo(() => projects.map(p => p.id), [projects]);
     const projectNames = useMemo(() => projects.map(p => p.name), [projects]);

@@ -94,7 +94,6 @@ export default function CreateOrganization(){
                 navigate(`/organizations/${returnData.id}`);
             }
             else{
-                const data = await response.json();
                 console.log(data);
             }
         }
