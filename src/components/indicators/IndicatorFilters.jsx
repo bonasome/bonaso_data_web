@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from '../../styles/filters.module.css';
 import errorStyles from '../../styles/errors.module.css'
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import SimpleSelect from '../reuseables/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
