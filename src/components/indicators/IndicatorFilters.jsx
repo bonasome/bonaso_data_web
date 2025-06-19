@@ -14,10 +14,6 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
         project: null,
         prereq: null,
     })
-    const [projectIDs, setProjectIDs] = useState([]);
-    const [projectNames, setProjectNames] = useState([]);
-    const [indicatorIDs, setIndicatorIDs] = useState([]);
-    const [indicatorNames, setIndicatorNames] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
     const [errors, setErrors] = useState([])
     const containerRef = useRef(null);
@@ -48,6 +44,15 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
             return () => document.removeEventListener('mousedown', handleClickOutside);
         }, [])
     
+    const projectIDs = useMemo(() => projects.map(p => p.id), [projects]);
+    const projectNames = useMemo(() => projects.map(p => p.name), [projects]);
+
+    const indicatorIDs = useMemo(() => indicators.map(ind => ind.id), [indicators]);
+    const indicatorNames = useMemo(
+        () => indicators.map(ind => `${ind.code}: ${ind.name}`),
+        [indicators]
+    );
+        /*
     useEffect(() => {
         if(projects.length !== 0){
             const projectIDs = projects.map((p) => p.id);
@@ -62,7 +67,7 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
             setIndicatorNames(indNames)
         }
     }, [indicators])
-    
+    */
     const handleChange = () =>{
         onFilterChange(filters);
     }

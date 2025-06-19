@@ -49,19 +49,23 @@ export default function OrganizationFilters({ onFilterChange, organizations=[] }
         }, [])
     
     useEffect(() => {
-        if(projects.length !== 0){
-            const ids = projects.map((p) => p.id);
-            const names= projects.map((p)=> p.name);
-            setProjectIDs(ids);
-            setProjectNames(names);
+        if (projects.length !== 0) {
+            const ids = projects.map(p => p.id);
+            const names = projects.map(p => p.name);
+
+            // Prevent infinite loop by checking shallow equality
+            if (JSON.stringify(ids) !== JSON.stringify(projectIDs)) setProjectIDs(ids);
+            if (JSON.stringify(names) !== JSON.stringify(projectNames)) setProjectNames(names);
         }
-        if(organizations.length != 0){
-             const ids = organizations.map((o) => o.id);
-            const names= organizations.map((o)=> o.name);
-            setOrgIDs(ids);
-            setOrgNames(names);
+
+        if (organizations.length !== 0) {
+            const ids = organizations.map(o => o.id);
+            const names = organizations.map(o => o.name);
+
+            if (JSON.stringify(ids) !== JSON.stringify(orgIDs)) setOrgIDs(ids);
+            if (JSON.stringify(names) !== JSON.stringify(orgNames)) setOrgNames(names);
         }
-    }, [projects, organizations])
+    }, [projects, organizations]);
     
     const handleChange = () =>{
         onFilterChange(filters);
