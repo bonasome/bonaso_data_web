@@ -6,7 +6,7 @@ export default function indicatorConfig(ids, names, existing=null){
     return [
         {name: 'code', label: 'Indicator code', type: 'text', required: false, value: existing?.code ? existing.code : ''},
         {name: 'name', label: 'Indicator Name', type: 'text', required: true, value: existing?.name ? existing.name : ''},
-        {name: 'prerequisite_id', label: 'Prerequisite', type: 'select',  required: false, value: existing?.prerequisite.id ? existing.prerequisite.id : '',
+        {name: 'prerequisite_id', label: 'Prerequisite', type: 'select',  required: false, value: existing?.prerequisite?.id ? existing.prerequisite?.id : '',
             constructors: {
                 values: ids,
                 labels: names,
