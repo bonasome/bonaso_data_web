@@ -27,6 +27,7 @@ export default function CreateProject(){
                     setClientNames(clientNames);
                     setLoading(false)
                 }
+                setLoading(false);
                 return;
             }
             else{
@@ -95,8 +96,7 @@ export default function CreateProject(){
                 navigate(`/projects/${returnData.id}`);
             }
             else{
-                const data = await response.json();
-                console.log(data);
+                console.log(returnData);
             }
         }
         catch(err){

@@ -46,7 +46,7 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
         };
         document.addEventListener('mousedown', handleClickOutside);
             return () => document.removeEventListener('mousedown', handleClickOutside);
-        }, [projects])
+        }, [])
     
     useEffect(() => {
         if(projects.length !== 0){
@@ -61,7 +61,7 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
             setIndicatorIDs(indIDs)
             setIndicatorNames(indNames)
         }
-    }, [projects, indicators])
+    }, [indicators])
     
     const handleChange = () =>{
         onFilterChange(filters);

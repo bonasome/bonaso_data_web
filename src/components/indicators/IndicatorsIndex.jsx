@@ -103,7 +103,7 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
             }
         };
         loadOrgs();
-    }, [page, search, prereqFilter, projectFilter, setIndicators]);
+    }, [page, search, prereqFilter, projectFilter]);
 
     const setFilters = (filters) => {
         setPrereqFilter(filters.prereq);
