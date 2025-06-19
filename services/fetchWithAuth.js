@@ -6,7 +6,7 @@ export default async function fetchWithAuth(url, options = {}) {
         ...(options.headers || {}),
     };
 
-    let response = await fetch(url, {
+    let response = await fetch(BASE_URL+url, {
         ...options,
         headers,
         credentials: 'include',
@@ -23,7 +23,7 @@ export default async function fetchWithAuth(url, options = {}) {
         });
 
         if (refreshResponse.ok) {
-            response = await fetch(url, {
+            response = await fetch(BASE_URL+url, {
                 ...options,
                 headers,
                 credentials: 'include',
