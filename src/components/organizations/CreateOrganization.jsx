@@ -94,7 +94,7 @@ export default function CreateOrganization(){
                 navigate(`/organizations/${returnData.id}`);
             }
             else{
-                console.log(data);
+                console.log(returnData);
             }
         }
         catch(err){

@@ -74,8 +74,7 @@ export default function CreateIndicator(){
                 navigate(`/indicators/${returnData.id}`);
             }
             else{
-                const data = await response.json();
-                console.log(data);
+                console.log(returnData);
             }
         }
         catch(err){
