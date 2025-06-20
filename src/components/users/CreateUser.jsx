@@ -2,14 +2,14 @@ import { useEffect, useState, useMemo } from "react";
 import { useAuth } from '../../contexts/UserAuth';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import userConfig from "./userConfig";
-import DynamicForm from "../reuseables/DynamicForm";
+import UserForm from './UserForm'
 import Loading from '../reuseables/Loading'
 import { useNavigate } from "react-router-dom";
 
 
 export default function CreateUser(){
     const { user } = useAuth();
-    const { navigate } = useNavigate();
+    const navigate = useNavigate();
     const[loading, setLoading] = useState(true);
     const[orgIDs, setOrgIDs] = useState([]);
     const[orgNames, setOrgNames] = useState([]);
@@ -23,8 +23,9 @@ export default function CreateUser(){
                 console.log('fetching model info...')
                 const response = await fetchWithAuth(`/api/organizations/`);
                 const data = await response.json();
-                const ids = data.organizations.map((o) => o.id);
-                    const names= data.organizations.map((o)=> o.name);
+                console.log(data.results)
+                const ids = data.results.map((o) => o.id);
+                    const names= data.results.map((o)=> o.name);
                     setOrgIDs(ids);
                     setOrgNames(names);
                 setLoading(false)
@@ -38,8 +39,8 @@ export default function CreateUser(){
     }, [])
 
     const formConfig = useMemo(() => {
-        return userConfig(orgIDs, orgNames, roles, roleNames);
-    }, [orgIDs, orgNames, roles, roleNames]);
+        return userConfig(orgIDs, orgNames);
+    }, [orgIDs, orgNames]);
 
     const handleCancel = () => {
             navigate('/')

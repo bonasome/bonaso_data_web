@@ -42,6 +42,7 @@ import IndicatorDetail from '../components/indicators/IndicatorDetail';
 
 import ProfileLayout from '../layouts/ProfileLayout';
 import Profile from '../components/users/Profile';
+import UsersIndex from '../components/users/UsersIndex';
 import CreateUser from '../components/users/CreateUser';
 import EditUser from '../components/users/EditUser';
 
@@ -192,7 +193,7 @@ function Router() {
         >
             <Route index element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <RespondentsIndex />
+                    <UsersIndex />
                 </RedirectIfNoPerm>
                 }/>
             <Route path=':id' element={

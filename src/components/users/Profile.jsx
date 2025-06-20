@@ -31,21 +31,22 @@ export default function Profile(){
 
     }, [])
     
-    const deactivate = async() => {
+    
+    const changeStatus = async(to) => {
         try{
             console.log('fetching model info...')
             const response = await fetchWithAuth(`/api/profiles/users/${id}/`,{
-                method: 'POST',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': "application/json",
                 },
                 body: JSON.stringify({
-                    'is_active': false
+                    'is_active': to
                 })
             });
             const data = await response.json();
             if(response.ok){
-                setActive(false);
+                setActive(to);
             }
             else{
                 console.log(data)
@@ -60,8 +61,8 @@ export default function Profile(){
     return(
         <div>
             <h1>{profile.username}</h1>
-            <Link to={`/profiles/${profile.id}`}> <button>Edit Profile</button></Link>
-            <button onClick={() => deactivate}>Deactive User</button>
+            <Link to={`/profiles/${profile.id}/edit`}> <button>Edit Profile</button></Link>
+            {user.role === 'admin' &&<button onClick={() => changeStatus(!active)}>{active ? 'Deactive User' : 'Activate User'}</button>}
         </div>
     )
 }

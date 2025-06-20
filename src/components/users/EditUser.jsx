@@ -6,11 +6,12 @@ import DynamicForm from "../reuseables/DynamicForm";
 import Loading from '../reuseables/Loading'
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import UserForm from './UserForm';
 
 export default function EditUser(){
     const { user } = useAuth();
     const { id } = useParams();
-    const { navigate } = useNavigate();
+    const navigate = useNavigate();
     const[loading, setLoading] = useState(true);
     const[orgIDs, setOrgIDs] = useState([]);
     const[orgNames, setOrgNames] = useState([]);
@@ -22,8 +23,9 @@ export default function EditUser(){
                 console.log('fetching model info...')
                 const response = await fetchWithAuth(`/api/organizations/`);
                 const data = await response.json();
-                const ids = data.organizations.map((o) => o.id);
-                    const names= data.organizations.map((o)=> o.name);
+                console.log(data.results)
+                const ids = data.results.map((o) => o.id);
+                    const names= data.results.map((o)=> o.name);
                     setOrgIDs(ids);
                     setOrgNames(names);
                 setLoading(false)
@@ -53,18 +55,18 @@ export default function EditUser(){
     }, [])
 
     const formConfig = useMemo(() => {
-        return userConfig(orgIDs, orgNames);
-    }, [orgIDs, orgNames]);
+        return userConfig(orgIDs, orgNames, existing);
+    }, [orgIDs, orgNames, existing]);
 
     const handleCancel = () => {
-        navigate('/')
+        navigate(`/profiles/${id}`)
     }
     
     const handleSubmit = async(data) => {
         console.log('submitting data...', data)
         try{
-            const response = await fetchWithAuth('/api/users/create-user/', {
-                method: 'POST',
+            const response = await fetchWithAuth(`/api/profiles/users/${id}/`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': "application/json",
                 },
@@ -72,7 +74,7 @@ export default function EditUser(){
             });
             const returnData = await response.json();
             if(response.ok){
-                navigate(`/profile/${returnData.id}`);
+                navigate(`/profiles/${returnData.id}`);
             }
             else{
                 setErrors(returnData.detail)
