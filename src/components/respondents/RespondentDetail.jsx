@@ -155,7 +155,7 @@ export default function RespondentDetail(){
                 </div>
             </div>
             <div className={styles.sidebar}>
-                <Tasks className={styles.sidebar} callback={loadTasks} isDraggable={true} blacklist={added} />
+                <Tasks callback={loadTasks} isDraggable={true} blacklist={added} />
             </div>
         </div>
     )

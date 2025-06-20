@@ -8,7 +8,9 @@ import Tasks from '../../tasks/Tasks';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import styles from './projectDetail.module.css';
 import errorStyles from '../../../styles/errors.module.css'
+import NarrativeReportDownload from '../../narrativeReports/NarrativeReportDownload';
 
+import { Link } from 'react-router-dom';
 export function OrganizationsBar({ project, callback }){
     return(
         <div  className={styles.sidebar}>
@@ -225,6 +227,7 @@ export function ViewOrganization({ project, organization, onRemove }){
             }
             </div>
             <OrganizationTasks project={project} organization={organization} />
+            <NarrativeReportDownload project={project} organization={organization} />
             {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Remove Organization From Project</button>}
         </div>
     )

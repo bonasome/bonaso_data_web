@@ -27,6 +27,8 @@ import ProjectsIndex from '../components/projects/ProjectsIndex';
 import ProjectDetail from '../components/projects/projectDetail/ProjectDetail';
 import CreateProject from '../components/projects/CreateProject';
 import EditProject from '../components/projects/EditProject';
+import NarrativeReportUpload from '../components/narrativeReports/NarrativeReportUpload';
+import NarrativeReportDownload from '../components/narrativeReports/NarrativeReportDownload';
 
 //template manager
 import BatchRecord from '../components/batchRecord/BatchRecord';
@@ -116,6 +118,16 @@ function Router() {
             <Route path=':id/edit' element={
                 <RedirectIfNoPerm level={['admin']}>
                     <EditProject />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path=':id/narrative-reports/upload' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <NarrativeReportUpload />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path=':id/narrative-reports/download' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <NarrativeReportDownload />
                 </RedirectIfNoPerm>
             }/>
 

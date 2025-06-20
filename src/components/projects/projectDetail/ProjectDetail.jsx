@@ -74,6 +74,8 @@ function ProjectInfo({ project }){
             <p>{project.description}</p>
             {user.role == 'admin' && <Link to={`/projects/${project.id}/edit`}><button>Edit Details</button></Link>}
             {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)} >Delete</button>}
+            <Link to={`/projects/${project.id}/narrative-reports/upload`} ><button>Upload a Narrative Report for this Project</button></Link>
+            <Link to={`/projects/${project.id}/narrative-reports/download`}><button>View Narrative Reports</button></Link>
         </div>
     )
 }
