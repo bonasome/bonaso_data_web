@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/UserAuth';
 
 const RedirectIfNotAuthenticated = ({ children }) => {
-    const { loading, loggedIn } = useAuth();
+    const { user, loading, loggedIn } = useAuth();
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -11,6 +11,12 @@ const RedirectIfNotAuthenticated = ({ children }) => {
     if (!loggedIn) {
         return <Navigate to="/users/login" replace />;
     }
+    
+    const allowedForViewOnly = ['/users/logout'];
+    if (loggedIn && user?.role === 'view_only' && !allowedForViewOnly.includes(location.pathname)) {
+        return <Navigate to="/viewer" replace />;
+    }
+
 
     return children;
 };

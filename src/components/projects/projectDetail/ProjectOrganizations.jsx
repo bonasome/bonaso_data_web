@@ -5,6 +5,7 @@ import fetchWithAuth from '../../../../services/fetchWithAuth';
 import { useAuth } from '../../../contexts/UserAuth';
 import OrganizationIndex from '../../organizations/OrganizationsIndex';
 import Tasks from '../../tasks/Tasks';
+import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import styles from './projectDetail.module.css';
 import errorStyles from '../../../styles/errors.module.css'
 
@@ -78,7 +79,6 @@ export function OrganizationTasks({ project, organization }){
     const [warnings, setWarnings] = useState([])
     const [reload, setReload] = useState(1)
     const { user } = useAuth();
-
     const loadTasks = (data) => {
         setOrgTasks(data);
     }
@@ -142,17 +142,79 @@ export function OrganizationTasks({ project, organization }){
                 </div>
             </div>
             <div className={styles.tasksContainer}>
-                <Tasks className={styles.tasks} callback={loadTasks} update={reload} organization={organization} target={true}/>
+                <Tasks className={styles.tasks} callback={loadTasks} update={reload} organization={organization} target={true} canDelete={true}/>
             </div>
+
         </div>
     )
     
 }
 
-export function ViewOrganization({ project, organization }){
+export function ViewOrganization({ project, organization, onRemove }){
+    const { user } = useAuth();
+    const [errors, setErrors] = useState([]);
+    const [del, setDel] = useState(false);
+    const { setProjectDetails } = useProjects();
+    const removeOrg = async() => {
+        try {
+            console.log('deleting organization...');
+            const response = await fetchWithAuth(`/api/manage/projects/${project.id}/remove-organization/${organization.id}/`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                setProjectDetails(prevState =>
+                    prevState.map(p =>
+                    p.id === project.id
+                        ? {
+                            ...p,
+                            organizations: p.organizations.filter(org => org.id != organization.id),
+                        }
+                        : p
+                    )
+                );
+                onRemove();
+            } 
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } 
+                catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${field}: ${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        setDel(false)
+    }
+
     return (
         <div>
-            <h3>Viewing as {organization.name}</h3>
+            {del && 
+                <ConfirmDelete 
+                    name={organization.name + ' from project ' + project.name} 
+                    statusWarning={'If there are any active tasks, you will be prevented from doing this.'} 
+                    onConfirm={() => removeOrg()} onCancel={() => setDel(false)} 
+            />}
+            <div className={styles.viewbox}>
+            <h3 >Viewing as {organization.name}</h3>
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {organization?.child_organizations.length > 0 && 
                 <div>
                 <h4>Child Organizations</h4>
@@ -161,7 +223,9 @@ export function ViewOrganization({ project, organization }){
                 </ul>
                 </div>
             }
+            </div>
             <OrganizationTasks project={project} organization={organization} />
+            {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Remove Organization From Project</button>}
         </div>
     )
 }

@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import Checkbox from '../../reuseables/Checkbox';
 import fetchWithAuth from "../../../../services/fetchWithAuth";
-import errorStyles from '../../../styles/errors.module.css'
-import modalStyles from './modals.module.css'
+import errorStyles from '../../../styles/errors.module.css';
+import modalStyles from '../../../styles/modals.module.css';
 import { useInteractions} from '../../../contexts/InteractionsContext';
 import styles from '../respondentDetail.module.css';
 
@@ -163,7 +163,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             } 
             else if (interactions?.length > 0) {
                 const validPastInt = interactions.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
-                if (validPastInt) {
+                if (validPastInt && validPastInt.date <= interactionDate) {
                     isValid = true;
                     if (validPastInt?.subcategories) {
                         const interSubcats = validPastInt.subcategories.map(t => t.name);
@@ -255,10 +255,22 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                 onFinish()
             }
             else{
-                console.log(returnData);
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${field}: ${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse)
             }
         }
         catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record respondent: ', err)
         }
         setErrors(submissionErrors);

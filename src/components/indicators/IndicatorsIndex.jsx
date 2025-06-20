@@ -14,7 +14,7 @@ function IndicatorCard({ indicator, callback = null }) {
     const { indicatorDetails, setIndicatorDetails } = useIndicators();
     const [active, setActive] = useState(null);
     const [expanded, setExpanded] = useState(false);
-
+    
     const handleClick = async () => {
         const willExpand = !expanded;
         setExpanded(willExpand);
@@ -75,14 +75,16 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
     const { indicators, setIndicators } = useIndicators();
     const [loading, setLoading] = useState(true);
     const [prereqFilter, setPrereqFilter] = useState('');
-    const [projectFilter, setProjectFilter] = useState('')
+    const [projectFilter, setProjectFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
 
     useEffect(() => {
         const loadOrgs = async () => {
             try {
                 const filterQuery = 
                     (prereqFilter ? `&prerequisite=${prereqFilter}` : '') +
-                    (projectFilter ? `&project=${projectFilter}` : '');
+                    (projectFilter ? `&project=${projectFilter}` : '') + 
+                    (statusFilter ? `&status=${statusFilter}` : '');
                 
                 const url = `/api/indicators/?search=${search}&page=${page}` + filterQuery;
                 console.log(url)
@@ -108,6 +110,7 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
     const setFilters = (filters) => {
         setPrereqFilter(filters.prereq);
         setProjectFilter(filters.project)
+        setStatusFilter(filters.status)
     }
     const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
     if(loading) return <Loading />

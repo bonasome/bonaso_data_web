@@ -12,17 +12,9 @@
     cursor: pointer;
     transform: scale(1.05);
     background-color: var(--bonaso-uber-dark-accent);
+    z-index: 2;
 }
 
-.card:hover >* button{ 
-    background-color: var(--bonaso-dark-accent);
-    color: white;
-}
-
-.card:hover >* button:hover{ 
-    background-color: white;
-    color: var(--bonaso-dark-accent);
-}
 
 .tasks{
     overflow: scroll;

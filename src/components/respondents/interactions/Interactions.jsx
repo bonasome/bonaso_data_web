@@ -8,17 +8,23 @@ import IndexViewWrapper from '../../reuseables/IndexView';
 import { useInteractions } from '../../../contexts/InteractionsContext';
 import AddInteractions from './AddInteractions';
 import styles from '../respondentDetail.module.css';
+import errorStyles from '../../../styles/errors.module.css';
+import ConfirmDelete from '../../reuseables/ConfirmDelete';
 
-function InteractionCard({ interaction }){
+function InteractionCard({ interaction, onUpdate, onDelete }){
     const { user } = useAuth();
     const [edit, setEdit] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [perm, setPerm] = useState(false);
-
+    const [errors, setErrors] = useState([]);
     const[interactionDate, setInteractionDate] = useState('');
     const[subcats, setSubcats] = useState('');
     const[number, setNumber] = useState('');
     const[availableSubcats, setAvailableSubcats] = useState([]);
+    const [del, setDel] = useState(false);
+    const [flagged, setFlagged] = useState(interaction.flagged)
+    const {setInteractionDetails} = useInteractions();
+
     useEffect(() => {
         console.log(interaction)
         const permCheck = () => {
@@ -47,16 +53,18 @@ function InteractionCard({ interaction }){
         permCheck();
     }, [user, interaction])
 
-    if(!interaction.task_detail) return <></>
-    const handleSubmit = async() =>{
+    
+    const handleSubmit = async(flaggedOverride = flagged) =>{
         const data={
             'respondent': interaction.respondent,
             'task': interaction.task_detail.id,
             'interaction_date': interactionDate,
             'numeric_component': number || null,
-            'subcategory_names': subcats
+            'subcategory_names': subcats,
+            'flagged': flaggedOverride,
         }
         try{
+            console.log('submitting edits', data)
             const url = `/api/record/interactions/${interaction.id}/`; 
             const response = await fetchWithAuth(url, {
                 method: 'PATCH',
@@ -67,20 +75,87 @@ function InteractionCard({ interaction }){
             });
             const returnData = await response.json();
             if(response.ok){
-                window.location.reload();
+                setInteractionDetails(prev => {
+                    const others = prev.filter(r => r.id !== interaction.id);
+                    return [...others, returnData];
+                });
+                setEdit(false);
+                onUpdate();
+                setErrors([]);
             }
+
             else{
-                console.log(returnData);
+                const serverResponse = [];
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                    });
+                    } 
+                    else {
+                    serverResponse.push(`${field}: ${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
             }
         }
         catch(err){
-            console.error('Could not save changes to interaction: ', err)
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
         }
     }
 
+    const flagInteraction = async() => {
+        const newFlag = !flagged
+        setFlagged(!flagged);
+        handleSubmit(newFlag);
+    }
+
+    const deleteInteraction = async() => {
+        try {
+            console.log('deleting organization...');
+            const response = await fetchWithAuth(`/api/record/interactions/${interaction.id}/`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                onDelete(interaction.id)
+                setErrors([]);
+            } 
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } 
+                catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${field}: ${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete interaction:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        setDel(false)
+    }
+
+    if(!interaction.task_detail) return <></>
     if(edit){
         return(
             <div className={styles.card}>
+                <h3>{interaction.task_detail.indicator.code + ' '} {interaction.task_detail.indicator.name}</h3>
                 <label htmlFor='interaction_date'>Date</label>
                 <input type='date' name='interaction_date' id='interaction_date' value={interactionDate} onChange={(e)=>setInteractionDate(e.target.value)}/>
                 {interaction.numeric_component &&
@@ -106,7 +181,15 @@ function InteractionCard({ interaction }){
     }
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
+            {del && 
+                <ConfirmDelete 
+                    name={`Interaction related to task ${interaction?.task_detail?.indicator?.name}`} 
+                    statusWarning={'This cannot be undone, and this data will be lost. Consider flagging this instead if you are unsure.'} 
+                    onConfirm={() => deleteInteraction()} onCancel={() => setDel(false)} 
+            />}
             <h3>{interaction.task_detail.indicator.code + ' '} {interaction.task_detail.indicator.name}</h3>
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {flagged && <div className={errorStyles.warnings}><h3>FLAGGED</h3></div>}
             <p>{prettyDates(interaction.interaction_date)}</p>
             {expanded && 
                 <div>
@@ -121,6 +204,8 @@ function InteractionCard({ interaction }){
                 }
                 {interaction.numeric_component && <p>{interaction.numeric_component}</p>}
                 {perm && <button onClick={() => setEdit(!edit)}>{edit ? 'Cancel' : 'Edit Interaction'}</button>}
+                {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
+                {['admin', 'meofficer', 'manager'].includes(user.role) && <button className={errorStyles.warningButton} onClick={() => flagInteraction()} >{flagged ? 'Mark as OK' :'Flag'} </button>}
                 </div>
             }
         </div>
@@ -131,8 +216,8 @@ function InteractionCard({ interaction }){
 export default function Interactions({ id, tasks, onUpdate }){
     const [loading, setLoading] = useState(true);
 
-    const {interactions, setInteractions} = useInteractions();
-
+    const { interactions, setInteractions } = useInteractions();
+    const[success, setSuccess] = useState('');
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
@@ -162,16 +247,27 @@ export default function Interactions({ id, tasks, onUpdate }){
         getInteractions();
     }, [id, search, page, interactionRefresh])
 
+
+
     const onFinish = () => {
         setInteractionRefresh(prev => prev + 1)
+    }
+    const onEdit = () => {
+        setInteractionRefresh(prev => prev +1)
+    }
+    const onDelete = (id) => {
+        const updated = interactions.filter(inter => inter.id != id)
+        setInteractions(updated);
+        setSuccess('Interaction Deleted.')
     }
     if(loading) return <p>Loading...</p>
     return(
         <div>
+                {success && <div className={errorStyles.success}>{success}</div>}
                 <AddInteractions id={id} tasks={tasks} interactions={interactions} onUpdate={onUpdate} onFinish={onFinish}/>
                 <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
                     <h4>Previous Interactions</h4>
-                    {interactions.map((interaction) => (<InteractionCard interaction={interaction} />))}
+                    {interactions.map((interaction) => (<InteractionCard key={interaction.id} interaction={interaction} onUpdate={onEdit} onDelete={onDelete}/>))}
                 </IndexViewWrapper>
         </div>
     )

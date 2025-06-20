@@ -108,6 +108,14 @@ export default function DynamicForm({ config, onSubmit, onCancel }){
                             </div>
                         )
                     }
+                    else if(field.type == 'password'){
+                        return(
+                            <div key={field.name} className={styles.field}>
+                                <label htmlFor={field.name}>{label}</label>
+                                <input type='password' id={field.name} name={field.name} required={field.required} max={max} value={formData[field.name] || ''} onChange={(e) => setFormData(prev=>({...prev, [field.name]: e.target.value }))} />
+                            </div>
+                        )
+                    }
                     else if(field.type == 'date'){
                         return(
                             <div key={field.name} className={styles.field}>

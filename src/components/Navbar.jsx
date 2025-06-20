@@ -19,6 +19,7 @@ function useWindowWidth() {
 }
 
 function Hover({ options }){
+    const { user } = useAuth();
     if(!options || options == 'none') return;
     if(options=='user'){
         return(
@@ -26,15 +27,92 @@ function Hover({ options }){
                 <div className={styles.triangle}></div>
                 <div className={styles.onHoverLinks}>
                     <div className={styles.hoverLink}>
-                        <a href='/users/profile'>Profile</a>
+                        <Link to={`/profiles/${user.id}`}>Profile</Link>
                     </div>
                     <div className={styles.hoverLink}>
-                        <a href='/users/logout'>Logout</a>
+                        <Link href='/users/logout'>Logout</Link>
                     </div>
                 </div>
             </div>
         )
     }
+    if(options == 'projects' && user.role == 'admin'){
+         <div className={styles.onHoverMenu}>
+            <div className={styles.triangle}></div>
+            <div className={styles.onHoverLinks}>
+                <div className={styles.hoverLink}>
+                    <Link to={`/organizations`}>Organizations</Link>
+                </div>
+                <div className={styles.hoverLink}>
+                    <Link href='/indicators'>Indicators</Link>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+
+function Dropdown({ name }){
+    const [labels, setLabels] = useState([]);
+    const [urls, setUrls] = useState([]);
+    const { user } = useAuth();
+    useEffect(() => {
+        if(name =='Projects' && user.role == 'admin'){
+            setUrls(['/projects', '/indicators', '/organizations'])
+            setLabels(['Manage Projects', 'Manage Indicators', 'Manage Organizations'])
+        }
+        if(name =='Respondents' && ['meofficer', 'manager', 'admin'].includes(user.role)){
+            setUrls(['/respondents', '/batch-record'])
+            setLabels(['Manage Respondents', 'Batch Record'])
+        }
+        if(name ==`${user.username}`){
+            setUrls([`/profiles/${user.id}`, '/users/logout'])
+            setLabels(['My Profile', 'Logout'])
+        }
+        if(name=='Team'){
+            setUrls(['/profiles/new'])
+            setLabels(['Add a New User'])
+        }
+    }, [])
+    return(
+        <div className={styles.expandedMenuDropdown}>
+            {urls.map((url, index) => (
+                <div key={url} className={styles.expandedDropdownLink}>
+                    <Link to={url}>{labels[index]}</Link> 
+                </div>
+            ))}
+        </div>
+    )
+}
+
+
+function MenuLink({ name, url }) {
+    const { user } = useAuth();
+    const [active, setActive] = useState(false);
+    if(name == 'Projects' && !['meofficer', 'manager', 'admin'].includes(user.role)){
+        return <></>
+    }
+    if(name == 'Team' && !['meofficer', 'manager', 'admin'].includes(user.role)){
+        return <></>
+    }
+    return(
+        <div className={styles.expandedMenuLink} onMouseEnter={() => setActive(true)} onMouseLeave={() => setActive(false)}>
+            <Link to={url}>{name}</Link>
+            {active && <Dropdown name={name} />}
+        </div>
+    )
+}
+
+function ExpandedMenu() {
+    const { user } = useAuth();
+    const links = ['Projects', 'Respondents', 'Team', `${user.username}`]
+    const urls = ['/projects', '/respondents', '/profiles', `/profiles/${user.id}`]
+
+    return(
+        <div className={styles.expandedMenu}>
+            {links.map((l, index) => (<MenuLink name={l} url={urls[index]} />))}
+        </div>
+    )
 }
 
 function ThinMenu() {
@@ -47,11 +125,13 @@ function ThinMenu() {
             <div className={styles.menuBar}>{['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/batch-record'}>Batch Record</Link>}</div>
             <div className={styles.menuBar}>{['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/organizations'}>Organizations</Link>}</div>
             <div className={styles.menuBar}>{['admin'].includes(user.role) && <Link to={'/indicators'}>Indicators</Link>}</div>
-            <div className={styles.menuBar}><Link to={'/profile'}>Profile</Link></div>
-            <div className={styles.menuBar}><Link to={'/logout'}>Logout</Link></div>
+            <div className={styles.menuBar}><Link to={`/profiles/${user.id}`}>Profile</Link></div>
+            <div className={styles.menuBar}><Link to={'/users/logout'}>Logout</Link></div>
         </div>
     )
 }
+
+
 
 export default function Navbar() {
     const width = useWindowWidth();
@@ -77,26 +157,13 @@ export default function Navbar() {
         <div className={styles.navbar}>
             <div className={width > 1100 ? styles.header : styles.wideHeader}>
                 <Link to='/'><img src={bonasoWhite} className={styles.headerLogo} /></Link>
-                <div className={styles.headerText}>
+                <Link to='/'><div className={styles.headerText}>
                     <h2>BONASO Data Portal</h2>
                     <h5 className={styles.subheader}>Empowering Botswana's HIV/AIDS Response since 1997</h5>
-                </div>
+                </div></Link>
             </div>
                 {width > 1100 ?
-                    <div className={styles.menu}>
-                    <Link to='/respondents'>Respondents</Link>
-                    {['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/projects'}>Projects</Link>}
-                    {['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/batch-record'}>Batch Record</Link>}
-                    {['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/organizations'}>Organizations</Link>}
-                    {['admin'].includes(user.role) && <Link to={'/indicators'}>Indicators</Link>}
-                    <div className={styles.profile} onMouseEnter={()=>setHover({...hover, user: true})}
-                        onMouseLeave={()=>setHover({...hover, user: false})}> 
-                        <h4 className={styles.profileText}>
-                            {user.username && user.username.charAt(0).toUpperCase()}
-                        </h4>
-                        {hover.user ? <Hover options={'user'} /> : <Hover options={'none'} /> }
-                    </div>
-                </div> :
+                    <ExpandedMenu /> :
                 <div className={styles.slimMenu} ref={containerRef}>
                     <TfiMenu onClick={() => setMenuExpanded(!menuExpanded)}/>
                     {menuExpanded && <ThinMenu />}

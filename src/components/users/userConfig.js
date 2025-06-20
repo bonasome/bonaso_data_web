@@ -4,8 +4,8 @@ export default function userConfig(orgIDs, orgNames, existing=null){
     if(!existing){
         return [
         {name: 'username', label: 'Username', type: 'text', required: true, value: existing?.username ? existing.username : ''},
-        {name: 'password', label: 'Password', type: 'text', required: true, value: ''},
-        {name: 'confirm_password', label: 'Confirm Password', type: 'text', required: true, value: ''},
+        {name: 'password', label: 'Password', type: 'password', required: true, value: ''},
+        {name: 'confirm_password', label: 'Confirm Password', type: 'password', required: true, value: ''},
         {name: 'organization', label: 'User Organization', type: 'select',  required: true, value: existing?.organization?.id ? existing.organization?.id : '',
             constructors: {
                 values: orgIDs,

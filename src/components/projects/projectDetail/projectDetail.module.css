@@ -1,7 +1,7 @@
 .projectDetails{
     height: 84vh;
     display: grid;
-    grid-template-columns: 25% 50% 25%;
+    grid-template-columns: 20% 60% 20%;
 }
 
 .projectHeader{
@@ -18,6 +18,11 @@
     margin: 4vh;
 }
 
+.viewbox {
+    background-color: var(--bonaso-dark-accent);
+    padding: 5vh;
+    margin-bottom: 3vh;
+}
 .sidebar{
     background-color: var(--bonaso-dark-accent);
     padding-top: 2vh;

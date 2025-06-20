@@ -43,12 +43,12 @@ export default function CreateUser(){
     }, [orgIDs, orgNames]);
 
     const handleCancel = () => {
-            navigate('/')
+            navigate('/profiles')
     }
     
     const handleSubmit = async(data) => {
         if(data.password != data.confirm_password){
-            setErrors('Passwords do not match.')
+            setErrors(['Passwords do not match.'])
             return;
         }
         console.log('submitting data...', data)
@@ -62,14 +62,25 @@ export default function CreateUser(){
             });
             const returnData = await response.json();
             if(response.ok){
-                navigate(`/profile/${returnData.id}`);
+                navigate(`/profiles/${returnData.id}`);
             }
             else{
-                setErrors(returnData.detail)
-                console.log(returnData);
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse)
             }
         }
         catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not create user: ', err)
         }
     }

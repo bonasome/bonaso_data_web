@@ -37,7 +37,8 @@ button {
     background-color: white;
     cursor: pointer;
     transition: border-color 0.25s;
-    margin: 1vh
+    margin: 1vh;
+    transition: all .3s ease;
 }
 button:disabled {
     background-color: var(--light-grey-bg);
@@ -45,8 +46,9 @@ button:disabled {
 }
 
 button:hover {
-    background-color: var(--bonaso-light-accent);
+    background-color: var(--bonaso-main);
     color: white;
+    transform: scale(1.1);
 }
 
 button:disabled:hover {

@@ -12,13 +12,34 @@ export default function CreateIndicator(){
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const { indicators, setIndicators, setIndicatorDetails } = useIndicators();
+    const { indicators, setIndicators, setIndicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
     const [indicatorIDs, setIndicatorIDs] = useState([]);
     const [indicatorNames, setIndicatorNames] = useState([]);
-
     const fetchedRef = useRef(false);
 
     useEffect(() => {
+        const getMeta = async() => {
+            if(Object.keys(indicatorsMeta).length != 0){
+                setLoading(false);
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/indicators/meta/`);
+                    const data = await response.json();
+                    setIndicatorsMeta(data);
+                    console.log(data)
+                    setLoading(false);
+                }
+                catch(err){
+                    console.error('Failed to fetch indicators meta: ', err)
+                    setLoading(false)
+                }
+            }
+        }
+        getMeta()
+
         const getIndicators = async () => {
             if (fetchedRef.current || indicators.length !== 0) {
                 const ids = indicators.map(o => o.id);
@@ -46,8 +67,8 @@ export default function CreateIndicator(){
     }, []);
 
     const formConfig = useMemo(() => {
-        return indicatorConfig(indicatorIDs, indicatorNames);
-    }, [indicatorIDs, indicatorNames]);
+        return indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta.statuses);
+    }, [indicatorIDs, indicatorNames, indicatorsMeta]);
 
     const handleCancel = () => {
         navigate('/indicators')
@@ -69,10 +90,22 @@ export default function CreateIndicator(){
                 navigate(`/indicators/${returnData.id}`);
             }
             else{
-                console.log(returnData);
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${field}: ${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse)
             }
         }
         catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record indicator: ', err)
         }
     }

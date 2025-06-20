@@ -6,13 +6,16 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import SimpleSelect from '../reuseables/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
 import { useProjects } from '../../contexts/ProjectsContext';
+import { useIndicators } from '../../contexts/IndicatorsContext';
 
 export default function IndicatorFilters({ onFilterChange, indicators=[] }){
     const { projects, setProjects } = useProjects();
+    const { indicatorsMeta, setIndicatorsMeta } = useIndicators();
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
         project: null,
         prereq: null,
+        status: null,
     })
     const [showFilters, setShowFilters] = useState(false);
     const [errors, setErrors] = useState([])
@@ -38,6 +41,27 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
             }
         };
         getProjects();
+        
+        const getMeta = async() => {
+            if(Object.keys(indicatorsMeta).length != 0){
+                setLoading(false);
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/indicators/meta/`);
+                    const data = await response.json();
+                    setIndicatorsMeta(data);
+                    setLoading(false);
+                }
+                catch(err){
+                    console.error('Failed to fetch indicators meta: ', err)
+                    setLoading(false)
+                }
+            }
+        }
+        getMeta()
 
         const handleClickOutside = (e) => {
             if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -81,6 +105,12 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
                         optionValues={projectIDs}
                         optionLabels={projectNames} search={true}
                         callback={(val) => setFilters(prev => ({...prev, project: val}))}
+                    />
+                    <SimpleSelect
+                        name='status'
+                        optionValues={indicatorsMeta.statuses}
+                        optionLabels={indicatorsMeta.statuses}
+                        callback={(val) => setFilters(prev => ({...prev, status: val}))}
                     />
                     <button onClick={()=>handleChange()}>Apply</button>
                 </div>

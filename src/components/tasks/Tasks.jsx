@@ -4,8 +4,12 @@ import IndexViewWrapper from "../reuseables/IndexView";
 import { useAuth } from '../../contexts/UserAuth'
 import { Target, TargetEdit } from './Targets';
 import styles from './tasks.module.css';
+import errorStyles from '../../styles/errors.module.css';
+import ConfirmDelete from "../reuseables/ConfirmDelete";
 
-function TaskCard({ task, tasks, isDraggable = false }) {
+function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=null }) {
+    const [errors, setErrors] = useState([]);
+    const [del, setDel] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [targets, setTargets] = useState([]);
     const [addingTarget, setAddingTarget] = useState(false);
@@ -32,9 +36,63 @@ function TaskCard({ task, tasks, isDraggable = false }) {
         }
         setAddingTarget(false);
     }
-    console.log(task)
+    const checkTargets = (id) => {
+        const updated = targets.filter((t) => t.id != id);
+        setTargets(updated)
+
+    }
+
+
+    const removeTask = async() => {
+        try {
+            console.log('deleting organization...');
+            const response = await fetchWithAuth(`/api/manage/tasks/${task.id}/`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                onDelete(task.id)
+                setErrors([]);
+            } 
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } 
+                catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${field}: ${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        setDel(false)
+
+    }
+
     return (
         <div className={styles.card} onClick={() => setExpanded(!expanded)} draggable={isDraggable} onDragStart={isDraggable ? handleDragStart : undefined}>
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {del && 
+                <ConfirmDelete 
+                    name={'Task ' + task.indicator.name + ' for' + task.organization.name } 
+                    statusWarning={'If this task has any interactions associated with it, you will not be able to delete it.'} 
+                    onConfirm={() => removeTask()} onCancel={() => setDel(false)} 
+            />}
             <h3>{task.indicator.code}: {task.indicator.name}</h3>
             {expanded && (
                 <div>
@@ -55,24 +113,26 @@ function TaskCard({ task, tasks, isDraggable = false }) {
                     <p>{task.indicator.require_numeric ? 'Requires Number' : ''}</p>
                     {targets && targets.length > 0 && <h3>Targets:</h3>}
                     {targets && targets.length > 0 && targets.map((t) => (
-                        <Target key={t.id} target={t} task={task} tasks={tasks} onUpdate={(data) => onUpdate(data)}/>
+                        <Target key={t.id} target={t} task={task} tasks={tasks} onUpdate={(data) => onUpdate(data)} onDelete={(id) => checkTargets(id)}/>
                         ))
                     }
                     {targets && addingTarget && user.role == 'admin' && <TargetEdit task={task} tasks={tasks} onUpdate={onUpdate} />}
                     {targets && user.role == 'admin' && <button onClick={(e) => {e.stopPropagation(); setAddingTarget(!addingTarget)}}>{addingTarget ? 'Cancel' : 'Add Target'}</button> }
+                    {canDelete && user.role == 'admin' && <button onClick={()=> setDel(true)}>Remove Task</button> }
                 </div>
             )}
         </div>
     );
 }
 
-export default function Tasks({ callback, update=null, target=false, organization=null, isDraggable=false, blacklist=[] }) {
+export default function Tasks({ callback, update=null, target=false, organization=null, isDraggable=false, blacklist=[], canDelete=false }) {
     const [loading, setLoading] = useState(true);
     const [ tasks, setTasks ] = useState([]);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-
+    const [success, setSuccess] = useState('')
+    const [errors, setErrors] = useState([]);
     useEffect(() => {
         const getTasks = async () => {
             try {
@@ -96,7 +156,8 @@ export default function Tasks({ callback, update=null, target=false, organizatio
                 }
             } 
             catch (err) {
-                console.error('Failed to fetch respondent: ', err);
+                console.error('Failed to delete organization:', err);
+                setErrors(['Something went wrong. Please try again later.'])
             } 
             finally {
                 setLoading(false);
@@ -106,14 +167,21 @@ export default function Tasks({ callback, update=null, target=false, organizatio
 
     }, [search, page, update, organization]);
 
+    const updateTasks = (id) => {
+        const updated = tasks.filter(t => t.id !=id)
+        setTasks(updated);
+        setSuccess('Task removed.')
+    }
     const filteredTasks = tasks.filter(t => !blacklist.includes(t.id))
     if (loading) return <p>Loading...</p>;
     return (
         <div className={styles.tasks}>
+            {success && <div className={errorStyles.success}>{success}</div>}
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <h2>Tasks</h2>
             <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
             {tasks.length > 0 ? filteredTasks.map((task) => (
-                <TaskCard task={task} key={task.id} target={target} tasks={tasks} isDraggable={isDraggable}/>
+                <TaskCard task={task} key={task.id} target={target} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)}/>
             )) : <p>No tasks yet.</p>}
             </IndexViewWrapper>
         </div>

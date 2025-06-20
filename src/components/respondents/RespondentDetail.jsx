@@ -9,11 +9,15 @@ import SensitiveInfo from './SensitiveInfo';
 import styles from './respondentDetail.module.css'
 import Interactions from './interactions/Interactions'; 
 import Tasks from '../tasks/Tasks';
-
-
+import { useAuth } from '../../contexts/UserAuth';
+import { useNavigate } from 'react-router-dom';
+import ConfirmDelete from '../reuseables/ConfirmDelete';
+import errorStyles from '../../styles/errors.module.css';
 
 export default function RespondentDetail(){
     const { id } = useParams();
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const { respondentDetails, setRespondentDetails, respondentsMeta, setRespondentsMeta } = useRespondents();
     const[activeRespondent, setActiveRespondent] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -21,7 +25,8 @@ export default function RespondentDetail(){
     const [labels, setLabels] = useState({});
     const [added, setAdded] = useState([]);
     const[tasks, setTasks] = useState([]);
-
+    const [del, setDel] = useState(false);
+    const [errors, setErrors] = useState([])
     useEffect(() => {
         const getRespondentMeta = async () => {
             if(Object.keys(respondentsMeta).length !== 0){
@@ -80,11 +85,57 @@ export default function RespondentDetail(){
     const onUpdate = (data) => {
         setAdded(data)
     }
+
+    const deleteRespondent = async() => {
+        try {
+            console.log('deleting organization...');
+            const response = await fetchWithAuth(`/api/record/respondents/${id}/`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                navigate('/respondents');
+            } 
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${field}: ${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        setDel(false)
+    }
+
     if(loading) return <Loading /> 
     return(
         <div className={styles.respondentView}>
             <div className={styles.mainPanel}>
                 <div className={styles.respondentDetails}>
+                    {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                    {del && 
+                        <ConfirmDelete 
+                            name={activeRespondent.is_anonymous ? activeRespondent.uuid : (activeRespondent.first_name + activeRespondent.last_name)} 
+                            statusWarning={'We advise against deleting respondents unless they have expressly asked to be deleted. Please note that if this respondent has any recorded interactions, you will be required to delete those first.'} 
+                            onConfirm={() => deleteRespondent()} onCancel={() => setDel(false)} 
+                    />}
                     {activeRespondent.is_anonymous && <h1>Anonymous Respondent {activeRespondent.uuid}</h1>}
                     {!activeRespondent.is_anonymous && <h1>{activeRespondent.first_name} {activeRespondent.last_name}</h1>}
                     <p>{labels.sex}, Age {labels.age_range}</p>
@@ -96,6 +147,7 @@ export default function RespondentDetail(){
                         {sensative ? 'Hide Pregnancy & HIV Status' : 'View/Edit Pregnancy & HIV Status'}
                     </button>
                     {sensative && <SensitiveInfo id={id} />}
+                    {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)} >Delete</button>}
                 </div>
                 <div className={styles.interactions}>
                     <h2>Interactions</h2>

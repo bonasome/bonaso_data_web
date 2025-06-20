@@ -1,0 +1,79 @@
+.home { 
+    padding: 6vh;
+}
+.header {
+    padding: 6vh;
+    background-color: var(--bonaso-dark-accent);
+}
+.content {
+    display: grid;
+    grid-template-columns: 60% 40%;
+    gap: 2rem;
+
+}
+.tasksBox{
+    padding: 4vh;
+    background-color: var(--bonaso-dark-accent);
+}
+.tasks {
+
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+.task {
+    background-color: var(--bonaso-uber-dark-accent);
+    margin: 2vh;
+    padding: 3vh;
+    transition: transform 0.5s ease;
+    background-color: var(--bonaso-dark-accent);
+}
+
+.task:hover {
+    background-color: var(--bonaso-uber-dark-accent);
+    margin: 2vh;
+    padding: 3vh;
+    transform: scale(1.15);
+}
+.taskLink {
+    background-color: var(--bonaso-uber-dark-accent);
+    margin: 2vh;
+    padding: 3vh;
+    transition: transform 0.5s ease;
+}
+
+.taskLink:hover {
+    background-color: var(--bonaso-uber-dark-accent);
+    margin: 2vh;
+    padding: 3vh;
+    cursor: pointer;
+    transform: scale(1.15);
+}
+
+.actions {
+    background-color: var(--bonaso-dark-accent);
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding-bottom: 6vh;
+    margin-right: 4vh;
+}
+
+.actionLink {
+    margin-left: auto;
+    margin-right: auto;
+    width: 66%;
+    padding: 3vh;
+    background-color: var(--bonaso-uber-dark-accent);
+    transition: transform 0.3s ease;
+}
+
+.actionLink :hover{
+    text-overflow: ellipsis;
+    padding: 3vh;
+    background-color: var(--bonaso-light-accent);
+    transform: scale(1.2);
+}
+.actionLink > a:hover {
+    color: var(--bonaso-uber-dark-accent);
+}

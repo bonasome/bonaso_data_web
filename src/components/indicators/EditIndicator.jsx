@@ -16,7 +16,7 @@ export default function EditIndicator(){
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [existing, setExisting] = useState(null)
-    const { indicators, setIndicators, setIndicatorDetails, indicatorDetails } = useIndicators();
+    const { indicators, setIndicators, setIndicatorDetails, indicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
     const [indicatorIDs, setIndicatorIDs] = useState([]);
     const [indicatorNames, setIndicatorNames] = useState([]);
 
@@ -77,11 +77,31 @@ export default function EditIndicator(){
             }
         }
         getIndicators();
+        const getMeta = async() => {
+            if(Object.keys(indicatorsMeta).length != 0){
+                setLoading(false);
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/indicators/meta/`);
+                    const data = await response.json();
+                    setIndicatorsMeta(data);
+                    setLoading(false);
+                }
+                catch(err){
+                    console.error('Failed to fetch indicators meta: ', err)
+                    setLoading(false)
+                }
+            }
+        }
+        getMeta()
     }, [indicators])
 
     useEffect(() => {
-        setFormConfig(indicatorConfig(indicatorIDs, indicatorNames, existing))
-    }, [indicatorNames, indicatorIDs, existing])
+        setFormConfig(indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta.statuses, existing))
+    }, [indicatorNames, indicatorIDs, indicatorsMeta, existing])
 
     const handleCancel = () => {
         navigate(`/indicators/${id}`)
@@ -104,11 +124,22 @@ export default function EditIndicator(){
                 navigate(`/indicators/${returnData.id}`);
             }
             else{
-                const data = await response.json();
-                console.log(data);
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${field}: ${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse)
             }
         }
         catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record indicator: ', err)
         }
     }

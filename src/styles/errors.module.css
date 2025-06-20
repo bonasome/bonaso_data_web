@@ -24,3 +24,20 @@
     padding: 4px;
     margin: 1vh;
 }
+
+.deleteButton {
+    color: white;
+    background-color: var(--error);
+}
+.deleteButton:hover{
+    color: var(--error-text);
+    background-color: var(--error-bg);
+}
+.warningButton {
+    color: var(--warning-text);
+    background-color: var(--warning-bg);
+}
+.warningButton:hover{
+    color: var(--warning-bg);
+    background-color: var(--warning-text);
+}

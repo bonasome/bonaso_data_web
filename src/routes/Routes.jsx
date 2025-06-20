@@ -6,12 +6,14 @@ import Login from '../components/auth/Login';
 import Logout from '../components/auth/Logout';
 import AuthLayout from '../layouts/AuthLayout';
 import { Routes, Route } from 'react-router-dom';
+ 
 
 //redirects
 import RedirectIfAuthenticated from '../authRedirect/RedirectIfAuth';
 import RedirectIfNotAuthenticated from '../authRedirect/RedirectIfNotAuth';
 import RedirectIfNoPerm from '../authRedirect/RedirectIfNoPerm';
 
+import ViewOnly from '../components/ViewOnly';
 //respondents
 import RespondentsLayout from '../layouts/RespondentLayout';
 import RespondentsIndex from '../components/respondents/RespondentsIndex';
@@ -31,6 +33,7 @@ import BatchRecord from '../components/batchRecord/BatchRecord';
 
 //organizations
 import OrganizationsIndex from '../components/organizations/OrganizationsIndex';
+import OrganizationDetail from '../components/organizations/OrganizationDetail';
 import CreateOrganization from '../components/organizations/CreateOrganization';
 import EditOrganization from '../components/organizations/EditOrganization';
 
@@ -134,7 +137,7 @@ function Router() {
                 }/>
             <Route path=':id' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <OrganizationsIndex />
+                    <OrganizationDetail />
                 </RedirectIfNoPerm>
                 }/>
             
@@ -242,7 +245,12 @@ function Router() {
                 }/>
         </Route>
         
-        
+        <Route
+            path='/viewer'
+            element={
+                <ViewOnly />
+            }
+        />
 
         <Route path='/users' element={<AuthLayout />}>
             <Route

@@ -6,13 +6,17 @@ import SimpleSelect from "../reuseables/SimpleSelect";
 import errorStyles from '../../styles/errors.module.css';
 import styles from './tasks.module.css';
 import prettyDates from '../../../services/prettyDates';
+import ConfirmDelete from "../reuseables/ConfirmDelete";
 
-export function Target({ target, task, tasks, onUpdate }){
+export function Target({ target, task, tasks, onUpdate, onDelete }){
     const { user } = useAuth();
     const [success, setSuccess] = useState('')
     const[currentTarget, setCurrentTarget] = useState(target);
     const [editing, setEditing] = useState(false)
     const [related, setRelated] = useState(null);
+    const [del, setDel] = useState(false);
+    const [errors, setErrors] = useState([]);
+
     useEffect(() => {
         console.log('current', currentTarget)
         if (currentTarget?.related_to) {
@@ -28,14 +32,65 @@ export function Target({ target, task, tasks, onUpdate }){
         setCurrentTarget(data);
         onUpdate(data)
     }
+    const deleteTarget = async() => {
+        try {
+            console.log('deleting organization...');
+            const response = await fetchWithAuth(`/api/manage/targets/${target.id}/`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                setSuccess('Target deleted.')
+                onDelete(target.id);
+                setErrors([]);
+            } 
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${field}: ${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        setDel(false)
+
+    }
+
     return(
         <div className={styles.target} onClick={(e) => e.stopPropagation()}>
             {success && <div className={errorStyles.success}>{success}</div>}
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {del && 
+                <ConfirmDelete 
+                    name={'Target for ' + task.indicator.name + 'for '+ task.organization.name}  
+                    onConfirm={() => deleteTarget()} onCancel={() => setDel(false)} 
+                    allowEasy={true}
+            />}
             {editing ? 
                 <TargetEdit task={task} tasks={tasks} onUpdate={onComplete} existing={currentTarget} /> :
                 <p>{prettyDates(currentTarget.start)} - {prettyDates(currentTarget.end)}: <b>{currentTarget.amount ? currentTarget.amount : currentTarget.percentage_of_related + '% of ' + related?.indicator.name}</b> </p>
             }
-            {user.role == 'admin' && <button className={styles.cancel} onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit'}</button>}
+            <div>
+                {user.role == 'admin' && <button className={styles.cancel} onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit'}</button>}
+                {user.role == 'admin' && <button className={styles.cancel} onClick={() => setDel(true)}>Delete Target</button>}
+            </div>
         </div>
     )
 }
@@ -46,6 +101,7 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
     const [errors, setErrors] = useState([])
     const [taskIDs, setTaskIDs] = useState([])
     const [asPercentage, setAsPercentage] = useState(false)
+
     console.log(existing)
     const [targetInfo, setTargetInfo] = useState({
         task_id: task.id,
@@ -121,12 +177,25 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
             const returnData = await response.json();
             if(response.ok){
                 onUpdate(returnData)
+                setErrors([]);
             }
             else{
-                console.log(returnData);
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${field}: ${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse)
             }
         }
         catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record respondent: ', err)
         }
     }

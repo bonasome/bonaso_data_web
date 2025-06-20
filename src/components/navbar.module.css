@@ -37,17 +37,49 @@
     height: 12vh;
     padding: 2vh;
 }
-.menu {
+
+.expandedMenu {
     display: flex;
     flex-direction: row;
-    margin-top: 6.5vh;
-    margin-bottom: auto;
     margin-left: auto;
     padding-left: 10vw;
 }
-.menu >a{
-    margin-right: 6vh;
+
+.expandedMenuLink{
+    position: relative;
+    display: inline-block;
+    padding-top: 7vh;
+    padding-bottom: 7vh;
+    padding-left: 5vh;
+    padding-right: 5vh;
+    transition: all .5s ease;
 }
+
+.expandedMenuLink:hover{
+    background-color: var(--bonaso-main);
+}
+.expandedMenuDropdown {
+    width: fit-content;
+    height: fit-content;
+    background-color: var(--bonaso-main);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+}
+.expandedDropdownLink {
+    transition: all .5s ease;
+    padding: 2vh;
+}
+
+.expandedDropdownLink:hover {
+    background-color: white;
+}
+.expandedDropdownLink:hover >*{
+    color: var(--bonaso-uber-dark-accent);
+}
+
+
 
 .profile{
     height: 4vw;

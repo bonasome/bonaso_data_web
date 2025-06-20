@@ -9,26 +9,80 @@ import { Link } from 'react-router-dom';
 import styles from './projectDetail.module.css';
 import { ViewIndicator, IndicatorsBar, AddIndicator } from './ProjectIndicators';
 import { ViewOrganization, OrganizationsBar, AddOrganization, OrganizationTasks } from './ProjectOrganizations';
+import errorStyles from '../../../styles/errors.module.css';
+import { useNavigate } from 'react-router-dom';
+import ConfirmDelete from '../../reuseables/ConfirmDelete';
 
 
 function ProjectInfo({ project }){
+    const navigate = useNavigate();
+    const [errors, setErrors] = useState([]);
+    const [del, setDel] = useState(false);
+
+    const deleteProject = async() => {
+        try {
+            console.log('deleting organization...');
+            const response = await fetchWithAuth(`/api/manage/projects/${project.id}/`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                navigate('/projects');
+            } 
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${field}: ${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        setDel(false);
+    } 
+
+
     const { user } = useAuth();
     return(
-        <div>
+        <div className={styles.viewbox}>
+            {del && 
+                <ConfirmDelete 
+                    name={project.name} 
+                    statusWarning={'If this project is active or has any tasks associated with it, you will not be allowed to delete it.'} 
+                    onConfirm={() => deleteProject()} onCancel={() => setDel(false)} 
+            />}
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <i>Lasts from {project.start} to {project.end} {user.role =='admin' && '('+project.status+')'} </i>
             {project?.client && <h4>From {project.client.name}</h4>}
             <h5>Project Description</h5>
             <p>{project.description}</p>
             {user.role == 'admin' && <Link to={`/projects/${project.id}/edit`}><button>Edit Details</button></Link>}
+            {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)} >Delete</button>}
         </div>
     )
 }
 
-function ProjectViewSwitch({ project, type, indicator=null, organization=null }) {
+function ProjectViewSwitch({ project, type, onRemove, indicator=null, organization=null }) {
     if(type=='add-indicator') return <AddIndicator project={project} />
-    if(type=='view-indicator' && indicator) return <ViewIndicator project={project} indicator = {indicator} />
+    if(type=='view-indicator' && indicator) return <ViewIndicator project={project} indicator = {indicator} onRemove={onRemove}/>
     if(type == 'add-organization') return <AddOrganization project={project}  />
-    if(type=='view-organization' && organization) return <ViewOrganization project={project} organization = {organization} />
+    if(type=='view-organization' && organization) return <ViewOrganization project={project} organization = {organization} onRemove={onRemove}/>
     if(!type || type == 'project') return <ProjectInfo project={project} />
 }
 
@@ -39,7 +93,6 @@ export default function ProjectDetail(){
     const [loading, setLoading] = useState(true);
     const [activeIndicator, setActiveIndicator] = useState(null);
     const [activeOrganization, setActiveOrganization] = useState(null);
-
     const [type, setType ] = useState('project');
 
     useEffect(() => {
@@ -71,10 +124,10 @@ export default function ProjectDetail(){
     if(loading) return <Loading /> 
     return(
         <div className={styles.projectDetails}>
-            <OrganizationsBar project={activeProject} callback={(t, org) => {setType(t); setActiveOrganization(org)}}/>
+            <OrganizationsBar project={activeProject} callback={(t, org) => {setType(t); setActiveOrganization(org)}} />
             <div className={styles.panel}>
                 <h1 onClick={() => setType('project')} className={styles.projectHeader}>{activeProject.name}</h1>
-                <ProjectViewSwitch project={activeProject} type={type} indicator={activeIndicator} organization={activeOrganization}/>
+                <ProjectViewSwitch project={activeProject} type={type} indicator={activeIndicator} organization={activeOrganization} onRemove={() => setType('project')}/>
             </div>
             <IndicatorsBar project={activeProject} callback={(t, ind) => {setType(t); setActiveIndicator(ind)}}/>
         </div>
