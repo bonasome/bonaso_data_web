@@ -40,6 +40,11 @@ import CreateIndicator from '../components/indicators/CreateIndicator';
 import EditIndicator from '../components/indicators/EditIndicator';
 import IndicatorDetail from '../components/indicators/IndicatorDetail';
 
+import ProfileLayout from '../layouts/ProfileLayout';
+import Profile from '../components/users/Profile';
+import CreateUser from '../components/users/CreateUser';
+import EditUser from '../components/users/EditUser';
+
 function Router() {
     return (
         <Routes>
@@ -175,8 +180,68 @@ function Router() {
                 </RedirectIfNoPerm>
                 }/>
         </Route>
-        
 
+        <Route 
+            path='/profiles' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <ProfileLayout />
+                </RedirectIfNotAuthenticated>
+            }
+        >
+            <Route index element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <RespondentsIndex />
+                </RedirectIfNoPerm>
+                }/>
+            <Route path=':id' element={
+                    <Profile />
+                }/>
+            
+            <Route path='new' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <CreateUser/>
+                </RedirectIfNoPerm>
+                }/>
+            <Route path=':id/edit' element={
+                    <EditUser />
+                }/>
+        </Route>
+
+        <Route 
+            path='/indicators' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <RespondentsLayout />
+                </RedirectIfNotAuthenticated>
+            }
+        >
+            <Route index element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <IndicatorsIndex />
+                </RedirectIfNoPerm>
+                }/>
+            <Route path=':id' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <IndicatorDetail />
+                </RedirectIfNoPerm>
+                }/>
+            
+            <Route path='new' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <CreateIndicator/>
+                </RedirectIfNoPerm>
+                }/>
+            <Route path=':id/edit' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <EditIndicator />
+                </RedirectIfNoPerm>
+                }/>
+        </Route>
+        
+        
 
         <Route path='/users' element={<AuthLayout />}>
             <Route

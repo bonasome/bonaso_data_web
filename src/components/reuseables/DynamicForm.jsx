@@ -5,8 +5,11 @@ import SimpleDynamicRows from './SimpleDynamicRows';
 import validate from '../../../services/validate';
 import styles from './dynamicForm.module.css';
 import errorStyles from '../../styles/errors.module.css';
+import { useAuth } from '../../contexts/UserAuth';
+
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]
 export default function DynamicForm({ config, onSubmit, onCancel }){
+    const { user } = useAuth();
     const [formData, setFormData] = useState({})
     const [errors, setErrors] = useState([])
     const [switchpath, setSwitchpath] = useState(false);
@@ -68,6 +71,7 @@ export default function DynamicForm({ config, onSubmit, onCancel }){
             <form onSubmit={handleSubmit}>
                 {errors.length != 0 && <div className={errorStyles.errors} role="alert"><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 {config.map(field => {
+                    if(field?.rolerestrict && !field.rolerestrict.includes(user.role)) return <div key={field.name}></div>
                     if(switchpath && field.hideonpath) return <div key={field.name}></div>
                     if(!switchpath && field.showonpath) return <div key={field.name}></div>
                     const label = (field.label || (field.name.charAt(0).toUpperCase() + field.name.slice(1))) + (field.required ? ' *': ' (Optional)');

@@ -9,7 +9,7 @@ import { useParams } from 'react-router-dom';
 import indicatorConfig from './indicatorConfig';
 
 
-export default function CreateIndicator(){
+export default function EditIndicator(){
     const navigate = useNavigate();
     const { id } = useParams();
     const [formConfig, setFormConfig] = useState([]);

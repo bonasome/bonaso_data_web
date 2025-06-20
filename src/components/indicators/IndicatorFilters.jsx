@@ -56,22 +56,7 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
         () => indicators.map(ind => `${ind.code}: ${ind.name}`),
         [indicators]
     );
-        /*
-    useEffect(() => {
-        if(projects.length !== 0){
-            const projectIDs = projects.map((p) => p.id);
-            const projectNames= projects.map((p)=> p.name);
-            setProjectIDs(projectIDs);
-            setProjectNames(projectNames);
-        }
-        if(indicators.length != 0){
-            const indIDs = indicators.map((ind) => ind.id);
-            const indNames = indicators.map((ind) => (ind.code + ': '+ ind.name));
-            setIndicatorIDs(indIDs)
-            setIndicatorNames(indNames)
-        }
-    }, [indicators])
-    */
+
     const handleChange = () =>{
         onFilterChange(filters);
     }
