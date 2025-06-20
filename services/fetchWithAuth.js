@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
+const baseUrl = import.meta.env.VITE_API_URL;
 export default async function fetchWithAuth(url, options = {}) {
 
     // Only set Content-Type for methods that send a body
@@ -6,14 +6,14 @@ export default async function fetchWithAuth(url, options = {}) {
         ...(options.headers || {}),
     };
 
-    let response = await fetch(BASE_URL+url, {
+    let response = await fetch(baseUrl+url, {
         ...options,
         headers,
         credentials: 'include',
     });
 
     if (response.status === 401) {
-        const refreshResponse = await fetch(`${BASE_URL}/api/users/token/refresh/`, {
+        const refreshResponse = await fetch(`${baseUrl}/api/users/token/refresh/`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -23,7 +23,7 @@ export default async function fetchWithAuth(url, options = {}) {
         });
 
         if (refreshResponse.ok) {
-            response = await fetch(BASE_URL+url, {
+            response = await fetch(baseUrl+url, {
                 ...options,
                 headers,
                 credentials: 'include',
