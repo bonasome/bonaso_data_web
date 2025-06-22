@@ -7,6 +7,7 @@
 }
 
 .mainPanel {
+    padding-bottom: 20vh;
     overflow-x: hidden;
     overflow-y: scroll;
 }
