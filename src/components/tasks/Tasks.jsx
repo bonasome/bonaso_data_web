@@ -84,15 +84,23 @@ function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=
 
     }
 
+    if(del){
+        return(
+            <div>
+                {del && <div className={styles.backdrop}></div>}
+                {del && 
+                    <ConfirmDelete 
+                        name={'Task ' + task.indicator.name + ' for' + task.organization.name } 
+                        statusWarning={'If this task has any interactions associated with it, you will not be able to delete it.'} 
+                        onConfirm={() => removeTask()} onCancel={() => setDel(false)} 
+                />}
+            </div>
+        )
+
+    }
     return (
         <div className={styles.card} onClick={() => setExpanded(!expanded)} draggable={isDraggable} onDragStart={isDraggable ? handleDragStart : undefined}>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {del && 
-                <ConfirmDelete 
-                    name={'Task ' + task.indicator.name + ' for' + task.organization.name } 
-                    statusWarning={'If this task has any interactions associated with it, you will not be able to delete it.'} 
-                    onConfirm={() => removeTask()} onCancel={() => setDel(false)} 
-            />}
             <h3>{task.indicator.code}: {task.indicator.name}</h3>
             {expanded && (
                 <div>

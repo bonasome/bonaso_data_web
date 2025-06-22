@@ -152,6 +152,20 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     }
 
     if(!interaction.task_detail) return <></>
+    if(del){
+        return(
+            <div>
+                {del && <div className={styles.backdrop}></div>}
+                {del && 
+                    <ConfirmDelete 
+                        name={`Interaction related to task ${interaction?.task_detail?.indicator?.name}`} 
+                        statusWarning={'This cannot be undone, and this data will be lost. Consider flagging this instead if you are unsure.'} 
+                        onConfirm={() => deleteInteraction()} onCancel={() => setDel(false)} 
+                />}
+            </div>
+        )
+        
+    }
     if(edit){
         return(
             <div className={styles.card}>
@@ -181,12 +195,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     }
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
-            {del && 
-                <ConfirmDelete 
-                    name={`Interaction related to task ${interaction?.task_detail?.indicator?.name}`} 
-                    statusWarning={'This cannot be undone, and this data will be lost. Consider flagging this instead if you are unsure.'} 
-                    onConfirm={() => deleteInteraction()} onCancel={() => setDel(false)} 
-            />}
+            
             <h3>{interaction.task_detail.indicator.code + ' '} {interaction.task_detail.indicator.name}</h3>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {flagged && <div className={errorStyles.warnings}><h3>FLAGGED</h3></div>}

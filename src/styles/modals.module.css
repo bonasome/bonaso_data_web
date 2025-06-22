@@ -5,10 +5,14 @@
 .modal {
     display: flex;
     flex-direction: column;
-    position: fixed;
+    position: absolute;
+    top: 0vh;
+    left:0vw;
     padding: 5vh;
-    top: 17vh;
-    left: 23vw;
+    margin-left: 20vw;
+    margin-right: 20vw;
+    margin-top: 20vh;
+    margin-bottom: 20vh;
     width: 60vw;
     height: 60vh;
     border: 10px solid white;

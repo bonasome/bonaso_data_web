@@ -2,7 +2,7 @@
     display: grid;
     grid-template-columns: 70% 30%;
     height: 84vh;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .mainPanel {
