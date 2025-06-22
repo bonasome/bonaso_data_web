@@ -7,10 +7,10 @@
 }
 
 .mainPanel {
-    padding-bottom: 20vh;
     overflow-x: hidden;
     overflow-y: scroll;
 }
+
 .respondentDetails{
     margin: 5vh;
     padding-top: 2vh;
@@ -63,10 +63,18 @@
     font-size: x-small;
 }
 
-.sidebar{
-    overflow-y: scroll;
-    height: 100vw;
+.mainPanel,
+.sidebar {
+    height: 84vh;
+    overflow-y: auto; /* Enable vertical scroll */
+    overflow-x: hidden;
+    margin-bottom: 10vh;
 }
+
+.sidebar {
+    background-color: var(--bonaso-dark-accent);
+}
+
 .card{
     margin: 2vh;
     padding: 4vh;
