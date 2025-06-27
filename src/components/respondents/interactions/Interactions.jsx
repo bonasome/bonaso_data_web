@@ -32,15 +32,17 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             if(user.role == 'admin'){
                 setPerm(true);
             }
-            else if (interaction?.task_detail?.organization?.id == user.organization_id){
-                if (user.role == 'meofficer' || user.role == 'manager'){
-                    setPerm(true);
-                }
-                else if(user.id == interaction.created_by){
+            else if (user.role == 'meofficer' || user.role == 'manager'){
+                if(interaction?.task_detail?.organization?.id === user.organization_id || interaction?.task_detail?.parent_organization?.id === user.organization_id){
                     setPerm(true);
                 }
             }
+            else if(user.id == interaction.created_by){
+                    setPerm(true);
+                
+            }
         }
+        
         setInteractionDate(interaction.interaction_date)
         if (interaction.task_detail?.indicator?.subcategories?.length > 0) {
             const subcatNames = interaction.task_detail.indicator.subcategories.map(c => c.name);
@@ -215,7 +217,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                 {interaction.numeric_component && <p>{interaction.numeric_component}</p>}
                 {perm && <button onClick={() => setEdit(!edit)}>{edit ? 'Cancel' : 'Edit Interaction'}</button>}
                 {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
-                {['admin', 'meofficer', 'manager'].includes(user.role) && <button className={errorStyles.warningButton} onClick={() => flagInteraction()} >{flagged ? 'Mark as OK' :'Flag'} </button>}
+                {perm && <button className={errorStyles.warningButton} onClick={() => flagInteraction()} >{flagged ? 'Mark as OK' :'Flag'} </button>}
                 </div>
             }
         </div>

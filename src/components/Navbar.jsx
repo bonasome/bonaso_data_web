@@ -70,8 +70,8 @@ function Dropdown({ name }){
             setLabels(['My Profile','Help', 'Logout'])
         }
         if(name=='Team'){
-            setUrls(['/profiles/new'])
-            setLabels(['Add a New User'])
+            setUrls(['/profiles', '/profiles/new'])
+            setLabels(['My Team', 'Add a New User'])
         }
     }, [])
     return(
@@ -121,10 +121,11 @@ function ThinMenu() {
     return(
         <div className={styles.menuExpanded}>
             <div className={styles.menuBar}><Link to='/respondents'>Respondents</Link></div>
-            <div className={styles.menuBar}>{['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/projects'}>Projects</Link>}</div>
-            <div className={styles.menuBar}>{['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/batch-record'}>Batch Record</Link>}</div>
-            <div className={styles.menuBar}>{['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/organizations'}>Organizations</Link>}</div>
-            <div className={styles.menuBar}>{['admin'].includes(user.role) && <Link to={'/indicators'}>Indicators</Link>}</div>
+            {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}
+            {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/batch-record'}>Batch Record</Link></div>}
+            {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/organizations'}>Organizations</Link></div>}
+            {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/indicators'}>Indicators</Link></div>}
+            {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>Profile</Link></div>} 
             <div className={styles.menuBar}><Link to={`/profiles/${user.id}`}>Profile</Link></div>
             <div className={styles.menuBar}><Link to={`/help`}>Help</Link></div>
             <div className={styles.menuBar}><Link to={'/users/logout'}>Logout</Link></div>

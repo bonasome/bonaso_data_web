@@ -10,7 +10,7 @@ function ViewOnly() {
             <img src={bonasoWhite} className={styles.image} />
             <h1>Welcome, {user.username}!</h1>
             <p>You have a registered account, but it has not been activated yet.</p>
-            <p> Please be patient, it should be activated soon, and you can access the portal.</p>
+            <p> Please be patient, your account should be activated soon, and then you will be able to access the portal.</p>
             <Link to='/users/logout'><button>Logout</button></Link>
         </div>
     )
