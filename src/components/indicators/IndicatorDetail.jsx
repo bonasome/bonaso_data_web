@@ -124,6 +124,13 @@ export default function IndicatorDetail(){
                 <h1>{activeIndicator.code}: {activeIndicator.name}</h1>
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 <p>{activeIndicator.description}</p>
+                {activeIndicator.subcategories.length > 0 && 
+                    <ul>
+                        {activeIndicator.subcategories.map((cat) => (
+                            <li key={cat.id}>{cat.name}</li>
+                        ))}
+                    </ul>
+                }
                 <i>{activeIndicator.status}</i>
                 <p>
                     You got me, there's not much here yet. Eventually this should include a list of projects,

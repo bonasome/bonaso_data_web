@@ -152,11 +152,11 @@ export function ViewIndicator({ project, indicator, onRemove }){
                 for (const field in data) {
                     if (Array.isArray(data[field])) {
                         data[field].forEach(msg => {
-                            serverResponse.push(`${field}: ${msg}`);
+                            serverResponse.push(`${msg}`);
                         });
                     } 
                     else {
-                    serverResponse.push(`${field}: ${data[field]}`);
+                    serverResponse.push(`${data[field]}`);
                     }
                 }
                 setErrors(serverResponse);

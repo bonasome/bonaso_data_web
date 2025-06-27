@@ -141,12 +141,17 @@ export function OrganizationTasks({ project, organization }){
                 })
             });
             const returnData = await response.json();
+            console.log(returnData)
             if(response.ok){
                 setOrgTasks(prev => [...prev, returnData])
                 setReload(prev => prev + 1);
             }
             else{
                 let serverResponse = [];
+                if(Array.isArray(returnData)){
+                    setErrors(returnData);
+                    return;
+                }
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
                         returnData[field].forEach(msg => {
