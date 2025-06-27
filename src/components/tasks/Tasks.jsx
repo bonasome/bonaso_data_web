@@ -126,7 +126,7 @@ function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=
                     }
                     {targets && addingTarget && user.role == 'admin' && <TargetEdit task={task} tasks={tasks} onUpdate={onUpdate} />}
                     {targets && user.role == 'admin' && <button onClick={(e) => {e.stopPropagation(); setAddingTarget(!addingTarget)}}>{addingTarget ? 'Cancel' : 'Add Target'}</button> }
-                    {canDelete && user.role == 'admin' && <button onClick={()=> setDel(true)}>Remove Task</button> }
+                    {canDelete && user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)}>Remove Task</button> }
                 </div>
             )}
         </div>

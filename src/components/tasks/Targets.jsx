@@ -77,19 +77,13 @@ export function Target({ target, task, tasks, onUpdate, onDelete }){
         <div className={styles.target} onClick={(e) => e.stopPropagation()}>
             {success && <div className={errorStyles.success}>{success}</div>}
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {del && 
-                <ConfirmDelete 
-                    name={'Target for ' + task.indicator.name + 'for '+ task.organization.name}  
-                    onConfirm={() => deleteTarget()} onCancel={() => setDel(false)} 
-                    allowEasy={true}
-            />}
             {editing ? 
                 <TargetEdit task={task} tasks={tasks} onUpdate={onComplete} existing={currentTarget} /> :
                 <p>{prettyDates(currentTarget.start)} - {prettyDates(currentTarget.end)}: <b>{currentTarget.amount ? currentTarget.amount : currentTarget.percentage_of_related + '% of ' + related?.indicator.name}</b> </p>
             }
             <div>
                 {user.role == 'admin' && <button className={styles.cancel} onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit Target'}</button>}
-                {user.role == 'admin' && <button className={styles.cancel} onClick={() => setDel(true)}>Delete Target</button>}
+                {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={del ? () => deleteTarget() : () => {setDel(true); setErrors(['Are you sure you want to delete this target?'])}}> {del ? 'Confirm' : 'Delete Target'}</button>}
             </div>
         </div>
     )
