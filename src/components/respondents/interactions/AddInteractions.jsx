@@ -242,7 +242,10 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             subcategory_names: subcats[task.id] || [],
             comments: comments[task.id] || null
         }))
-        if(submissionErrors.length > 0){return;}
+        if(submissionErrors.length > 0){
+            setErrors(submissionErrors)
+            return;
+        }
         try{
             console.log('submitting data...',)
             const url = `/api/record/interactions/batch/`; 

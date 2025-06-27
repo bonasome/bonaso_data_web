@@ -22,7 +22,9 @@ export default function Profile(){
                 const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
                 const data = await response.json();
                 setProfile(data)
-                if(data.is_active){setActive(true)}
+                if(data.is_active){
+                    setActive(true)
+                }
                 setLoading(false)
             }
             catch(err){

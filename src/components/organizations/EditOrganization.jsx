@@ -79,7 +79,7 @@ export default function EditOrganization(){
         };
         getOrganizationDetails();
 
-    }, [organizations, organizationDetails, id])
+    }, [id])
 
     useEffect(() => {
         console.log(existing)
