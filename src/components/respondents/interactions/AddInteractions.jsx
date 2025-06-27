@@ -143,6 +143,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
 
     }
     const handleDrop = async (e) => {
+        setErrors([])
         let dropWarnings = [];
         if(subcatModalActive || numberModalActive){
             dropWarnings.push(`Please fill out and close the modal form before adding another task.`);
@@ -150,7 +151,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
         }
         e.preventDefault();
         const task = JSON.parse(e.dataTransfer.getData('application/json'));
-        if(!active) setActive(true);
+        if (!active) setTimeout(() => setActive(true), 0);
 
         let addedIDs = added.map((d) => (d.id))
         if(addedIDs.includes(task.id)){
@@ -230,6 +231,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
     };
 
     const handleSubmit = async () => {
+        setErrors([])
         let submissionErrors = [];
         if(interactionDate=='' || isNaN(Date.parse(interactionDate)) || new Date(interactionDate) > new Date()){
             submissionErrors.push('Interaction date must be a valid date and may not be in the future.');
@@ -326,7 +328,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                             <ul>
                                 {subcats[task.id]?.length >0 && subcats[task.id].map((c) => (<li key={c}>{c}</li>))}
                             </ul>
-                            {comments[task.id] && <p>comments[task.id]</p>}
+                            {comments[task.id] && <p>{comments[task.id]}</p>}
                         </div>
                         <button onClick={() => {setCommentsModalActive(true); setModalTask(task)}}>Add a comment</button>
                         <button onClick={() => {removeItem(task)}}>Remove From List</button>
