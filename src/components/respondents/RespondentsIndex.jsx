@@ -7,13 +7,26 @@ import IndexViewWrapper from '../reuseables/IndexView';
 import { useRespondents } from '../../contexts/RespondentsContext';
 import { Link } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
+import { IoPersonAddSharp } from "react-icons/io5";
 
 function RespondentCard({ respondent }) {
     const [loading, setLoading] = useState(false);
-    const { respondentDetails, setRespondentDetails } = useRespondents();
+    const { respondentDetails, setRespondentDetails, respondentsMeta } = useRespondents();
     const [active, setActive] = useState(null);
     const [expanded, setExpanded] = useState(false);
+    const [labels, setLabels] = useState({})
 
+    useEffect(() => {
+        if (!respondentsMeta?.sexs || !active) return;
+        const sexIndex = respondentsMeta.sexs.indexOf(active.sex);
+        const districtIndex = respondentsMeta.districts.indexOf(active.district)
+        const ageRangeIndex = respondentsMeta.age_ranges.indexOf(active.age_range)
+        setLabels({
+            district: respondentsMeta.district_labels[districtIndex],
+            sex: respondentsMeta.sex_labels[sexIndex],
+            age_range: respondentsMeta.age_range_labels[ageRangeIndex]
+        })
+    }, [respondentsMeta, active])
     const handleClick = async () => {
         const willExpand = !expanded;
         setExpanded(willExpand);
@@ -42,18 +55,19 @@ function RespondentCard({ respondent }) {
 
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
-            <h2>{respondent.is_anonymous ? ('Anonymous ' + respondent.uuid) : (respondent.first_name + ' ' + respondent.last_name)} ({respondent.sex})</h2>
+            <Link to={`/respondents/${respondent.id}`} style={{display:'flex', width:"fit-content"}}><h2>{respondent.is_anonymous ? ('Anonymous ' + respondent.uuid) : (respondent.first_name + ' ' + respondent.last_name)}</h2></Link>
             {expanded && loading && <p>Loading...</p>}
             {active == respondent.id && loading &&
                 <p>Loading...</p>
             }
             {expanded && active && (
                 <>
-                    <h4>{respondent.village}, {respondent.district}</h4>
-                    <p>{active.age_range}</p>
+                    <h4>{respondent.village}, {labels.district}</h4>
+                    <p>{labels.age_range}, {labels.sex}</p>
                     <p>{active.citizenship}</p>
                     <p>{active.comments ? active.comments : 'No Comments'}</p>
-                    <Link to={`/respondents/${respondent.id}`}> <button>View Details</button></Link>
+                    <Link to={`/respondents/${respondent.id}`}> <button>Go to Respondent</button></Link>
+                    <Link to={`/respondents/${respondent.id}/edit`}> <button>Edit Details</button></Link>
                 </>
             )}
         </div>
@@ -109,9 +123,8 @@ export default function RespondentsIndex(){
     return(
         <div className={styles.index}>
             <h1>Respondents</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
-                <a href='/respondents/new'><button>Create New Respondent</button></a>
-                <RespondentFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>
+            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries} filter={<RespondentFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
+                <Link to='/respondents/new'><button> <IoPersonAddSharp style={{marginRight: '1vh'}}/> Create New Respondent</button></Link>
                 {Array.isArray(respondents) && respondents.length === 0 ? (
                         <p>No respondents match your criteria.</p>
                     ) : (

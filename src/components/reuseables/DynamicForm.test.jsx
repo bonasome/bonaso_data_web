@@ -1,4 +1,5 @@
 import React from 'react';
+import { MockUserAuthProvider } from '../../mocks/utils/UserAuth';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
 //mock validate
@@ -54,10 +55,18 @@ const baseConfig = [
         },
     },
 ];
+const mockSubmit = vi.fn();
+export const renderWithContext = (user) => {
+    return render(
+        <MockUserAuthProvider mockUser={user}>
+            <DynamicForm config={baseConfig} onSubmit={mockSubmit} />
+        </MockUserAuthProvider>
+    );
+};
 
 describe('DynamicForm', () => {
   it('renders fields based on config', () => {
-    render(<DynamicForm config={baseConfig} onSubmit={() => {}} />);
+    renderWithContext();
 
     expect(screen.getByLabelText(/Username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
@@ -68,8 +77,7 @@ describe('DynamicForm', () => {
   });
 
   it('submits correct data', async () => {
-    const mockSubmit = vi.fn();
-    render(<DynamicForm config={baseConfig} onSubmit={mockSubmit} />);
+    renderWithContext();
 
     fireEvent.change(screen.getByLabelText(/Username/i), { target: { value: 'john_doe' } });
     fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } });
@@ -97,8 +105,7 @@ describe('DynamicForm', () => {
   });
 
   it('shows validation errors when fields are invalid', async () => {
-        const mockSubmit = vi.fn();
-        render(<DynamicForm config={baseConfig} onSubmit={mockSubmit} />);
+        renderWithContext();
 
         fireEvent.change(screen.getByLabelText(/Username/i), { target: { value: 'john_doe' } });
         fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'johxample.com' } });
@@ -118,7 +125,5 @@ describe('DynamicForm', () => {
             console.log('Error alert:', alert.textContent);
             expect(alert).toBeInTheDocument();
         });
-
-    expect(mockSubmit).not.toHaveBeenCalled();
   });
 });

@@ -56,7 +56,7 @@ function Home() {
             </div>
             <div className={styles.actions}>
                 <h2>Where should we start today?</h2>
-                <Link to={'/respondents'}><button>First time? Check out the tutorial!</button></Link> 
+                <Link to={'/help'}><button>First time? Check out the tutorial!</button></Link> 
                 <Link to={'/respondents'}><button>Start Recording Data!</button></Link> 
                 {['meofficer', 'admin', 'manager'].includes(user.role) && <Link to={'/batch-record'}><button>Upload a file</button></Link> }
                 {['meofficer', 'admin', 'manager'].includes(user.role) && <Link to={'/projects'}><button>See My Projects</button></Link> }

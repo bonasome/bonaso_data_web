@@ -4,7 +4,7 @@
 }
 .card{
     background-color: var(--bonaso-dark-accent);
-    margin: 6vh;
+    margin: 5vh;
     padding: 3vh;
     height: fit-content;
     transition: transform 0.3s ease;

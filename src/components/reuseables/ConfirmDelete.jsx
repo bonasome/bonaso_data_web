@@ -13,8 +13,8 @@ export default function ConfirmDelete({ name, onConfirm, onCancel, statusWarning
                 Please be absolutely sure that you want to do this. This action cannot be undone.
             </p>
             {statusWarning && <p>{statusWarning}</p>}
-            {!allowEasy && <p>Please type "confirm" to delete.</p>}
-            {!allowEasy && <input type='text' value={confirmDelete} onChange={(e) => setConfirmDelete(e.target.value)} />}
+            {!allowEasy && <label htmlFor='confirm'>Please type "confirm" to delete.</label>}
+            {!allowEasy && <input id="confirm" type='text' value={confirmDelete} onChange={(e) => setConfirmDelete(e.target.value)} />}
             <button className={errorStyles.deleteButton} onClick={() => onConfirm()} disabled={allowEasy ? null : confirmDelete != 'confirm'}>Confirm</button>
             <button onClick={() => onCancel()}>Cancel</button>
             <></>

@@ -1,7 +1,6 @@
 .projectDetails{
     height: 84vh;
     display: grid;
-    grid-template-columns: 20% 60% 20%;
 }
 
 .projectHeader{
@@ -11,7 +10,22 @@
 .projectHeader:hover {
     cursor: pointer;
 }
-
+.return{
+    display: flex;
+    flex-direction: row;
+    margin-top: auto;
+    margin-bottom: auto;
+    border-bottom: 2px solid white;
+    background-color: var(--bonaso-dark-accent);
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+    padding-left: 5vh;
+}
+.returnIcon{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 3vh;
+}
 .panel{
     overflow-x: hidden;
     overflow-y: scroll;
@@ -20,10 +34,15 @@
 
 .viewbox {
     background-color: var(--bonaso-dark-accent);
-    padding: 5vh;
-    margin-bottom: 3vh;
+    padding-left: 5vh;
+    padding-right: 5vh;
+    padding-top: 5vh;
+    padding-bottom: 1vh;
+    margin-bottom: 2vh;
 }
-.sidebar{
+.sidebarRight{
+    display: grid;
+    grid-template-columns: 6% 94%;
     background-color: var(--bonaso-dark-accent);
     padding-top: 2vh;
     padding-bottom: 2vh;
@@ -31,6 +50,21 @@
     padding-right: 4vh;
     overflow-y:scroll;
     overflow-x: hidden;
+}
+.sidebarLeft{
+    display: grid;
+    grid-template-columns: 94% 6%;
+    background-color: var(--bonaso-dark-accent);
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    padding-left: 4vh;
+    padding-right: 4vh;
+    overflow-y:scroll;
+    overflow-x: hidden;
+}
+.toggle > *{
+    position: absolute;
+    margin-top: 43vh;
 }
 .card{
     margin: 2vh;

@@ -1,0 +1,43 @@
+.container{
+    margin: 4vh;
+}
+
+.section {
+    background-color: var(--bonaso-dark-accent);
+    padding: 4vh;
+    margin-bottom: 2vh;
+}
+
+.card{
+    padding: 3vh;
+    background-color: var(--bonaso-uber-dark-accent);
+    margin: 3vh;
+    transition: transform .6s;
+}
+
+.card:hover{
+    transform: scale(1.06);
+}
+.return{
+    display: flex;
+    flex-direction: row;
+    margin-top: auto;
+    margin-bottom: auto;
+    border-bottom: 2px solid white;
+    background-color: var(--bonaso-dark-accent);
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+    padding-left: 5vh;
+}
+.returnIcon{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 3vh;
+}
+
+.section > label {
+    display: inline;
+}
+.spacer {
+    padding: 5vh;
+}

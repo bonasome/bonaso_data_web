@@ -5,10 +5,29 @@
     overflow-x: hidden;
     overflow-y: hidden;
 }
+.respondentViewFull{
+    display: grid;
+    grid-template-columns: 97% 3%;
+    height: 84vh;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
 
 .mainPanel {
     overflow-x: hidden;
     overflow-y: scroll;
+}
+.return{
+    display: flex;
+    flex-direction: row;
+    margin-top: auto;
+    margin-bottom: auto;
+    border-bottom: 2px solid white;
+}
+.returnIcon{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 3vh;
 }
 
 .respondentDetails{
@@ -72,7 +91,14 @@
 }
 
 .sidebar {
+    display: grid;
+    grid-template-columns: 6% 94%;
     background-color: var(--bonaso-dark-accent);
+}
+.toggle > *{
+    position: absolute;
+    margin-top: 43vh;
+    margin-left: 1vh;
 }
 
 .card{
@@ -80,6 +106,7 @@
     padding: 4vh;
     background-color: var(--bonaso-dark-accent);
     transition: transform 0.3s ease;
+    border-bottom: 4px solid white;
 }
 .card:hover{ 
     cursor: pointer;

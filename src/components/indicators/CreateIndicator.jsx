@@ -6,7 +6,7 @@ import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useIndicators } from '../../contexts/IndicatorsContext';
 import IndicatorForm from './IndicatorForm';
 import indicatorConfig from './indicatorConfig';
-
+import styles from '../reuseables/dynamicForm.module.css';
 
 export default function CreateIndicator(){
     const navigate = useNavigate();
@@ -29,7 +29,6 @@ export default function CreateIndicator(){
                     const response = await fetchWithAuth(`/api/indicators/meta/`);
                     const data = await response.json();
                     setIndicatorsMeta(data);
-                    console.log(data)
                     setLoading(false);
                 }
                 catch(err){
@@ -113,7 +112,7 @@ export default function CreateIndicator(){
     if(loading) return <Loading />
 
     return(
-        <div>
+        <div className={styles.container}>
             <h1>New Indicator</h1>
             <IndicatorForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
         </div>

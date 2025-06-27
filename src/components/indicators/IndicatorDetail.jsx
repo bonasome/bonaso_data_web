@@ -9,6 +9,10 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
+import styles from './indicatorDetail.module.css';
+import IndicatorChart from '../reuseables/charts/IndicatorChart';
+import Checkbox from '../reuseables/Checkbox';
+import { IoMdReturnLeft } from "react-icons/io";
 
 export default function IndicatorDetail(){
     const { user } = useAuth();
@@ -16,6 +20,8 @@ export default function IndicatorDetail(){
     const[loading, setLoading] = useState(true)
     const { indicatorDetails, setIndicatorDetails } = useIndicators();
     const[activeIndicator, setActiveIndicator] = useState(null);
+    const [projects, setProjects] = useState([]);
+    const [showTargets, setShowTargets] = useState(false);
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
 
@@ -35,16 +41,35 @@ export default function IndicatorDetail(){
                     const data = await response.json();
                     setIndicatorDetails(prev => [...prev, data]);
                     setActiveIndicator(data);
-                    setLoading(false);
                 } 
                 catch (err) {
                     console.error('Failed to fetch indicator: ', err);
-                    setLoading(false)
                 } 
             }
         };
         getIndicatorDetails();
-    }, [id, indicatorDetails, setIndicatorDetails])
+
+    }, [id, indicatorDetails, setIndicatorDetails]);
+
+    useEffect(() => {
+        const getProjects = async () => {
+            if(!activeIndicator) return;
+            try {
+                console.log('fetching projects...');
+                const response = await fetchWithAuth(`/api/manage/projects/?indicators=${activeIndicator.id}`);
+                const data = await response.json();
+                setProjects(data.results);
+                setLoading(false);
+                console.log(data)
+            } 
+            catch (err) {
+                setErrors(['Something went wrong. Please try again later.'])
+                console.error('Failed to fetch indicator: ', err);
+                setLoading(false)
+            } 
+        };
+        getProjects();
+    }, [activeIndicator])
 
     const deleteIndicator = async() => {
         try {
@@ -89,19 +114,42 @@ export default function IndicatorDetail(){
 
     if (loading) return <Loading />
     return(
-        <div>
+        <div className={styles.container}>
             {del && <ConfirmDelete name={activeIndicator.name} statusWarning={'We advise against deleting indicators. Instead, please consider setting its status as "deprecated".'} onConfirm={() => deleteIndicator()} onCancel={() => setDel(false)} />}
-            <h1>{activeIndicator.code}: {activeIndicator.name}</h1>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <p>{activeIndicator.description}</p>
-            <i>{activeIndicator.status}</i>
-            <p>
-                You got me, there's not much here yet. Eventually this should include a list of projects,
-                organizations, targets, and interactions related to this indicator, allowing admins to have a 
-                centralized place to track this information. 
-            </p>
-            <Link to={`/indicators/${id}/edit`}><button>Edit Details</button></Link>
-            {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Indicator</button>}
+            <Link to={'/indicators'} className={styles.return}>
+                <IoMdReturnLeft className={styles.returnIcon} />
+                <p>Return to indicators overview</p>   
+            </Link>
+            <div className={styles.section}>
+                <h1>{activeIndicator.code}: {activeIndicator.name}</h1>
+                {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                <p>{activeIndicator.description}</p>
+                <i>{activeIndicator.status}</i>
+                <p>
+                    You got me, there's not much here yet. Eventually this should include a list of projects,
+                    organizations, targets, and interactions related to this indicator, allowing admins to have a 
+                    centralized place to track this information. 
+                </p>
+                <Link to={`/indicators/${id}/edit`}><button>Edit Details</button></Link>
+                {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Indicator</button>}
+            </div>
+            {activeIndicator.status != 'Planned' && <div className={styles.section}>
+                <h2>Performance Over Time</h2>
+                <Checkbox label='Show Targets?' name="targets" checked={showTargets} callback={(c) => setShowTargets(c)} />
+                <IndicatorChart indicator={activeIndicator} showTargets={showTargets}/>
+            </div>}
+            
+            
+            <div className={styles.section}>
+                <h2>In projects</h2>
+                {projects.length > 0 && projects.map((p) =>(
+                    <div className={styles.card}>
+                        <Link to={`/projects/${p.id}`}><h3>{p.name}</h3></Link>
+                    </div>
+                ))}
+                {projects.length === 0 && <p><i>This indicator is not in any projects.</i></p>}
+            </div>
+            <div className={styles.spacer}></div>
         </div>
     )
 }

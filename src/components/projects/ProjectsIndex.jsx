@@ -43,14 +43,15 @@ function ProjectCard({ project }) {
 
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
-            <h2>{project.name}</h2>
+            <Link to={`/projects/${project.id}`} style={{display:'flex', width:"fit-content"}}><h2>{project.name}</h2></Link>
             {expanded && loading && <p>Loading...</p>}
             {expanded && active && (
                 <>
                     <i>Lasts from {active.start} to {active.end} {user.role =='admin' && '('+active.status+')'} </i>
                     {active?.client && <h4> For: {project.client.name}</h4>}
                     <p>{active.description}</p>
-                    <Link to={`/projects/${project.id}`}> <button>View Details</button></Link>
+                    <Link to={`/projects/${project.id}`}> <button>Go to Project</button></Link>
+                    <Link to={`/projects/${project.id}/edit`}> <button>Edit Details</button></Link>
                 </>
             )}
         </div>
@@ -109,9 +110,9 @@ export default function ProjectsIndex(){
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Projects' : 'My Projects'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
+            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries} filter={<ProjectFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 {user.role == 'admin' && <Link to='/projects/new'><button>Create New Project</button></Link>}
-                <ProjectFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>
+                
                 {projects.length == 0 ? 
                     <p>No projects match your criteria.</p> :
                     projects.map(p => (

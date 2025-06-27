@@ -5,7 +5,7 @@ import userConfig from "./userConfig";
 import UserForm from './UserForm'
 import Loading from '../reuseables/Loading'
 import { useNavigate } from "react-router-dom";
-
+import styles from '../reuseables/dynamicForm.module.css';
 
 export default function CreateUser(){
     const { user } = useAuth();
@@ -87,7 +87,7 @@ export default function CreateUser(){
     
         if(loading) return <Loading />
         return(
-            <div>
+            <div className={styles.container}>
                 <h1>New User</h1>
                 <UserForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
             </div>

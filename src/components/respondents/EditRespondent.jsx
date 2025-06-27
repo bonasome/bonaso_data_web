@@ -6,6 +6,8 @@ import RespondentForm from './RespondentForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useRespondents } from '../../contexts/RespondentsContext';
 import { useParams } from 'react-router-dom';
+import respondentsConfig from './respondentsConfig';
+import styles from '../reuseables/dynamicForm.module.css';
 
 export default function EditRespondent(){
     const { id } = useParams();
@@ -15,7 +17,6 @@ export default function EditRespondent(){
     const [errors, setErrors] = useState([]);
     const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
     const [active, setActive] = useState({});
-    const [existingKPs, setExistingKPs] = useState([]);
 
     useEffect(() => {
         const getRespondentMeta = async () => {
@@ -56,46 +57,8 @@ export default function EditRespondent(){
     }, [id])
 
     useEffect(() => {
-        setFormConfig([
-            //always show
-            {name: 'is_anonymous', label: 'Does this respondent want to remain anonymous', type: 'checkbox', required: true, switchpath: true, value: active.is_anonymous ? active.is_anonymous : false},
-            
-            //show if not anonymous
-
-            {name: 'first_name', label: 'First Name', type: 'text', required: true, hideonpath: true, value: active.first_name ? active.first_name : ''},
-            {name: 'last_name', label: 'Surname', type: 'text', required: true, hideonpath: true, value: active.last_name ? active.last_name : ''},
-
-            //always show
-            {name: 'sex', label: 'Sex', type: 'select', required: true, value: active.sex ? active.sex : '', constructors: {
-                values: respondentsMeta.sexs,
-                multiple: false,
-                labels: respondentsMeta.sex_labels
-            }},
-            //show ONLY if anonymous
-            {name: 'age_range', label: 'Age Range', type: 'select', required: true, showonpath:true, value: active.age_range ? active.age_range : '', constructors: {
-                values: respondentsMeta.age_ranges,
-                multiple: false, showonpath: true,
-                labels: respondentsMeta.age_range_labels
-            }},
-            //show if not anonymous
-            {name: 'dob', label: 'Date of Birth', type: 'date', required: true, hideonpath: true, value: active.dob ? active.dob : ''},
-            {name: 'ward', label: 'Ward', type: 'text', required: false, hideonpath: true, value: active.ward ? active.ward : ''},
-
-            //always show
-            {name: 'village', label: 'Village', type: 'text', required: true, value: active.village ? active.village : ''},
-            {name: 'district', label: 'District', type: 'select', required: true, value: active.district ? active.district : '', constructors: {
-                values: respondentsMeta.districts,
-                multiple: false,
-                labels: respondentsMeta.district_labels
-            }},
-            {name: 'citizenship', label: 'Citizenship', type: 'text', value: active.citizenship ? active.citizenship : 'Motswana', required: true, },
-            
-            //show if not anonymous
-            {name: 'email', label: 'Email', type: 'email', required: false, hideonpath: true, value: active.email ? active.email : ''},
-            {name: 'phone_number', label: 'Phone Number', type: 'number', required: false, hideonpath: true, value: active.phone_number ? active.phone_number : ''},
-        
-        ])
-    }, [respondentsMeta, active, existingKPs])
+        setFormConfig(respondentsConfig(respondentsMeta, active))
+    }, [respondentsMeta, active])
 
     const handleCancel = () => {
         navigate(`/respondents/${id}`)
@@ -168,7 +131,7 @@ export default function EditRespondent(){
     
     if(loading) return <Loading />
     return(
-        <div>
+        <div className={styles.container}>
             <h1>Editing Respondent {active.is_anonymous ? active.uuid : (active.first_name + ' ' + active.last_name) }</h1>
             <RespondentForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors}/>
         </div>

@@ -1,11 +1,10 @@
 export default function indicatorConfig(ids, names, statuses, existing=null){
-    console.log(ids, names, statuses)
     let subcats = []
     if(existing?.subcategories.length > 0){
         subcats = existing.subcategories.map((cat) => (cat.name))
     }
     return [
-        {name: 'code', label: 'Indicator code', type: 'text', required: false, value: existing?.code ? existing.code : ''},
+        {name: 'code', label: 'Indicator code', type: 'text', required: true, value: existing?.code ? existing.code : ''},
         {name: 'name', label: 'Indicator Name', type: 'text', required: true, value: existing?.name ? existing.name : ''},
         {name: 'prerequisite_id', label: 'Prerequisite', type: 'select',  required: false, value: existing?.prerequisite?.id ? existing.prerequisite?.id : '',
             constructors: {
@@ -14,7 +13,7 @@ export default function indicatorConfig(ids, names, statuses, existing=null){
                 multiple: false,
         }},
         {name: 'description', label: 'Description', type: 'textarea', required: false, value: existing?.description ? existing.description : ''},
-        {name: 'status', label: 'Indicator Status', type: 'select',  required: false, value: existing?.status ? existing.status : '',
+        {name: 'status', label: 'Indicator Status', type: 'select',  required: true, value: existing?.status ? existing.status : 'Active',
             constructors: {
                 values: statuses,
                 labels: statuses,

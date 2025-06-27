@@ -1,8 +1,14 @@
+.container{
+    margin: 5vh;
+    padding-bottom: 10vh;
+}
 .formElement{
+    padding: 3vh;
+    background-color: var(--bonaso-dark-accent);
     max-width: fit-content;
     max-height: fit-content;
     margin: 2.5vh;
-    padding: 2vh;
+    box-shadow: 6px 3px 3px rgb(255, 255, 255);
 }
 label {
     display: block;
@@ -17,7 +23,7 @@ label {
     margin-top: 3vh;
     margin-bottom: 3%;
     padding: 2vh;
-    background-color: var(--bonaso-dark-accent);
+    border-bottom: 2px solid white;
 }
 
 .checkboxField{

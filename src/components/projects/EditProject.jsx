@@ -108,8 +108,8 @@ export default function EditProject(){
         }
         console.log('submitting data...', data)
         try{
-            const response = await fetchWithAuth('/api/manage/projects/', {
-                method: 'POST',
+            const response = await fetchWithAuth(`/api/manage/projects/${existing.id}/`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': "application/json",
                 },

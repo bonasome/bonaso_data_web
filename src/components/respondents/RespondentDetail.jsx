@@ -13,6 +13,9 @@ import { useAuth } from '../../contexts/UserAuth';
 import { useNavigate } from 'react-router-dom';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
 import errorStyles from '../../styles/errors.module.css';
+import { IoMdReturnLeft } from "react-icons/io";
+import { BiSolidShow } from "react-icons/bi";
+import { BiSolidHide } from "react-icons/bi";
 
 export default function RespondentDetail(){
     const { id } = useParams();
@@ -27,6 +30,9 @@ export default function RespondentDetail(){
     const[tasks, setTasks] = useState([]);
     const [del, setDel] = useState(false);
     const [errors, setErrors] = useState([])
+
+    const[sbVisible, setSBVisible] = useState(true);
+
     useEffect(() => {
         const getRespondentMeta = async () => {
             if(Object.keys(respondentsMeta).length !== 0){
@@ -126,9 +132,13 @@ export default function RespondentDetail(){
 
     if(loading) return <Loading /> 
     return(
-        <div className={styles.respondentView}>
+        <div className={ sbVisible ? styles.respondentView : styles.respondentViewFull}>
             <div className={styles.mainPanel}>
                 <div className={styles.respondentDetails}>
+                        <Link to={'/respondents'} className={styles.return}>
+                            <IoMdReturnLeft className={styles.returnIcon} />
+                            <p>Return to respondents overview</p>
+                        </Link>
                     {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                     {del && 
                         <ConfirmDelete 
@@ -144,7 +154,7 @@ export default function RespondentDetail(){
                     <p>{}</p>
                     <Link to={`/respondents/${activeRespondent.id}/edit`}><button>Edit Details</button></Link>
                     <button onClick={() => setSensative(!sensative)}>
-                        {sensative ? 'Hide Pregnancy & HIV Status' : 'View/Edit Pregnancy & HIV Status'}
+                        {sensative ? 'Hide Details' : 'View More'}
                     </button>
                     {sensative && <SensitiveInfo id={id} />}
                     {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)} >Delete</button>}
@@ -155,7 +165,10 @@ export default function RespondentDetail(){
                 </div>
             </div>
             <div className={styles.sidebar}>
-                <Tasks callback={loadTasks} isDraggable={true} blacklist={added} />
+                <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
+                    {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
+                </div>
+                {sbVisible && <Tasks callback={loadTasks} isDraggable={true} blacklist={added} />}
             </div>
         </div>
     )

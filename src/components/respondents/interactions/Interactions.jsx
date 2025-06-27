@@ -28,6 +28,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     useEffect(() => {
         console.log(interaction)
         const permCheck = () => {
+            console.log('user', user)
             if(user.role == 'admin'){
                 setPerm(true);
             }
@@ -83,28 +84,27 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                 onUpdate();
                 setErrors([]);
             }
-
             else{
                 const serverResponse = [];
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
-                    data[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
+                    returnData[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
                     });
                     } 
                     else {
-                    serverResponse.push(`${field}: ${returnData[field]}`);
+                        serverResponse.push(`${returnData[field]}`);
                     }
                 }
+                console.log(serverResponse)
                 setErrors(serverResponse);
             }
         }
         catch(err){
-            console.error('Failed to delete organization:', err);
+            console.error('Failed to apply changes to interaction:', err);
             setErrors(['Something went wrong. Please try again later.'])
         }
     }
-
     const flagInteraction = async() => {
         const newFlag = !flagged
         setFlagged(!flagged);
@@ -170,6 +170,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
         return(
             <div className={styles.card}>
                 <h3>{interaction.task_detail.indicator.code + ' '} {interaction.task_detail.indicator.name}</h3>
+                {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 <label htmlFor='interaction_date'>Date</label>
                 <input type='date' name='interaction_date' id='interaction_date' value={interactionDate} onChange={(e)=>setInteractionDate(e.target.value)}/>
                 {interaction.numeric_component &&
@@ -221,7 +222,6 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     )
 }
 
-
 export default function Interactions({ id, tasks, onUpdate }){
     const [loading, setLoading] = useState(true);
 
@@ -238,6 +238,7 @@ export default function Interactions({ id, tasks, onUpdate }){
                 console.log('fetching respondent details...');
                 const response = await fetchWithAuth(`/api/record/interactions/?respondent=${id}&search=${search}&page=${page}`);
                 const data = await response.json();
+                console.log(data)
                 setEntries(data.count); 
                 if (page === 1) {
                     setInteractions(data.results);

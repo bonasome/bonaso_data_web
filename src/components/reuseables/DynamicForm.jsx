@@ -19,6 +19,7 @@ export default function DynamicForm({ config, onSubmit, onCancel }){
     useEffect(() => {
         const struct = {};
         config.forEach(field => {
+            if(!field) return
             if(field.constructors && field.constructors.multiple){
                 struct[field.name] = field.value || [];
             }
@@ -41,6 +42,7 @@ export default function DynamicForm({ config, onSubmit, onCancel }){
         const newFormData = { ...formData };
 
         config.forEach(field => {
+            if(!field) return
             if (field.type === 'dynamic') {
                 const ref = rowRefs.current[field.name];
                 if (ref?.current?.collect) {
@@ -65,12 +67,12 @@ export default function DynamicForm({ config, onSubmit, onCancel }){
         }
         onSubmit(newFormData);
     }
-
     return(
         <div className={styles.formElement}>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate={true}>
                 {errors.length != 0 && <div className={errorStyles.errors} role="alert"><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 {config.map(field => {
+                    if(!field) return
                     if(field?.rolerestrict && !field.rolerestrict.includes(user.role)) return <div key={field.name}></div>
                     if(switchpath && field.hideonpath) return <div key={field.name}></div>
                     if(!switchpath && field.showonpath) return <div key={field.name}></div>

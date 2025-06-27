@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect, createContext, useContext } from "react";
 import fetchWithAuth from '../../services/fetchWithAuth';
-const UserContext = createContext();
+export const UserContext = createContext();
 
 export function UserAuth({ children }) {
     const dns = import.meta.env.VITE_DNS

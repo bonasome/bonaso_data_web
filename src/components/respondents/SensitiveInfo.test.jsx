@@ -20,11 +20,11 @@ describe('SensitiveInfo', () => {
 
         // Wait for the key populations text to appear
         expect(await screen.findByText(/Key Populations/)).toBeInTheDocument()
-        expect(screen.getByText('Female Sex Worker')).toBeInTheDocument()
-        expect(screen.getByText('Disability Status:')).toBeInTheDocument()
-        expect(screen.getByText('Hearing Impairment')).toBeInTheDocument()
+        expect(screen.getByText('MSM')).toBeInTheDocument()
+        expect(screen.getByText('FSW')).toBeInTheDocument()
+        expect(screen.getByText('Visual')).toBeInTheDocument()
         expect(screen.getByText('HIV Status: Positive')).toBeInTheDocument()
-        expect(screen.getByText('Pregnant Since: 2024-01-01')).toBeInTheDocument()
+        expect(screen.getByText('Pregnant Since: 2025-04-01')).toBeInTheDocument()
     })
 
     it('switches to edit mode and renders form fields', async () => {
@@ -39,10 +39,9 @@ describe('SensitiveInfo', () => {
         await waitFor(() => {
             expect(screen.getByText(/Key Population Status/)).toBeInTheDocument()
             expect(screen.getByLabelText(/Is this HIV Positive/)).toBeChecked()
-            expect(screen.getByLabelText(/When did this person become HIV Positve/)).toHaveValue('2023-06-01')
+            expect(screen.getByLabelText(/When did this person become HIV Positve/)).toHaveValue('2024-10-10')
             expect(screen.getByLabelText(/Is this person pregnant/)).toBeChecked()
-            expect(screen.getByLabelText(/Pregnancy began/)).toHaveValue('2024-01-01')
-            expect(screen.getByLabelText(/Pregnancy Ended/)).toHaveValue('2024-05-01')
+            expect(screen.getByLabelText(/Pregnancy began/)).toHaveValue('2025-04-01')
         })
     })
 
@@ -62,7 +61,7 @@ describe('SensitiveInfo', () => {
         })
 
         fireEvent.change(screen.getByLabelText('Pregnancy began'), {
-            target: { value: '2024-06-01' },
+            target: { value: '2025-04-01' },
         })
         fireEvent.change(screen.getByLabelText(/Pregnancy Ended/i), {
             target: { value: '2024-05-01' },

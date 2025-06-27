@@ -34,7 +34,7 @@ export function Target({ target, task, tasks, onUpdate, onDelete }){
     }
     const deleteTarget = async() => {
         try {
-            console.log('deleting organization...');
+            console.log('deleting targets...');
             const response = await fetchWithAuth(`/api/manage/targets/${target.id}/`, {
                 method: 'DELETE',
             });
@@ -66,7 +66,7 @@ export function Target({ target, task, tasks, onUpdate, onDelete }){
             }
         } 
         catch (err) {
-            console.error('Failed to delete organization:', err);
+            console.error('Failed to delete target:', err);
             setErrors(['Something went wrong. Please try again later.'])
         }
         setDel(false)
@@ -88,7 +88,7 @@ export function Target({ target, task, tasks, onUpdate, onDelete }){
                 <p>{prettyDates(currentTarget.start)} - {prettyDates(currentTarget.end)}: <b>{currentTarget.amount ? currentTarget.amount : currentTarget.percentage_of_related + '% of ' + related?.indicator.name}</b> </p>
             }
             <div>
-                {user.role == 'admin' && <button className={styles.cancel} onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit'}</button>}
+                {user.role == 'admin' && <button className={styles.cancel} onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit Target'}</button>}
                 {user.role == 'admin' && <button className={styles.cancel} onClick={() => setDel(true)}>Delete Target</button>}
             </div>
         </div>

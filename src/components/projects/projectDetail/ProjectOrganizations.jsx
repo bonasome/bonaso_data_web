@@ -9,20 +9,28 @@ import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import styles from './projectDetail.module.css';
 import errorStyles from '../../../styles/errors.module.css'
 import NarrativeReportDownload from '../../narrativeReports/NarrativeReportDownload';
+import { BiSolidShow } from "react-icons/bi";
+import { BiSolidHide } from "react-icons/bi";
 
 import { Link } from 'react-router-dom';
-export function OrganizationsBar({ project, callback }){
+export function OrganizationsBar({ project, callback, visChange }){
+    const[sbVisible, setSBVisible] = useState(true)
     return(
-        <div  className={styles.sidebar}>
-            <h2>Project Organizations</h2>
-            <button onClick={() => callback('add-organization')}>Add an Organization</button>
-            {project?.organizations.length > 0 ? project.organizations.map((org) => (
-                <div key={org.id} className={styles.card} onClick={() => callback('view-organization', org)}>
-                    <h3>{org.name}</h3>
-                </div>
-            )):
-            <p>This project doesn't have any organizations yet.</p>
-            }
+        <div  className={styles.sidebarLeft}>
+            {sbVisible && <div>
+                <h2>Project Organizations</h2>
+                <button onClick={() => callback('add-organization')}>Add an Organization</button>
+                {project?.organizations.length > 0 ? project.organizations.map((org) => (
+                    <div key={org.id} className={styles.card} onClick={() => callback('view-organization', org)}>
+                        <h3>{org.name}</h3>
+                    </div>
+                )):
+                <p>This project doesn't have any organizations yet.</p>
+                }
+            </div>}
+            <div className={styles.toggle} onClick={() => {setSBVisible(!sbVisible); visChange(!sbVisible)}}>
+                {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
+            </div>
         </div>
     )
 }
@@ -30,6 +38,7 @@ export function OrganizationsBar({ project, callback }){
 export function AddOrganization({ project }){
     const { setProjectDetails } = useProjects();
     const [projectOrgs, setProjectOrgs] = useState([]);
+    const [errors, setErrors] = useState([]);
 
     useEffect(() => {
         if(project?.organizations.length > 0){
@@ -61,18 +70,37 @@ export function AddOrganization({ project }){
                             : p
                         )
                     );
-                    setProjectOrgs(prev => [...prev, org.id])
+                    setProjectOrgs(prev => [...prev, org.id]);
+                    setErrors([]);
                 }
                 else{
                     const data = await response.json();
-                    console.log(data);
+                    let serverResponse = [];
+                    for (const field in data) {
+                        if (Array.isArray(data[field])) {
+                            data[field].forEach(msg => {
+                                serverResponse.push(`${field}: ${msg}`);
+                            });
+                        } 
+                        else {
+                        serverResponse.push(`${field}: ${data[field]}`);
+                        }
+                    }
+                    setErrors(serverResponse);
                 }
             }
             catch(err){
-                console.error('Could not record indicator: ', err)
+                console.error('Failed to remove indicator:', err);
+                setErrors(['Something went wrong. Please try again later.'])
             }
     }
-    return <OrganizationIndex blacklist={projectOrgs} callback={(org) => addOrganization(org)} />
+    return (
+        <div>
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <OrganizationIndex blacklist={projectOrgs} callback={(org) => addOrganization(org)} />
+        </div>
+    )
+    
 }
 
 export function OrganizationTasks({ project, organization }){
@@ -118,7 +146,18 @@ export function OrganizationTasks({ project, organization }){
                 setReload(prev => prev + 1);
             }
             else{
-                console.log(returnData);
+                let serverResponse = [];
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                            serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                    serverResponse.push(`${field}: ${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
             }
         }
         catch(err){

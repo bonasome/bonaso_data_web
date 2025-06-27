@@ -1,10 +1,12 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
+import { FaSearch } from "react-icons/fa";
 
-export default function IndexViewWrapper({ children, onSearchChange, onPageChange, entries={entries} }){
+export default function IndexViewWrapper({ children, onSearchChange, onPageChange, entries={entries}, filter=null }){
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    
     useEffect(() => {
         const pages = Math.ceil(entries / 20) == 0 ? 1 : Math.ceil(entries / 20);
         setTotalPages(pages)
@@ -25,7 +27,8 @@ export default function IndexViewWrapper({ children, onSearchChange, onPageChang
         <div >
             <div>
                 <input type='text' onChange={(e) => setSearch(e.target.value)}/>
-                <button onClick={handleSearch}>Search</button>
+                <button onClick={handleSearch}><FaSearch /> Search</button>
+                {filter && filter}
             </div>
             { children }
             <div>

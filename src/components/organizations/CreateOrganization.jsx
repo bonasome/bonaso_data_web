@@ -7,6 +7,9 @@ import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useOrganizations } from '../../contexts/OrganizationsContext';
 import OrganizationForm from './OrganizationForm';
+import styles from '../reuseables/dynamicForm.module.css';
+import organizationConfig from './organizationConfig';
+
 
 export default function CreateOrganization(){
     const navigate = useNavigate();
@@ -20,7 +23,7 @@ export default function CreateOrganization(){
 
     useEffect(() => {
         const getOrganizations = async () => {
-            if(Object.keys(organizations).length != 0){
+            if(typeof organizations === Object && Object.keys(organizations).length != 0){
                 const ids = organizations.map((o) => o.id);
                 const names= organizations.map((o)=> o.name);
                 setOrgIDs(ids);
@@ -30,9 +33,10 @@ export default function CreateOrganization(){
             }
             else{
                 try{
-                    console.log('fetching model info...')
+                    console.log('fetching organizations...')
                     const response = await fetchWithAuth(`/api/organizations/`);
                     const data = await response.json();
+                    console.log(data)
                     if(organizations.length > 0){
                         const ids = organizations.map((o) => o.id);
                         const names= organizations.map((o)=> o.name);
@@ -49,25 +53,11 @@ export default function CreateOrganization(){
             }
         }
         getOrganizations();
-    }, [organizations])
+    }, [])
 
     
     useEffect(() => {
-        setFormConfig([
-            {name: 'name', label: 'Organization Name', type: 'text', required: true},
-            {name: 'parent_organization_id', label: 'Parent Organization', type: 'select', label: 'Parent Organization',  required: false, 
-                constructors: {
-                    values: orgIDs,
-                    labels: orgNames,
-                    multiple: false,
-            }},
-            {name: 'office_address', label: 'Office Address', type: 'text', required: false},
-            {name: 'office_email', label: 'Office Email', type: 'email', required: false},
-            {name: 'office_phone', label:'Office Phone Number', type: 'text', required: false},
-            {name: 'executive_director', label: 'Executive Director Name', type: 'text', required: false},
-            {name: 'ed_email', label:"Executive Director's Email", type: 'email', required: false},
-            {name: 'ed_phone', label: "Executive Director's Phone Number", type: 'text', required: false},
-        ])
+        setFormConfig(organizationConfig(orgIDs, orgNames))
     }, [orgNames, orgIDs])
 
     const handleCancel = () => {
@@ -109,6 +99,7 @@ export default function CreateOrganization(){
             }
         }
         catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record organization: ', err)
         }
     }
@@ -116,7 +107,7 @@ export default function CreateOrganization(){
     if(loading) return <Loading />
 
     return(
-        <div>
+        <div className={styles.container}>
             <h1>New Organization</h1>
             <OrganizationForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
         </div>

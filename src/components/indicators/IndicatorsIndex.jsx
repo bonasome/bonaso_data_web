@@ -45,7 +45,7 @@ function IndicatorCard({ indicator, callback = null }) {
             className={expanded ? styles.expandedCard : styles.card}
             onClick={handleClick}
         >
-            <h2>{indicator.code}: {indicator.name}</h2>
+            <Link to={`/indicators/${indicator.id}`} style={{display:'flex', width:"fit-content"}}><h2>{indicator.code}: {indicator.name}</h2></Link>
             {callback && (
                 <button onClick={(e) => { e.stopPropagation(); callback(indicator); }}>
                     Add to Project
@@ -60,6 +60,9 @@ function IndicatorCard({ indicator, callback = null }) {
                     )}
                     <Link to={`/indicators/${indicator.id}`}>
                         <button onClick={(e) => e.stopPropagation()}>View Details</button>
+                    </Link>
+                    <Link to={`/indicators/${indicator.id}/edit`}>
+                        <button onClick={(e) => e.stopPropagation()}>Edit Details</button>
                     </Link>
                 </>
             )}
@@ -117,10 +120,9 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Indicators' : 'My Indicators'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
+            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries} filter={<IndicatorFilters indicators={indicators} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
-                <Link to='/indicators/new'><button>Create a New Indicator</button></Link>}
-                <IndicatorFilters indicators={indicators} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>
+                <Link to='/indicators/new'><button>Create a New Indicator</button></Link>} 
                 {visibleIndicators?.length === 0 ? 
                     <p>No indicators match your criteria.</p> :
                     visibleIndicators.map(ind => (

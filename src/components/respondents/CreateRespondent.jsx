@@ -6,6 +6,10 @@ import Loading from '../reuseables/Loading';
 import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useRespondents } from '../../contexts/RespondentsContext';
+import respondentsConfig from './respondentsConfig';
+import { Link } from 'react-router-dom';
+import styles from '../reuseables/dynamicForm.module.css';
+import modalStyles from '../../styles/modals.module.css';
 
 export default function CreateRespondent(){
     const navigate = useNavigate();
@@ -13,7 +17,8 @@ export default function CreateRespondent(){
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
-
+    const [existing, setExisting] = useState(null)
+    const [showModal, setShowModal] = useState(true)
     useEffect(() => {
         const getRespondentMeta = async () => {
             console.log(respondentsMeta)
@@ -39,47 +44,7 @@ export default function CreateRespondent(){
     }, [respondentsMeta, setRespondentsMeta])
 
     useEffect(() => {
-        setFormConfig([
-            //always show
-            {name: 'is_anonymous', label: 'Does this respondent want to remain anonymous', type: 'checkbox', required: true, switchpath: true},
-            
-            //show if not anonymous
-
-             // Conditionally include 'id_no'
-            { name: 'id_no', label: 'ID/Passport Number', type: 'text', required: true, hideonpath: true},
-            {name: 'first_name', label: 'First Name', type: 'text', required: true, hideonpath: true},
-            {name: 'last_name', label: 'Surname', type: 'text', required: true, hideonpath: true},
-
-            //always show
-            {name: 'sex', label: 'Sex', type: 'select', required: true, constructors: {
-                values: respondentsMeta.sexs,
-                multiple: false,
-                labels: respondentsMeta.sex_labels
-            }},
-            //show ONLY if anonymous
-            {name: 'age_range', label: 'Age Range', type: 'select', required: true, showonpath:true, constructors: {
-                values: respondentsMeta.age_ranges,
-                multiple: false, showonpath: true,
-                labels: respondentsMeta.age_range_labels
-            }},
-            //show if not anonymous
-            {name: 'dob', label: 'Date of Birth', type: 'date', required: true, hideonpath: true},
-            {name: 'ward', label: 'Ward', type: 'text', required: false, hideonpath: true},
-
-            //always show
-            {name: 'village', label: 'Village', type: 'text', required: true},
-            {name: 'district', label: 'District', type: 'select', required: true, constructors: {
-                values: respondentsMeta.districts,
-                multiple: false,
-                labels: respondentsMeta.district_labels
-            }},
-            {name: 'citizenship', label: 'Citizenship', type: 'text', value:'Motswana', required: true },
-            
-            //show if not anonymous
-            {name: 'email', label: 'Email', type: 'email', required: false, hideonpath: true},
-            {name: 'phone_number', label: 'Phone Number', type: 'number', required: false, hideonpath: true},
-        
-        ])
+        setFormConfig(respondentsConfig(respondentsMeta))
     }, [respondentsMeta])
 
     const handleCancel = () => {
@@ -128,16 +93,21 @@ export default function CreateRespondent(){
             else{
                 const serverResponse = []
                 for (const field in returnData) {
+                    if(field == 'existing_id'){
+                        setExisting(returnData[field])
+                        continue
+                    }
                     if (Array.isArray(returnData[field])) {
                         returnData[field].forEach(msg => {
                         serverResponse.push(`${field}: ${msg}`);
                         });
                     } 
                     else {
-                        serverResponse.push(`${field}: ${returnData[field]}`);
+                        serverResponse.push(`${returnData[field]}`);
                     }
                 }
                 setErrors(serverResponse)
+    
             }
         }
         catch(err){
@@ -146,12 +116,44 @@ export default function CreateRespondent(){
         }
     }
 
+    function DataModal(){
+        return(
+            <div className={modalStyles.modal} >
+                <h3>Data Privacy Message</h3>
+                <p>
+                    Before you collect any information about this respondent, please explain to them
+                    what data you are collecting and how it will be used. If you need more information,
+                    you may visit our data policy <Link to='/policy'><b>here</b></Link>
+                </p>
+                <b>Before recording any personal
+                    information about the respondent, make sure you have their express consent.
+                </b>
+                <p>
+                    If this respondent does not consent to giving their information, please
+                    mark them as anonymous.
+                </p>
+                <button onClick ={() => setShowModal(false)}>Got it</button>
+                <></>
+            </div>
+        )
+    }
+
+
+
     if(loading) return <Loading />
 
     return(
-        <div>
+        <div className={styles.container}>
+            {showModal && <DataModal />}
             <h1>Creating a New Respondent</h1>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {errors.length != 0 &&
+                <div className={errorStyles.errors}>
+                    <ul>{errors.map((msg)=>
+                        <li key={msg}>{msg}</li>)}
+                    </ul>
+                    {existing && <Link to={`/respondents/${existing}`}> <p>Click here to view their profile.</p></Link>}
+                </div>}
+            
             <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors}/>
         </div>
     )

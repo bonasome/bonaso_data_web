@@ -9,6 +9,8 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
+import styles from './organizationDetail.module.css';
+import { IoMdReturnLeft } from "react-icons/io";
 
 export default function OrganizationDetail(){
     const { user } = useAuth();
@@ -16,6 +18,7 @@ export default function OrganizationDetail(){
     const[loading, setLoading] = useState(true)
     const { organizationDetails, setOrganizationDetails } = useOrganizations();
     const[activeOrganization, setActiveOrganization] = useState(null);
+    const [projects, setProjects] = useState([]);
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
 
@@ -46,6 +49,26 @@ export default function OrganizationDetail(){
         };
         getOrganizationDetails();
     }, [id, organizationDetails, setOrganizationDetails])
+
+    useEffect(() => {
+            const getProjects = async () => {
+                if(!activeOrganization) return;
+                try {
+                    console.log('fetching projects...');
+                    const response = await fetchWithAuth(`/api/manage/projects/?organizations=${activeOrganization.id}`);
+                    const data = await response.json();
+                    setProjects(data.results);
+                    setLoading(false);
+                    console.log(data)
+                } 
+                catch (err) {
+                    setErrors(['Something went wrong. Please try again later.'])
+                    console.error('Failed to fetch indicator: ', err);
+                    setLoading(false)
+                } 
+            };
+            getProjects();
+        }, [activeOrganization])
 
     const deleteOrganization = async() => {
         try {
@@ -89,23 +112,57 @@ export default function OrganizationDetail(){
 
     if (loading) return <Loading />
     return(
-        <div>
+        <div className={styles.container}>
             {del && <ConfirmDelete name={activeOrganization.name} statusWarning={'We advise against deleting organizations. If this organization has any active users associated with it, you will not be able to delete it.'} onConfirm={() => deleteOrganization()} onCancel={() => setDel(false)} />}
-            <h1>{activeOrganization.name}</h1>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            { activeOrganization.parent_organization && <p>'Parent: {activeOrganization.parent_organization.name} </p>}
-            {activeOrganization?.child_organizations.length > 0 && 
-                <div><p>Child Organizations</p>
-                    <ul>
-                        {activeOrganization.child_organizations.map((o) => (<li key={o.id}>{o.name}</li>))} 
-                    </ul>
-                </div>}
-            <i>{activeOrganization.status}</i>
-            <p>
-                You got me, there's not much here yet. Eventually this will have some information about targets/performance.
-            </p>
-            <Link to={`/organizations/${id}/edit`}><button>Edit Details</button></Link>
-            {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Organization</button>}
+            <Link to={'/organizations'} className={styles.return}>
+                <IoMdReturnLeft className={styles.returnIcon} />
+                <p>Return to organizations overview</p>   
+            </Link>
+            <div className={styles.section}>
+                <h1>{activeOrganization.name}</h1>
+                {activeOrganization.full_name && <i>Full Name: {activeOrganization.full_name}</i>}
+                {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                {activeOrganization.parent_organization && <h2>Parent</h2>}
+                {activeOrganization.parent_organization && <Link to={`/organizations/${activeOrganization.parent_organization.id}`}>{activeOrganization.parent_organization.name}</Link>}
+                {activeOrganization?.child_organizations.length > 0 && 
+                    <div><h3>Child Organizations</h3>
+                        <ul>
+                            {activeOrganization.child_organizations.map((o) => (<li key={o.id}> <Link to={`/organizations/${o.id}`}>  {o.name} </Link></li>))} 
+                        </ul>
+                    </div>}
+                <div style={{ paddingTop: 15 }}>
+                    <Link to={`/organizations/${id}/edit`}><button>Edit Details</button></Link>
+                    {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Organization</button>}
+                </div>
+            </div>
+            <div className={styles.section}>
+                <h2>Projects</h2>
+                {projects.length > 0 && projects.map((p) =>(
+                    <div className={styles.card}>
+                        <Link to={`/projects/${p.id}`}><h3>{p.name}</h3></Link>
+                    </div>
+                ))}
+                {projects.length === 0 && <p><i>This indicator is not in any projects.</i></p>}
+            </div>
+
+            <div className={styles.section}>
+                <h2>Details</h2>
+                <div className={styles.card}>
+                    <h3>Address</h3>
+                    <p>{activeOrganization.office_address ? activeOrganization.office_address : 'No address on record'}</p>
+                </div>
+                <div className={styles.card}>
+                    <h3>Office Contacts</h3>
+                    <p>Phone: {activeOrganization.office_phone ? activeOrganization.office_phone : 'No phone number on record'}</p>
+                    <p>Email: {activeOrganization.office_email ? activeOrganization.office_email : 'No email on record'}</p>
+                </div>
+                <div className={styles.card}>
+                    <h3>{activeOrganization.executive_director ? activeOrganization.executive_director : 'No Executive Director on Record'}</h3>
+                    <p>Phone: {activeOrganization.ed_phone ? activeOrganization.ed_phone : 'No phone number on record'}</p>
+                    <p>Email: {activeOrganization.ed_email ? activeOrganization.ed_email : 'No email on record'}</p>
+                </div>
+            </div>
+            <div className={styles.spacer}></div>
         </div>
     )
 }

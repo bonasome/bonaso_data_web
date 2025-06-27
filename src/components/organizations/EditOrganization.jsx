@@ -7,6 +7,8 @@ import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useOrganizations } from '../../contexts/OrganizationsContext';
 import { useParams } from 'react-router-dom';
 import OrganizationForm from './OrganizationForm';
+import styles from '../reuseables/dynamicForm.module.css';
+import organizationConfig from './organizationConfig';
 
 export default function EditOrganization(){
     const navigate = useNavigate();
@@ -21,7 +23,7 @@ export default function EditOrganization(){
 
     useEffect(() => {
         const getOrganizations = async () => {
-            if(Object.keys(organizations).length != 0){
+            if(typeof organizations === Object && Object.keys(organizations).length != 0){
                 const ids = organizations.filter(o => o.id.toString() != id.toString()).map((o) => o.id);
                 const names= organizations.filter(o => o.id.toString() != id.toString()).map((o)=> o.name);
                 setOrgIDs(ids);
@@ -52,7 +54,9 @@ export default function EditOrganization(){
         
         const getOrganizationDetails = async () => {
             setLoading(true);
-            const found = organizationDetails.find(o => o.id.toString() === id.toString());
+            const found = organizationDetails.find(
+                (o) => o?.id?.toString?.() === id?.toString?.()
+            );
             if (found) {
                 setExisting(found);
                 setLoading(false);
@@ -79,21 +83,7 @@ export default function EditOrganization(){
 
     useEffect(() => {
         console.log(existing)
-        setFormConfig([
-            {name: 'name', label: 'Organization Name', type: 'text', required: true, value: existing.name ? existing.name : ''},
-            {name: 'parent_organization_id', label: 'Parent Organization', type: 'select', required: false, value: existing.parent_organization ? existing.parent_organization.id : '', 
-                constructors: {
-                    values: orgIDs,
-                    labels: orgNames,
-                    multiple: false,
-            }},
-            {name: 'office_address', label: 'Office Address', type: 'text', required: false, value: existing.office_address ? existing.office_address : ''},
-            {name: 'office_email', label: 'Office Email', type: 'email', required: false, value: existing.office_email ? existing.office_email : ''},
-            {name: 'office_phone',label:'Office Phone Number', type: 'text', required: false, value: existing.office_phone ? existing.office_phone : ''},
-            {name: 'executive_director', label: 'Executive Director Name', type: 'text', required: false, value: existing.executive_director ? existing.executive_director : ''},
-            {name: 'ed_email', label:"Executive Director's Email", type: 'email', required: false, value: existing.ed_email ? existing.ed_email : ''},
-            {name: 'ed_phone', label: "Executive Director's Phone Number", type: 'text', required: false, value: existing.ed_phone ? existing.ed_phone : ''},
-        ])
+        setFormConfig(organizationConfig(orgIDs, orgNames, existing))
     }, [orgNames, orgIDs, existing])
 
     const handleCancel = () => {
@@ -138,7 +128,7 @@ export default function EditOrganization(){
     if(loading) return <Loading />
 
     return(
-        <div>
+        <div className={styles.container}>
             <h1>Editing Details for Organization {organizationDetails.name}</h1>
             <OrganizationForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
         </div>

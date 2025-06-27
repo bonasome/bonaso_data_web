@@ -15,7 +15,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
     const [comments, setComments] = useState({});
     const [active, setActive] = useState(false);
     const [added, setAdded] = useState([]);
-    const[ allowedSubcats, setAllowedSubcats] = useState([]);
+    const[ allowedSubcats, setAllowedSubcats] = useState({});
     const [numberModalActive, setNumberModalActive] = useState(false);
     const [commentsModalActive, setCommentsModalActive] = useState(false);
     const [modalTask, setModalTask] = useState(null);
@@ -32,7 +32,6 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             setComments(prev => ({...prev,[task.id]: localComment}))
             setCommentsModalActive(false);
         }
-        console.log(task)
         if(!task) return<></>
         return(
             <div className={modalStyles.modal}>
@@ -79,22 +78,16 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             </div>
         )
     }
-    function SubcategoryModal({task}){
+    function SubcategoryModal({ task }) {
         const [modalErrors, setModalErrors] = useState('');
+        const [localSubcats, setLocalSubcats] = useState([]);
+
         const handleCheckbox = (checked, value) => {
-            setSubcats(prev => {
-                const currentList = prev[task.id] || [];
-
-                const updatedList = checked
-                ? [...currentList, value]
-                : currentList.filter(v => v !== value);
-
-                return {
-                    ...prev,
-                    [task.id]: updatedList,
-                };
-            });
+            setLocalSubcats(prev =>
+                checked ? [...prev, value] : prev.filter(v => v !== value)
+            );
         };
+
         const cancel = () => {
             setAdded(prev => {
                 const updated = prev.filter(t => t.id !== task.id);
@@ -102,27 +95,42 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                 return updated;
             });
             setSubcatModalActive(false);
-        }
-        const closeWindow = () => {
-            if(subcats[task.id].length === 0){
-                setModalErrors('This field is required.');
-                return;
-            }
-            setSubcatModalActive(false);
-        }
+        };
 
-        return(
+        const closeWindow = () => {
+            setSubcats(prev => ({...prev, [task.id]: localSubcats}));
+            setSubcatModalActive(false);
+        };
+
+        const taskSubcats = allowedSubcats?.[task.id] || task.indicator.subcategories.map(c => c.name);
+
+        return (
             <div className={modalStyles.modal}>
                 <h2>Additional Information Required</h2>
-                {modalErrors && <div role='alert' className={errorStyles.errors} style={{width: '30vw'}}><p>{modalErrors}</p></div>}
-                <p>Please select all relevent subcategories related to this interaction.</p>
-                {task.indicator.subcategories.map((cat) => (<div key={cat.name} className={modalStyles.checkbox}> <Checkbox label={cat.name} checked={subcats[task.id]?.includes(cat.name)} name={cat.name} callback={(checked) => handleCheckbox(checked, cat.name)}/></div> ))}
+                {modalErrors && (
+                    <div role='alert' className={errorStyles.errors} style={{ width: '30vw' }}>
+                        <p>{modalErrors}</p>
+                    </div>
+                )}
+                <p>Please select all relevant subcategories related to {task.indicator.name}.</p>
+                {taskSubcats.map((cat) => (
+                    <div key={cat} className={modalStyles.checkbox}>
+                        <Checkbox key={cat}
+                            label={cat}
+                            checked={localSubcats.includes(cat)}
+                            name={cat}
+                            callback={(checked) => handleCheckbox(checked, cat)}
+                        />
+                    </div>
+                ))}
                 <div>
-                    <button onClick={() => closeWindow()}>Confirm Choices</button>
-                    <button onClick={() => cancel()}>Cancel</button>
+                    <button disabled={localSubcats.length === 0} onClick={closeWindow}>
+                        Confirm Choices
+                    </button>
+                    <button onClick={cancel}>Cancel</button>
                 </div>
             </div>
-        )
+        );
     }
 
     const handleDateChange = (e) => {
@@ -134,7 +142,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
         setWarnings([])
 
     }
-    const handleDrop = (e) => {
+    const handleDrop = async (e) => {
         let dropWarnings = [];
         if(subcatModalActive || numberModalActive){
             dropWarnings.push(`Please fill out and close the modal form before adding another task.`);
@@ -150,33 +158,43 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             return;
         }
 
-        addedIDs.push(task.id)
-        setAdded(prev => [...prev, task])
-        onUpdate(addedIDs);
-
         if (task?.indicator?.prerequisite) {
             const prereq = task.indicator.prerequisite;
             const requiredTask = tasks.find(t => t.indicator.id === prereq.id);
             let isValid = false;
-            if (addedIDs.includes(requiredTask?.id?.toString())) {
+            const inBatch = added.filter(t => t.indicator.id.toString() === requiredTask?.indicator.id.toString())
+            if (inBatch.length > 0) {
                 isValid = true;
+                const interSubcats = subcats[inBatch[0].id]
+                setAllowedSubcats(prev=> ({...prev, [task.id]: interSubcats}));
             } 
             else if (interactions?.length > 0) {
-                const validPastInt = interactions.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
-                if (validPastInt && validPastInt.date <= interactionDate) {
-                    isValid = true;
-                    if (validPastInt?.subcategories) {
-                        const interSubcats = validPastInt.subcategories.map(t => t.name);
-                        setAllowedSubcats(interSubcats);
+                const response = await fetchWithAuth(`/api/record/interactions/?respondent=${interactions[0].respondent}&task_indicator=${prereq.id}&before=${interactionDate}`);
+                const data = await response.json()
+                console.log(data)
+                if(data.results.length > 0){
+                    const validPastInt = interactions.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
+                    console.log(validPastInt)
+                    if (validPastInt && validPastInt.interaction_date <= interactionDate) {
+                        isValid = true;
+                        if (validPastInt?.subcategories) {
+                            const interSubcats = validPastInt.subcategories.map(t => t.name);
+                            setAllowedSubcats(prev=> ({...prev, [task.id]: interSubcats}));
+                        }
                     }
                 }
             }
             if (!isValid) {
                 dropWarnings.push(
-                    `This indicator requires this respondent to have been ${prereq.name}, however, we could not find a prior record of this interaction.`
+                    `This indicator requires this respondent to have been ${prereq.name}, however, we could not find a prior record of this interaction (HINT: If you haven't already, please set an interaciton date so that we can verify that the prerequisite interaction took place before or on the same date as this one.).`
                 );
+                setWarnings(dropWarnings);
+                return;
             }
         }
+        addedIDs.push(task.id)
+        setAdded(prev => [...prev, task])
+        onUpdate(addedIDs);
         if(interactionDate=='' || isNaN(Date.parse(interactionDate)) || new Date(interactionDate) > new Date()){
             dropWarnings.push('Interaction date must be a valid date and may not be in the future.');
         }
@@ -259,21 +277,21 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
                         returnData[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
+                        serverResponse.push(`${msg}`);
                         });
                     } 
                     else {
-                        serverResponse.push(`${field}: ${returnData[field]}`);
+                        serverResponse.push(`${returnData[field]}`);
                     }
                 }
                 setErrors(serverResponse)
+                console.log(serverResponse)
             }
         }
         catch(err){
             setErrors(['Something went wrong. Please try again later.'])
-            console.error('Could not record respondent: ', err)
+            console.error('Could not record interactions: ', err)
         }
-        setErrors(submissionErrors);
     }
     const removeItem = (task) => {
         setAdded(prev => {
@@ -292,15 +310,16 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                     {subcatModalActive && <SubcategoryModal task={modalTask} />}
                 </>
             )}
-            <h3>Adding Tasks to Interaction</h3>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {warnings.length != 0 && <div className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <h3>New Interaction</h3>
+            {errors.length != 0 && <div role='alert' className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {warnings.length != 0 && <div role='alert' className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {!active && <i>Start dragging and dropping tasks to begin.</i>}
-            {active && <input type='date' onChange={(e) => handleDateChange(e)}/>}
+            {active && <label htmlFor="interaction_date">Interaction Date</label>}
+            {active && <input id='interaction_date' type='date' onChange={(e) => handleDateChange(e)}/>}
             <div className={styles.dropBox} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray' }}>
                 {added.length === 0 && <p>Drag an indicator from the sidebar to start.</p>}
                 {added.length > 0 && added.map((task) => (
-                    <div className={styles.row}>
+                    <div className={styles.row} key={task.id}>
                         <div>
                             <p><b>{task.indicator.code + ': '} {task.indicator.name}</b></p>
                             {number[task.id] && <li>{number[task.id]}</li>}

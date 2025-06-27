@@ -13,10 +13,10 @@ export default function ProjectFilters({ onFilterChange }){
     const { projectsMeta, setProjectsMeta } = useProjects();
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
-        start: null,
-        end: null,
-        client:null,
-        status: null,
+        start: '',
+        end: '',
+        client: '',
+        status: '',
     })
     const [clientIDs, setClientIDs] = useState([]);
     const [clientNames, setClientNames] = useState([]);
@@ -91,9 +91,9 @@ export default function ProjectFilters({ onFilterChange }){
                     {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                     <div className={styles.range}>
                         <label htmlFor='lowDate'>Begins after:</label>
-                        <input id='lowDate' type='date' onChange={(e) => setFilters(prev => ({...prev, start: e.target.value}))} />
+                        <input id='lowDate' type='date' value={filters.start} onChange={(e) => setFilters(prev => ({...prev, start: e.target.value}))} />
                         <label htmlFor='highDate'>Ends before:</label>
-                        <input id='highDate' type='date' onChange={(e) => setFilters(prev => ({...prev, end: e.target.value}))} />
+                        <input id='highDate' type='date' value={filters.end} onChange={(e) => setFilters(prev => ({...prev, end: e.target.value}))} />
                     </div>
                     {user.role === 'admin' && (
                         <SimpleSelect

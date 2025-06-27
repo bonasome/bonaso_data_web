@@ -12,7 +12,7 @@ export default function BatchRecord(){
     const [organizations, setOrganizations] = useState([]);
     const [file, setFile] = useState(null);
     const [selectTools, setSelectTools] = useState({})
-    const [targetOrg, setTargetOrg] = useState(user.organization);
+    const [targetOrg, setTargetOrg] = useState('');
     const [targetProject, setTargetProject] = useState('');
     const [loading, setLoading] = useState(true)
     const [warnings, setWarnings] = useState([]);
@@ -70,6 +70,17 @@ export default function BatchRecord(){
     const handleClick = async() => {
         setWarnings([]);
         setErrors([]);
+        let getErrors = [];
+        if(targetProject === ''){
+            getErrors.push('Please select a project.')
+        }
+        if(targetOrg === ''){
+            getErrors.push('Please select an organization.')
+        }
+        if(getErrors.length > 0){
+            setErrors(getErrors)
+            return;
+        }
         setGettingFile(true);
         try{
             console.log('fetching template...')
@@ -90,7 +101,8 @@ export default function BatchRecord(){
             }
         }
         catch(err){
-            console.error('Failed to fetch projects: ', err);
+            setErrors(['Something went wrong, please try again.'])
+            console.error('Failed to upload file: ', err);
         }
         setGettingFile(false);
     }
@@ -130,15 +142,15 @@ export default function BatchRecord(){
     return(
         <div className={styles.fileUpload}>
             <h1>Batch Uploading</h1>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {warnings.length != 0 && <div className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {errors.length != 0 && <div role='alert' className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {warnings.length != 0 && <div role='alert' className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {ok && <div className={errorStyles.success}><p>Upload successful!</p></div>}
             <div className={styles.template}>
                 <i>1. Select your organization and the project to get a ready to use template for recording data. There are directions and examples in the template for your reference.</i>
                 {selectTools?.orgs && <SimpleSelect name={'organization'} label={'Select an Organization'} 
                     optionValues={selectTools.orgs.ids} optionLabels={selectTools.orgs.names}
                     callback={(val)=>setTargetOrg(val)} />}
-                {selectTools?.projects && <SimpleSelect name={'project'} label={'Select an Project'} 
+                {selectTools?.projects && <SimpleSelect name={'project'} label={'Select a Project'} 
                     optionValues={selectTools.projects.ids} optionLabels={selectTools.projects.names}
                     callback={(val)=>setTargetProject(val)} />}
                 <button onClick={() => handleClick()} disabled={gettingFile}>Get my file!</button>
@@ -146,8 +158,9 @@ export default function BatchRecord(){
             
             <div className={styles.upload}>
                 <i>2. Upload your completed file. If there are any issues, you will be informed and can try to upload again. </i>
-                <form onSubmit={handleSubmit}>
-                    <input type="file" onChange={handleChange} />
+                <form onSubmit={handleSubmit}  noValidate={true}>
+                    <label htmlFor="upload_file">Upload file</label>
+                    <input id="upload_file" type="file" onChange={handleChange} />
                     <button type="submit">Upload</button>
                     <button type="button">Clear</button>
                 </form>

@@ -45,6 +45,9 @@ import CreateIndicator from '../components/indicators/CreateIndicator';
 import EditIndicator from '../components/indicators/EditIndicator';
 import IndicatorDetail from '../components/indicators/IndicatorDetail';
 
+import Tutorial from '../components/tutorial/Tutorial';
+import NotFound from '../components/NotFound';
+
 import ProfileLayout from '../layouts/ProfileLayout';
 import Profile from '../components/users/Profile';
 import UsersIndex from '../components/users/UsersIndex';
@@ -257,6 +260,22 @@ function Router() {
                 }/>
         </Route>
         
+        <Route 
+            path='/help' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <ProfileLayout />
+                </RedirectIfNotAuthenticated>
+            }
+        >
+            <Route index element={
+                    <Tutorial />
+                }/>
+        </Route>
+
+
+
         <Route
             path='/viewer'
             element={
@@ -289,6 +308,16 @@ function Router() {
                 </RedirectIfNotAuthenticated>
             }
             />
+        </Route>
+        <Route 
+            path='*' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <NotFound />
+                </RedirectIfNotAuthenticated>
+            }
+        >
         </Route>
         </Routes>
     );

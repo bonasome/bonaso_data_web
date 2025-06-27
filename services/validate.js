@@ -5,6 +5,7 @@ export default function validate (target, phone=false) {
     const type = target.type || 'text'
     const max = target.max || null
     let field = name.charAt(0).toUpperCase() + name.slice(1);
+    field = field.replace('_', ' ')
 
     let errors = []
     if(required == true || required == 'true'){

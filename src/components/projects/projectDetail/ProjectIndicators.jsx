@@ -7,8 +7,9 @@ import IndicatorsIndex from '../../indicators/IndicatorsIndex';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import styles from './projectDetail.module.css';
 import errorStyles from '../../../styles/errors.module.css';
-
-
+import { BiSolidShow } from "react-icons/bi";
+import { BiSolidHide } from "react-icons/bi";
+import IndicatorChart from '../../reuseables/charts/IndicatorChart';
 
 function IndicatorCard({ indicator, callback }){
     const handleDragStart = (e) => {
@@ -22,16 +23,23 @@ function IndicatorCard({ indicator, callback }){
     )
 }
 
-export function IndicatorsBar({ project, callback }){
+export function IndicatorsBar({ project, callback, visChange }){
+    const { user } = useAuth();
+    const[sbVisible, setSBVisible] = useState(true)
     return(
-        <div  className={styles.sidebar}>
-            <h2>Project Indicators</h2>
-            <button onClick={() => callback('add-indicator')}>Add an Indicator</button>
-            {project?.indicators.length > 0 ? project.indicators.map((ind) => (
-                <IndicatorCard key={ind.id} indicator={ind} callback={callback}/>
-            )) :
-            <p>This project doesn't have any indicators yet.</p>
-            }
+        <div  className={styles.sidebarRight}>
+            <div className={styles.toggle} onClick={() => {setSBVisible(!sbVisible); visChange(!sbVisible)}}>
+                {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
+            </div>
+            {sbVisible && <div>
+                <h2>Project Indicators</h2>
+                {user.role ==='admin' && <button onClick={() => callback('add-indicator')}>Add an Indicator</button>}
+                {project?.indicators.length > 0 ? project.indicators.map((ind) => (
+                    <IndicatorCard key={ind.id} indicator={ind} callback={callback}/>
+                )) :
+                <p>This project doesn't have any indicators yet.</p>
+                }
+            </div>}
         </div>
     )
 }
@@ -40,6 +48,8 @@ export function IndicatorsBar({ project, callback }){
 export function AddIndicator({ project }){
     const { setProjectDetails } = useProjects();
     const [projectIndicators, setProjectIndicators] = useState([]);
+    const [errors, setErrors] = useState([]);
+
     console.log(project)
     useEffect(() => {
         if(project?.indicators.length > 0){
@@ -72,17 +82,35 @@ export function AddIndicator({ project }){
                     )
                 );
                 setProjectIndicators(prev => [...prev, ind.id]);
+                setErrors([]);
             }
             else{
                 const data = await response.json();
-                console.log(data);
+                let serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                        data[field].forEach(msg => {
+                            serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                    serverResponse.push(`${field}: ${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
             }
         }
         catch(err){
-            console.error('Could not record indicator: ', err)
+            console.error('Failed to remove indicator:', err);
+            setErrors(['Something went wrong. Please try again later.'])
         }
     }
-    return <IndicatorsIndex blacklist={projectIndicators} callback={(ind) => addIndicator(ind)} />
+    return (
+        <div>
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <IndicatorsIndex blacklist={projectIndicators} callback={(ind) => addIndicator(ind)} />
+        </div>
+    )
 }
 
 
@@ -153,7 +181,7 @@ export function ViewIndicator({ project, indicator, onRemove }){
             <h2>{indicator.code}: {indicator.name}</h2>
             <h5>In project {project.name}</h5>
             <p>{indicator.description}</p>
-            <p>Eventually, we'll add data related to the indicator based on interactions linked to the project.org</p>
+            <IndicatorChart indicator={indicator}/>
             {user.role =='admin' && <p>Admins will see a component here related to general indicators</p>}
             {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Remove Indicator From Project</button>}
             {['meofficer, manager'].includes(user.role) && <p>Organizations will see a component here related to their tasks</p>}

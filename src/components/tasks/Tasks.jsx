@@ -187,6 +187,7 @@ export default function Tasks({ callback, update=null, target=false, organizatio
             {success && <div className={errorStyles.success}>{success}</div>}
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <h2>Tasks</h2>
+            <p><i>Search your tasks by name, organization, or project.</i></p>
             <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
             {tasks.length > 0 ? filteredTasks.map((task) => (
                 <TaskCard task={task} key={task.id} target={target} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)}/>

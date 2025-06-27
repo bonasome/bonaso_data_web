@@ -7,7 +7,7 @@ import { useIndicators } from '../../contexts/IndicatorsContext';
 import IndicatorForm from './IndicatorForm';
 import { useParams } from 'react-router-dom';
 import indicatorConfig from './indicatorConfig';
-
+import styles from '../reuseables/dynamicForm.module.css';
 
 export default function EditIndicator(){
     const navigate = useNavigate();
@@ -23,11 +23,9 @@ export default function EditIndicator(){
     useEffect(() => {
 
         const getIndicatorDetails = async () => {
-            setLoading(true);
             const found = indicatorDetails.find(o => o.id.toString() === id.toString());
             if (found) {
                 setExisting(found);
-                setLoading(false);
                 return;
             }
             else{
@@ -37,11 +35,9 @@ export default function EditIndicator(){
                     const data = await response.json();
                     setIndicatorDetails(prev => [...prev, data]);
                     setExisting(data);
-                    setLoading(false);
                 } 
                 catch (err) {
                     console.error('Failed to fetch indicator: ', err);
-                    setLoading(false);
                 } 
             }
         };
@@ -53,7 +49,6 @@ export default function EditIndicator(){
                 const names= indicators.filter(ind => ind.id.toString() != id.toString()).map((ind)=> ind.name);
                 setIndicatorIDs(ids);
                 setIndicatorNames(names);
-                setLoading(false)
                 return;
             }
             else{
@@ -68,11 +63,9 @@ export default function EditIndicator(){
                         setIndicatorNames(names);
                     }
                     setIndicators(data.results);
-                    setLoading(false)
                 }
                 catch(err){
                     console.error('Failed to fetch indicators: ', err)
-                    setLoading(false)
                 }
             }
         }
@@ -143,12 +136,12 @@ export default function EditIndicator(){
             console.error('Could not record indicator: ', err)
         }
     }
-
+    console.log(existing)
     if(loading) return <Loading />
 
     return(
-        <div>
-            <h1>New Indicator</h1>
+        <div className={styles.container}>
+            <h1>Editing Indicator {existing.code}: {existing.name}</h1>
             <IndicatorForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
         </div>
     )

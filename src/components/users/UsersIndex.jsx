@@ -10,16 +10,22 @@ import { Link } from 'react-router-dom';
 
 function ProfileCard({ profile }) {
     const [expanded, setExpanded] = useState(false);
-
+    const map = {
+        'admin': 'Site Administrator',
+        'meofficer': 'M&E Officer',
+        'manager': 'Manager',
+        'data_collector': 'Data Collector',
+        'view_only': 'Uninitiated',
+    }
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={()=>setExpanded(!expanded)}>
-            <h2>{profile.username}</h2>
+            <Link to={`/profiles/${profile.id}`} style={{display:'flex', width:"fit-content"}}><h2>{profile.first_name} {profile.last_name}</h2></Link>
             {expanded && (
                 <>
-                    {profile?.first_name && profile?.last_name && <p>{profile.first_name}, {profile.last_name}</p>}
-                    <p>{profile?.organization?.name}</p>
-                    <p>{profile?.role}</p>
-                    <Link to={`/profiles/${profile.id}`}><button>Edit Profile</button></Link>
+                    <p>Organization: {profile?.organization?.name}</p>
+                    <p>Role: {map[profile?.role]}</p>
+                    <Link to={`/profiles/${profile.id}`}><button>View Details</button></Link>
+                    <Link to={`/profiles/${profile.id}/edit`}><button>Edit Details</button></Link>
                 </>
             )}
         </div>

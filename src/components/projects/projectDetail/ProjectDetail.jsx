@@ -12,7 +12,7 @@ import { ViewOrganization, OrganizationsBar, AddOrganization, OrganizationTasks 
 import errorStyles from '../../../styles/errors.module.css';
 import { useNavigate } from 'react-router-dom';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
-
+import { IoMdReturnLeft } from "react-icons/io";
 
 function ProjectInfo({ project }){
     const navigate = useNavigate();
@@ -75,7 +75,6 @@ function ProjectInfo({ project }){
             {user.role == 'admin' && <Link to={`/projects/${project.id}/edit`}><button>Edit Details</button></Link>}
             {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)} >Delete</button>}
             <Link to={`/projects/${project.id}/narrative-reports/upload`} ><button>Upload a Narrative Report for this Project</button></Link>
-            <Link to={`/projects/${project.id}/narrative-reports/download`}><button>View Narrative Reports</button></Link>
         </div>
     )
 }
@@ -96,7 +95,15 @@ export default function ProjectDetail(){
     const [activeIndicator, setActiveIndicator] = useState(null);
     const [activeOrganization, setActiveOrganization] = useState(null);
     const [type, setType ] = useState('project');
+    const[leftVisible, setLeftVisible] =useState(true);
+    const [rightVisible, setRightVisible] = useState(true);
 
+    const getGridTemplate = () => {
+        if (leftVisible && rightVisible) return '20% 60% 20%';
+        if (leftVisible && !rightVisible) return '20% 75% 5%';
+        if (!leftVisible && rightVisible) return '5% 75% 20%';
+        return '5% 90% 5%';
+    };
     useEffect(() => {
         const getProjectDetails = async () => {
         const found = projectDetails.find(p => p.id.toString() === id.toString());
@@ -125,13 +132,17 @@ export default function ProjectDetail(){
 
     if(loading) return <Loading /> 
     return(
-        <div className={styles.projectDetails}>
-            <OrganizationsBar project={activeProject} callback={(t, org) => {setType(t); setActiveOrganization(org)}} />
+        <div className={styles.projectDetails} style={{ gridTemplateColumns: getGridTemplate() }}>
+            <OrganizationsBar project={activeProject} callback={(t, org) => {setType(t); setActiveOrganization(org)}} visChange={(vis) => setLeftVisible(vis)}/>
             <div className={styles.panel}>
-                <h1 onClick={() => setType('project')} className={styles.projectHeader}>{activeProject.name}</h1>
+                <Link to={'/projects'} className={styles.return}>
+                    <IoMdReturnLeft className={styles.returnIcon} />
+                    <p>Return to projects overview</p>   
+                </Link>
+                <Link><h1 onClick={() => setType('project')} className={styles.projectHeader}>{activeProject.name}</h1></Link>
                 <ProjectViewSwitch project={activeProject} type={type} indicator={activeIndicator} organization={activeOrganization} onRemove={() => setType('project')}/>
             </div>
-            <IndicatorsBar project={activeProject} callback={(t, ind) => {setType(t); setActiveIndicator(ind)}}/>
+            <IndicatorsBar project={activeProject} callback={(t, ind) => {setType(t); setActiveIndicator(ind)}} visChange={(vis) => setRightVisible(vis)} />
         </div>
     )
 }

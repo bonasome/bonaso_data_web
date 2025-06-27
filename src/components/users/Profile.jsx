@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { useAuth } from '../../contexts/UserAuth';
 import fetchWithAuth from "../../../services/fetchWithAuth";
-import DynamicForm from "../reuseables/DynamicForm";
 import Loading from '../reuseables/Loading'
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import styles from './profile.module.css';
+import errorStyles from '../../styles/errors.module.css';
+import { IoMdReturnLeft } from "react-icons/io";
+
 export default function Profile(){
     const { user } = useAuth();
     const{ id } = useParams();
@@ -59,10 +62,15 @@ export default function Profile(){
 
     if(loading) return <Loading />
     return(
-        <div>
-            <h1>{profile.username}</h1>
+        <div className={styles.container}>
+            <Link to={'/profiles'} className={styles.return}>
+                <IoMdReturnLeft className={styles.returnIcon} />
+                <p>Return to team overview</p>   
+            </Link>
+            <h1>{profile.first_name} {profile.last_name}</h1>
+            {!active && <h3>User is inactive.</h3>}
             <Link to={`/profiles/${profile.id}/edit`}> <button>Edit Profile</button></Link>
-            {user.role === 'admin' &&<button onClick={() => changeStatus(!active)}>{active ? 'Deactive User' : 'Activate User'}</button>}
+            {user.role === 'admin' &&<button className={errorStyles.deleteButton} onClick={() => changeStatus(!active)}>{active ? 'Deactivate User' : 'Activate User'}</button>}
         </div>
     )
 }

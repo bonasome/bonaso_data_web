@@ -40,17 +40,19 @@ function OrganizationCard({ org, callback = null }) {
             setLoading(false);
         }
     };
-
+    if (loading) return <p>Loading...</p>
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
-            <h2>{org.name}</h2>
+            <Link to={`/organizations/${org.id}`} style={{display:'flex', width:"fit-content"}}><h2>{org.name}</h2></Link>
             {callback && <button onClick={() => callback(org)}>Add to Project</button>}
-            {expanded && loading && <p>Loading...</p>}
             {expanded && active && (
                 <>
                     {active && org?.parent_organization && <h4> Parent: {org.parent_organization.name}</h4>}
                     {active &&
                         <Link to={`/organizations/${org.id}`}> <button>View Details</button></Link>
+                    }
+                    {active &&
+                        <Link to={`/organizations/${org.id}/edit`}> <button>Edit Details</button></Link>
                     }
                 </>
             )}
@@ -105,10 +107,9 @@ export default function OrganizationsIndex( { callback=null, blacklist=[] }){
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Organizations' : 'My Organizations'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
+            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries} filter={<OrganizationFilters organizations={organizations} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <Link to='/organizations/new'><button>Add an Organiation</button></Link>}
-                <OrganizationFilters organizations={organizations} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>
                 {visibleOrgs?.length == 0 ? 
                     <p>No organizations match your criteria.</p> :
                     visibleOrgs.map(org => (

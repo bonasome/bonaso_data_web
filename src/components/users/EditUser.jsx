@@ -7,6 +7,7 @@ import Loading from '../reuseables/Loading'
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import UserForm from './UserForm';
+import styles from '../reuseables/dynamicForm.module.css';
 
 export default function EditUser(){
     const { user } = useAuth();
@@ -40,7 +41,7 @@ export default function EditUser(){
         const getProfile = async () => {
             try{
                 console.log('fetching model info...')
-                const response = await fetchWithAuth(`/api/profiles/users/${id}`);
+                const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
                 const data = await response.json();
                 setExisting(data)
                 setLoading(false)
@@ -99,8 +100,8 @@ export default function EditUser(){
     
         if(loading) return <Loading />
         return(
-            <div>
-                <h1>New User</h1>
+            <div className={styles.container}>
+                {user?.username && <h1>Editing {user.username}</h1>}
                 <UserForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
             </div>
         )

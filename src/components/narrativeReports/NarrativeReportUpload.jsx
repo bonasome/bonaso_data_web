@@ -49,7 +49,7 @@ export default function NarrativeReportUpload() {
 
         if (!file){
             setErrors(['Please select a file.']);
-            
+            setUploading(false);
             return 
         } 
         if (!title.trim()){
@@ -102,7 +102,7 @@ export default function NarrativeReportUpload() {
             {success && <div className={errorStyles.success}><p>{success}</p></div>}
 
             <div className={styles.template}>
-                <i>1. Select your organization and project, then upload your report.</i>
+                <h3>1. Select your organization and project, then upload your report.</h3>
                 <SimpleSelect
                     name="organization"
                     label="Select an Organization"
@@ -111,7 +111,8 @@ export default function NarrativeReportUpload() {
                     optionLabels={organizationNames}
                     callback={setTargetOrg}
                 />
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit}  noValidate={true}>
+                    <div className={styles.form}>
                     <label htmlFor="title">Upload Title</label>
                     <input
                         type="text"
@@ -124,6 +125,7 @@ export default function NarrativeReportUpload() {
 
                     <label htmlFor="description">Upload Description</label>
                     <textarea
+                        className={styles.desc}
                         name="description"
                         id="description"
                         value={desc}
@@ -131,8 +133,11 @@ export default function NarrativeReportUpload() {
                     />
 
                     <input type="file" accept=".pdf,.doc,.docx" onChange={handleChange} />
-                    <button type="submit" disabled={uploading}>Upload</button>
-                    <button type="button" onClick={() => setFile(null)}>Clear</button>
+                    <div className={styles.buttons}>
+                        <button type="submit" disabled={uploading}>Upload</button>
+                        <button type="button" onClick={() => setFile(null)}>Clear</button>
+                    </div>
+                    </div>
                 </form>
             </div>
         </div>

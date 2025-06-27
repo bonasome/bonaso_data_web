@@ -1,6 +1,26 @@
+.fileUpload{
+    margin: 5vh;
+    background-color: var(--bonaso-dark-accent);
+    padding: 4vh;
+    max-width: 60vw;
+}
+.template > * {
+    margin-bottom: 4vh;
+}
 .files{
     margin-top: 4vh;
     margin-bottom: 4vh;
     background-color: var(--bonaso-dark-accent);
     padding: 4vh;
+}
+.form{
+    display: flex;
+    flex-direction: column;
+    margin-right: 10vw;
+}
+.desc{
+    height: 15vh;
+}
+.buttons > button{
+    max-width: 10vw;
 }

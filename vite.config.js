@@ -15,6 +15,12 @@ export default defineConfig({
         globals: true, 
         environment: 'jsdom',
         setupFiles: './vitest.setup.js',
+        coverage: {
+            provider: 'v8', // or 'istanbul' if you prefer
+            reporter: ['text', 'lcov', 'html'], // optional, you can customize
+            all: true, // include files even if they weren't tested
+            reportsDirectory: './coverage',
+        },
     },
     resolve: {
         lias: {

@@ -1,0 +1,14 @@
+.container{
+    margin: 5vh;
+    padding-bottom: 10vh;
+}
+
+.section{
+    background-color: var(--bonaso-dark-accent);
+    padding: 4vh;
+    margin-bottom: 3vh;
+}
+
+li {
+    margin-bottom: .5rem;
+}
