@@ -93,8 +93,6 @@ export default function SimpleSelect({
         }
     };
 
-    
-
     return (
         <div className={styles.select}>
         <label htmlFor={name} className={styles.selectLabel}>
