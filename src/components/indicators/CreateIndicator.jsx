@@ -40,7 +40,6 @@ export default function CreateIndicator(){
         const getIndicators = async () => {
             try {
                 console.log('fetching indicators info...');
-                console.log(`/api/indicators/?search=${search}`)
                 const response = await fetchWithAuth(`/api/indicators/?search=${search}`);
                 const data = await response.json();
                 console.log(data.results)
@@ -61,7 +60,7 @@ export default function CreateIndicator(){
 
     const formConfig = useMemo(() => {
         return indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta.statuses, (val) => setSearch(val));
-    }, [indicatorIDs, indicatorNames, indicatorsMeta, search]);
+    }, [indicatorIDs, indicatorNames, indicatorsMeta]);
 
     const handleCancel = () => {
         navigate('/indicators')

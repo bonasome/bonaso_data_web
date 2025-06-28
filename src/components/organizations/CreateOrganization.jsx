@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/UserAuth';
 import Loading from '../reuseables/Loading';
@@ -14,51 +14,39 @@ import organizationConfig from './organizationConfig';
 export default function CreateOrganization(){
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [formConfig, setFormConfig] = useState([]);
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const { organizations, setOrganizations, setOrganizationDetails } = useOrganizations();
     const [orgIDs, setOrgIDs] = useState([]);
     const [orgNames, setOrgNames] = useState([]);
-
+    const [search, setSearch] = useState('');
     useEffect(() => {
         const getOrganizations = async () => {
-            if(typeof organizations === Object && Object.keys(organizations).length != 0){
-                const ids = organizations.map((o) => o.id);
-                const names= organizations.map((o)=> o.name);
-                setOrgIDs(ids);
-                setOrgNames(names);
+            try{
+                console.log('fetching organizations...')
+                const response = await fetchWithAuth(`/api/organizations/?search=${search}`);
+                const data = await response.json();
+                console.log(data)
+                if(organizations.length > 0){
+                    const ids = organizations.map((o) => o.id);
+                    const names= organizations.map((o)=> o.name);
+                    setOrgIDs(ids);
+                    setOrgNames(names);
+                }
+                setOrganizations(data.results);
                 setLoading(false)
-                return;
             }
-            else{
-                try{
-                    console.log('fetching organizations...')
-                    const response = await fetchWithAuth(`/api/organizations/`);
-                    const data = await response.json();
-                    console.log(data)
-                    if(organizations.length > 0){
-                        const ids = organizations.map((o) => o.id);
-                        const names= organizations.map((o)=> o.name);
-                        setOrgIDs(ids);
-                        setOrgNames(names);
-                    }
-                    setOrganizations(data.results);
-                    setLoading(false)
-                }
-                catch(err){
-                    console.error('Failed to fetch organizations: ', err)
-                    setLoading(false)
-                }
+            catch(err){
+                console.error('Failed to fetch organizations: ', err)
+                setLoading(false)
             }
         }
         getOrganizations();
-    }, [])
+    }, [search])
 
-    
-    useEffect(() => {
-        setFormConfig(organizationConfig(orgIDs, orgNames))
-    }, [orgNames, orgIDs])
+    const formConfig = useMemo(() => {
+        return organizationConfig(orgIDs, orgNames, (val) => setSearch(val));
+    }, [orgIDs, orgNames]);
 
     const handleCancel = () => {
         navigate(`/organizations`)

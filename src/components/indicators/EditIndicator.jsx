@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
 import fetchWithAuth from "../../../services/fetchWithAuth";
@@ -12,13 +12,13 @@ import styles from '../reuseables/dynamicForm.module.css';
 export default function EditIndicator(){
     const navigate = useNavigate();
     const { id } = useParams();
-    const [formConfig, setFormConfig] = useState([]);
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [existing, setExisting] = useState(null)
     const { indicators, setIndicators, setIndicatorDetails, indicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
     const [indicatorIDs, setIndicatorIDs] = useState([]);
     const [indicatorNames, setIndicatorNames] = useState([]);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
 
@@ -44,29 +44,22 @@ export default function EditIndicator(){
         getIndicatorDetails();
 
         const getIndicators = async () => {
-            if(Object.keys(indicators).length != 0){
-                const ids = indicators.filter(ind => ind.id.toString() != id.toString()).map((ind) => ind.id);
-                const names= indicators.filter(ind => ind.id.toString() != id.toString()).map((ind)=> ind.name);
-                setIndicatorIDs(ids);
-                setIndicatorNames(names);
-                return;
-            }
-            else{
-                try{
-                    console.log('fetching model info...')
-                    const response = await fetchWithAuth(`/api/indicators/`);
-                    const data = await response.json();
-                    if(indicators.length > 0){
-                        const ids = indicators.filter(ind => ind.id.toString() != id.toString()).map((ind) => ind.id);
-                        const names= indicators.filter(ind => ind.id.toString() != id.toString()).map((ind)=> ind.name);
-                        setIndicatorIDs(ids);
-                        setIndicatorNames(names);
-                    }
+            try{
+                console.log('fetching model info...')
+                const response = await fetchWithAuth(`/api/indicators/?search=${search}`);
+                const data = await response.json();
+                
+                if(data.results.length > 0){
                     setIndicators(data.results);
+                    const ids = data.results.map(o => o.id);
+                    const names = data.results.map(o => o.name);
+                    setIndicatorIDs(ids);
+                    setIndicatorNames(names);
                 }
-                catch(err){
-                    console.error('Failed to fetch indicators: ', err)
-                }
+                setIndicators(data.results);
+            }
+            catch(err){
+                console.error('Failed to fetch indicators: ', err)
             }
         }
         getIndicators();
@@ -90,11 +83,11 @@ export default function EditIndicator(){
             }
         }
         getMeta()
-    }, [indicators])
+    }, [search])
 
-    useEffect(() => {
-        setFormConfig(indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta.statuses, existing))
-    }, [indicatorNames, indicatorIDs, indicatorsMeta, existing])
+    const formConfig = useMemo(() => {
+        return indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta.statuses, (val) => setSearch(val), existing);
+    }, [indicatorIDs, indicatorNames, indicatorsMeta, existing]);
 
     const handleCancel = () => {
         navigate(`/indicators/${id}`)
