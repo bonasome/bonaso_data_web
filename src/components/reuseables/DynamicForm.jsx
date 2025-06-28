@@ -136,6 +136,8 @@ export default function DynamicForm({ config, onSubmit, onCancel }){
                                 optionLabels={field.constructors.labels} 
                                 defaultOption={field.value} 
                                 multiple={field.constructors.multiple} 
+                                search={field?.constructors?.search ? field?.constructors?.search : false}
+                                searchCallback={field?.constructors?.search ? field?.constructors?.searchCallback : null}
                                 callback={(val) => {
                                     setFormData(prev => ({
                                         ...prev,

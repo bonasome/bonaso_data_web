@@ -8,6 +8,7 @@ export default function SimpleSelect({
         label = null,
         multiple = false,
         search = false,
+        searchCallback = null,
         callback = null,
         nullOption = true,
         value = null,
@@ -92,9 +93,7 @@ export default function SimpleSelect({
         }
     };
 
-    if (!options.length) {
-        return <p>Field {label ?? name.charAt(0).toUpperCase() + name.slice(1)} has no values.</p>;
-    }
+    
 
     return (
         <div className={styles.select}>
@@ -107,7 +106,7 @@ export default function SimpleSelect({
                 className={styles.selectSearch}
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {setSearchTerm(e.target.value); searchCallback ? searchCallback(e.target.value) : null}}
                 placeholder="start typing to search..."
             />
             )}

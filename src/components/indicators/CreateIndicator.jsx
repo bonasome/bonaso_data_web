@@ -15,12 +15,12 @@ export default function CreateIndicator(){
     const { indicators, setIndicators, setIndicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
     const [indicatorIDs, setIndicatorIDs] = useState([]);
     const [indicatorNames, setIndicatorNames] = useState([]);
-    const fetchedRef = useRef(false);
+    const [search, setSearch] = useState('')
+    //const fetchedRef = useRef(false);
 
     useEffect(() => {
         const getMeta = async() => {
             if(Object.keys(indicatorsMeta).length != 0){
-                setLoading(false);
                 return;
             }
             else{
@@ -29,45 +29,39 @@ export default function CreateIndicator(){
                     const response = await fetchWithAuth(`/api/indicators/meta/`);
                     const data = await response.json();
                     setIndicatorsMeta(data);
-                    setLoading(false);
                 }
                 catch(err){
                     console.error('Failed to fetch indicators meta: ', err)
-                    setLoading(false)
                 }
             }
         }
         getMeta()
 
         const getIndicators = async () => {
-            if (fetchedRef.current || indicators.length !== 0) {
-                const ids = indicators.map(o => o.id);
-                const names = indicators.map(o => o.name);
+            try {
+                console.log('fetching indicators info...');
+                console.log(`/api/indicators/?search=${search}`)
+                const response = await fetchWithAuth(`/api/indicators/?search=${search}`);
+                const data = await response.json();
+                console.log(data.results)
+                setIndicators(data.results);
+                const ids = data.results.map(o => o.id);
+                const names = data.results.map(o => o.name);
                 setIndicatorIDs(ids);
                 setIndicatorNames(names);
                 setLoading(false);
-                return;
-            }
-
-            try {
-                console.log('fetching model info...');
-                const response = await fetchWithAuth(`/api/indicators/`);
-                const data = await response.json();
-                setIndicators(data.results);
-                setLoading(false);
-                fetchedRef.current = true;
-            } catch (err) {
+            } 
+            catch (err) {
                 console.error('Failed to fetch indicators: ', err);
                 setLoading(false);
             }
         };
-
         getIndicators();
-    }, []);
+    }, [search]);
 
     const formConfig = useMemo(() => {
-        return indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta.statuses);
-    }, [indicatorIDs, indicatorNames, indicatorsMeta]);
+        return indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta.statuses, (val) => setSearch(val));
+    }, [indicatorIDs, indicatorNames, indicatorsMeta, search]);
 
     const handleCancel = () => {
         navigate('/indicators')

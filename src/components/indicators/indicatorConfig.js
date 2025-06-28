@@ -1,4 +1,4 @@
-export default function indicatorConfig(ids, names, statuses, existing=null){
+export default function indicatorConfig(ids, names, statuses, searchCallback, existing=null){
     let subcats = []
     if(existing?.subcategories.length > 0){
         subcats = existing.subcategories.map((cat) => (cat.name))
@@ -11,6 +11,8 @@ export default function indicatorConfig(ids, names, statuses, existing=null){
                 values: ids,
                 labels: names,
                 multiple: false,
+                search: true,
+                searchCallback: searchCallback
         }},
         {name: 'description', label: 'Description', type: 'textarea', required: false, value: existing?.description ? existing.description : ''},
         {name: 'status', label: 'Indicator Status', type: 'select',  required: true, value: existing?.status ? existing.status : 'Active',
