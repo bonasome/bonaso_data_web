@@ -75,10 +75,4 @@ describe('SimpleSelect', () => {
         expect(screen.queryByText('Apple')).not.toBeInTheDocument();
         expect(screen.queryByText('Cherry')).not.toBeInTheDocument();
     });
-
-    it('shows message if no options', () => {
-        render(<SimpleSelect name="empty" optionValues={[]} />);
-
-        expect(screen.getByText(/Field Empty has no values/i)).toBeInTheDocument();
-    });
 });

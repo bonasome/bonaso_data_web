@@ -174,7 +174,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                 const data = await response.json()
                 console.log(data)
                 if(data.results.length > 0){
-                    const validPastInt = interactions.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
+                    const validPastInt = data.results.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
                     console.log(validPastInt)
                     if (validPastInt && validPastInt.interaction_date <= interactionDate) {
                         isValid = true;
@@ -208,7 +208,9 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             setModalTask(task);
         }
         if (interactions?.length > 0) {
-            const pastInt = interactions.filter(inter => inter?.task_detail?.indicator?.id === task.indicator.id);
+            const response = await fetchWithAuth(`/api/record/interactions/?respondent=${interactions[0].respondent}&task_indicator=${task.id}`);
+            const data = await response.json()
+            const pastInt = data.results.filter(inter => inter?.task_detail?.indicator?.id === task.indicator.id);
             const now = new Date();
             const oneMonthAgo = new Date();
             oneMonthAgo.setMonth(now.getMonth() - 1);

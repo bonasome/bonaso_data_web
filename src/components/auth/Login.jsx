@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/UserAuth'
 import styles from './login.module.css';
 import bonasoWhite from '../../assets/bonasoWhite.png'
 import Loading from '../reuseables/Loading'
-
+import { Link } from 'react-router-dom';
 const baseUrl = import.meta.env.VITE_API_URL;
 export default function Login() {
     const { refreshAuth } = useAuth();
@@ -70,6 +70,7 @@ export default function Login() {
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
+                <Link to={'/users/reset-password-get'}>Forgot your password?</Link>
                 <div>
                     {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
                 </div>

@@ -125,7 +125,7 @@ function ThinMenu() {
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/batch-record'}>Batch Record</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/organizations'}>Organizations</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/indicators'}>Indicators</Link></div>}
-            {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>Profile</Link></div>} 
+            {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>My Team</Link></div>} 
             <div className={styles.menuBar}><Link to={`/profiles/${user.id}`}>Profile</Link></div>
             <div className={styles.menuBar}><Link to={`/help`}>Help</Link></div>
             <div className={styles.menuBar}><Link to={'/users/logout'}>Logout</Link></div>

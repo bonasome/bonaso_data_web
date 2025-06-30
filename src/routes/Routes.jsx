@@ -4,6 +4,9 @@ import Navbar from '../components/Navbar';
 //auth
 import Login from '../components/auth/Login';
 import Logout from '../components/auth/Logout';
+import EnterEmail from '../components/auth/passwordReset/EnterEmail';
+import ResetForm from '../components/auth/passwordReset/ResetForm';
+
 import AuthLayout from '../layouts/AuthLayout';
 import { Routes, Route } from 'react-router-dom';
  
@@ -297,6 +300,22 @@ function Router() {
                 element={
                 <RedirectIfAuthenticated>
                     <Login />
+                </RedirectIfAuthenticated>
+            }
+            />
+            <Route
+                path='reset-password-get'
+                element={
+                <RedirectIfAuthenticated>
+                    <EnterEmail />
+                </RedirectIfAuthenticated>
+            }
+            />
+            <Route
+                path='reset-password-confirm/:uid/:token'
+                element={
+                <RedirectIfAuthenticated>
+                    <ResetForm />
                 </RedirectIfAuthenticated>
             }
             />
