@@ -28,9 +28,10 @@ export default function IndicatorChart({ indicatorID, showTargets=true, showFilt
             setLoading(true)
             try {
                 console.log('fetching respondent details...');
-                const urlFilters = organizationID ? `&organization=${organizationID}` : '' +
-                    projectID ? `&project=${projectID}` : '';
-                const response = await fetchWithAuth(`/api/indicators/chart-data/?indicator=${indicatorID}&${urlFilters}`);
+                const urlFilters = (organizationID ? `&organization=${organizationID}` : '') +
+                    (projectID ? `&project=${projectID}` : '');
+                    console.log(`/api/indicators/chart-data/?indicator=${indicatorID}${urlFilters}`)
+                const response = await fetchWithAuth(`/api/indicators/chart-data/?indicator=${indicatorID}${urlFilters}`);
                 const data = await response.json();
                 setData(data);
                 setChartData(monthlyCounts(data[0], showTargets));

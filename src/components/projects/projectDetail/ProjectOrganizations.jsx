@@ -190,7 +190,7 @@ export function OrganizationTasks({ project, organization }){
                 </div>
             </div>
             <div className={styles.tasksContainer}>
-                <Tasks className={styles.tasks} callback={loadTasks} update={reload} organization={organization} target={true} canDelete={true}/>
+                <Tasks className={styles.tasks} callback={loadTasks} update={reload} organization={organization} project={project} target={true} canDelete={true}/>
             </div>
 
         </div>

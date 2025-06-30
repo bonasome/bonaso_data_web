@@ -41,7 +41,7 @@ function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=
         setTargets(updated)
 
     }
-
+    console.log(task)
 
     const removeTask = async() => {
         try {
@@ -104,7 +104,8 @@ function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=
             <h3>{task.indicator.code}: {task.indicator.name}</h3>
             {expanded && (
                 <div>
-                    <i>{task.organization.name}</i>
+                    <p><i>{task.organization.name}</i></p>
+                    <p><i>{task.project.name}</i></p>
                     <p>{task.indicator.description}</p>
                     <p>{task.indicator.prerequisite && `Prerequisite Task: ${task.indicator.prerequisite.code +': '+ task.indicator.prerequisite.name }`}</p>
 
@@ -133,7 +134,7 @@ function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=
     );
 }
 
-export default function Tasks({ callback, update=null, target=false, organization=null, isDraggable=false, blacklist=[], canDelete=false }) {
+export default function Tasks({ callback, update=null, target=false, organization=null, project=null, isDraggable=false, blacklist=[], canDelete=false }) {
     const [loading, setLoading] = useState(true);
     const [ tasks, setTasks ] = useState([]);
     const [search, setSearch] = useState('');
@@ -147,7 +148,8 @@ export default function Tasks({ callback, update=null, target=false, organizatio
                 console.log('fetching respondent details...');
                 const includeOrg = organization ? `&organization=${organization.id}` : ''
                 const includeTargets = target ? `&include_targets=true` : ''
-                const url = `/api/manage/tasks/?search=${search}` + includeTargets + includeOrg
+                const includeProject = project ? `&project=${project.id}` : ''
+                const url = `/api/manage/tasks/?search=${search}` + includeTargets + includeOrg + includeProject
                 console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
