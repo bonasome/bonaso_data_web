@@ -11,6 +11,11 @@ import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
 import styles from './organizationDetail.module.css';
 import { IoMdReturnLeft } from "react-icons/io";
+import Checkbox from '../reuseables/Checkbox';
+import IndicatorChart from '../reuseables/charts/IndicatorChart';
+import { useIndicators } from '../../contexts/IndicatorsContext';
+import SimpleSelect from '../reuseables/SimpleSelect';
+
 
 export default function OrganizationDetail(){
     const { user } = useAuth();
@@ -119,7 +124,7 @@ export default function OrganizationDetail(){
                 <p>Return to organizations overview</p>   
             </Link>
             <div className={styles.section}>
-                <h1>{activeOrganization.name}</h1>
+                <h1>{activeOrganization?.name}</h1>
                 {activeOrganization.full_name && <i>Full Name: {activeOrganization.full_name}</i>}
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 {activeOrganization.parent_organization && <h2>Parent</h2>}
@@ -150,7 +155,6 @@ export default function OrganizationDetail(){
                 ))}
                 {projects.length === 0 && <p><i>This indicator is not in any projects.</i></p>}
             </div>
-
             <div className={styles.section}>
                 <h2>Details</h2>
                 <div className={styles.card}>

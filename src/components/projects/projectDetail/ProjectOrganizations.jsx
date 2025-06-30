@@ -13,6 +13,8 @@ import { BiSolidShow } from "react-icons/bi";
 import { BiSolidHide } from "react-icons/bi";
 
 import { Link } from 'react-router-dom';
+import IndicatorChart from '../../reuseables/charts/IndicatorChart';
+
 export function OrganizationsBar({ project, callback, visChange }){
     const[sbVisible, setSBVisible] = useState(true)
     return(
@@ -196,6 +198,30 @@ export function OrganizationTasks({ project, organization }){
     
 }
 
+export function OrganizationPerformance({ project, organization }){
+    const [indicator, setIndicator] = useState(null)
+
+    const handleDrop = async (e) => {
+        e.preventDefault();
+        const indicatorPackage = JSON.parse(e.dataTransfer.getData('application/json'));
+        setIndicator(indicatorPackage)
+    }
+    const handleDragOver = (e) => {
+        e.preventDefault(); // Required to allow drop
+    };
+    return(
+        <div className={styles.viewbox}>
+            <h3>Performance for {organization.name} during {project.name}</h3>
+            {indicator && <h4><i>{indicator.name}</i></h4>}
+            <div className={styles.dropZone} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray', height: '100px', padding: '10px', marginBottom: '30px' }}>
+                <p>Drag an indicator from the sidebar to view {organization.name}'s performance.</p>
+            </div>
+        
+            {!indicator && <p><i>Drag and drop an indicator to view performance.</i></p>}
+            {indicator && <IndicatorChart indicatorID={indicator.id} organizationID={organization.id} projectID={project.id} />}
+        </div>
+    )
+}
 export function ViewOrganization({ project, organization, onRemove }){
     const { user } = useAuth();
     const [errors, setErrors] = useState([]);
@@ -271,6 +297,7 @@ export function ViewOrganization({ project, organization, onRemove }){
             }
             </div>
             <OrganizationTasks project={project} organization={organization} />
+            <OrganizationPerformance project={project} organization={organization} />
             <NarrativeReportDownload project={project} organization={organization} />
             {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Remove Organization From Project</button>}
         </div>

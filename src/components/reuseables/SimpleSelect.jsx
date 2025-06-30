@@ -116,6 +116,7 @@ export default function SimpleSelect({
                 className={styles.select}
                 required={required}
                 value={selectedVal}
+                style={multiple ? {height: 125} : {}}
             >
             {filteredOptions.map(({ value, label }) => (
                 <option key={value + label} value={value}>

@@ -142,7 +142,7 @@ export default function IndicatorDetail(){
             {activeIndicator.status != 'Planned' && <div className={styles.section}>
                 <h2>Performance Over Time</h2>
                 <Checkbox label='Show Targets?' name="targets" checked={showTargets} callback={(c) => setShowTargets(c)} />
-                <IndicatorChart indicator={activeIndicator} showTargets={showTargets}/>
+                <IndicatorChart indicatorID={activeIndicator.id} showTargets={showTargets} showFilters={true} />
             </div>}
             
             

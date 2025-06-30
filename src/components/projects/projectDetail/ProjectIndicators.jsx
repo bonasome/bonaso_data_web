@@ -181,7 +181,7 @@ export function ViewIndicator({ project, indicator, onRemove }){
             <h2>{indicator.code}: {indicator.name}</h2>
             <h5>In project {project.name}</h5>
             <p>{indicator.description}</p>
-            <IndicatorChart indicator={indicator}/>
+            <IndicatorChart indicatorID={indicator.id} projectID={project.id}/>
             {user.role =='admin' && <p>Admins will see a component here related to general indicators</p>}
             {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Remove Indicator From Project</button>}
             {['meofficer, manager'].includes(user.role) && <p>Organizations will see a component here related to their tasks</p>}
