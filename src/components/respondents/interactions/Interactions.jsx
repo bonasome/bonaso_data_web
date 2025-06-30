@@ -37,7 +37,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                     setPerm(true);
                 }
             }
-            else if(user.id == interaction.created_by){
+            else if(user.id == interaction.created_by.id){
                     setPerm(true);
                 
             }
@@ -218,6 +218,12 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                 {perm && <button onClick={() => setEdit(!edit)}>{edit ? 'Cancel' : 'Edit Interaction'}</button>}
                 {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
                 {perm && <button className={errorStyles.warningButton} onClick={() => flagInteraction()} >{flagged ? 'Mark as OK' :'Flag'} </button>}
+                {user.role == 'admin' && 
+                    <div>
+                        <p><i>Created by: {interaction.created_by?.first_name} {interaction.created_by?.last_name} at {new Date(interaction.created_at).toLocaleString()}</i></p>
+                        {interaction.updated_by && interaction.updated_by && <p><i>Updated by: {interaction.updated_by?.first_name} {interaction.updated_by?.last_name} at {new Date(interaction.updated_at).toLocaleString()}</i></p>}
+                    </div>
+                } 
                 </div>
             }
         </div>

@@ -1,29 +1,22 @@
 import { useState, useEffect } from 'react';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
-import { useInteractions } from '../../../contexts/InteractionsContext';
 import monthlyCounts from './monthlyCounts'
-const data = [
-  { name: 'Org A', value: 80 },
-  { name: 'Org B', value: 120 },
-  { name: 'Org C', value: 100 },
-];
 
-const target = 100;
-
-export default function IndicatorChart({ indicator, showTargets=true }) {
+export default function ActivityChart({ profile, showTargets=false }) {
     const [data, setData] = useState(null);
     const [chartData, setChartData] = useState(null)
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const getInteractions = async() => {
+    useEffect(() => {   
+        const getProfileActivity = async() => {
             try {
                 console.log('fetching respondent details...');
-                const response = await fetchWithAuth(`/api/indicators/chart-data/?indicator=${indicator.id}`);
+                const response = await fetchWithAuth(`/api/profiles/users/activity/${profile.id}/chart/`);
                 const data = await response.json();
-                setData(data);
-                setChartData(monthlyCounts(data[0], showTargets));
+                const titledData = {interactions: data};
+                setData(titledData);
+                setChartData(monthlyCounts(titledData, showTargets));
                 setLoading(false)
             } 
             catch (err) {
@@ -31,14 +24,8 @@ export default function IndicatorChart({ indicator, showTargets=true }) {
                 setLoading(false)
             }
         }
-        getInteractions();
-    }, [indicator])
-
-    useEffect(() => {
-        if(data?.length > 0){
-            setChartData(monthlyCounts(data[0], showTargets));
-        }
-    }, [data, showTargets])
+        getProfileActivity();
+    }, [profile])
 
     const CustomTooltip = ({ active, payload, label }) => {
         if (!active || !payload || payload.length === 0) return null;
@@ -63,7 +50,7 @@ export default function IndicatorChart({ indicator, showTargets=true }) {
             <YAxis tick={{fill: '#fff'}}/>
             <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
             <Legend />
-            <Bar dataKey="count" fill="#fff" name="Acheivement" />
+            <Bar dataKey="count" fill="#fff" name="Activity" />
             {showTargets && <Bar dataKey="target" fill="#ec7070" name="Target" />}
         </BarChart>
     )

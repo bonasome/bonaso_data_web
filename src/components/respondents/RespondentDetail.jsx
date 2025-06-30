@@ -158,6 +158,12 @@ export default function RespondentDetail(){
                     </button>
                     {sensative && <SensitiveInfo id={id} />}
                     {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)} >Delete</button>}
+                    {user.role == 'admin' && 
+                        <div>
+                            <p><i>Created by: {activeRespondent.created_by?.first_name} {activeRespondent.created_by?.last_name} at {new Date(activeRespondent.created_at).toLocaleString()}</i></p>
+                            {activeRespondent.updated_by && activeRespondent.updated_by && <p><i>Updated by: {activeRespondent.updated_by?.first_name} {activeRespondent.updated_by?.last_name} at {new Date(activeRespondent.updated_at).toLocaleString()}</i></p>}
+                        </div>
+                    } 
                 </div>
                 <div className={styles.interactions}>
                     <h2>Interactions</h2>

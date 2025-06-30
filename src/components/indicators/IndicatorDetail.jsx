@@ -39,6 +39,7 @@ export default function IndicatorDetail(){
                     console.log('fetching indicator details...');
                     const response = await fetchWithAuth(`/api/indicators/${id}/`);
                     const data = await response.json();
+                    console.log(data)
                     setIndicatorDetails(prev => [...prev, data]);
                     setActiveIndicator(data);
                 } 
@@ -60,7 +61,6 @@ export default function IndicatorDetail(){
                 const data = await response.json();
                 setProjects(data.results);
                 setLoading(false);
-                console.log(data)
             } 
             catch (err) {
                 setErrors(['Something went wrong. Please try again later.'])
@@ -110,8 +110,6 @@ export default function IndicatorDetail(){
         setDel(false);
     } 
 
-
-
     if (loading) return <Loading />
     return(
         <div className={styles.container}>
@@ -131,14 +129,15 @@ export default function IndicatorDetail(){
                         ))}
                     </ul>
                 }
-                <i>{activeIndicator.status}</i>
-                <p>
-                    You got me, there's not much here yet. Eventually this should include a list of projects,
-                    organizations, targets, and interactions related to this indicator, allowing admins to have a 
-                    centralized place to track this information. 
-                </p>
+                <p><i>{activeIndicator.status}</i></p>
                 <Link to={`/indicators/${id}/edit`}><button>Edit Details</button></Link>
                 {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Indicator</button>}
+                {user.role == 'admin' && 
+                    <div>
+                        <p><i>Created by: {activeIndicator.created_by?.first_name} {activeIndicator.created_by?.last_name} at {new Date(activeIndicator.created_at).toLocaleString()}</i></p>
+                        {activeIndicator.updated_by && activeIndicator.updated_by && <p><i>Updated by: {activeIndicator.updated_by?.first_name} {activeIndicator.updated_by?.last_name} at {new Date(activeIndicator.updated_at).toLocaleString()}</i></p>}
+                    </div>
+                } 
             </div>
             {activeIndicator.status != 'Planned' && <div className={styles.section}>
                 <h2>Performance Over Time</h2>

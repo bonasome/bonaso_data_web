@@ -70,7 +70,7 @@ export default function Login() {
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
-                <Link to={'/users/reset-password-get'}>Forgot your password?</Link>
+                <Link style={{ textAlign: "center", margin: 10 }} to={'/users/reset-password-get'}>Forgot your password?</Link>
                 <div>
                     {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
                 </div>

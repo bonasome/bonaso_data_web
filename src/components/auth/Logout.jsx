@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/UserAuth';
 import fetchWithAuth from '../../../services/fetchWithAuth';
+import bonasoWhite from '../../assets/bonasoWhite.png'
+import styles from './login.module.css';
 export default function Logout() {
     const dns = import.meta.env.VITE_DNS;
     const { refreshAuth } = useAuth();
@@ -32,5 +34,14 @@ export default function Logout() {
         logout();
     }, [dns, refreshAuth, navigate]);
 
-  return <p>Logging you out now...</p>;
+  return(
+    <div>
+        <div className={styles.login}>
+                <div className={styles.header}>
+                    <img src={bonasoWhite} className={styles.headerImage} />
+                    <h2>Until next time!</h2>
+                </div>
+            </div>
+    </div>
+  )
 }

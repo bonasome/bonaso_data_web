@@ -45,8 +45,8 @@ export const getRespondentDetail = {
     phone_number: "+123456789",
     dob: "1990-05-15",
     age_range: "30-39",
-    created_by: 2,
-    updated_by: 3
+    created_by: {id: 2, username: 'test'},
+    updated_by: {id: 3, username: 'test2'}
 }
 export const getRespondentSensitive = {
     id: 1,
@@ -66,7 +66,7 @@ export const getRespondentSensitive = {
     disability_status: [
         { id: 1, name: 'visual' },
     ],
-    created_by: 5,
+    created_by: {id: 2, username: 'test'},
     updated_by: null,
 };
 
@@ -80,8 +80,8 @@ export const getAnonRespondentDetail = {
     citizenship: "Country Z",
     comments: "Regular participant",
     age_range: "30-39",
-    created_by: 2,
-    updated_by: 3
+    created_by: {id: 2, username: 'test'},
+    updated_by: {id: 3, username: 'test2'}
 }
 
 export const getInteractions = [{
@@ -96,7 +96,7 @@ export const getInteractions = [{
     interaction_date: '2025-06-26',
     comments: 'Follow-up needed',
     flagged: false,
-    created_by: 1,
+    created_by: {id: 2, username: 'test'},
     updated_by: null,
 }]
 

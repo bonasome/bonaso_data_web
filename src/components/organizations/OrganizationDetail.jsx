@@ -130,6 +130,12 @@ export default function OrganizationDetail(){
                             {activeOrganization.child_organizations.map((o) => (<li key={o.id}> <Link to={`/organizations/${o.id}`}>  {o.name} </Link></li>))} 
                         </ul>
                     </div>}
+                    {user.role == 'admin' && 
+                        <div>
+                            <p><i>Created by: {activeOrganization.created_by?.first_name} {activeOrganization.created_by?.last_name} at {new Date(activeOrganization.created_at).toLocaleString()}</i></p>
+                            {activeOrganization.updated_by && activeOrganization.updated_by && <p><i>Updated by: {activeOrganization.updated_by?.first_name} {activeOrganization.updated_by?.last_name} at {new Date(activeOrganization.updated_at).toLocaleString()}</i></p>}
+                        </div>
+                    } 
                 <div style={{ paddingTop: 15 }}>
                     <Link to={`/organizations/${id}/edit`}><button>Edit Details</button></Link>
                     {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Organization</button>}

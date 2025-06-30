@@ -20,3 +20,9 @@
     margin-bottom: auto;
     margin-right: 3vh;
 }
+
+.card{
+    margin-top: 3vh;
+    padding: 4vh;
+    background-color: var(--bonaso-uber-dark-accent);
+}

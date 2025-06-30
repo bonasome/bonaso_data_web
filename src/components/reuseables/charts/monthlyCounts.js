@@ -1,7 +1,6 @@
 export default function monthlyCounts(data, showTargets=false) {
     const interactions = data.interactions || [];
     const targets = showTargets ? data.targets : null;
-    console.log(interactions, targets)
     
     const countsByMonth = {};
     const targetsByMonth = {};
