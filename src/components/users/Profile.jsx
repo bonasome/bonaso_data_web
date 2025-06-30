@@ -116,13 +116,24 @@ export default function Profile(){
                 <p>{map[profile?.role]}</p>
             </div>
             <div className={styles.card}>
-                <h3>Activity (Interactions) </h3>
+                <h2>Activity </h2>
+                <h3>Interactions Over Time</h3>
                 <ActivityChart profile={profile} />
+                <h3>Activity Feed</h3>
                 <IndexView onPageChange={setPage} entries={entries} onSearchChange={setSearch}>
                     {feed.length > 0 ? 
                         <div>
                         {feed.map((a) => (
-                            <p>{a.summary} at {new Date(a.date).toLocaleString()}</p>
+                            <div className={styles.feedItem}>
+                                {a.type === 'respondent' && <Link to={`/respondents/${a.id}`}> <p>{a.summary} at {new Date(a.date).toLocaleString()}</p></Link>}
+                                {a.type === 'interaction' && <Link to={`/respondents/${a.respondent}`}> <p>{a.summary} at {new Date(a.date).toLocaleString()}</p></Link>}
+                                {a.type === 'organization' && <Link to={`/organizations/${a.id}`}> <p>{a.summary} at {new Date(a.date).toLocaleString()}</p></Link>}
+                                {a.type === 'indicator' && <Link to={`/indicators/${a.id}`}> <p>{a.summary} at {new Date(a.date).toLocaleString()}</p></Link>}
+                                {a.type === 'project' && <Link to={`/projects/${a.id}`}> <p>{a.summary} at {new Date(a.date).toLocaleString()}</p></Link>}
+                                {a.type === 'task' && <Link to={`/projects/${a.project}`}> <p>{a.summary} at {new Date(a.date).toLocaleString()}</p></Link>}
+                                {a.type === 'target' && <Link to={`/projects/${a.project}`}> <p>{a.summary} at {new Date(a.date).toLocaleString()}</p></Link>}
+                                {a.type === 'narrative_report' && <Link to={`/projects/${a.project}`}> <p>{a.summary} at {new Date(a.date).toLocaleString()}</p></Link>}
+                            </div>
                         ))}
                         </div> :
                         <p>No recent activity</p>

@@ -26,3 +26,14 @@
     padding: 4vh;
     background-color: var(--bonaso-uber-dark-accent);
 }
+
+.feedItem {
+    padding: 1vh;
+    margin: 1vh;
+    transition: transform .6s;
+}
+.feedItem:hover{
+    margin: 0;
+    background-color: var(--bonaso-main);
+    transform: scale(1.05);
+}

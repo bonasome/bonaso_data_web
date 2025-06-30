@@ -120,15 +120,19 @@ function ThinMenu() {
 
     return(
         <div className={styles.menuExpanded}>
+            <h3>Respondents</h3>
             <div className={styles.menuBar}><Link to='/respondents'>Respondents</Link></div>
-            {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/batch-record'}>Batch Record</Link></div>}
+            {['admin', 'meofficer', 'manager'].includes(user.role) && <h3>Projects</h3>}
+            {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/organizations'}>Organizations</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/indicators'}>Indicators</Link></div>}
+            {['admin', 'meofficer', 'manager'].includes(user.role) && <h3>Team</h3>}
             {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>My Team</Link></div>} 
+            <h3>Profile</h3>
             <div className={styles.menuBar}><Link to={`/profiles/${user.id}`}>Profile</Link></div>
-            <div className={styles.menuBar}><Link to={`/help`}>Help</Link></div>
             <div className={styles.menuBar}><Link to={'/users/logout'}>Logout</Link></div>
+            <div className={styles.menuBar}><Link to={`/help`}>Help</Link></div>
         </div>
     )
 }

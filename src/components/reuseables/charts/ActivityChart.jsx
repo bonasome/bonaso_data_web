@@ -10,9 +10,10 @@ export default function ActivityChart({ profile, showTargets=false }) {
 
     useEffect(() => {   
         const getProfileActivity = async() => {
+            if(!profile) return;
             try {
                 console.log('fetching respondent details...');
-                const response = await fetchWithAuth(`/api/profiles/users/activity/${profile.id}/chart/`);
+                const response = await fetchWithAuth(`/api/profiles/users/activity/${profile?.id}/chart/`);
                 const data = await response.json();
                 const titledData = {interactions: data};
                 setData(titledData);
