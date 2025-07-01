@@ -152,7 +152,7 @@ export default function RespondentDetail(){
                     <p>{activeRespondent.ward && activeRespondent.ward + ', '}{activeRespondent.village}, {labels.district}</p>
                     <p>{activeRespondent.citizenship}</p>
                     <p>{}</p>
-                    <Link to={`/respondents/${activeRespondent.id}/edit`}><button>Edit Details</button></Link>
+                    {!['client'].includes(user.role) && <Link to={`/respondents/${activeRespondent.id}/edit`}><button>Edit Details</button></Link>}
                     <button onClick={() => setSensative(!sensative)}>
                         {sensative ? 'Hide Details' : 'View More'}
                     </button>
@@ -174,7 +174,7 @@ export default function RespondentDetail(){
                 <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
                     {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
                 </div>
-                {sbVisible && <Tasks callback={loadTasks} isDraggable={true} blacklist={added} />}
+                {!['client'].includes(user.role) && sbVisible && <Tasks callback={loadTasks} isDraggable={true} blacklist={added} />}
             </div>
         </div>
     )

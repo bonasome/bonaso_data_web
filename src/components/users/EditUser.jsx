@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import UserForm from './UserForm';
 import styles from '../reuseables/dynamicForm.module.css';
+import { useProfiles } from "../../contexts/ProfilesContext";
+import { useProjects } from '../../contexts/ProjectsContext';
 
 export default function EditUser(){
     const { user } = useAuth();
@@ -18,46 +20,103 @@ export default function EditUser(){
     const[orgNames, setOrgNames] = useState([]);
     const [errors, setErrors] = useState('')
     const [existing, setExisting] = useState(null)
+    const [search, setSearch] = useState('');
+    const [clientIDs, setClientIDs] = useState([]);
+    const [clientNames, setClientNames] = useState([]);
+
+    const { profileDetails, setProfileDetails, profilesMeta, setProfilesMeta } = useProfiles();
+    const {projectsMeta, setProjectsMeta} = useProjects();
     useEffect(() => {
+        const getMeta = async() => {
+            if(Object.keys(profilesMeta).length != 0){
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/profiles/users/meta/`);
+                    const data = await response.json();
+                    setProfilesMeta(data);
+                }
+                catch(err){
+                    console.error('Failed to fetch profiles meta: ', err)
+                }
+            }
+        }
+        getMeta()
+        const getProfile = async () => {
+            const found = profileDetails.find(o => o.id.toString() === id.toString());
+            if (found) {
+                setExisting(found);
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
+                    const data = await response.json();
+                    setExisting(data)
+                    setProfileDetails(prev => [...prev, data]);
+                }
+                catch(err){
+                    console.error('Failed to fetch organizations: ', err)
+                }
+            }
+        }
+        getProfile();
+        const getProjectMeta = async () => {
+            if(Object.keys(projectsMeta).length != 0){
+                if(projectsMeta.clients){
+                    const clientIDs = projectsMeta.clients.map((c) => c.id);
+                    const clientNames= projectsMeta.clients.map((c)=> c.name);
+                    setClientIDs(clientIDs);
+                    setClientNames(clientNames);
+                }
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/manage/projects/meta/`);
+                    const data = await response.json();
+                    setProjectsMeta(data);
+                    if(data.clients){
+                        const clientIDs = data.clients.map((c) => c.id);
+                        const clientNames= data.clients.map((c)=> c.name);
+                        setClientIDs(clientIDs);
+                        setClientNames(clientNames);
+                    }
+                }
+                catch(err){
+                    console.error('Failed to fetch projects: ', err)
+                }
+            }
+        }
+        getProjectMeta();
         const getOrganizations = async () => {
             try{
                 console.log('fetching model info...')
-                const response = await fetchWithAuth(`/api/organizations/`);
+                const response = await fetchWithAuth(`/api/organizations/?search=${search}`);
                 const data = await response.json();
-                console.log(data.results)
                 const ids = data.results.map((o) => o.id);
                     const names= data.results.map((o)=> o.name);
                     setOrgIDs(ids);
                     setOrgNames(names);
-                setLoading(false)
             }
             catch(err){
                 console.error('Failed to fetch organizations: ', err)
+            }
+            finally{
                 setLoading(false)
             }
         }
         getOrganizations();
 
-        const getProfile = async () => {
-            try{
-                console.log('fetching model info...')
-                const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
-                const data = await response.json();
-                setExisting(data)
-                setLoading(false)
-            }
-            catch(err){
-                console.error('Failed to fetch organizations: ', err)
-                setLoading(false)
-            }
-        }
-        getProfile()
-
-    }, [])
+    }, [search])
 
     const formConfig = useMemo(() => {
-        return userConfig(orgIDs, orgNames, existing);
-    }, [orgIDs, orgNames, existing]);
+        return userConfig(orgIDs, orgNames, clientIDs, clientNames, profilesMeta, (val)=> setSearch(val), existing);
+    }, [orgIDs, orgNames, clientIDs, clientNames, existing]);
 
     const handleCancel = () => {
         navigate(`/profiles/${id}`)
@@ -75,6 +134,7 @@ export default function EditUser(){
             });
             const returnData = await response.json();
             if(response.ok){
+                setProfileDetails(prev => [...prev, returnData])
                 navigate(`/profiles/${returnData.id}`);
             }
             else{
@@ -101,7 +161,7 @@ export default function EditUser(){
         if(loading) return <Loading />
         return(
             <div className={styles.container}>
-                {user?.username && <h1>Editing {user.username}</h1>}
+                {existing?.username && <h1>Editing {existing.username}</h1>}
                 <UserForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
             </div>
         )

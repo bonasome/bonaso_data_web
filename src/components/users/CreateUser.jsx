@@ -6,6 +6,8 @@ import UserForm from './UserForm'
 import Loading from '../reuseables/Loading'
 import { useNavigate } from "react-router-dom";
 import styles from '../reuseables/dynamicForm.module.css';
+import { useProfiles } from "../../contexts/ProfilesContext";
+import { useProjects } from '../../contexts/ProjectsContext';
 
 export default function CreateUser(){
     const { user } = useAuth();
@@ -13,15 +15,64 @@ export default function CreateUser(){
     const[loading, setLoading] = useState(true);
     const[orgIDs, setOrgIDs] = useState([]);
     const[orgNames, setOrgNames] = useState([]);
-    const [roles, setRoles] = useState(['admin', 'manager', 'meofficer', 'data_collector', 'view_only', 'disable']);
-    const[roleNames, setRoleNames] = useState(['Administrator', 'Manager', 'M&E Officer', 'Data Collector', 'View Only', 'SET AS INACTIVE'])
-    const [errors, setErrors] = useState('')
-    
+    const [search, setSearch] = useState('');
+    const [errors, setErrors] = useState('');
+    const [clientIDs, setClientIDs] = useState([]);
+    const [clientNames, setClientNames] = useState([]);
+
+    const { setProfileDetails, profilesMeta, setProfilesMeta } = useProfiles();
+    const {projectsMeta, setProjectsMeta} = useProjects();
     useEffect(() => {
+        const getMeta = async() => {
+            if(Object.keys(profilesMeta).length != 0){
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/profiles/users/meta/`);
+                    const data = await response.json();
+                    setProfilesMeta(data);
+                }
+                catch(err){
+                    console.error('Failed to fetch profiles meta: ', err)
+                }
+            }
+        }
+        getMeta()
+        const getProjectMeta = async () => {
+            if(Object.keys(projectsMeta).length != 0){
+                if(projectsMeta.clients){
+                    const clientIDs = projectsMeta.clients.map((c) => c.id);
+                    const clientNames= projectsMeta.clients.map((c)=> c.name);
+                    setClientIDs(clientIDs);
+                    setClientNames(clientNames);
+                }
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/manage/projects/meta/`);
+                    const data = await response.json();
+                    setProjectsMeta(data);
+                    if(data.clients){
+                        const clientIDs = data.clients.map((c) => c.id);
+                        const clientNames= data.clients.map((c)=> c.name);
+                        setClientIDs(clientIDs);
+                        setClientNames(clientNames);
+                    }
+                }
+                catch(err){
+                    console.error('Failed to fetch projects: ', err)
+                }
+            }
+        }
+        getProjectMeta();
         const getOrganizations = async () => {
             try{
                 console.log('fetching model info...')
-                const response = await fetchWithAuth(`/api/organizations/`);
+                const response = await fetchWithAuth(`/api/organizations/?search=${search}`);
                 const data = await response.json();
                 console.log(data.results)
                 const ids = data.results.map((o) => o.id);
@@ -36,11 +87,11 @@ export default function CreateUser(){
             }
         }
         getOrganizations();
-    }, [])
+    }, [search])
 
     const formConfig = useMemo(() => {
-        return userConfig(orgIDs, orgNames);
-    }, [orgIDs, orgNames]);
+        return userConfig(orgIDs, orgNames, clientIDs, clientNames, profilesMeta, (val) => setSearch(val));
+    }, [orgIDs, orgNames, profilesMeta]);
 
     const handleCancel = () => {
             navigate('/profiles')
@@ -62,6 +113,7 @@ export default function CreateUser(){
             });
             const returnData = await response.json();
             if(response.ok){
+                setProfileDetails(prev => [...prev, returnData])
                 navigate(`/profiles/${returnData.id}`);
             }
             else{

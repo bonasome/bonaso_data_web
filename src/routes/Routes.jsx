@@ -112,7 +112,7 @@ function Router() {
         >
             <Route index element={<ProjectsIndex />}/>
             <Route path=':id' element = {
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <ProjectDetail />
                 </RedirectIfNoPerm>
             } />
@@ -132,7 +132,7 @@ function Router() {
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id/narrative-reports/download' element={
-                <RedirectIfNoPerm level={['admin']}>
+                <RedirectIfNoPerm level={['admin', 'client']}>
                     <NarrativeReportDownload />
                 </RedirectIfNoPerm>
             }/>

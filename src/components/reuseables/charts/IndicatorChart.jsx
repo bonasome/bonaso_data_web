@@ -44,7 +44,7 @@ export default function IndicatorChart({ indicatorID, showTargets=true, showFilt
         }
         getInteractions();
     }, [indicatorID, projectID, organizationID])
-
+    console.log(data)
     useEffect(() => {
         const getRespondentMeta = async () => {
             setLoading(true)

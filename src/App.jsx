@@ -6,6 +6,7 @@ import { OrganizationsProvider } from './contexts/OrganizationsContext';
 import { IndicatorsProvider } from './contexts/IndicatorsContext';
 import { InteractionsProvider } from './contexts/InteractionsContext';
 import { TasksProvider } from './contexts/TasksContext';
+import { ProfilesProvider } from './contexts/ProfilesContext';
 import Router from './routes/Routes';
 import Navbar from './components/Navbar';
 function App() {
@@ -16,9 +17,11 @@ function App() {
         <IndicatorsProvider>
         <InteractionsProvider>
         <TasksProvider>
+        <ProfilesProvider>
             <BrowserRouter>
                 <Router />
             </BrowserRouter>
+        </ProfilesProvider>
         </TasksProvider>
         </InteractionsProvider>
         </IndicatorsProvider>

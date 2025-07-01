@@ -7,23 +7,48 @@ import UserFilters from './UserFilters';
 import IndexViewWrapper from '../reuseables/IndexView';
 import Loading from '../reuseables/Loading';
 import { Link } from 'react-router-dom';
+import { useProfiles } from "../../contexts/ProfilesContext";
 
 function ProfileCard({ profile }) {
     const [expanded, setExpanded] = useState(false);
-    const map = {
-        'admin': 'Site Administrator',
-        'meofficer': 'M&E Officer',
-        'manager': 'Manager',
-        'data_collector': 'Data Collector',
-        'view_only': 'Uninitiated',
-    }
+    const { profilesMeta, setProfilesMeta } = useProfiles();
+    const [labels, setLabels] = useState({});
+    useEffect(() => {
+        const getMeta = async() => {
+            if(Object.keys(profilesMeta).length != 0){
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/profiles/users/meta/`);
+                    const data = await response.json();
+                    setProfilesMeta(data);
+                }
+                catch(err){
+                    console.error('Failed to fetch profiles meta: ', err)
+                }
+            }
+        }
+        getMeta()
+    }, [])
+
+    useEffect(() => {
+        if (!profilesMeta?.roles) return;
+        const roleIndex = profilesMeta.roles.indexOf(profile.role);
+        console.log('ri', roleIndex)
+        setLabels({
+            role: profilesMeta.role_labels[roleIndex],
+        })
+    }, [profilesMeta, profile])
+        
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={()=>setExpanded(!expanded)}>
             <Link to={`/profiles/${profile.id}`} style={{display:'flex', width:"fit-content"}}><h2>{profile.first_name} {profile.last_name}</h2></Link>
             {expanded && (
                 <>
                     <p>Organization: {profile?.organization?.name}</p>
-                    <p>Role: {map[profile?.role]}</p>
+                    <p>Role: {labels.role}</p>
                     <Link to={`/profiles/${profile.id}`}><button>View Details</button></Link>
                     <Link to={`/profiles/${profile.id}/edit`}><button>Edit Details</button></Link>
                 </>
@@ -37,7 +62,7 @@ export default function ProfilesIndex(){
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-    const [profiles, setProfiles] = useState(null);
+    const { profiles, setProfiles } = useProfiles();
     const [loading, setLoading] = useState(true);
     const [orgFilter, setOrgFilter] = useState('');
     const [roleFilter, setRoleFilter] = useState('');

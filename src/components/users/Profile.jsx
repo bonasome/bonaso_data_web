@@ -11,6 +11,7 @@ import AdminResetPassword from '../auth/passwordReset/AdminResetPassword'
 import ProfileChart from '../reuseables/charts/ActivityChart';
 import ActivityChart from "../reuseables/charts/ActivityChart";
 import IndexView from '../reuseables/IndexView';
+import { useProfiles } from '../../contexts/ProfilesContext';
 
 export default function Profile(){
     const { user } = useAuth();
@@ -23,25 +24,52 @@ export default function Profile(){
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
     const [search, setSearch] = useState('')
-
+    const [labels, setLabels] = useState({});
+    const { profileDetails, setProfileDetails, profilesMeta, setProfilesMeta } = useProfiles();
     useEffect(() => {
         const getProfile = async () => {
-            try{
-                console.log('fetching model info...')
-                const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
-                const data = await response.json();
-                setProfile(data)
-                if(data.is_active){
-                    setActive(true)
-                }
-                setLoading(false)
+            const found = profileDetails.find(p => p.id.toString() === id.toString());
+            if (found) {
+                setProfile(found);
+                setLoading(false);
+                return;
             }
-            catch(err){
-                console.error('Failed to fetch profile: ', err)
-                setLoading(false)
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
+                    const data = await response.json();
+                    setProfile(data)
+                    setProfileDetails(prev => [...prev, data]);
+                    if(data.is_active){
+                        setActive(true)
+                    }
+                    setLoading(false)
+                }
+                catch(err){
+                    console.error('Failed to fetch profile: ', err)
+                    setLoading(false)
+                }
             }
         }
-        getProfile()
+        getProfile();
+        const getMeta = async() => {
+            if(Object.keys(profilesMeta).length != 0){
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/profiles/users/meta/`);
+                    const data = await response.json();
+                    setProfilesMeta(data);
+                }
+                catch(err){
+                    console.error('Failed to fetch profiles meta: ', err)
+                }
+            }
+        }
+        getMeta();
         const getActivityFeed = async () => {
             try{
                 console.log('fetching model info...')
@@ -61,6 +89,15 @@ export default function Profile(){
 
     }, [page, search])
     
+    useEffect(() => {
+            if (!profilesMeta?.roles || ! profile?.role) return;
+            const roleIndex = profilesMeta.roles.indexOf(profile.role);
+            console.log('ri', roleIndex)
+            setLabels({
+                role: profilesMeta.role_labels[roleIndex],
+            })
+        }, [profilesMeta, profile])
+
     
     const changeStatus = async(to) => {
         try{
@@ -86,14 +123,8 @@ export default function Profile(){
             console.error('Failed to fetch profile: ', err)
         }
     }
-    const map = {
-        'admin': 'Site Administrator',
-        'meofficer': 'M&E Officer',
-        'manager': 'Manager',
-        'data_collector': 'Data Collector',
-        'view_only': 'Uninitiated',
-    }
 
+    console.log(profile)
     if(loading) return <Loading />
     return(
         <div className={styles.container}>
@@ -113,7 +144,13 @@ export default function Profile(){
                 <h3>Email</h3>
                 <p>{profile?.email}</p>
                 <h3>Role</h3>
-                <p>{map[profile?.role]}</p>
+                <p>{labels.role}</p>
+                {profile.role=='client' &&
+                    <div>
+                        <h3>Client</h3>
+                        <p>{profile?.client_organization.name}</p>
+                    </div>
+                }
             </div>
             <div className={styles.card}>
                 <h2>Activity </h2>

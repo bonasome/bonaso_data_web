@@ -89,7 +89,7 @@ function Dropdown({ name }){
 function MenuLink({ name, url }) {
     const { user } = useAuth();
     const [active, setActive] = useState(false);
-    if(name == 'Projects' && !['meofficer', 'manager', 'admin'].includes(user.role)){
+    if(name == 'Projects' && !['meofficer', 'manager', 'admin', 'client'].includes(user.role)){
         return <></>
     }
     if(name == 'Team' && !['meofficer', 'manager', 'admin'].includes(user.role)){
@@ -123,8 +123,8 @@ function ThinMenu() {
             <h3>Respondents</h3>
             <div className={styles.menuBar}><Link to='/respondents'>Respondents</Link></div>
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/batch-record'}>Batch Record</Link></div>}
-            {['admin', 'meofficer', 'manager'].includes(user.role) && <h3>Projects</h3>}
-            {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}
+            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h3>Projects</h3>}
+            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/organizations'}>Organizations</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/indicators'}>Indicators</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <h3>Team</h3>}
