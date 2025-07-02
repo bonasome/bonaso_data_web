@@ -11,13 +11,13 @@ import { BiSolidShow } from "react-icons/bi";
 import { BiSolidHide } from "react-icons/bi";
 import IndicatorChart from '../../reuseables/charts/IndicatorChart';
 
-function IndicatorCard({ indicator, callback }){
+function IndicatorCard({ indicator, callback, active }){
     const handleDragStart = (e) => {
         e.dataTransfer.setData('application/json', JSON.stringify(indicator));
     };
 
     return(
-        <div className={styles.card} draggable onDragStart={handleDragStart} onClick={() => callback('view-indicator', indicator)}>
+        <div className={active ? styles.activeCard : styles.card} draggable onDragStart={handleDragStart} onClick={() => callback('view-indicator', indicator)}>
             <h3>{indicator.code}: {indicator.name}</h3>
         </div>
     )
@@ -26,6 +26,12 @@ function IndicatorCard({ indicator, callback }){
 export function IndicatorsBar({ project, callback, visChange }){
     const { user } = useAuth();
     const[sbVisible, setSBVisible] = useState(true)
+    const [activeIndicator, setActiveIndicator] = useState('');
+    
+    const handleClick = (type, ind) => {
+        setActiveIndicator(ind.id)
+        callback(type, ind)
+    }
     return(
         <div  className={styles.sidebarRight}>
             <div className={styles.toggle} onClick={() => {setSBVisible(!sbVisible); visChange(!sbVisible)}}>
@@ -35,7 +41,7 @@ export function IndicatorsBar({ project, callback, visChange }){
                 <h2>Project Indicators</h2>
                 {user.role ==='admin' && <button onClick={() => callback('add-indicator')}>Add an Indicator</button>}
                 {project?.indicators.length > 0 ? project.indicators.map((ind) => (
-                    <IndicatorCard key={ind.id} indicator={ind} callback={callback}/>
+                    <IndicatorCard key={ind.id} indicator={ind} callback={(type, ind) => handleClick(type, ind)} active={activeIndicator === ind.id ? true : false}/>
                 )) :
                 <p>This project doesn't have any indicators yet.</p>
                 }

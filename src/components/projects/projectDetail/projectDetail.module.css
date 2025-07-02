@@ -80,6 +80,23 @@
     color: var(--bonaso-dark-accent);
 }
 
+.activeCard {
+    margin: 2vh;
+    padding: 1vh;
+    height: fit-content;
+    cursor: pointer;
+    background-color: white;
+    color: var(--bonaso-dark-accent);
+    transition: transform 0.3s ease;
+}
+
+.activeCard:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    background-color: white;
+    color: var(--bonaso-dark-accent);
+}
+
 .addTask{
     background-color: var(--bonaso-dark-accent);
     padding: 4vh;

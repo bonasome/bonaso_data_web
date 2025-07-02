@@ -21,7 +21,6 @@ export default function IndicatorDetail(){
     const { indicatorDetails, setIndicatorDetails } = useIndicators();
     const[activeIndicator, setActiveIndicator] = useState(null);
     const [projects, setProjects] = useState([]);
-    const [showTargets, setShowTargets] = useState(false);
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
 
@@ -141,8 +140,7 @@ export default function IndicatorDetail(){
             </div>
             {activeIndicator.status != 'Planned' && <div className={styles.section}>
                 <h2>Performance Over Time</h2>
-                <Checkbox label='Show Targets?' name="targets" checked={showTargets} callback={(c) => setShowTargets(c)} />
-                <IndicatorChart indicatorID={activeIndicator.id} showTargets={showTargets} showFilters={true} />
+                <IndicatorChart indicatorID={activeIndicator.id} showFilters={true} />
             </div>}
             
             

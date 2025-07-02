@@ -16,6 +16,7 @@ import { Link } from 'react-router-dom';
 import IndicatorChart from '../../reuseables/charts/IndicatorChart';
 
 export function OrganizationsBar({ project, callback, visChange }){
+    const [activeOrg, setActiveOrg] = useState('');
     const[sbVisible, setSBVisible] = useState(true)
     return(
         <div  className={styles.sidebarLeft}>
@@ -23,7 +24,7 @@ export function OrganizationsBar({ project, callback, visChange }){
                 <h2>Project Organizations</h2>
                 <button onClick={() => callback('add-organization')}>Add an Organization</button>
                 {project?.organizations.length > 0 ? project.organizations.map((org) => (
-                    <div key={org.id} className={styles.card} onClick={() => callback('view-organization', org)}>
+                    <div key={org.id} className={org.id === activeOrg ? styles.activeCard : styles.card} onClick={() => {callback('view-organization', org); setActiveOrg(org.id)}}>
                         <h3>{org.name}</h3>
                     </div>
                 )):
@@ -213,12 +214,10 @@ export function OrganizationPerformance({ project, organization }){
         <div className={styles.viewbox}>
             <h3>Performance for {organization.name} during {project.name}</h3>
             {indicator && <h4><i>{indicator.name}</i></h4>}
+            {indicator && <IndicatorChart indicatorID={indicator.id} organizationID={organization.id} projectID={project.id} />}
             <div className={styles.dropZone} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray', height: '100px', padding: '10px', marginBottom: '30px' }}>
                 <p>Drag an indicator from the sidebar to view {organization.name}'s performance.</p>
             </div>
-        
-            {!indicator && <p><i>Drag and drop an indicator to view performance.</i></p>}
-            {indicator && <IndicatorChart indicatorID={indicator.id} organizationID={organization.id} projectID={project.id} />}
         </div>
     )
 }
@@ -284,21 +283,10 @@ export function ViewOrganization({ project, organization, onRemove }){
                     statusWarning={'If there are any active tasks, you will be prevented from doing this.'} 
                     onConfirm={() => removeOrg()} onCancel={() => setDel(false)} 
             />}
-            <div className={styles.viewbox}>
-            <h3 >Viewing as {organization.name}</h3>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {organization?.child_organizations.length > 0 && 
-                <div>
-                <h4>Child Organizations</h4>
-                <ul>
-                    {organization.child_organizations.map((org) => <li key={org.id}>{org.name}</li>)}
-                </ul>
-                </div>
-            }
-            </div>
-            <OrganizationTasks project={project} organization={organization} />
-            <OrganizationPerformance project={project} organization={organization} />
+            {project.status === 'Active' && <OrganizationPerformance project={project} organization={organization} />}
             <NarrativeReportDownload project={project} organization={organization} />
+            <OrganizationTasks project={project} organization={organization} />
             {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Remove Organization From Project</button>}
         </div>
     )

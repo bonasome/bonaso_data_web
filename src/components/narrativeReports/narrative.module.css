@@ -24,3 +24,25 @@
 .buttons > button{
     max-width: 10vw;
 }
+
+.card {
+    background-color: var(--bonaso-uber-dark-accent);
+    padding: 2vh;
+    margin: 2vh;
+    transition: transform .6s;
+}
+
+.card:hover{
+    transform: scale(1.05);
+    margin: 0;
+    background-color: var(--bonaso-light-accent);
+    color: var(--bonaso-uber-dark-accent);
+}
+
+.downloadRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+

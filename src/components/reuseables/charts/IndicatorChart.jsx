@@ -5,10 +5,18 @@ import monthlyCounts from './monthlyCounts'
 import { useRespondents } from '../../../contexts/RespondentsContext';
 import SimpleSelect from '../SimpleSelect';
 import Checkbox from '../Checkbox';
+import styles from './chart.module.css';
 
-export default function IndicatorChart({ indicatorID, showTargets=true, showFilters=false, organizationID=null, projectID=null }) {
+export default function IndicatorChart({ indicatorID, organizationID=null, projectID=null }) {
     const { respondentsMeta, setRespondentsMeta } = useRespondents();
     const [data, setData] = useState(null);
+    const [showFilters, setShowFilters] = useState(false);
+    const [axis, setAxis] = useState('');
+    const [legendOptions, setLegendOptions] = useState([]);
+    const [legendLabels, setLegendLabels] = useState([]);
+    const [subcategories, setSubcategories] = useState([])
+    const [legend, setLegend] = useState('');
+
     const [filters, setFilters] = useState({
         sex: '',
         age_range: '',
@@ -17,8 +25,8 @@ export default function IndicatorChart({ indicatorID, showTargets=true, showFilt
         kp_status: [],
         disability_status: [],
         organization: '',
-        start: null,
-        end: null,
+        after: '',
+        before: '',
     });
     const [chartData, setChartData] = useState(null)
     const [loading, setLoading] = useState(true);
@@ -30,11 +38,12 @@ export default function IndicatorChart({ indicatorID, showTargets=true, showFilt
                 console.log('fetching respondent details...');
                 const urlFilters = (organizationID ? `&organization=${organizationID}` : '') +
                     (projectID ? `&project=${projectID}` : '');
-                    console.log(`/api/indicators/chart-data/?indicator=${indicatorID}${urlFilters}`)
                 const response = await fetchWithAuth(`/api/indicators/chart-data/?indicator=${indicatorID}${urlFilters}`);
                 const data = await response.json();
-                setData(data);
-                setChartData(monthlyCounts(data[0], showTargets));
+                setData(data[0]);
+                setLegendOptions(data[0].legend)
+                setLegendLabels(data[0].legend_labels)
+                setChartData(monthlyCounts(data[0]));
                 setLoading(false)
             } 
             catch (err) {
@@ -44,7 +53,7 @@ export default function IndicatorChart({ indicatorID, showTargets=true, showFilt
         }
         getInteractions();
     }, [indicatorID, projectID, organizationID])
-    console.log(data)
+
     useEffect(() => {
         const getRespondentMeta = async () => {
             setLoading(true)
@@ -70,10 +79,24 @@ export default function IndicatorChart({ indicatorID, showTargets=true, showFilt
     }, [])
 
     useEffect(() => {
-        if(data?.length > 0){
-            setChartData(monthlyCounts(data[0], showTargets, filters));
+        if(data){
+            setChartData(monthlyCounts(data, filters, axis, legend, respondentsMeta));
         }
-    }, [data, showTargets, filters])
+    }, [data, filters, axis, legend])
+
+    useEffect(() => {
+        if(!chartData || chartData.length === 0) return;
+        let groups = [];
+        chartData.forEach((g) => {
+            const keys = Object.keys(g)
+            keys.forEach(key => {
+                if(key === 'ag' || key === 'target' || key === 'count') return;
+                if(groups.includes(key)) return;
+                groups.push(key);
+            })
+        })
+        setSubcategories(groups);
+    }, [chartData])
 
     const CustomTooltip = ({ active, payload, label }) => {
         if (!active || !payload || payload.length === 0) return null;
@@ -91,19 +114,31 @@ export default function IndicatorChart({ indicatorID, showTargets=true, showFilt
         );
     };
 
+    const getRandomColor = () =>{
+        return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+    }
     if (loading || !chartData) return <p>Loading...</p>;
     return(
         <div>
             <BarChart width={600} height={300} data={chartData}>
-                <XAxis dataKey="month" tick={{fill: '#fff'}}/>
+                <XAxis dataKey="ag" tick={{fill: '#fff'}}/>
                 <YAxis tick={{fill: '#fff'}}/>
                 <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
                 <Legend />
-                <Bar dataKey="count" fill="#fff" name="Acheivement" />
-                {showTargets && <Bar dataKey="target" fill="#ec7070" name="Target" />}
+                {['', 'targets'].includes(legend) && <Bar dataKey="count" fill="#fff" name="Acheivement" />}
+                {subcategories.map((key) => (
+                    <Bar key={key} dataKey={key} fill={getRandomColor()}/>
+                ))}
+                {legend === 'targets' && <Bar dataKey="target" fill="#ec7070" name="Target" />}
             </BarChart>
+
+            <SimpleSelect name='legend' optionValues={legendOptions} optionLabels={legendLabels} callback={(val) => setLegend(val)} value={legend} />
+            <SimpleSelect name='axis' optionValues={['month']} optionLabels={['By Month']} callback={(val) => setAxis(val)} value={axis} />
+            
+            <Checkbox label='Show Filters?' name="filters" checked={showFilters} callback={(c) => setShowFilters(c)} />
             {showFilters && <div>
                 <h3>Filters</h3>
+                <div className={styles.filters}>
                 <SimpleSelect name='sex' optionValues={respondentsMeta.sexs} optionLabels={respondentsMeta.sex_labels} callback={(val) => setFilters(prev => ({...prev, sex: val}))} />
                 <SimpleSelect name='age_range' optionValues={respondentsMeta.age_ranges} optionLabels={respondentsMeta.age_range_labels} callback={(val) => setFilters(prev => ({...prev, age_range: val}))} />
                 <SimpleSelect name='district' optionValues={respondentsMeta.districts} optionLabels={respondentsMeta.district_labels} callback={(val) => setFilters(prev => ({...prev, district: val}))} />
@@ -118,6 +153,17 @@ export default function IndicatorChart({ indicatorID, showTargets=true, showFilt
                     multiple={true} optionLabels={respondentsMeta.disability_type_labels}
                     callback={(val) => setFilters(prev => ({ ...prev, disability_status: val }))}
                 />
+                <div>
+                    <div>
+                        <label htmlFor='after' >After</label>
+                        <input id='after' type='date' value={filters.after} onChange={(e) => setFilters(prev => ({...prev, after: e.target.value}))} />
+                    </div>
+                    <div>
+                        <label htmlFor='before' >Before</label>
+                        <input id='before' type='date' value={filters.before} onChange={(e) => setFilters(prev => ({...prev, before: e.target.value}))} />
+                    </div>
+                    </div>
+                </div>
             </div>}
         </div>
     )

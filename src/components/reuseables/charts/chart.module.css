@@ -1,0 +1,9 @@
+.filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+.filters > * {
+    padding: 2vh;
+    background-color: var(--bonaso-uber-dark-accent);
+}

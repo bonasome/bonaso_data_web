@@ -5,6 +5,49 @@ import SimpleSelect from '../reuseables/SimpleSelect';
 import Loading from '../reuseables/Loading';
 import errorStyles from '../../styles/errors.module.css';
 import styles from './narrative.module.css';
+import { Link } from 'react-router-dom';
+
+function NarrativeReportCard({ report }){
+    const [expanded, setExpanded] = useState(false);
+    const[errors, setErrors] = useState([]);
+    const handleDownload = async (report) => {
+        try {
+            const response = await fetchWithAuth(`/api/uploads/narrative-report/${report.id}/download/`);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', report.file?.split('/').pop() || 'report.pdf');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            setErrors(['Failed to download file.']);
+            console.error('Download failed:', error);
+        }
+    };
+    return(
+        <div key={report.id} className={styles.card} onClick={() => setExpanded(!expanded)}>
+            {errors.length > 0 && (
+                <div className={errorStyles.errors}>
+                    <ul>{errors.map((msg) => <li key={msg}>{msg}</li>)}</ul>
+                </div>
+            )}
+            <div className={styles.downloadRow}>
+                <h3>{report.title}</h3>
+                {!expanded && <button onClick={() => handleDownload(report)}>Download</button>}
+            </div>
+            {expanded && 
+                <div>
+                    <p>{report.description}</p>
+                    <button onClick={() => handleDownload(report)}>Download</button>
+                </div>
+            }
+        </div>
+    )
+}
 
 export default function NarrativeReportDownload({ organization, project }) {
     const { user } = useAuth();
@@ -28,30 +71,11 @@ export default function NarrativeReportDownload({ organization, project }) {
         getFiles();
     }, [organization, project]);
 
-    const handleDownload = async (report) => {
-        try {
-            const response = await fetchWithAuth(`/api/uploads/narrative-report/${report.id}/download/`);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', report.file?.split('/').pop() || 'report.pdf');
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            setErrors(['Failed to download file.']);
-            console.error('Download failed:', error);
-        }
-    };
-
     if (loading) return <Loading />;
 
     return (
         <div className={styles.files}>
-            <h2>Narrative Reports for {project.name}</h2>
+            <h2>Narrative Reports for {organization.name} during {project.name}</h2>
 
             {errors.length > 0 && (
                 <div className={errorStyles.errors}>
@@ -60,13 +84,10 @@ export default function NarrativeReportDownload({ organization, project }) {
             )}
 
             {files.length > 0 ? files.map((report) => (
-                <div key={report.id}>
-                    <h3>{report.title}</h3>
-                    <p>{report.description}</p>
-                    <button onClick={() => handleDownload(report)}>Download</button>
-                </div>
+                <NarrativeReportCard report={report} />
             )) : <p>No reports found.</p>}
             {files.length == 0 && <p>No narrative reports have been uploaded yet.</p>}
+            <Link to={`/projects/${project.id}/narrative-reports/upload`} ><button>Upload a Narrative Report for this Project</button></Link>
         </div>
     )
 }
