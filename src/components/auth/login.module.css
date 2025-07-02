@@ -10,6 +10,11 @@
     margin-top: 10vh;
     box-shadow: 2px 2px 2px 4px var(--bonaso-light-accent);
 }
+@media screen and (max-width: 768px){
+    .login{
+        width: 80vw;
+    }
+}
 .header{
     text-align: center;
 }
@@ -32,4 +37,9 @@
 }
 .inputs > *{
     margin-bottom: 1vh;
+}
+@media screen and (max-width: 768px){
+    .inputs{
+        width: 60vw;
+    }
 }
