@@ -80,11 +80,11 @@ function ProjectInfo({ project }){
     )
 }
 
-function ProjectViewSwitch({ project, type, onRemove, indicator=null, organization=null }) {
+function ProjectViewSwitch({ project, type, onRemove, indicator=null, organization=null, setAddingTask, setViewingInd }) {
     if(type=='add-indicator') return <AddIndicator project={project} />
     if(type=='view-indicator' && indicator) return <ViewIndicator project={project} indicator = {indicator} onRemove={onRemove}/>
     if(type == 'add-organization') return <AddOrganization project={project}  />
-    if(type=='view-organization' && organization) return <ViewOrganization project={project} organization = {organization} onRemove={onRemove}/>
+    if(type=='view-organization' && organization) return <ViewOrganization project={project} organization = {organization} onRemove={onRemove} setAddingTask={setAddingTask} setViewingInd={setViewingInd}/>
     if(!type || type == 'project') return <ProjectInfo project={project} />
 }
 
@@ -98,7 +98,16 @@ export default function ProjectDetail(){
     const [type, setType ] = useState('project');
     const[leftVisible, setLeftVisible] =useState(true);
     const [rightVisible, setRightVisible] = useState(true);
+    const [addingTask, setAddingTask] = useState(() => () => {});
+    const [viewingInd, setViewingInd] = useState(() => () => {});
     const width = useWindowWidth();
+
+    const handleButtonAdd = (task) => {
+        addingTask(task);
+    };
+    const handleButtonView = (indicator) => {
+        viewingInd(indicator);
+    };
 
     const getGridTemplate = () => {
         if(width < 500) return '100%'
@@ -143,9 +152,9 @@ export default function ProjectDetail(){
                     <p>Return to projects overview</p>   
                 </Link>
                 <Link><h1 onClick={() => setType('project')} className={styles.projectHeader}>{activeProject.name}</h1></Link>
-                <ProjectViewSwitch project={activeProject} type={type} indicator={activeIndicator} organization={activeOrganization} onRemove={() => setType('project')}/>
+                <ProjectViewSwitch project={activeProject} type={type} indicator={activeIndicator} organization={activeOrganization} onRemove={() => setType('project')} setAddingTask={setAddingTask} setViewingInd={setViewingInd}/>
             </div>
-            <IndicatorsBar project={activeProject} callback={(t, ind) => {setType(t); setActiveIndicator(ind)}} visChange={(vis) => setRightVisible(vis)} />
+            <IndicatorsBar project={activeProject} callback={(t, ind) => {setType(t); setActiveIndicator(ind)}} visChange={(vis) => setRightVisible(vis)} activeOrganization={activeOrganization} buttonAdd={handleButtonAdd} buttonViewChart={handleButtonView}/>
             {width <500 && <OrganizationsBar project={activeProject} callback={(t, org) => {setType(t); setActiveOrganization(org)}} visChange={(vis) => setLeftVisible(vis)}/>}
         </div>
     )

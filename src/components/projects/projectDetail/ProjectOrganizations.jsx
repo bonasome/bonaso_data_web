@@ -107,7 +107,7 @@ export function AddOrganization({ project }){
     
 }
 
-export function OrganizationTasks({ project, organization }){
+export function OrganizationTasks({ project, organization, setAddingTask }){
     const [orgTasks, setOrgTasks] = useState([])
     const [errors, setErrors] = useState([])
     const [warnings, setWarnings] = useState([])
@@ -116,12 +116,22 @@ export function OrganizationTasks({ project, organization }){
     const loadTasks = (data) => {
         setOrgTasks(data);
     }
-    const handleDrop = async (e) => {
+
+    useEffect(() => {
+        setAddingTask(() => handleAdd)
+    }, [setAddingTask])
+
+    const handleDrop = async(e) => {
+        e.preventDefault();
+        const indicator = JSON.parse(e.dataTransfer.getData('application/json'));
+        handleAdd(indicator)
+    }
+
+    const handleAdd = async (indicator) => {
         if(!['meofficer', 'manager', 'admin'].includes(user.role)){return;}
         let taskWarnings = []
         let taskErrors = []
-        e.preventDefault();
-        const indicator = JSON.parse(e.dataTransfer.getData('application/json'));
+        
         const forbidden = orgTasks.map((task) => task.indicator.id);
         if(forbidden.includes(indicator.id)){
             taskErrors.push('Cannot assign the same indicator to the same org twice!')
@@ -200,7 +210,7 @@ export function OrganizationTasks({ project, organization }){
     
 }
 
-export function OrganizationPerformance({ project, organization }){
+export function OrganizationPerformance({ project, organization, setViewingInd }){
     const [indicator, setIndicator] = useState(null)
 
     const handleDrop = async (e) => {
@@ -208,6 +218,9 @@ export function OrganizationPerformance({ project, organization }){
         const indicatorPackage = JSON.parse(e.dataTransfer.getData('application/json'));
         setIndicator(indicatorPackage)
     }
+    useEffect(() => {
+        setViewingInd(() => setIndicator)
+    }, [setViewingInd])
     const handleDragOver = (e) => {
         e.preventDefault(); // Required to allow drop
     };
@@ -222,7 +235,7 @@ export function OrganizationPerformance({ project, organization }){
         </div>
     )
 }
-export function ViewOrganization({ project, organization, onRemove }){
+export function ViewOrganization({ project, organization, onRemove, setAddingTask, setViewingInd }){
     const { user } = useAuth();
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
@@ -285,9 +298,9 @@ export function ViewOrganization({ project, organization, onRemove }){
                     onConfirm={() => removeOrg()} onCancel={() => setDel(false)} 
             />}
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {project.status === 'Active' && <OrganizationPerformance project={project} organization={organization} />}
+            {project.status === 'Active' && <OrganizationPerformance project={project} organization={organization} setViewingInd={setViewingInd}/>}
             <NarrativeReportDownload project={project} organization={organization} />
-            <OrganizationTasks project={project} organization={organization} />
+            <OrganizationTasks project={project} organization={organization} setAddingTask={setAddingTask}/>
             {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Remove Organization From Project</button>}
         </div>
     )

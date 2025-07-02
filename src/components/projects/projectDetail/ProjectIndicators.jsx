@@ -12,7 +12,7 @@ import { BiSolidHide } from "react-icons/bi";
 import IndicatorChart from '../../reuseables/charts/IndicatorChart';
 import useWindowWidth from '../../../../services/useWindowWidth';
 
-function IndicatorCard({ indicator, callback, active }){
+function IndicatorCard({ indicator, callback, active, activeOrganization, buttonAdd, buttonViewChart }){
     const handleDragStart = (e) => {
         e.dataTransfer.setData('application/json', JSON.stringify(indicator));
     };
@@ -20,11 +20,13 @@ function IndicatorCard({ indicator, callback, active }){
     return(
         <div className={active ? styles.activeCard : styles.card} draggable onDragStart={handleDragStart} onClick={() => callback('view-indicator', indicator)}>
             <h3>{indicator.code}: {indicator.name}</h3>
+            {activeOrganization && <button onClick={(e) => {e.stopPropagation(); buttonAdd(indicator)}}>Assign as task</button>}
+            {activeOrganization && <button onClick={(e) => {e.stopPropagation(); buttonViewChart(indicator)}}>Chart</button>}
         </div>
     )
 }
 
-export function IndicatorsBar({ project, callback, visChange }){
+export function IndicatorsBar({ project, callback, visChange, activeOrganization, buttonAdd, buttonViewChart }){
     const width = useWindowWidth();
 
     const { user } = useAuth();
@@ -44,7 +46,7 @@ export function IndicatorsBar({ project, callback, visChange }){
                 <h2>Project Indicators</h2>
                 {user.role ==='admin' && <button onClick={() => callback('add-indicator')}>Add an Indicator</button>}
                 {project?.indicators.length > 0 ? project.indicators.map((ind) => (
-                    <IndicatorCard key={ind.id} indicator={ind} callback={(type, ind) => handleClick(type, ind)} active={activeIndicator === ind.id ? true : false}/>
+                    <IndicatorCard key={ind.id} indicator={ind} callback={(type, ind) => handleClick(type, ind)} active={activeIndicator === ind.id ? true : false} activeOrganization={activeOrganization} buttonAdd={buttonAdd} buttonViewChart={buttonViewChart} />
                 )) :
                 <p>This project doesn't have any indicators yet.</p>
                 }
