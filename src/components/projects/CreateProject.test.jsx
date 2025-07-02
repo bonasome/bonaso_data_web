@@ -6,7 +6,8 @@ import { handlers } from '../../mocks/handlers';
 import { ProjectProvider } from '../../contexts/ProjectsContext';
 import { UserAuth } from '../../contexts/UserAuth';
 import CreateProject from './CreateProject';
-import userEvent from '@testing-library/user-event';;
+import userEvent from '@testing-library/user-event';
+
 const user = userEvent.setup();
 
 const navigateMock = vi.fn();

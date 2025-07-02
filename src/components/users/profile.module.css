@@ -3,7 +3,12 @@
     padding: 5vh;
     background-color: var(--bonaso-dark-accent);
 }
-
+@media screen and (max-width: 768px){
+    .container{
+        padding: 2vh;
+        margin: 2vh;
+    }
+}
 .return{
     display: flex;
     flex-direction: row;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from 'react-router-dom';
 import { useRespondents } from '../../contexts/RespondentsContext';
 import fetchWithAuth from '../../../services/fetchWithAuth';
@@ -16,8 +16,11 @@ import errorStyles from '../../styles/errors.module.css';
 import { IoMdReturnLeft } from "react-icons/io";
 import { BiSolidShow } from "react-icons/bi";
 import { BiSolidHide } from "react-icons/bi";
+import useWindowWidth from '../../../services/useWindowWidth';
 
 export default function RespondentDetail(){
+    const width = useWindowWidth();
+
     const { id } = useParams();
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -30,9 +33,12 @@ export default function RespondentDetail(){
     const[tasks, setTasks] = useState([]);
     const [del, setDel] = useState(false);
     const [errors, setErrors] = useState([])
-
     const[sbVisible, setSBVisible] = useState(true);
+    const [addingTask, setAddingTask] = useState(() => () => {});
 
+    const handleButtonAdd = (task) => {
+        addingTask(task);
+    };
     useEffect(() => {
         const getRespondentMeta = async () => {
             if(Object.keys(respondentsMeta).length !== 0){
@@ -167,14 +173,14 @@ export default function RespondentDetail(){
                 </div>
                 <div className={styles.interactions}>
                     <h2>Interactions</h2>
-                    <Interactions id={id} tasks={tasks} onUpdate={onUpdate}/>
+                    <Interactions id={id} tasks={tasks} onUpdate={onUpdate} setAddingTask={setAddingTask}/>
                 </div>
             </div>
             <div className={styles.sidebar}>
-                <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
+                {width > 700 && <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
                     {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
-                </div>
-                {!['client'].includes(user.role) && sbVisible && <Tasks callback={loadTasks} isDraggable={true} blacklist={added} />}
+                </div>}
+                {!['client'].includes(user.role) && sbVisible && <Tasks callback={loadTasks} isDraggable={true} addCallback={(t) => handleButtonAdd(t)} blacklist={added} />}
             </div>
         </div>
     )

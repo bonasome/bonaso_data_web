@@ -64,6 +64,14 @@ input:focus{
     outline: none;
     box-shadow: 4px 4px 4px var(--bonaso-uber-dark-accent);
 }
+@media screen and (max-width: 768px){
+    input{
+        max-width: 66vw;
+    }
+    select{
+        max-width: 66vw;
+    }
+}
 textarea{
     font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     padding: 10px;

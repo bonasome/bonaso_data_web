@@ -13,6 +13,7 @@ import errorStyles from '../../../styles/errors.module.css';
 import { useNavigate } from 'react-router-dom';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import { IoMdReturnLeft } from "react-icons/io";
+import useWindowWidth from '../../../../services/useWindowWidth';
 
 function ProjectInfo({ project }){
     const navigate = useNavigate();
@@ -97,8 +98,10 @@ export default function ProjectDetail(){
     const [type, setType ] = useState('project');
     const[leftVisible, setLeftVisible] =useState(true);
     const [rightVisible, setRightVisible] = useState(true);
+    const width = useWindowWidth();
 
     const getGridTemplate = () => {
+        if(width < 500) return '100%'
         if (leftVisible && rightVisible) return '20% 60% 20%';
         if (leftVisible && !rightVisible) return '20% 75% 5%';
         if (!leftVisible && rightVisible) return '5% 75% 20%';
@@ -133,7 +136,7 @@ export default function ProjectDetail(){
     if(loading) return <Loading /> 
     return(
         <div className={styles.projectDetails} style={{ gridTemplateColumns: getGridTemplate() }}>
-            <OrganizationsBar project={activeProject} callback={(t, org) => {setType(t); setActiveOrganization(org)}} visChange={(vis) => setLeftVisible(vis)}/>
+            {width >= 500 && <OrganizationsBar project={activeProject} callback={(t, org) => {setType(t); setActiveOrganization(org)}} visChange={(vis) => setLeftVisible(vis)}/>}
             <div className={styles.panel}>
                 <Link to={'/projects'} className={styles.return}>
                     <IoMdReturnLeft className={styles.returnIcon} />
@@ -143,6 +146,7 @@ export default function ProjectDetail(){
                 <ProjectViewSwitch project={activeProject} type={type} indicator={activeIndicator} organization={activeOrganization} onRemove={() => setType('project')}/>
             </div>
             <IndicatorsBar project={activeProject} callback={(t, ind) => {setType(t); setActiveIndicator(ind)}} visChange={(vis) => setRightVisible(vis)} />
+            {width <500 && <OrganizationsBar project={activeProject} callback={(t, org) => {setType(t); setActiveOrganization(org)}} visChange={(vis) => setLeftVisible(vis)}/>}
         </div>
     )
 }

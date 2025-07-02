@@ -165,7 +165,7 @@ export default function Navbar() {
                 <Link to='/'><img src={bonasoWhite} className={styles.headerLogo} /></Link>
                 <Link to='/'><div className={styles.headerText}>
                     <h2>BONASO Data Portal</h2>
-                    <h5 className={styles.subheader}>Empowering Botswana's HIV/AIDS Response since 1997</h5>
+                    {width > 500 && <h5 className={styles.subheader}>Empowering Botswana's HIV/AIDS Response since 1997</h5>}
                 </div></Link>
             </div>
                 {width > 1100 ?

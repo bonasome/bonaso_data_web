@@ -47,8 +47,8 @@ export default function ProfileFilters({ onFilterChange }){
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
     
-    const orgIDs = useMemo(() => orgs.map(p => p.id), [orgs]);
-    const orgNames = useMemo(() => orgs.map(p => p.name), [orgs]);
+    const orgIDs = useMemo(() => orgs.map(p => p?.id), [orgs]);
+    const orgNames = useMemo(() => orgs.map(p => p?.name), [orgs]);
     const roleVals = ['data_collector', 'meofficer', 'manager', 'admin', 'view_only']
     const roleNames =  ['Data Collector', 'M&E Officer', 'Manager', 'Site Administrator', 'View Only/Uninitiated']
 

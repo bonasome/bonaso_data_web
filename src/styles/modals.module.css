@@ -22,3 +22,11 @@
     align-items: center;
     justify-content: center;
 }
+@media screen and (max-width: 768px){
+    .modal{
+        margin: 3vh;
+        width: 75vw;
+        height: 80vh;
+        padding: 3vh;
+    }
+}

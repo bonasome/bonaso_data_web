@@ -9,14 +9,18 @@
     display: grid;
     grid-template-columns: 60% 40%;
     gap: 2rem;
-
+}
+@media screen and (max-width: 768px){
+    .content{
+        display: flex;
+        flex-direction: column;
+    }
 }
 .tasksBox{
     padding: 4vh;
     background-color: var(--bonaso-dark-accent);
 }
 .tasks {
-
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
@@ -58,7 +62,11 @@
     padding-bottom: 6vh;
     margin-right: 4vh;
 }
-
+@media screen and (max-width: 768px){
+    .actions{
+        margin: 0;
+    }
+}
 .actionLink {
     margin-left: auto;
     margin-right: auto;

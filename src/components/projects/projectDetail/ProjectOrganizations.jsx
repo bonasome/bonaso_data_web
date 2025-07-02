@@ -11,13 +11,14 @@ import errorStyles from '../../../styles/errors.module.css'
 import NarrativeReportDownload from '../../narrativeReports/NarrativeReportDownload';
 import { BiSolidShow } from "react-icons/bi";
 import { BiSolidHide } from "react-icons/bi";
-
+import useWindowWidth from '../../../../services/useWindowWidth';
 import { Link } from 'react-router-dom';
 import IndicatorChart from '../../reuseables/charts/IndicatorChart';
 
 export function OrganizationsBar({ project, callback, visChange }){
     const [activeOrg, setActiveOrg] = useState('');
-    const[sbVisible, setSBVisible] = useState(true)
+    const[sbVisible, setSBVisible] = useState(true);
+    const width = useWindowWidth();
     return(
         <div  className={styles.sidebarLeft}>
             {sbVisible && <div>
@@ -31,9 +32,9 @@ export function OrganizationsBar({ project, callback, visChange }){
                 <p>This project doesn't have any organizations yet.</p>
                 }
             </div>}
-            <div className={styles.toggle} onClick={() => {setSBVisible(!sbVisible); visChange(!sbVisible)}}>
+            {width > 500 && <div className={styles.toggle} onClick={() => {setSBVisible(!sbVisible); visChange(!sbVisible)}}>
                 {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
-            </div>
+            </div>}
         </div>
     )
 }

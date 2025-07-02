@@ -5,6 +5,13 @@
     overflow-x: hidden;
     overflow-y: hidden;
 }
+@media screen and (max-width: 700px){
+    .respondentView{
+        height: auto;
+        display: flex;  
+        flex-direction: column;
+    }
+}
 .respondentViewFull{
     display: grid;
     grid-template-columns: 97% 3%;
@@ -89,11 +96,22 @@
     overflow-x: hidden;
     margin-bottom: 10vh;
 }
+@media screen and (max-width: 768px){
+    .mainPanel, .sidebar{
+        height: auto;
+    }
+}
 
 .sidebar {
     display: grid;
     grid-template-columns: 6% 94%;
     background-color: var(--bonaso-dark-accent);
+}
+@media screen and (max-width: 768px){
+    .sidebar{
+        display: block;
+        margin: 3vh;
+    }
 }
 .toggle > *{
     position: absolute;

@@ -230,7 +230,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     )
 }
 
-export default function Interactions({ id, tasks, onUpdate }){
+export default function Interactions({ id, tasks, onUpdate, setAddingTask }){
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
 
@@ -283,7 +283,7 @@ export default function Interactions({ id, tasks, onUpdate }){
     return(
         <div>
                 {success && <div className={errorStyles.success}>{success}</div>}
-                {!['client'].includes(user.role) && <AddInteractions id={id} tasks={tasks} interactions={interactions} onUpdate={onUpdate} onFinish={onFinish}/>}
+                {!['client'].includes(user.role) && <AddInteractions id={id} tasks={tasks} interactions={interactions} onUpdate={onUpdate} onFinish={onFinish} setAddingTask={setAddingTask}/>}
                 <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
                     <h4>Previous Interactions</h4>
                     {interactions.map((interaction) => (<InteractionCard key={interaction.id} interaction={interaction} onUpdate={onEdit} onDelete={onDelete}/>))}

@@ -87,7 +87,7 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
                 axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
             });
         }
-        else if (Object.keys(interaction.respondent).includes(legend)) {
+        else if (interaction?.respondent && Object.keys(interaction.respondent).includes(legend)) {
             if(legend==='citizenship'){
                 const cat=interaction.respondent[legend];
                 const label = cat ? 'Citizen' : 'Non-Citizen';

@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import { FaSearch } from "react-icons/fa";
 
-export default function IndexViewWrapper({ children, onSearchChange, onPageChange, entries={entries}, filter=null }){
+export default function IndexViewWrapper({ children, onSearchChange, onPageChange, entries, filter=null }){
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);

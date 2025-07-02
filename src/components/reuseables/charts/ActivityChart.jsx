@@ -46,13 +46,14 @@ export default function ActivityChart({ profile, showTargets=false }) {
 
     if(loading) return <p>Loading...</p>
     return(
+        <ResponsiveContainer width="100%" height={300}>
         <BarChart width={600} height={300} data={chartData}>
-            <XAxis dataKey="month" tick={{fill: '#fff'}}/>
+            <XAxis dataKey="ag" tick={{fill: '#fff'}}/>
             <YAxis tick={{fill: '#fff'}}/>
             <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
             <Legend />
             <Bar dataKey="count" fill="#fff" name="Activity" />
-            {showTargets && <Bar dataKey="target" fill="#ec7070" name="Target" />}
         </BarChart>
+        </ResponsiveContainer>
     )
 }

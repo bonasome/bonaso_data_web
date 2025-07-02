@@ -7,7 +7,7 @@ import styles from './tasks.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 
-function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=null }) {
+function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelete=false, onDelete=null }) {
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -24,7 +24,6 @@ function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=
     }, [task])
 
     const onUpdate = (data) => {
-        console.log(data)
         const index = targets.findIndex(item => item.id === data.id);
         if (index !== -1) {
             const updated = [...targets];
@@ -41,7 +40,6 @@ function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=
         setTargets(updated)
 
     }
-    console.log(task)
 
     const removeTask = async() => {
         try {
@@ -120,6 +118,7 @@ function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=
                         </div>
                     )}
                     <p>{task.indicator.require_numeric ? 'Requires Number' : ''}</p>
+                    {isDraggable && <button onClick={() => addCallback(task)}>Add to Interaction</button>}
                     {targets && targets.length > 0 && <h3>Targets:</h3>}
                     {targets && targets.length > 0 && targets.map((t) => (
                         <Target key={t.id} target={t} task={task} tasks={tasks} onUpdate={(data) => onUpdate(data)} onDelete={(id) => checkTargets(id)}/>
@@ -134,7 +133,7 @@ function TaskCard({ task, tasks, isDraggable = false, canDelete=false, onDelete=
     );
 }
 
-export default function Tasks({ callback, update=null, target=false, organization=null, project=null, isDraggable=false, blacklist=[], canDelete=false }) {
+export default function Tasks({ callback, update=null, target=false, organization=null, project=null, isDraggable=false, blacklist=[], canDelete=false, addCallback=null }) {
     const [loading, setLoading] = useState(true);
     const [ tasks, setTasks ] = useState([]);
     const [search, setSearch] = useState('');
@@ -150,7 +149,6 @@ export default function Tasks({ callback, update=null, target=false, organizatio
                 const includeTargets = target ? `&include_targets=true` : ''
                 const includeProject = project ? `&project=${project.id}` : ''
                 const url = `/api/manage/tasks/?search=${search}` + includeTargets + includeOrg + includeProject
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setTasks(data.results);
@@ -192,7 +190,7 @@ export default function Tasks({ callback, update=null, target=false, organizatio
             <p><i>Search your tasks by name, organization, or project.</i></p>
             <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
             {tasks.length > 0 ? filteredTasks.map((task) => (
-                <TaskCard task={task} key={task.id} target={target} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)}/>
+                <TaskCard task={task} key={task.id} target={target} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} addCallback={addCallback}/>
             )) : <p>No tasks yet.</p>}
             </IndexViewWrapper>
         </div>

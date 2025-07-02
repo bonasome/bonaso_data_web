@@ -10,6 +10,7 @@ import errorStyles from '../../../styles/errors.module.css';
 import { BiSolidShow } from "react-icons/bi";
 import { BiSolidHide } from "react-icons/bi";
 import IndicatorChart from '../../reuseables/charts/IndicatorChart';
+import useWindowWidth from '../../../../services/useWindowWidth';
 
 function IndicatorCard({ indicator, callback, active }){
     const handleDragStart = (e) => {
@@ -24,6 +25,8 @@ function IndicatorCard({ indicator, callback, active }){
 }
 
 export function IndicatorsBar({ project, callback, visChange }){
+    const width = useWindowWidth();
+
     const { user } = useAuth();
     const[sbVisible, setSBVisible] = useState(true)
     const [activeIndicator, setActiveIndicator] = useState('');
@@ -34,9 +37,9 @@ export function IndicatorsBar({ project, callback, visChange }){
     }
     return(
         <div  className={styles.sidebarRight}>
-            <div className={styles.toggle} onClick={() => {setSBVisible(!sbVisible); visChange(!sbVisible)}}>
+            {width > 500 && <div className={styles.toggle} onClick={() => {setSBVisible(!sbVisible); visChange(!sbVisible)}}>
                 {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
-            </div>
+            </div>}
             {sbVisible && <div>
                 <h2>Project Indicators</h2>
                 {user.role ==='admin' && <button onClick={() => callback('add-indicator')}>Add an Indicator</button>}

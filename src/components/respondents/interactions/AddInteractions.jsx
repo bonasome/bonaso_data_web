@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import Checkbox from '../../reuseables/Checkbox';
 import fetchWithAuth from "../../../../services/fetchWithAuth";
 import errorStyles from '../../../styles/errors.module.css';
@@ -7,7 +7,7 @@ import { useInteractions} from '../../../contexts/InteractionsContext';
 import styles from '../respondentDetail.module.css';
 
 
-export default function AddInteractions({ id, tasks, interactions, onUpdate, onFinish }) {
+export default function AddInteractions({ id, tasks, interactions, onUpdate, onFinish, setAddingTask }) {
     const { setInteractions } = useInteractions();
     const [interactionDate, setInteractionDate] = useState('');
     const [number, setNumber] = useState({});
@@ -22,6 +22,12 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
     const [subcatModalActive, setSubcatModalActive] = useState(false);
     const[errors, setErrors] = useState([]);
     const[warnings, setWarnings] = useState([]);
+
+    const interactionDateRef = useRef('');
+
+    useEffect(() => {
+        interactionDateRef.current = interactionDate;
+    }, [interactionDate]);
 
     function CommentModal({task}){
         const [localComment, setLocalComment] = useState('');
@@ -152,7 +158,18 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
         e.preventDefault();
         const task = JSON.parse(e.dataTransfer.getData('application/json'));
         if (!active) setTimeout(() => setActive(true), 0);
+        handleAdd(task);
+    }
 
+    useEffect(() => {
+        setErrors([])
+        setAddingTask(() => handleAdd)
+        if (!active) setTimeout(() => setActive(true), 0);
+    }, [setAddingTask])
+
+    const handleAdd = async (task) => {
+        const date = interactionDateRef.current;
+        let dropWarnings = [];
         let addedIDs = added.map((d) => (d.id))
         if(addedIDs.includes(task.id)){
             dropWarnings.push(`This task is already recorded for this interaction.`);
@@ -176,7 +193,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                 if(data.results.length > 0){
                     const validPastInt = data.results.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
                     console.log(validPastInt)
-                    if (validPastInt && validPastInt.interaction_date <= interactionDate) {
+                    if (validPastInt && validPastInt.interaction_date <= date) {
                         isValid = true;
                         if (validPastInt?.subcategories) {
                             const interSubcats = validPastInt.subcategories.map(t => t.name);
@@ -196,7 +213,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
         addedIDs.push(task.id)
         setAdded(prev => [...prev, task])
         onUpdate(addedIDs);
-        if(interactionDate=='' || isNaN(Date.parse(interactionDate)) || new Date(interactionDate) > new Date()){
+        if(date=='' || isNaN(Date.parse(date)) || new Date(date) > new Date()){
             dropWarnings.push('Interaction date must be a valid date and may not be in the future.');
         }
         if(task.indicator.require_numeric){
