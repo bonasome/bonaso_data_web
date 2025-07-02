@@ -1,22 +1,29 @@
 import { useState, useEffect } from 'react';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
 import monthlyCounts from './monthlyCounts'
 import { useRespondents } from '../../../contexts/RespondentsContext';
 import SimpleSelect from '../SimpleSelect';
 import Checkbox from '../Checkbox';
 import styles from './chart.module.css';
+import theme from '../../../../theme/theme';
 
 export default function IndicatorChart({ indicatorID, organizationID=null, projectID=null }) {
     const { respondentsMeta, setRespondentsMeta } = useRespondents();
     const [data, setData] = useState(null);
     const [showFilters, setShowFilters] = useState(false);
+    const [chartType, setChartType] = useState('')
     const [axis, setAxis] = useState('');
+    const [axisOptions, setAxisOptions] = useState(['month', 'quarter']);
+    const [axisLabels, setAxisLabels] = useState(['By Month', 'By Quarter']);
+    const [allowNullAxis, setAllowNullAxis] = useState(true);
     const [legendOptions, setLegendOptions] = useState([]);
     const [legendLabels, setLegendLabels] = useState([]);
     const [subcategories, setSubcategories] = useState([])
     const [legend, setLegend] = useState('');
-
+    const [orgIDs, setOrgIDs] = useState([]);
+    const [orgNames, setOrgNames] = useState([]);
+    const[search, setSearch] = useState('');
     const [filters, setFilters] = useState({
         sex: '',
         age_range: '',
@@ -76,7 +83,30 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
             }
         }
         getRespondentMeta();
-    }, [])
+
+        if(!organizationID){
+            const getOrganizations = async () => {
+                try{
+                    console.log('fetching organizations...')
+                    const projectFilter = projectID ? `&project=${projectID}` : '';
+                    const response = await fetchWithAuth(`/api/organizations/?search=${search}${projectFilter}`);
+                    const data = await response.json();
+                    if(data.results.length > 0){
+                        const ids = data.results.map((o) => o.id);
+                        const names= data.results.map((o)=> o.name);
+                        setOrgIDs(ids);
+                        setOrgNames(names);
+                    }
+                    setLoading(false)
+                }
+                catch(err){
+                    console.error('Failed to fetch organizations: ', err)
+                    setLoading(false)
+                }
+            }
+            getOrganizations();
+        }
+    }, [search])
 
     useEffect(() => {
         if(data){
@@ -98,6 +128,27 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
         setSubcategories(groups);
     }, [chartData])
 
+    useEffect(() => {
+        if(chartType === 'bar'){
+            setAllowNullAxis(true);
+            setAxisOptions(['month', 'quarter']);
+            setAxisLabels(['By Month', ' By quarter']);
+        }
+        if(chartType === 'line'){
+            setAllowNullAxis(false);
+            setAxisOptions(['month', 'quarter']);
+            setAxisLabels(['By Month', ' By quarter']);
+            if(axis === '') setAxis('month');
+        }
+        if(chartType === 'pie'){
+            setAllowNullAxis(true)
+            setAxisOptions([])
+            setAxisLabels([])
+            setAxis('')
+        }
+    }, [chartType]);
+
+
     const CustomTooltip = ({ active, payload, label }) => {
         if (!active || !payload || payload.length === 0) return null;
 
@@ -117,30 +168,91 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
     const getRandomColor = () =>{
         return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
     }
+    const getColor = (index) => {
+        console.log(index)
+        switch (index){
+            case 0:
+                return '#fff'
+            case 1:
+                return theme.colors.bonasoLightAccent
+            case 2:
+                return theme.colors.bonasoAlternateLight
+            case 3:
+                return theme.colors.bonasoAlternateUberLight
+            case 4:
+                return theme.colors.warningBg
+            case 5:
+                return theme.colors.bonasoUberLightAccent
+            case 6:
+                return theme.colors.lightGrey
+            default:
+                return getRandomColor()
+        }
+    }
+
+
     if (loading || !chartData) return <p>Loading...</p>;
     return(
         <div>
-            <BarChart width={600} height={300} data={chartData}>
+            {(chartType === '' || chartType ==='bar') && <BarChart width={600} height={300} data={chartData}>
                 <XAxis dataKey="ag" tick={{fill: '#fff'}}/>
                 <YAxis tick={{fill: '#fff'}}/>
                 <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
                 <Legend />
                 {['', 'targets'].includes(legend) && <Bar dataKey="count" fill="#fff" name="Acheivement" />}
-                {subcategories.map((key) => (
-                    <Bar key={key} dataKey={key} fill={getRandomColor()}/>
+                {subcategories.map((key, index) => (
+                    <Bar key={key} dataKey={key} fill={getColor(index)}/>
                 ))}
                 {legend === 'targets' && <Bar dataKey="target" fill="#ec7070" name="Target" />}
-            </BarChart>
+            </BarChart>}
+
+            {chartType === 'line' && <LineChart width={600} height={300} data={chartData}>
+                <XAxis dataKey="ag" tick={{fill: '#fff'}}/>
+                <YAxis tick={{fill: '#fff'}}/>
+                <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
+                <Legend />
+                {['', 'targets'].includes(legend) && <Line dataKey="count" fill="#fff" stroke='#fff' name="Acheivement" />}
+                {subcategories.map((key, index) => (
+                    <Line key={key} dataKey={key} fill={getColor(index)} stroke={getColor(index)}/>
+                ))}
+                {legend === 'targets' && <Line dataKey="target" fill="#ec7070" stroke="#ec7070" name="Target" />}
+            </LineChart>}
+            {chartType === 'pie' && legend=='' && <p><i>Select a legend item to view pie charts.</i></p> }
+            {chartType === 'pie' && chartData.length > 0 && (
+                <PieChart width={400} height={300}>
+                    <Pie
+                    data={subcategories.map((key) => ({
+                        name: key,
+                        value: chartData[0][key] || 0,
+                    }))}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label
+                    >
+                    {subcategories.map((key, index) => (
+                        <Cell key={key} fill={getColor(index)} />
+                    ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                </PieChart>
+            )}
+
+
 
             <SimpleSelect name='legend' optionValues={legendOptions} optionLabels={legendLabels} callback={(val) => setLegend(val)} value={legend} />
-            <SimpleSelect name='axis' optionValues={['month']} optionLabels={['By Month']} callback={(val) => setAxis(val)} value={axis} />
+            <SimpleSelect name='axis' optionValues={axisOptions} optionLabels={axisLabels} callback={(val) => setAxis(val)} value={axis} nullOption={allowNullAxis} />
+            <SimpleSelect name='chart' optionValues={['bar', 'line', 'pie']} optionLabels={['Bar', 'Line', 'Pie']} callback={(val) => setChartType(val)} value={chartType} nullOption={false}/>
             
             <Checkbox label='Show Filters?' name="filters" checked={showFilters} callback={(c) => setShowFilters(c)} />
             {showFilters && <div>
                 <h3>Filters</h3>
                 <div className={styles.filters}>
                 <SimpleSelect name='sex' optionValues={respondentsMeta.sexs} optionLabels={respondentsMeta.sex_labels} callback={(val) => setFilters(prev => ({...prev, sex: val}))} />
-                <SimpleSelect name='age_range' optionValues={respondentsMeta.age_ranges} optionLabels={respondentsMeta.age_range_labels} callback={(val) => setFilters(prev => ({...prev, age_range: val}))} />
+                <SimpleSelect name='age_range' label={'Age Range'} optionValues={respondentsMeta.age_ranges} optionLabels={respondentsMeta.age_range_labels} callback={(val) => setFilters(prev => ({...prev, age_range: val}))} />
                 <SimpleSelect name='district' optionValues={respondentsMeta.districts} optionLabels={respondentsMeta.district_labels} callback={(val) => setFilters(prev => ({...prev, district: val}))} />
                 <SimpleSelect name='citizen' optionValues={[true, false]} optionLabels={['Citizen', 'Non-Citizen']} callback={(val) => setFilters(prev => ({...prev, citizen: val}))} value={filters.citizen}/>
                 <SimpleSelect name='kp_status' label='Key Population Status' 
@@ -152,6 +264,11 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
                     optionValues={respondentsMeta.disability_types} 
                     multiple={true} optionLabels={respondentsMeta.disability_type_labels}
                     callback={(val) => setFilters(prev => ({ ...prev, disability_status: val }))}
+                />
+                <SimpleSelect name='organization' label='Organization' 
+                    optionValues={orgIDs} search={true} searchCallback={(val) => setSearch(val)}
+                    multiple={false} optionLabels={orgNames}
+                    callback={(val) => setFilters(prev => ({ ...prev, organization: val }))}
                 />
                 <div>
                     <div>

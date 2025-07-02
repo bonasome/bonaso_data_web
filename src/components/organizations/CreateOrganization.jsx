@@ -21,27 +21,26 @@ export default function CreateOrganization(){
     const [orgNames, setOrgNames] = useState([]);
     const [search, setSearch] = useState('');
     useEffect(() => {
-        const getOrganizations = async () => {
-            try{
-                console.log('fetching organizations...')
-                const response = await fetchWithAuth(`/api/organizations/?search=${search}`);
-                const data = await response.json();
-                console.log(data)
-                if(organizations.length > 0){
-                    const ids = organizations.map((o) => o.id);
-                    const names= organizations.map((o)=> o.name);
-                    setOrgIDs(ids);
-                    setOrgNames(names);
+            const getOrganizations = async () => {
+                try{
+                    console.log('fetching organizations...')
+                    const response = await fetchWithAuth(`/api/organizations/?search=${search}`);
+                    const data = await response.json();
+                    setOrganizations(data.results);
+                    if(organizations.length > 0){
+                        const ids = organizations.map((o) => o.id);
+                        const names= organizations.map((o)=> o.name);
+                        setOrgIDs(ids);
+                        setOrgNames(names);
+                    }
+                    setLoading(false)
                 }
-                setOrganizations(data.results);
-                setLoading(false)
+                catch(err){
+                    console.error('Failed to fetch organizations: ', err)
+                    setLoading(false)
+                }
             }
-            catch(err){
-                console.error('Failed to fetch organizations: ', err)
-                setLoading(false)
-            }
-        }
-        getOrganizations();
+            getOrganizations();
     }, [search])
 
     const formConfig = useMemo(() => {
