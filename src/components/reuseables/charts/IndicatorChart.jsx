@@ -194,51 +194,62 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
     if (loading || !chartData) return <p>Loading...</p>;
     return(
         <div>
-            {(chartType === '' || chartType ==='bar') && <BarChart width={600} height={300} data={chartData}>
-                <XAxis dataKey="ag" tick={{fill: '#fff'}}/>
-                <YAxis tick={{fill: '#fff'}}/>
-                <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
-                <Legend />
-                {['', 'targets'].includes(legend) && <Bar dataKey="count" fill="#fff" name="Acheivement" />}
-                {subcategories.map((key, index) => (
-                    <Bar key={key} dataKey={key} fill={getColor(index)}/>
-                ))}
-                {legend === 'targets' && <Bar dataKey="target" fill="#ec7070" name="Target" />}
-            </BarChart>}
+            {(chartType === '' || chartType ==='bar') && 
+                <ResponsiveContainer width="100%" height={300}>
+                    <BarChart width={600} height={300} data={chartData}>
+                        <XAxis dataKey="ag" tick={{fill: '#fff'}}/>
+                        <YAxis tick={{fill: '#fff'}}/>
+                        <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
+                        <Legend />
+                        {['', 'targets'].includes(legend) && <Bar dataKey="count" fill="#fff" name="Acheivement" />}
+                        {subcategories.map((key, index) => (
+                            <Bar key={key} dataKey={key} fill={getColor(index)}/>
+                        ))}
+                        {legend === 'targets' && <Bar dataKey="target" fill="#ec7070" name="Target" />}
+                    </BarChart>
+                </ResponsiveContainer>
+            }   
 
-            {chartType === 'line' && <LineChart width={600} height={300} data={chartData}>
-                <XAxis dataKey="ag" tick={{fill: '#fff'}}/>
-                <YAxis tick={{fill: '#fff'}}/>
-                <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
-                <Legend />
-                {['', 'targets'].includes(legend) && <Line dataKey="count" fill="#fff" stroke='#fff' name="Acheivement" />}
-                {subcategories.map((key, index) => (
-                    <Line key={key} dataKey={key} fill={getColor(index)} stroke={getColor(index)}/>
-                ))}
-                {legend === 'targets' && <Line dataKey="target" fill="#ec7070" stroke="#ec7070" name="Target" />}
-            </LineChart>}
+            {chartType === 'line' && 
+                <ResponsiveContainer width="100%" height={300}>
+                    <LineChart width={600} height={300} data={chartData}>
+                        <XAxis dataKey="ag" tick={{fill: '#fff'}}/>
+                        <YAxis tick={{fill: '#fff'}}/>
+                        <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
+                        <Legend />
+                        {['', 'targets'].includes(legend) && <Line dataKey="count" fill="#fff" stroke='#fff' name="Acheivement" />}
+                        {subcategories.map((key, index) => (
+                            <Line key={key} dataKey={key} fill={getColor(index)} stroke={getColor(index)}/>
+                        ))}
+                        {legend === 'targets' && <Line dataKey="target" fill="#ec7070" stroke="#ec7070" name="Target" />}
+                    </LineChart>
+                </ResponsiveContainer>
+            }
             {chartType === 'pie' && legend=='' && <p><i>Select a legend item to view pie charts.</i></p> }
+            {chartType === 'pie' && legend=='targets' && <p><i>Targets don't really work with a pie chart... try another view!</i></p> }
             {chartType === 'pie' && chartData.length > 0 && (
-                <PieChart width={400} height={300}>
-                    <Pie
-                    data={subcategories.map((key) => ({
-                        name: key,
-                        value: chartData[0][key] || 0,
-                    }))}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    label
-                    >
-                    {subcategories.map((key, index) => (
-                        <Cell key={key} fill={getColor(index)} />
-                    ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                </PieChart>
+                <ResponsiveContainer width="100%" height={300}>
+                    <PieChart width={400} height={300}>
+                        <Pie
+                        data={subcategories.map((key) => ({
+                            name: key,
+                            value: chartData[0][key] || 0,
+                        }))}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        label
+                        >
+                        {subcategories.map((key, index) => (
+                            <Cell key={key} fill={getColor(index)} />
+                        ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                    </PieChart>
+                </ResponsiveContainer>
             )}
 
 
