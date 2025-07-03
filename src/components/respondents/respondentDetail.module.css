@@ -99,6 +99,7 @@
 @media screen and (max-width: 768px){
     .mainPanel, .sidebar{
         height: auto;
+        margin-bottom: 1vh;
     }
 }
 
