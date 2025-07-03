@@ -75,7 +75,7 @@ function ProjectInfo({ project }){
             <p>{project.description}</p>
             {user.role == 'admin' && <Link to={`/projects/${project.id}/edit`}><button>Edit Details</button></Link>}
             {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)} >Delete</button>}
-            <Link to={`/projects/${project.id}/narrative-reports/upload`} ><button>Upload a Narrative Report for this Project</button></Link>
+            {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/narrative-reports/upload`} ><button>Upload a Narrative Report for this Project</button></Link>}
         </div>
     )
 }
@@ -142,20 +142,36 @@ export default function ProjectDetail(){
         getProjectDetails();
     }, [id, projectDetails, activeIndicator, activeOrganization])
 
+    const switchActive = (viewType, data) => {
+        setType(viewType)
+        if(viewType === 'view-indicator'){
+            setActiveOrganization(null);
+            setActiveIndicator(data);
+        } 
+        else if(viewType === 'view-organization') {
+            setActiveIndicator(null);
+            setActiveOrganization(data);
+        }
+        else{
+            setActiveIndicator(null);
+            setActiveOrganization(null)
+        }
+    }
+
     if(loading) return <Loading /> 
     return(
         <div className={styles.projectDetails} style={{ gridTemplateColumns: getGridTemplate() }}>
-            {width >= 500 && <OrganizationsBar project={activeProject} callback={(t, org) => {setType(t); setActiveOrganization(org)}} visChange={(vis) => setLeftVisible(vis)}/>}
+            {width >= 500 && <OrganizationsBar project={activeProject} callback={(t, org) => switchActive(t, org)} visChange={(vis) => setLeftVisible(vis)} activeOrganization={activeOrganization}/>}
             <div className={styles.panel}>
                 <Link to={'/projects'} className={styles.return}>
                     <IoMdReturnLeft className={styles.returnIcon} />
                     <p>Return to projects overview</p>   
                 </Link>
-                <Link><h1 onClick={() => setType('project')} className={styles.projectHeader}>{activeProject.name}</h1></Link>
+                <Link><h1 onClick={() => switchActive('project', null)} className={styles.projectHeader}>{activeProject.name}</h1></Link>
                 <ProjectViewSwitch project={activeProject} type={type} indicator={activeIndicator} organization={activeOrganization} onRemove={() => setType('project')} setAddingTask={setAddingTask} setViewingInd={setViewingInd}/>
             </div>
-            <IndicatorsBar project={activeProject} callback={(t, ind) => {setType(t); setActiveIndicator(ind)}} visChange={(vis) => setRightVisible(vis)} activeOrganization={activeOrganization} buttonAdd={handleButtonAdd} buttonViewChart={handleButtonView}/>
-            {width <500 && <OrganizationsBar project={activeProject} callback={(t, org) => {setType(t); setActiveOrganization(org)}} visChange={(vis) => setLeftVisible(vis)}/>}
+            <IndicatorsBar project={activeProject} callback={(t, ind) => switchActive(t, ind)} visChange={(vis) => setRightVisible(vis)} activeOrganization={activeOrganization} activeIndicator={activeIndicator} buttonAdd={handleButtonAdd} buttonViewChart={handleButtonView}/>
+            {width <500 && <OrganizationsBar project={activeProject} callback={(t, org) => switchActive(t, org)} visChange={(vis) => setLeftVisible(vis)} activeOrganization={activeOrganization}/>}
         </div>
     )
 }

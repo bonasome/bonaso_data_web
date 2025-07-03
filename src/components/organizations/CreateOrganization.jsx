@@ -44,7 +44,7 @@ export default function CreateOrganization(){
     }, [search])
 
     const formConfig = useMemo(() => {
-        return organizationConfig(orgIDs, orgNames, (val) => setSearch(val));
+        return organizationConfig(orgIDs, orgNames, (val) => setSearch(val), user.role);
     }, [orgIDs, orgNames]);
 
     const handleCancel = () => {

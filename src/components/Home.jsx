@@ -57,9 +57,9 @@ function Home() {
             <div className={styles.actions}>
                 <h2>Where should we start today?</h2>
                 <Link to={'/help'}><button>First time? Check out the tutorial!</button></Link> 
-                <Link to={'/respondents'}><button>Start Recording Data!</button></Link> 
+                {!['client'].includes(user.role) && <Link to={'/respondents'}><button>Start Recording Data!</button></Link> }
                 {['meofficer', 'admin', 'manager'].includes(user.role) && <Link to={'/batch-record'}><button>Upload a file</button></Link> }
-                {['meofficer', 'admin', 'manager'].includes(user.role) && <Link to={'/projects'}><button>See My Projects</button></Link> }
+                {['meofficer', 'admin', 'manager', 'client'].includes(user.role) && <Link to={'/projects'}><button>See My Projects</button></Link> }
             </div>
             </div>
         </div>

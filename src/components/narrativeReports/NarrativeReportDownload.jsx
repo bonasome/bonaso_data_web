@@ -87,7 +87,7 @@ export default function NarrativeReportDownload({ organization, project }) {
                 <NarrativeReportCard report={report} />
             )) : <p>No reports found.</p>}
             {files.length == 0 && <p>No narrative reports have been uploaded yet.</p>}
-            <Link to={`/projects/${project.id}/narrative-reports/upload`} ><button>Upload a Narrative Report for this Project</button></Link>
+            {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/narrative-reports/upload`} ><button>Upload a Narrative Report for this Project</button></Link>}
         </div>
     )
 }

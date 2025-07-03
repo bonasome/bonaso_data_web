@@ -17,6 +17,7 @@ export default function Profile(){
     const { user } = useAuth();
     const{ id } = useParams();
     const[loading, setLoading] = useState(true);
+    const { profiles, setProfiles, profilesMeta, setProfilesMeta } = useProfiles();
     const [profile, setProfile] = useState(null);
     const [feed, setFeed] = useState([]);
     const [active, setActive] = useState(false);
@@ -25,10 +26,9 @@ export default function Profile(){
     const [entries, setEntries] = useState(0);
     const [search, setSearch] = useState('')
     const [labels, setLabels] = useState({});
-    const { profileDetails, setProfileDetails, profilesMeta, setProfilesMeta } = useProfiles();
     useEffect(() => {
         const getProfile = async () => {
-            const found = profileDetails.find(p => p.id.toString() === id.toString());
+            const found = profiles.find(p => p.id.toString() === id.toString());
             if (found) {
                 setProfile(found);
                 setLoading(false);
@@ -40,7 +40,7 @@ export default function Profile(){
                     const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
                     const data = await response.json();
                     setProfile(data)
-                    setProfileDetails(prev => [...prev, data]);
+                    setProfiles(prev => [...prev, data]);
                     if(data.is_active){
                         setActive(true)
                     }
@@ -133,6 +133,7 @@ export default function Profile(){
                 <p>Return to team overview</p>   
             </Link>
             <h1>{profile?.first_name} {profile?.last_name}</h1>
+            {profile?.username === user.username && <h3><i>This is you.</i></h3>}
             {!active && <h3>User is inactive.</h3>}
             {changePass && <AdminResetPassword id={profile.id} />}
             <Link to={`/profiles/${profile?.id}/edit`}> <button>Edit Profile</button></Link>
@@ -145,7 +146,7 @@ export default function Profile(){
                 <p>{profile?.email}</p>
                 <h3>Role</h3>
                 <p>{labels.role}</p>
-                {profile.role=='client' &&
+                {profile?.role=='client' &&
                     <div>
                         <h3>Client</h3>
                         <p>{profile?.client_organization.name}</p>

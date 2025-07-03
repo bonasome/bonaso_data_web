@@ -91,6 +91,9 @@ export default function RespondentDetail(){
         })
     }, [respondentsMeta, activeRespondent])
 
+    useEffect(() => {
+        if(user.role ==='client') setSBVisible(false);
+    }, [])
     const loadTasks = (data) => {
         setTasks(data);
     }
@@ -176,12 +179,12 @@ export default function RespondentDetail(){
                     <Interactions id={id} tasks={tasks} onUpdate={onUpdate} setAddingTask={setAddingTask}/>
                 </div>
             </div>
-            <div className={styles.sidebar}>
+            {!['client'].includes(user.role) && <div className={styles.sidebar}>
                 {width > 768 && <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
                     {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
                 </div>}
-                {!['client'].includes(user.role) && sbVisible && <Tasks callback={loadTasks} isDraggable={true} addCallback={(t) => handleButtonAdd(t)} blacklist={added} />}
-            </div>
+                {sbVisible && <Tasks callback={loadTasks} isDraggable={true} addCallback={(t) => handleButtonAdd(t)} blacklist={added} />}
+            </div>}
         </div>
     )
 }

@@ -13,6 +13,7 @@ import IndicatorChart from '../../reuseables/charts/IndicatorChart';
 import useWindowWidth from '../../../../services/useWindowWidth';
 
 function IndicatorCard({ indicator, callback, active, activeOrganization, buttonAdd, buttonViewChart }){
+    const {user} = useAuth();
     const handleDragStart = (e) => {
         e.dataTransfer.setData('application/json', JSON.stringify(indicator));
     };
@@ -20,25 +21,24 @@ function IndicatorCard({ indicator, callback, active, activeOrganization, button
     return(
         <div className={active ? styles.activeCard : styles.card} draggable onDragStart={handleDragStart} onClick={() => callback('view-indicator', indicator)}>
             <h3>{indicator.code}: {indicator.name}</h3>
-            {activeOrganization && <button onClick={(e) => {e.stopPropagation(); buttonAdd(indicator)}}>Assign as task</button>}
+            {activeOrganization && (user.role != 'admin' && user.organization_id == activeOrganization?.parent_organization?.id) && <button onClick={(e) => {e.stopPropagation(); buttonAdd(indicator)}}>Assign as task</button>}
             {activeOrganization && <button onClick={(e) => {e.stopPropagation(); buttonViewChart(indicator)}}>Chart</button>}
         </div>
     )
 }
 
-export function IndicatorsBar({ project, callback, visChange, activeOrganization, buttonAdd, buttonViewChart }){
+export function IndicatorsBar({ project, callback, visChange, activeOrganization, buttonAdd, buttonViewChart, activeIndicator }){
     const width = useWindowWidth();
 
     const { user } = useAuth();
     const[sbVisible, setSBVisible] = useState(true)
-    const [activeIndicator, setActiveIndicator] = useState('');
     const [search, setSearch] = useState('');
     const handleClick = (type, ind) => {
-        setActiveIndicator(ind.id)
         callback(type, ind)
     }
     const filtered = project?.indicators?.length > 0 ? project.indicators.filter(i => i.code.toLowerCase().includes(search.toLowerCase()) || i.name.toLowerCase().includes(search.toLowerCase())) : []
     
+
     return(
         <div  className={styles.sidebarRight}>
             {width > 500 && <div className={styles.toggle} onClick={() => {setSBVisible(!sbVisible); visChange(!sbVisible)}}>
@@ -54,7 +54,7 @@ export function IndicatorsBar({ project, callback, visChange, activeOrganization
                     </div>
                 }
                 {project?.indicators.length > 0 ? filtered.map((ind) => (
-                    <IndicatorCard key={ind.id} indicator={ind} callback={(type, ind) => handleClick(type, ind)} active={activeIndicator === ind.id ? true : false} activeOrganization={activeOrganization} buttonAdd={buttonAdd} buttonViewChart={buttonViewChart} />
+                    <IndicatorCard key={ind.id} indicator={ind} callback={(type, ind) => handleClick(type, ind)} active={activeIndicator?.id === ind.id ? true : false} activeOrganization={activeOrganization} buttonAdd={buttonAdd} buttonViewChart={buttonViewChart} />
                 )) :
                 <p>This project doesn't have any indicators yet.</p>
                 }

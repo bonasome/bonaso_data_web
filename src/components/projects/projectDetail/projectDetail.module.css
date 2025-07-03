@@ -88,7 +88,9 @@
     background-color: white;
     color: var(--bonaso-dark-accent);
 }
-
+.card:hover > button {
+    background-color: var(--bonaso-light-accent);
+}
 .activeCard {
     margin: 2vh;
     padding: 1vh;
@@ -105,6 +107,13 @@
     background-color: white;
     color: var(--bonaso-dark-accent);
 }
+.activeCard > button{
+    background-color: var(--bonaso-light-accent);
+}
+.activeCard:hover > button {
+    background-color: var(--bonaso-light-accent);
+}
+
 
 .addTask{
     background-color: var(--bonaso-dark-accent);

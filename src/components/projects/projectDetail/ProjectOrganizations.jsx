@@ -15,11 +15,9 @@ import useWindowWidth from '../../../../services/useWindowWidth';
 import { Link } from 'react-router-dom';
 import IndicatorChart from '../../reuseables/charts/IndicatorChart';
 
-export function OrganizationsBar({ project, callback, visChange }){
-    const [activeOrg, setActiveOrg] = useState('');
+export function OrganizationsBar({ project, callback, visChange, activeOrganization }){
     const[sbVisible, setSBVisible] = useState(true);
     const [search, setSearch] = useState('');
-
     const width = useWindowWidth();
     const filtered = project?.organizations?.length > 0 ? project.organizations.filter(o => o.name.toLowerCase().includes(search.toLowerCase())) : []
     return(
@@ -34,7 +32,7 @@ export function OrganizationsBar({ project, callback, visChange }){
                     </div>
                 }
                 {project?.organizations.length > 0 ? filtered.map((org) => (
-                    <div key={org.id} className={org.id === activeOrg ? styles.activeCard : styles.card} onClick={() => {callback('view-organization', org); setActiveOrg(org.id)}}>
+                    <div key={org.id} className={org.id == activeOrganization?.id ? styles.activeCard : styles.card} onClick={() => callback('view-organization', org)}>
                         <h3>{org.name}</h3>
                     </div>
                 )):
@@ -119,10 +117,11 @@ export function AddOrganization({ project }){
 export function OrganizationTasks({ project, organization, setAddingTask }){
     const width = useWindowWidth();
 
-    const [orgTasks, setOrgTasks] = useState([])
-    const [errors, setErrors] = useState([])
-    const [warnings, setWarnings] = useState([])
-    const [reload, setReload] = useState(1)
+    const [orgTasks, setOrgTasks] = useState([]);
+    const [errors, setErrors] = useState([]);
+    const [warnings, setWarnings] = useState([]);
+    const [reload, setReload] = useState(1);
+    const [success, setSuccess] = useState('')
     const { user } = useAuth();
     const loadTasks = (data) => {
         setOrgTasks(data);
@@ -170,6 +169,7 @@ export function OrganizationTasks({ project, organization, setAddingTask }){
             if(response.ok){
                 setOrgTasks(prev => [...prev, returnData])
                 setReload(prev => prev + 1);
+                setSuccess('Task added!')
             }
             else{
                 let serverResponse = [];
@@ -205,8 +205,8 @@ export function OrganizationTasks({ project, organization, setAddingTask }){
         <div>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {warnings.length != 0 && <div className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            
-            {!['client'].includes(user.role) && width > 768 && <div className={styles.addTask}>
+            {success !== '' && <div className={errorStyles.success}><p>{success}</p></div>}
+            {!['client'].includes(user.role) && width > 768 && (user.role != 'admin' && user.organization_id != organization.id) && <div className={styles.addTask}>
                 <h3>Add Tasks</h3>
                 <div className={styles.dropZone} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray', height: '100px', padding: '10px' }}>
                     <p>Drag an indicator from the sidebar to assign it to this organization.</p>
@@ -238,7 +238,7 @@ export function OrganizationPerformance({ project, organization, setViewingInd }
     };
     return(
         <div className={styles.viewbox}>
-            <h3>Performance for {organization.name} during {project.name}</h3>
+            <h3>Performance for <Link to={`/organizations/${organization.id}`}>{organization.name}</Link> during {project.name}</h3>
             {indicator && <h4><i>{indicator.name}</i></h4>}
             {indicator && <IndicatorChart indicatorID={indicator.id} organizationID={organization.id} projectID={project.id} />}
             {width > 768 && <div className={styles.dropZone} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray', height: '100px', padding: '10px', marginBottom: '30px' }}>

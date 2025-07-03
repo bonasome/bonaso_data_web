@@ -24,7 +24,7 @@ export default function EditUser(){
     const [clientIDs, setClientIDs] = useState([]);
     const [clientNames, setClientNames] = useState([]);
 
-    const { profileDetails, setProfileDetails, profilesMeta, setProfilesMeta } = useProfiles();
+    const { profiles, setProfiles, profilesMeta, setProfilesMeta } = useProfiles();
     const {projectsMeta, setProjectsMeta} = useProjects();
     useEffect(() => {
         const getMeta = async() => {
@@ -45,7 +45,7 @@ export default function EditUser(){
         }
         getMeta()
         const getProfile = async () => {
-            const found = profileDetails.find(o => o.id.toString() === id.toString());
+            const found = profiles.find(o => o.id.toString() === id.toString());
             if (found) {
                 setExisting(found);
                 return;
@@ -56,7 +56,7 @@ export default function EditUser(){
                     const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
                     const data = await response.json();
                     setExisting(data)
-                    setProfileDetails(prev => [...prev, data]);
+                    setProfiles(prev => [...prev, data]);
                 }
                 catch(err){
                     console.error('Failed to fetch organizations: ', err)
@@ -134,7 +134,9 @@ export default function EditUser(){
             });
             const returnData = await response.json();
             if(response.ok){
-                setProfileDetails(prev => [...prev, returnData])
+                 const editedProf = profiles.filter(p => p.id != existing.id);
+                 editedProf.push(returnData);
+                setProfiles(editedProf);
                 navigate(`/profiles/${returnData.id}`);
             }
             else{

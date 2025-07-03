@@ -1,8 +1,8 @@
-export default function organizationConfig(orgIDs, orgNames, searchCallback, existing=null){
+export default function organizationConfig(orgIDs, orgNames, searchCallback, role, existing=null){
     return [
             {name: 'name', label: 'Organization Name', type: 'text', required: true, value: existing?.name ? existing.name : ''},
             {name: 'full_name', label: 'Full Name', type: 'text', required: false, value: existing?.full_name ? existing.full_name : ''},
-            {name: 'parent_organization_id', label: 'Parent Organization', type: 'select', required: false, value: existing?.parent_organization ? existing.parent_organization.id : '', 
+            {name: 'parent_organization_id', label: 'Parent Organization', type: 'select', required: role === 'admin' ? false : true, value: existing?.parent_organization ? existing.parent_organization.id : '', 
                 constructors: {
                     values: orgIDs,
                     labels: orgNames,
