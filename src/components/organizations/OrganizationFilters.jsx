@@ -6,6 +6,7 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import SimpleSelect from '../reuseables/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
 import { useProjects } from '../../contexts/ProjectsContext';
+import ComponentLoading from '../reuseables/ComponentLoading';
 
 export default function OrganizationFilters({ onFilterChange, organizations=[] }){
     const { projects, setProjects } = useProjects();
@@ -84,7 +85,7 @@ export default function OrganizationFilters({ onFilterChange, organizations=[] }
         onFilterChange(filters);
     }
 
-    if(loading) return <p>Loading...</p>
+    if(loading) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
             <button onClick={() => setShowFilters(!showFilters)}>

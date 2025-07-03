@@ -10,6 +10,7 @@ import AddInteractions from './AddInteractions';
 import styles from '../respondentDetail.module.css';
 import errorStyles from '../../../styles/errors.module.css';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
+import ComponentLoading from '../../reuseables/ComponentLoading';
 
 function InteractionCard({ interaction, onUpdate, onDelete }){
     const { user } = useAuth();
@@ -279,7 +280,8 @@ export default function Interactions({ id, tasks, onUpdate, setAddingTask }){
         setInteractions(updated);
         setSuccess('Interaction Deleted.')
     }
-    if(loading) return <p>Loading...</p>
+
+    if(loading) return <ComponentLoading />
     return(
         <div>
                 {success && <div className={errorStyles.success}>{success}</div>}

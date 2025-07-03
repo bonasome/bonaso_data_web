@@ -1,12 +1,11 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/UserAuth';
+import Loading from '../components/reuseables/Loading';
 
 const RedirectIfNotAuthenticated = ({ children }) => {
     const { user, loading, loggedIn } = useAuth();
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+    if(loading) return <Loading />
     
     if (!loggedIn) {
         return <Navigate to="/users/login" replace />;

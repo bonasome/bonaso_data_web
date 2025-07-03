@@ -6,6 +6,7 @@ import { Target, TargetEdit } from './Targets';
 import styles from './tasks.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
+import ComponentLoading from '../reuseables/ComponentLoading';
 
 function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelete=false, onDelete=null }) {
     const [errors, setErrors] = useState([]);
@@ -181,7 +182,7 @@ export default function Tasks({ callback, update=null, target=false, organizatio
         setSuccess('Task removed.')
     }
     const filteredTasks = tasks.filter(t => !blacklist.includes(t.id))
-    if (loading) return <p>Loading...</p>;
+    if(loading) return <ComponentLoading />
     return (
         <div className={styles.tasks}>
             {success && <div className={errorStyles.success}>{success}</div>}

@@ -61,13 +61,13 @@ export default function CreateProject(){
     useEffect(() => {
         setFormConfig([
             {name: 'name', label: 'Project Name', type: 'text', required: true},
-            {name: 'start', type: 'date', required: true},
-            {name: 'end', type: 'date', required: true},
             {name: 'client_id', label: 'Select a Client', type: 'select', required: false, constructors: {
                 values: clientIDs,
                 labels: clientNames,
                 multiple: false,
             }},
+            {name: 'start', type: 'date', required: true},
+            {name: 'end', type: 'date', required: true},
             {name: 'status', type: 'select', required: true, constructors: {
                 values: projectsMeta.statuses,
             }},

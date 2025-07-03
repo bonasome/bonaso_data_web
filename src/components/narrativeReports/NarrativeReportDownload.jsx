@@ -2,7 +2,7 @@ import { useAuth } from '../../contexts/UserAuth';
 import { useState, useEffect } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import SimpleSelect from '../reuseables/SimpleSelect';
-import Loading from '../reuseables/Loading';
+import ComponentLoading from '../reuseables/ComponentLoading';
 import errorStyles from '../../styles/errors.module.css';
 import styles from './narrative.module.css';
 import { Link } from 'react-router-dom';
@@ -71,7 +71,7 @@ export default function NarrativeReportDownload({ organization, project }) {
         getFiles();
     }, [organization, project]);
 
-    if (loading) return <Loading />;
+    if (loading) return <ComponentLoading />;
 
     return (
         <div className={styles.files}>

@@ -8,6 +8,7 @@ import IndexViewWrapper from '../reuseables/IndexView';
 import { useProjects } from '../../contexts/ProjectsContext';
 import { Link } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
+import ComponentLoading from '../reuseables/ComponentLoading';
 
 function ProjectCard({ project }) {
     const [loading, setLoading] = useState(false);
@@ -44,7 +45,7 @@ function ProjectCard({ project }) {
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             <Link to={`/projects/${project.id}`} style={{display:'flex', width:"fit-content"}}><h2>{project.name}</h2></Link>
-            {expanded && loading && <p>Loading...</p>}
+            {expanded && loading && <ComponentLoading />}
             {expanded && active && (
                 <>
                     <i>Lasts from {active.start} to {active.end} {user.role =='admin' && '('+active.status+')'} </i>

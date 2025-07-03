@@ -7,6 +7,7 @@ import SimpleSelect from '../reuseables/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
 import { useProjects } from '../../contexts/ProjectsContext';
 import { useIndicators } from '../../contexts/IndicatorsContext';
+import ComponentLoading from '../reuseables/ComponentLoading';
 
 export default function IndicatorFilters({ onFilterChange, indicators=[] }){
     const { projects, setProjects } = useProjects();
@@ -85,7 +86,7 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
         onFilterChange(filters);
     }
 
-    if(loading) return <p>Loading...</p>
+    if(loading) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
             <button onClick={() => setShowFilters(!showFilters)}>

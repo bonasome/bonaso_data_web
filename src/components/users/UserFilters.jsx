@@ -6,6 +6,7 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import SimpleSelect from '../reuseables/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
 import Checkbox from '../reuseables/Checkbox';
+import ComponentLoading from '../reuseables/ComponentLoading';
 
 export default function ProfileFilters({ onFilterChange }){
     const [loading, setLoading] = useState(true);
@@ -63,7 +64,7 @@ export default function ProfileFilters({ onFilterChange }){
     })
     }
 
-    if(loading) return <p>Loading...</p>
+    if(loading) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
             <button onClick={() => setShowFilters(!showFilters)}>

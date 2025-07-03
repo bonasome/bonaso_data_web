@@ -38,9 +38,14 @@ export default function IndicatorDetail(){
                     console.log('fetching indicator details...');
                     const response = await fetchWithAuth(`/api/indicators/${id}/`);
                     const data = await response.json();
-                    console.log(data)
-                    setIndicatorDetails(prev => [...prev, data]);
-                    setActiveIndicator(data);
+                    if(response.ok){
+                        setIndicatorDetails(prev => [...prev, data]);
+                        setActiveIndicator(data);
+                    }
+                    else{
+                        navigate('/not-found')
+                    }
+                    
                 } 
                 catch (err) {
                     console.error('Failed to fetch indicator: ', err);

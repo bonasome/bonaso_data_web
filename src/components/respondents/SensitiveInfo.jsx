@@ -5,6 +5,7 @@ import fetchWithAuth from "../../../services/fetchWithAuth";
 import SimpleSelect from "../reuseables/SimpleSelect";
 import { useRespondents } from "../../contexts/RespondentsContext";
 import styles from './respondentDetail.module.css';
+import ComponentLoading from '../reuseables/ComponentLoading';
 
 export default function SensitiveInfo({ id }) {
     const { respondentsMeta, setRespondentsMeta } = useRespondents();
@@ -141,7 +142,7 @@ export default function SensitiveInfo({ id }) {
             console.error('Could not record respondent: ', err)
         }
     }
-    if(loading) return <p>Loading...</p>
+    if(loading) return <ComponentLoading />
 
     if(edit){
         return(

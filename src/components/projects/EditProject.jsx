@@ -64,9 +64,15 @@ export default function EditProject(){
                     console.log('fetching project details...');
                     const response = await fetchWithAuth(`/api/manage/projects/${id}/`);
                     const data = await response.json();
-                    setProjectDetails(prev => [...prev, data]);
-                    setExisting(data);
-                    setLoading(false);
+                    if(response.ok){
+                        setProjectDetails(prev => [...prev, data]);
+                        setExisting(data);
+                        setLoading(false);
+                    }
+                    else{
+                        navigate(`/not-found`);
+                    }
+                    
                 } 
                 catch (err) {
                     console.error('Failed to fetch project: ', err);
@@ -117,7 +123,10 @@ export default function EditProject(){
             });
             const returnData = await response.json();
             if(response.ok){
-                setProjectDetails(prev => [...prev, returnData])
+                setProjectDetails(prev => {
+                    const others = prev.filter(r => r.id !== returnData.id);
+                    return [...others, returnData];
+                });
                 navigate(`/projects/${returnData.id}`);
             }
             else{

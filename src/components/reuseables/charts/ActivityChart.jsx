@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
 import monthlyCounts from './monthlyCounts'
+import ComponentLoading from '../ComponentLoading';
 
 export default function ActivityChart({ profile, showTargets=false }) {
     const [data, setData] = useState(null);
@@ -14,11 +15,13 @@ export default function ActivityChart({ profile, showTargets=false }) {
             try {
                 console.log('fetching respondent details...');
                 const response = await fetchWithAuth(`/api/profiles/users/activity/${profile?.id}/chart/`);
-                const data = await response.json();
-                const titledData = {interactions: data};
-                setData(titledData);
-                setChartData(monthlyCounts(titledData, showTargets));
-                setLoading(false)
+                if(response.ok){
+                    const data = await response.json();
+                    const titledData = {interactions: data};
+                    setData(titledData);
+                    setChartData(monthlyCounts(titledData, showTargets));
+                    setLoading(false)
+                }
             } 
             catch (err) {
                 console.error('Failed to fetch respondent: ', err);
@@ -44,7 +47,7 @@ export default function ActivityChart({ profile, showTargets=false }) {
         );
     };
 
-    if(loading) return <p>Loading...</p>
+    if(loading) return <ComponentLoading />
     return(
         <ResponsiveContainer width="100%" height={300}>
         <BarChart width={600} height={300} data={chartData}>

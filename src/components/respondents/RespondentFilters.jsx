@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/UserAuth'
 import SimpleSelect from '../reuseables/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
 import { useRespondents } from '../../contexts/RespondentsContext';
+import ComponentLoading from '../reuseables/ComponentLoading';
 
 export default function RespondentFilters({ onFilterChange }){
     const [loading, setLoading] = useState(true);
@@ -53,7 +54,8 @@ export default function RespondentFilters({ onFilterChange }){
     const handleChange = () =>{
         onFilterChange(filters);
     }
-    if(loading) return <p>Loading...</p>
+
+    if(loading) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
             <button onClick={() => setShowFilters(!showFilters)}>

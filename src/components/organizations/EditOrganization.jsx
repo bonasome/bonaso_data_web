@@ -9,8 +9,9 @@ import { useParams } from 'react-router-dom';
 import OrganizationForm from './OrganizationForm';
 import styles from '../reuseables/dynamicForm.module.css';
 import organizationConfig from './organizationConfig';
-
+import { useAuth } from '../../contexts/UserAuth';
 export default function EditOrganization(){
+    const { user } = useAuth();
     const navigate = useNavigate();
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
@@ -59,9 +60,15 @@ export default function EditOrganization(){
                     console.log('fetching organization details...');
                     const response = await fetchWithAuth(`/api/organizations/${id}/`);
                     const data = await response.json();
-                    setOrganizationDetails(prev => [...prev, data]);
-                    setExisting(data);
-                    setLoading(false);
+                    if(response.ok){
+                        setOrganizationDetails(prev => [...prev, data]);
+                        setExisting(data);
+                        setLoading(false);
+                    }
+                    else{
+                        navigate(`/not-found`);
+                    }
+                    
                 } 
                 catch (err) {
                     console.error('Failed to fetch organization: ', err);
@@ -74,7 +81,7 @@ export default function EditOrganization(){
     }, [id, search])
 
     const formConfig = useMemo(() => {
-            return organizationConfig(orgIDs, orgNames, (val) => setSearch(val), existing);
+            return organizationConfig(orgIDs, orgNames, (val) => setSearch(val), user.role, existing);
         }, [orgIDs, orgNames, existing]);
 
     const handleCancel = () => {
@@ -93,7 +100,10 @@ export default function EditOrganization(){
             });
             const returnData = await response.json();
             if(response.ok){
-                setOrganizationDetails(prev => [...prev, returnData])
+                setOrganizationDetails(prev => {
+                    const others = prev.filter(r => r.id !== returnData.id);
+                    return [...others, returnData];
+                });
                 navigate(`/organizations/${returnData.id}`);
             }
             else{

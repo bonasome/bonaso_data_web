@@ -58,7 +58,7 @@ export default function RespondentDetail(){
         }
         getRespondentMeta();
         const getRespondentDetails = async () => {
-        const found = respondentDetails.find(r => r.id.toString() === id.toString());
+        const found = respondentDetails.find(r => r?.id.toString() === id?.toString());
             if (found) {
                 setActiveRespondent(found);
                 setLoading(false);
@@ -68,8 +68,14 @@ export default function RespondentDetail(){
                 console.log('fetching respondent details...');
                 const response = await fetchWithAuth(`/api/record/respondents/${id}/`);
                 const data = await response.json();
-                setRespondentDetails(prev => [...prev, data]);
-                setActiveRespondent(data);
+                if(response.ok){
+                    setRespondentDetails(prev => [...prev, data]);
+                    setActiveRespondent(data);
+                }
+                else{
+                    navigate(`/not-found`);
+                }
+                
             } catch (err) {
                 console.error('Failed to fetch respondent: ', err);
             } finally {

@@ -44,7 +44,8 @@ function ProjectInfo({ project }){
                     data[field].forEach(msg => {
                         serverResponse.push(`${field}: ${msg}`);
                     });
-                    } else {
+                    } 
+                    else {
                     serverResponse.push(`${field}: ${data[field]}`);
                     }
                 }
@@ -90,6 +91,8 @@ function ProjectViewSwitch({ project, type, onRemove, indicator=null, organizati
 
 export default function ProjectDetail(){
     const { id } = useParams();
+    const navigate = useNavigate();
+
     const { projectDetails, setProjectDetails } = useProjects();
     const[activeProject, setActiveProject] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -129,9 +132,15 @@ export default function ProjectDetail(){
                     console.log('fetching project details...');
                     const response = await fetchWithAuth(`/api/manage/projects/${id}/`);
                     const data = await response.json();
-                    setProjectDetails(prev => [...prev, data]);
-                    setActiveProject(data);
-                    setLoading(false);
+                    if(response.ok){
+                        setProjectDetails(prev => [...prev, data]);
+                        setActiveProject(data);
+                        setLoading(false);
+                    }
+                    else{
+                        navigate(`/not-found`);
+                    }
+                    
                 } 
                 catch (err) {
                     console.error('Failed to fetch project: ', err);

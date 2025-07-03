@@ -8,6 +8,7 @@ import { useRespondents } from '../../contexts/RespondentsContext';
 import { Link } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
 import { IoPersonAddSharp } from "react-icons/io5";
+import ComponentLoading from '../reuseables/ComponentLoading';
 
 function RespondentCard({ respondent }) {
     const [loading, setLoading] = useState(false);
@@ -56,9 +57,9 @@ function RespondentCard({ respondent }) {
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             <Link to={`/respondents/${respondent.id}`} style={{display:'flex', width:"fit-content"}}><h2>{respondent.is_anonymous ? ('Anonymous ' + respondent.uuid) : (respondent.first_name + ' ' + respondent.last_name)}</h2></Link>
-            {expanded && loading && <p>Loading...</p>}
+            {expanded && loading && <ComponentLoading />}
             {active == respondent.id && loading &&
-                <p>Loading...</p>
+                <ComponentLoading />
             }
             {expanded && active && (
                 <>
@@ -79,7 +80,6 @@ export default function RespondentsIndex(){
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
     const { respondents, setRespondents } = useRespondents();
-    console.log('Respondents in component:', respondents);
     const [loading, setLoading] = useState(true);
     const [sexFilter, setSexFilter] = useState('');
     const [districtFilter, setDistrictFilter] = useState('')

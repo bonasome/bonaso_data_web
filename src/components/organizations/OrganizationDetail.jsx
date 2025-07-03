@@ -41,10 +41,15 @@ export default function OrganizationDetail(){
                     console.log('fetching organization details...');
                     const response = await fetchWithAuth(`/api/organizations/${id}/`);
                     const data = await response.json();
-                    console.log(data)
-                    setOrganizationDetails(prev => [...prev, data]);
-                    setActiveOrganization(data);
-                    setLoading(false);
+                    if(response.ok){
+                        setOrganizationDetails(prev => [...prev, data]);
+                        setActiveOrganization(data);
+                        setLoading(false);
+                    }
+                    else{
+                        navigate(`/not-found`);
+                    }
+                    
                 } 
                 catch (err) {
                     console.error('Failed to fetch organization: ', err);

@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/UserAuth'
 import SimpleSelect from '../reuseables/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
 import { useProjects } from '../../contexts/ProjectsContext';
+import ComponentLoading from '../reuseables/ComponentLoading';
 
 export default function ProjectFilters({ onFilterChange }){
     const { user } = useAuth()
@@ -80,7 +81,7 @@ export default function ProjectFilters({ onFilterChange }){
         setErrors([])
         onFilterChange(filters);
     }
-    if(loading) return <p>Loading...</p>
+    if(loading) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
             <button onClick={() => setShowFilters(!showFilters)}>

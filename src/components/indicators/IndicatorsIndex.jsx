@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/UserAuth'
 import IndicatorFilters from './IndicatorFilters';
 import IndexViewWrapper from '../reuseables/IndexView';
 import Loading from '../reuseables/Loading';
+import ComponentLoading from '../reuseables/ComponentLoading';
 import { useIndicators } from '../../contexts/IndicatorsContext';
 import { Link } from 'react-router-dom';
 
@@ -51,7 +52,7 @@ function IndicatorCard({ indicator, callback = null }) {
                     Add to Project
                 </button>
             )}
-            {expanded && loading && <p>Loading...</p>}
+            {expanded && loading && <ComponentLoading />}
             {expanded && active && (
                 <>
                     <p>{active.description}</p>

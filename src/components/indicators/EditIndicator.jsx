@@ -33,8 +33,14 @@ export default function EditIndicator(){
                     console.log('fetching indicator details...');
                     const response = await fetchWithAuth(`/api/indicators/${id}/`);
                     const data = await response.json();
-                    setIndicatorDetails(prev => [...prev, data]);
-                    setExisting(data);
+                    if(response.ok){
+                        setIndicatorDetails(prev => [...prev, data]);
+                        setExisting(data);
+                    }
+                    else{
+                        navigate(`/not-found`);
+                    }
+                    
                 } 
                 catch (err) {
                     console.error('Failed to fetch indicator: ', err);
@@ -106,7 +112,10 @@ export default function EditIndicator(){
             });
             const returnData = await response.json();
             if(response.ok){
-                setIndicatorDetails(prev => [...prev, returnData])
+                setIndicatorDetails(prev => {
+                    const others = prev.filter(r => r.id !== returnData.id);
+                    return [...others, returnData];
+                });
                 navigate(`/indicators/${returnData.id}`);
             }
             else{
@@ -134,7 +143,7 @@ export default function EditIndicator(){
 
     return(
         <div className={styles.container}>
-            <h1>Editing Indicator {existing.code}: {existing.name}</h1>
+            <h1>Editing Indicator {existing?.code}: {existing?.name}</h1>
             <IndicatorForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
         </div>
     )

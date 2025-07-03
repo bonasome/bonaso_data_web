@@ -7,6 +7,7 @@ import SimpleSelect from '../SimpleSelect';
 import Checkbox from '../Checkbox';
 import styles from './chart.module.css';
 import theme from '../../../../theme/theme';
+import ComponentLoading from '../ComponentLoading';
 
 export default function IndicatorChart({ indicatorID, organizationID=null, projectID=null }) {
     const { respondentsMeta, setRespondentsMeta } = useRespondents();
@@ -191,7 +192,7 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
     }
 
 
-    if (loading || !chartData) return <p>Loading...</p>;
+    if (loading || !chartData) return <ComponentLoading />;
     return(
         <div>
             {(chartType === '' || chartType ==='bar') && 

@@ -5,9 +5,9 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useAuth } from '../../contexts/UserAuth'
 import OrganizationFilters from './OrganizationFilters';
 import IndexViewWrapper from '../reuseables/IndexView';
-import Loading from '../reuseables/Loading';
 import { useOrganizations } from '../../contexts/OrganizationsContext';
 import { Link } from 'react-router-dom';
+import ComponentLoading from '../reuseables/ComponentLoading';
 
 function OrganizationCard({ org, callback = null }) {
     const [loading, setLoading] = useState(false);
@@ -40,7 +40,8 @@ function OrganizationCard({ org, callback = null }) {
             setLoading(false);
         }
     };
-    if (loading) return <p>Loading...</p>
+
+    if(loading) return <ComponentLoading />
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             <Link to={`/organizations/${org.id}`} style={{display:'flex', width:"fit-content"}}><h2>{org.name}</h2></Link>
@@ -103,7 +104,7 @@ export default function OrganizationsIndex( { callback=null, blacklist=[] }){
         setProjectFilter(filters.project)
     }
     const visibleOrgs = organizations?.filter(org => !blacklist.includes(org.id)) || [];
-    if(loading) return <Loading />
+    if(loading) return <ComponentLoading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Organizations' : 'My Organizations'}</h1> 

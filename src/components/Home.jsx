@@ -43,7 +43,7 @@ function Home() {
                     <div className={styles.tasks}>
                     {tasks.length == 0 && <h3>No tasks, great work!</h3>}
                     {tasks.length > 0 && tasks.map((task) =>  (
-                        <div 
+                        <div key={task.id} 
                             className={['meofficer', 'admin', 'manager'].includes(user.role) ? styles.taskLink : styles.task}
                             onClick={['meofficer', 'admin', 'manager'].includes(user.role) ? () => navigate(`/projects/${task.project.id}`) : null}
                         >

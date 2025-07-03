@@ -36,15 +36,19 @@ export default function EditRespondent(){
             }
         }
         const getRespondentDetails = async () => {
-            //force client to get newest data when editing to prevent asynchronous edits
             try {
                 console.log('fetching respondent details...');
                 const response = await fetchWithAuth(`/api/record/respondents/${id}/`);
                 const data = await response.json();
-                setRespondentDetails(prev => [...prev, data]);
+                if(response.ok){
+                    setRespondentDetails(prev => [...prev, data]);
+                    setActive(data);
+                    setLoading(false);
+                }
+                else{
+                    navigate(`/not-found`);
+                }
                 
-                setActive(data);
-                setLoading(false);
             } 
             catch (err) {
                 console.error('Failed to fetch respondent: ', err);
@@ -103,8 +107,8 @@ export default function EditRespondent(){
                 const returnData = await response.json();
                 if(response.ok){
                     setRespondentDetails(prev => {
-                        const others = prev.filter(r => r.id !== data.id);
-                        return [...others, data];
+                        const others = prev.filter(r => r.id !== returnData.id);
+                        return [...others, returnData];
                     });
                     navigate(`/respondents/${returnData.id}`);
                 }
