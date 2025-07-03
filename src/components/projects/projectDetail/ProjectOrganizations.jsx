@@ -165,7 +165,6 @@ export function OrganizationTasks({ project, organization, setAddingTask }){
                 })
             });
             const returnData = await response.json();
-            console.log(returnData)
             if(response.ok){
                 setOrgTasks(prev => [...prev, returnData])
                 setReload(prev => prev + 1);

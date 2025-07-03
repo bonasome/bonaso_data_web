@@ -19,7 +19,7 @@ export default function Logout() {
                 });
                 if (response.ok) {
                     await refreshAuth();
-                    console.log('Logged out.');
+                    console.log('Logged out successfuly.');
                     navigate('/users/login');
                 } 
                 else {

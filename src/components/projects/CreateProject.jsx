@@ -90,7 +90,7 @@ export default function CreateProject(){
             setErrors(['Start date must be after the end date.'])
             return;
         }
-        console.log('submitting data...', data)
+        console.log('submitting data...')
         try{
             const response = await fetchWithAuth('/api/manage/projects/', {
                 method: 'POST',

@@ -18,7 +18,6 @@ export function Target({ target, task, tasks, onUpdate, onDelete }){
     const [errors, setErrors] = useState([]);
 
     useEffect(() => {
-        console.log('current', currentTarget)
         if (currentTarget?.related_to) {
             const related = tasks.find(t => t.id === currentTarget.related_to.id);
             setRelated(related || null);
@@ -96,7 +95,6 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
     const [taskIDs, setTaskIDs] = useState([])
     const [asPercentage, setAsPercentage] = useState(false)
 
-    console.log(existing)
     const [targetInfo, setTargetInfo] = useState({
         task_id: task.id,
         amount: existing ? existing?.amount : '',
@@ -159,7 +157,7 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
         setErrors([])
 
         try{
-            //console.log('submitting target...', submission)
+            console.log('submitting target...')
             const url = existing ? `/api/manage/targets/${targetID}/` : `/api/manage/targets/`;
             const response = await fetchWithAuth(url, {
                 method: existing ? 'PATCH' : 'POST',

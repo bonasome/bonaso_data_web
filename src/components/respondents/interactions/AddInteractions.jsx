@@ -189,10 +189,8 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             else if (interactions?.length > 0) {
                 const response = await fetchWithAuth(`/api/record/interactions/?respondent=${interactions[0].respondent}&task_indicator=${prereq.id}&before=${interactionDate}`);
                 const data = await response.json()
-                console.log(data)
                 if(data.results.length > 0){
                     const validPastInt = data.results.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
-                    console.log(validPastInt)
                     if (validPastInt && validPastInt.interaction_date <= date) {
                         isValid = true;
                         if (validPastInt?.subcategories) {
@@ -309,7 +307,6 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                     }
                 }
                 setErrors(serverResponse)
-                console.log(serverResponse)
             }
         }
         catch(err){

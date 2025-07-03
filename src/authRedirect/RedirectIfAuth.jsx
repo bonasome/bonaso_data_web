@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/UserAuth';
 
 const RedirectIfAuthenticated = ({ children }) => {
     const { loggedIn } = useAuth();
-    console.log(loggedIn)
     return loggedIn ? <Navigate to="/" replace /> : children;
 };
 

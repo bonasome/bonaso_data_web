@@ -69,7 +69,7 @@ export default function EditRespondent(){
     }
 
     const handleSubmit = async(data) => {
-            console.log('submitting data...', data)
+            console.log('submitting data...')
             const submissionErrors = []
             if(data.is_anonymous == ''){
                 data.is_anonymous = false
@@ -86,7 +86,6 @@ export default function EditRespondent(){
             }
             else if(!data.is_anonymous){
                 data.age_range = null;
-                console.log('here')
                 if(data.dob && isNaN(Date.parse(data.dob)) || new Date(data.dob) > new Date()){
                     submissionErrors.push('Date of birth must be a valid date and may not be in the future.');
                 }

@@ -11,10 +11,6 @@ import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
 import styles from './organizationDetail.module.css';
 import { IoMdReturnLeft } from "react-icons/io";
-import Checkbox from '../reuseables/Checkbox';
-import IndicatorChart from '../reuseables/charts/IndicatorChart';
-import { useIndicators } from '../../contexts/IndicatorsContext';
-import SimpleSelect from '../reuseables/SimpleSelect';
 
 
 export default function OrganizationDetail(){
@@ -69,7 +65,6 @@ export default function OrganizationDetail(){
                     const data = await response.json();
                     setProjects(data.results);
                     setLoading(false);
-                    console.log(data)
                 } 
                 catch (err) {
                     setErrors(['Something went wrong. Please try again later.'])

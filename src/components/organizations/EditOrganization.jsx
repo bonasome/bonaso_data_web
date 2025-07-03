@@ -25,8 +25,7 @@ export default function EditOrganization(){
     useEffect(() => {
         const getOrganizations = async () => {
             try{
-                console.log('fetching model info...')
-                console.log(`/api/organizations/?search=${search}`)
+                console.log('fetching organizations...')
                 const response = await fetchWithAuth(`/api/organizations/?search=${search}`);
                 const data = await response.json();
                 if(organizations.length > 0){
@@ -89,7 +88,7 @@ export default function EditOrganization(){
     }
 
     const handleSubmit = async(data) => {
-        console.log('submitting data...', data)
+        console.log('submitting data...')
         try{
             const response = await fetchWithAuth(`/api/organizations/${id}/`, {
                 method: 'PATCH',

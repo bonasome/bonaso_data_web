@@ -17,7 +17,6 @@ function Home() {
             try {
                 console.log('fetching respondent details...');
                 const url = `/api/manage/tasks/`
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 const myTasks = data.results.filter(task => task.organization.id == user.id)

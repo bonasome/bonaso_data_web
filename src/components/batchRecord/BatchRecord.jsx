@@ -38,7 +38,6 @@ export default function BatchRecord(){
                 console.log('fetching organizations...')
                 const response = await fetchWithAuth(`/api/organizations/`);
                 const data = await response.json();
-                console.log(data.results)
                 setOrganizations(data.results)
                 setLoading(false)
             }
@@ -125,7 +124,6 @@ export default function BatchRecord(){
                 });
                 const data = await response.json();
                 if(response.ok){
-                    console.log(data)
                     if(data.errors.length == 0 && data.warnings.length ==0){
                         setOK(true);
                     }

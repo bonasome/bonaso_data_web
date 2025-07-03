@@ -42,7 +42,6 @@ export default function CreateIndicator(){
                 console.log('fetching indicators info...');
                 const response = await fetchWithAuth(`/api/indicators/?search=${search}`);
                 const data = await response.json();
-                console.log(data.results)
                 setIndicators(data.results);
                 const ids = data.results.map(o => o.id);
                 const names = data.results.map(o => o.name);
@@ -67,7 +66,7 @@ export default function CreateIndicator(){
     }
 
     const handleSubmit = async(data) => {
-        console.log('submitting data...', data)
+        console.log('submitting data...')
         try{
             const response = await fetchWithAuth('/api/indicators/', {
                 method: 'POST',

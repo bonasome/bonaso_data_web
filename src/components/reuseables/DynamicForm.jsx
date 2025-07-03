@@ -60,7 +60,6 @@ export default function DynamicForm({ config, onSubmit, onCancel }){
             const fieldErrors = validate(target);
             if(fieldErrors.length > 0) newErrors.push(...fieldErrors);
         });
-        console.log("Validation errors:", newErrors);
         if (newErrors.length > 0) {
             setErrors(newErrors);
             return;

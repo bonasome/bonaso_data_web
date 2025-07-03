@@ -43,7 +43,7 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
         const getInteractions = async() => {
             setLoading(true)
             try {
-                console.log('fetching respondent details...');
+                console.log('fetching interactions...');
                 const urlFilters = (organizationID ? `&organization=${organizationID}` : '') +
                     (projectID ? `&project=${projectID}` : '');
                 const response = await fetchWithAuth(`/api/indicators/chart-data/?indicator=${indicatorID}${urlFilters}`);
@@ -170,7 +170,6 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
         return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
     }
     const getColor = (index) => {
-        console.log(index)
         switch (index){
             case 0:
                 return '#fff'

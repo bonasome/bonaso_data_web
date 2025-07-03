@@ -26,6 +26,7 @@ export default function Profile(){
     const [entries, setEntries] = useState(0);
     const [search, setSearch] = useState('')
     const [labels, setLabels] = useState({});
+    const [errors, setErrors] = useState([]);
     useEffect(() => {
         const getProfile = async () => {
             const found = profiles.find(p => p.id.toString() === id.toString());
@@ -36,7 +37,7 @@ export default function Profile(){
             }
             else{
                 try{
-                    console.log('fetching model info...')
+                    console.log('fetching profile info...')
                     const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
                     const data = await response.json();
                     setProfile(data)
@@ -72,10 +73,9 @@ export default function Profile(){
         getMeta();
         const getActivityFeed = async () => {
             try{
-                console.log('fetching model info...')
+                console.log('fetching user acitivity...')
                 const response = await fetchWithAuth(`/api/profiles/users/activity/${id}/feed/?page=${page}&search=${search}`);
                 const data = await response.json();
-                console.log(data.results)
                 setFeed(data.results)
                 setEntries(data.count)
                 setLoading(false)
@@ -92,7 +92,6 @@ export default function Profile(){
     useEffect(() => {
             if (!profilesMeta?.roles || ! profile?.role) return;
             const roleIndex = profilesMeta.roles.indexOf(profile.role);
-            console.log('ri', roleIndex)
             setLabels({
                 role: profilesMeta.role_labels[roleIndex],
             })
@@ -101,7 +100,7 @@ export default function Profile(){
     
     const changeStatus = async(to) => {
         try{
-            console.log('fetching model info...')
+            console.log('updating user status...')
             const response = await fetchWithAuth(`/api/profiles/users/${id}/`,{
                 method: 'PATCH',
                 headers: {
@@ -116,18 +115,19 @@ export default function Profile(){
                 setActive(to);
             }
             else{
-                console.log(data)
+                setErrors(['Failed to change status. Please try again later.']);
             }
         }
         catch(err){
-            console.error('Failed to fetch profile: ', err)
+            setErrors(['Failed to change status. Please try again later.']);
+            console.error('Failed to fetch profile: ', err);
         }
     }
 
-    console.log(profile)
     if(loading) return <Loading />
     return(
         <div className={styles.container}>
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <Link to={'/profiles'} className={styles.return}>
                 <IoMdReturnLeft className={styles.returnIcon} />
                 <p>Return to team overview</p>   

@@ -91,7 +91,6 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
                     (statusFilter ? `&status=${statusFilter}` : '');
                 
                 const url = `/api/indicators/?search=${search}&page=${page}` + filterQuery;
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);

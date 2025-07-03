@@ -44,7 +44,7 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
 
     const removeTask = async() => {
         try {
-            console.log('deleting organization...');
+            console.log('deleting task...');
             const response = await fetchWithAuth(`/api/manage/tasks/${task.id}/`, {
                 method: 'DELETE',
             });
@@ -145,7 +145,7 @@ export default function Tasks({ callback, update=null, target=false, organizatio
     useEffect(() => {
         const getTasks = async () => {
             try {
-                console.log('fetching respondent details...');
+                console.log('fetching tasks...');
                 const includeOrg = organization ? `&organization=${organization.id}` : ''
                 const includeTargets = target ? `&include_targets=true` : ''
                 const includeProject = project ? `&project=${project.id}` : ''

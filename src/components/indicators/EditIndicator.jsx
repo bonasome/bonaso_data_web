@@ -101,7 +101,7 @@ export default function EditIndicator(){
 
     const handleSubmit = async(data) => {
         if(!Array.isArray(data.subcategory_names)) data.subcategory_names = []
-        console.log('submitting data...', data)
+        console.log('submitting data...')
         try{
             const response = await fetchWithAuth(`/api/indicators/${id}/`, {
                 method: 'PATCH',

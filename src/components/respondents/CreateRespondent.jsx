@@ -51,7 +51,7 @@ export default function CreateRespondent(){
         navigate('/respondents')
     }
     const handleSubmit = async(data) => {
-        console.log('submitting data...', data)
+        console.log('submitting data...')
         const submissionErrors = []
         if(data.is_anonymous == ''){
             data.is_anonymous = false

@@ -20,7 +20,6 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
         let amount = 1;
         const date = new Date(interaction.interaction_date);
         if (filters) {
-            console.log(filters.organization, interaction.organization.id)
             const respondent = interaction.respondent;
 
             if (filters.age_range && filters.age_range !== respondent.age_range) continue;
@@ -108,7 +107,6 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
     }
     // Targets
     for (const target of targets) {
-        console.log(target)
         const start = new Date(target.start);
         const end = new Date(target.end);
 

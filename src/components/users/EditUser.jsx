@@ -52,7 +52,7 @@ export default function EditUser(){
             }
             else{
                 try{
-                    console.log('fetching model info...')
+                    console.log('fetching profile info...')
                     const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
                     const data = await response.json();
                     setExisting(data)
@@ -76,7 +76,7 @@ export default function EditUser(){
             }
             else{
                 try{
-                    console.log('fetching model info...')
+                    console.log('fetching projects info...')
                     const response = await fetchWithAuth(`/api/manage/projects/meta/`);
                     const data = await response.json();
                     setProjectsMeta(data);
@@ -95,7 +95,7 @@ export default function EditUser(){
         getProjectMeta();
         const getOrganizations = async () => {
             try{
-                console.log('fetching model info...')
+                console.log('fetching organizations info...')
                 const response = await fetchWithAuth(`/api/organizations/?search=${search}`);
                 const data = await response.json();
                 const ids = data.results.map((o) => o.id);
@@ -123,7 +123,7 @@ export default function EditUser(){
     }
     
     const handleSubmit = async(data) => {
-        console.log('submitting data...', data)
+        console.log('submitting data...')
         try{
             const response = await fetchWithAuth(`/api/profiles/users/${id}/`, {
                 method: 'PATCH',

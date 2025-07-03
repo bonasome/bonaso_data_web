@@ -50,7 +50,6 @@ export default function SensitiveInfo({ id }) {
                 console.log('fetching respondent details...');
                 const response = await fetchWithAuth(`/api/record/respondents/${id}/sensitive-info/`);
                 const data = await response.json();
-                console.log('data', data)
                 setForm({
                     hiv_positive: data.hiv_status_info?.hiv_positive || false,
                     date_positive: data.hiv_status_info?.date_positive || '',
@@ -71,7 +70,6 @@ export default function SensitiveInfo({ id }) {
     }, [id])
 
     useEffect(() => {
-        console.log('form', form)
         if (!respondentsMeta?.kp_types || !form.kp_status_names) return;
             const kpIndexes = form.kp_status_names.map((kp) => respondentsMeta.kp_types.indexOf(kp));
             const kpLabels = kpIndexes.map((kp) => respondentsMeta.kp_type_labels[kp]);
@@ -135,7 +133,7 @@ export default function SensitiveInfo({ id }) {
                 setEdit(false);
             }
             else{
-                console.log(returnData);
+                setErrors(['Something went wrong. Please try again later.']);
             }
         }
         catch(err){

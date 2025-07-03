@@ -85,7 +85,6 @@ export default function EditProject(){
     }, [projectsMeta, setProjectsMeta, projectDetails, setProjectDetails, id])
 
     useEffect(() => {
-        console.log(existing)
         setFormConfig([
             {name: 'name', label: 'Project Name', type: 'text', required: true, value: existing.name ? existing.name : ''},
             {name: 'start', type: 'date', required: true, value: existing.start ? existing.start : ''},
@@ -112,7 +111,7 @@ export default function EditProject(){
             setErrors(['Start date must be after the end date.'])
             return;
         }
-        console.log('submitting data...', data)
+        console.log('submitting data...')
         try{
             const response = await fetchWithAuth(`/api/manage/projects/${existing.id}/`, {
                 method: 'PATCH',

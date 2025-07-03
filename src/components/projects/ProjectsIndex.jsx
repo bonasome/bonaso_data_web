@@ -81,7 +81,6 @@ export default function ProjectsIndex(){
                     (statusFilter ? `&status=${statusFilter}` : '');
                 
                 const url = `/api/manage/projects/?search=${search}&page=${page}` + filterQuery;
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);

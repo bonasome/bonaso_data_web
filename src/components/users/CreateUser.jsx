@@ -74,7 +74,6 @@ export default function CreateUser(){
                 console.log('fetching model info...')
                 const response = await fetchWithAuth(`/api/organizations/?search=${search}`);
                 const data = await response.json();
-                console.log(data.results)
                 const ids = data.results.map((o) => o.id);
                     const names= data.results.map((o)=> o.name);
                     setOrgIDs(ids);
@@ -102,7 +101,7 @@ export default function CreateUser(){
             setErrors(['Passwords do not match.'])
             return;
         }
-        console.log('submitting data...', data)
+        console.log('submitting data...')
         try{
             const response = await fetchWithAuth('/api/users/create-user/', {
                 method: 'POST',

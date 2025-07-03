@@ -36,7 +36,6 @@ function ProfileCard({ profile }) {
     useEffect(() => {
         if (!profilesMeta?.roles) return;
         const roleIndex = profilesMeta.roles.indexOf(profile.role);
-        console.log('ri', roleIndex)
         setLabels({
             role: profilesMeta.role_labels[roleIndex],
         })
@@ -76,12 +75,10 @@ export default function ProfilesIndex(){
                     (inactiveFilter ? `&is_active=${!inactiveFilter}` : '')
                 
                 const url = `/api/profiles/users/?search=${search}&page=${page}` + filterQuery;
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
                 if (page === 1) {
-                    console.log(data.results)
                     setProfiles(data.results);
                 } 
                 else {
@@ -99,7 +96,6 @@ export default function ProfilesIndex(){
     }, [page, search, orgFilter, roleFilter, inactiveFilter]);
 
     const setFilters = (filters) => {
-        console.log(filters)
         setOrgFilter(filters.organization);
         setRoleFilter(filters.role)
         setInactiveFilter(filters.inactive)

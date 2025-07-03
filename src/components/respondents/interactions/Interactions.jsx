@@ -27,9 +27,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     const {setInteractionDetails} = useInteractions();
 
     useEffect(() => {
-        console.log(interaction)
         const permCheck = () => {
-            console.log('user', user)
             if(user.role == 'admin'){
                 setPerm(true);
             }
@@ -68,7 +66,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             'flagged': flaggedOverride,
         }
         try{
-            console.log('submitting edits', data)
+            console.log('submitting edits...')
             const url = `/api/record/interactions/${interaction.id}/`; 
             const response = await fetchWithAuth(url, {
                 method: 'PATCH',
@@ -99,7 +97,6 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                         serverResponse.push(`${returnData[field]}`);
                     }
                 }
-                console.log(serverResponse)
                 setErrors(serverResponse);
             }
         }
@@ -116,7 +113,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
 
     const deleteInteraction = async() => {
         try {
-            console.log('deleting organization...');
+            console.log('deleting interaction...');
             const response = await fetchWithAuth(`/api/record/interactions/${interaction.id}/`, {
                 method: 'DELETE',
             });
@@ -248,11 +245,9 @@ export default function Interactions({ id, tasks, onUpdate, setAddingTask }){
                 console.log('fetching respondent details...');
                 const response = await fetchWithAuth(`/api/record/interactions/?respondent=${id}&search=${search}&page=${page}`);
                 const data = await response.json();
-                console.log(data)
                 setEntries(data.count); 
                 if (page === 1) {
                     setInteractions(data.results);
-                    console.log(data.results)
                 } 
                 else {
                     setInteractions(prev => [...prev, ...data.results]);

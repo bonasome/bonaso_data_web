@@ -69,16 +69,15 @@ export function AddIndicator({ project }){
     const [projectIndicators, setProjectIndicators] = useState([]);
     const [errors, setErrors] = useState([]);
 
-    console.log(project)
     useEffect(() => {
         if(project?.indicators.length > 0){
             const ids = project.indicators.map((ind) => ind.id)
             setProjectIndicators(ids)
         }
     }, [project])
-    console.log(projectIndicators)
+
     const addIndicator = async (ind) => {
-        console.log('adding indicator...', ind)
+        console.log('adding indicator...')
         try{
             const response = await fetchWithAuth(`/api/manage/projects/${project.id}/`, {
                 method: 'PATCH',
