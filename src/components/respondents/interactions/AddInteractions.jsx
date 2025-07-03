@@ -5,7 +5,7 @@ import errorStyles from '../../../styles/errors.module.css';
 import modalStyles from '../../../styles/modals.module.css';
 import { useInteractions} from '../../../contexts/InteractionsContext';
 import styles from '../respondentDetail.module.css';
-
+import useWindowWidth from '../../../../services/useWindowWidth';
 
 export default function AddInteractions({ id, tasks, interactions, onUpdate, onFinish, setAddingTask }) {
     const { setInteractions } = useInteractions();
@@ -22,7 +22,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
     const [subcatModalActive, setSubcatModalActive] = useState(false);
     const[errors, setErrors] = useState([]);
     const[warnings, setWarnings] = useState([]);
-
+    const width = useWindowWidth();
     const interactionDateRef = useRef('');
 
     useEffect(() => {
@@ -341,7 +341,8 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             {active && <label htmlFor="interaction_date">Interaction Date</label>}
             {active && <input id='interaction_date' type='date' onChange={(e) => handleDateChange(e)}/>}
             <div className={styles.dropBox} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray' }}>
-                {added.length === 0 && <p>Drag an indicator from the sidebar to start.</p>}
+                {added.length === 0 && width >=768 && <p>Drag an indicator from the sidebar to start.</p>}
+                {added.length === 0 && width < 768 && <p>Click the "Add to interaction" button on a task below to add it to the interaciton.</p>}
                 {added.length > 0 && added.map((task) => (
                     <div className={styles.row} key={task.id}>
                         <div>

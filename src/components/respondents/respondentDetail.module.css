@@ -5,7 +5,7 @@
     overflow-x: hidden;
     overflow-y: hidden;
 }
-@media screen and (max-width: 700px){
+@media screen and (max-width: 768px){
     .respondentView{
         height: auto;
         display: flex;  

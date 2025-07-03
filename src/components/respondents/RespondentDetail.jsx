@@ -177,7 +177,7 @@ export default function RespondentDetail(){
                 </div>
             </div>
             <div className={styles.sidebar}>
-                {width > 700 && <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
+                {width > 768 && <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
                     {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
                 </div>}
                 {!['client'].includes(user.role) && sbVisible && <Tasks callback={loadTasks} isDraggable={true} addCallback={(t) => handleButtonAdd(t)} blacklist={added} />}
