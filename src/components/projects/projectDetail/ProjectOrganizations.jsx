@@ -18,13 +18,22 @@ import IndicatorChart from '../../reuseables/charts/IndicatorChart';
 export function OrganizationsBar({ project, callback, visChange }){
     const [activeOrg, setActiveOrg] = useState('');
     const[sbVisible, setSBVisible] = useState(true);
+    const [search, setSearch] = useState('');
+
     const width = useWindowWidth();
+    const filtered = project?.organizations?.length > 0 ? project.organizations.filter(o => o.name.toLowerCase().includes(search.toLowerCase())) : []
     return(
         <div  className={styles.sidebarLeft}>
             {sbVisible && <div>
                 <h2>Project Organizations</h2>
                 <button onClick={() => callback('add-organization')}>Add an Organization</button>
-                {project?.organizations.length > 0 ? project.organizations.map((org) => (
+                {project?.organizations.length > 0 && 
+                    <div>
+                        <label htmlFor='search'>Search</label>
+                        <input id='search' type='text' value={search} onChange={(e) => setSearch(e.target.value)} />
+                    </div>
+                }
+                {project?.organizations.length > 0 ? filtered.map((org) => (
                     <div key={org.id} className={org.id === activeOrg ? styles.activeCard : styles.card} onClick={() => {callback('view-organization', org); setActiveOrg(org.id)}}>
                         <h3>{org.name}</h3>
                     </div>

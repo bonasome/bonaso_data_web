@@ -32,11 +32,13 @@ export function IndicatorsBar({ project, callback, visChange, activeOrganization
     const { user } = useAuth();
     const[sbVisible, setSBVisible] = useState(true)
     const [activeIndicator, setActiveIndicator] = useState('');
-    
+    const [search, setSearch] = useState('');
     const handleClick = (type, ind) => {
         setActiveIndicator(ind.id)
         callback(type, ind)
     }
+    const filtered = project?.indicators?.length > 0 ? project.indicators.filter(i => i.code.toLowerCase().includes(search.toLowerCase()) || i.name.toLowerCase().includes(search.toLowerCase())) : []
+    
     return(
         <div  className={styles.sidebarRight}>
             {width > 500 && <div className={styles.toggle} onClick={() => {setSBVisible(!sbVisible); visChange(!sbVisible)}}>
@@ -45,7 +47,13 @@ export function IndicatorsBar({ project, callback, visChange, activeOrganization
             {sbVisible && <div>
                 <h2>Project Indicators</h2>
                 {user.role ==='admin' && <button onClick={() => callback('add-indicator')}>Add an Indicator</button>}
-                {project?.indicators.length > 0 ? project.indicators.map((ind) => (
+                {project?.indicators.length > 0 && 
+                    <div>
+                        <label htmlFor='search'>Search</label>
+                        <input id='search' type='text' value={search} onChange={(e) => setSearch(e.target.value)} />
+                    </div>
+                }
+                {project?.indicators.length > 0 ? filtered.map((ind) => (
                     <IndicatorCard key={ind.id} indicator={ind} callback={(type, ind) => handleClick(type, ind)} active={activeIndicator === ind.id ? true : false} activeOrganization={activeOrganization} buttonAdd={buttonAdd} buttonViewChart={buttonViewChart} />
                 )) :
                 <p>This project doesn't have any indicators yet.</p>
