@@ -65,6 +65,10 @@ function Dropdown({ name }){
             setUrls(['/respondents', '/batch-record'])
             setLabels(['Manage Respondents', 'Batch Record'])
         }
+        if(name == 'Respondent' && !['client'].includes(user.role)){
+            setUrls(prev => [...prev, '/respondents/flagged'])
+            setLabels(prev => [...prev, 'Flagged Interactions'])
+        }
         if(name ==`${user.username}`){
             setUrls([`/profiles/${user.id}`,'/help', '/users/logout'])
             setLabels(['My Profile','Help', 'Logout'])
@@ -122,6 +126,7 @@ function ThinMenu() {
         <div className={styles.menuExpanded}>
             <h3>Respondents</h3>
             <div className={styles.menuBar}><Link to='/respondents'>Respondents</Link></div>
+            {!['clients'].includes(user.role) && <div className={styles.menuBar}><Link to='/respondents/flagged'>Flagged Interactions</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/batch-record'}>Batch Record</Link></div>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h3>Projects</h3>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}

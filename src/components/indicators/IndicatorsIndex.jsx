@@ -86,7 +86,7 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
         const loadOrgs = async () => {
             try {
                 const filterQuery = 
-                    (prereqFilter ? `&organization=${orgFilter}` : '') +
+                    (orgFilter ? `&organization=${orgFilter}` : '') +
                     (projectFilter ? `&project=${projectFilter}` : '') + 
                     (statusFilter ? `&status=${statusFilter}` : '');
                 
@@ -108,12 +108,12 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
             }
         };
         loadOrgs();
-    }, [page, search, prereqFilter, projectFilter]);
+    }, [page, search, orgFilter, projectFilter, statusFilter]);
 
     const setFilters = (filters) => {
-        setPrereqFilter(filters.prereq);
-        setProjectFilter(filters.project)
-        setStatusFilter(filters.status)
+        setOrgFilter(filters.organization);
+        setProjectFilter(filters.project);
+        setStatusFilter(filters.status);
     }
     const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
     if(loading) return <Loading />

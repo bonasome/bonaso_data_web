@@ -24,7 +24,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     const[availableSubcats, setAvailableSubcats] = useState([]);
     const [del, setDel] = useState(false);
     const [flagged, setFlagged] = useState(interaction.flagged)
-    const {setInteractionDetails} = useInteractions();
+    const {setInteractions} = useInteractions();
 
     useEffect(() => {
         const permCheck = () => {
@@ -77,7 +77,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             });
             const returnData = await response.json();
             if(response.ok){
-                setInteractionDetails(prev => {
+                setInteractions(prev => {
                     const others = prev.filter(r => r.id !== interaction.id);
                     return [...others, returnData];
                 });

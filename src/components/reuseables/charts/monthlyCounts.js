@@ -30,6 +30,14 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
                 const citizenship = filters.citizen === 'true';
                 if (citizenship !== respondent.citizenship) continue;
             }
+            if (filters.pregnant !== '') {
+                const preg = filters.pregnant === 'true';
+                if (preg !== respondent.pregnant) continue;
+            }
+            if (filters.hiv_status !== '') {
+                const hiv = filters.hiv_status === 'true';
+                if (hiv !== respondent.hiv_status) continue;
+            }
 
             if (filters.kp_status.length > 0) {
                 const include = respondent.kp_status?.some(kp => filters.kp_status.includes(kp));
@@ -90,6 +98,16 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
             if(legend==='citizenship'){
                 const cat=interaction.respondent[legend];
                 const label = cat ? 'Citizen' : 'Non-Citizen';
+                axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
+            }
+            else if(legend==='pregnant'){
+                const cat=interaction.respondent[legend];
+                const label = cat ? 'Pregnant' : 'Not Pregnant';
+                axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
+            }
+            else if(legend==='hiv_status'){
+                const cat=interaction.respondent[legend];
+                const label = cat ? 'HIV Positive' : 'HIV Negative';
                 axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
             }
             else{

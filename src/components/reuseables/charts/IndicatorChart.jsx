@@ -35,6 +35,8 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
         organization: '',
         after: '',
         before: '',
+        hiv_status: '',
+        pregnant: '',
     });
     const [chartData, setChartData] = useState(null)
     const [loading, setLoading] = useState(true);
@@ -281,6 +283,8 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
                     multiple={false} optionLabels={orgNames}
                     callback={(val) => setFilters(prev => ({ ...prev, organization: val }))}
                 />
+                <SimpleSelect name='pregnant' optionValues={[true, false]} optionLabels={['Pregnant', 'Not Pregnant']} callback={(val) => setFilters(prev => ({...prev, pregnant: val}))} value={filters.pregnant}/>
+                <SimpleSelect name='hiv_status' optionValues={[true, false]} optionLabels={['HIV Positive', 'HIV Negative']} callback={(val) => setFilters(prev => ({...prev, hiv_status: val}))} value={filters.hiv_status}/>
                 <div>
                     <div>
                         <label htmlFor='after' >After</label>

@@ -23,6 +23,7 @@ import RespondentsIndex from '../components/respondents/RespondentsIndex';
 import CreateRespondent from '../components/respondents/CreateRespondent';
 import EditRespondent from '../components/respondents/EditRespondent';
 import RespondentDetail from '../components/respondents/RespondentDetail';
+import FlaggedInteractions from '../components/respondents/interactions/FlaggedInteractions';
 
 //projects
 import ProjectLayout from '../layouts/ProjectLayout';
@@ -83,6 +84,7 @@ function Router() {
             <Route path=':id' element={<RespondentDetail />} />
             <Route path='new' element={<CreateRespondent />} />
             <Route path=':id/edit' element={<EditRespondent />} />
+            <Route path='flagged' element={<FlaggedInteractions />} />
         </Route>
         
         <Route 
