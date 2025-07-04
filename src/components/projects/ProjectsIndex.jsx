@@ -113,9 +113,9 @@ export default function ProjectsIndex(){
             <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries} filter={<ProjectFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 {user.role == 'admin' && <Link to='/projects/new'><button>Create New Project</button></Link>}
                 
-                {projects && projects?.length == 0 ? 
+                {(projects && projects?.length) == 0 ? 
                     <p>No projects match your criteria.</p> :
-                    projects.map(p => (
+                    projects?.map(p => (
                     <ProjectCard key={p.id} project={p} />
                     ))
                 }

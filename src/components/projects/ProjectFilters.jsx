@@ -104,8 +104,8 @@ export default function ProjectFilters({ onFilterChange }){
         const orgIDs = organizations?.map((o) => (o.id));
         const orgNames = organizations?.map((o) => (o.name));
 
-        const clientIDs = data.clients.map((c) => c.id);
-        const clientNames= data.clients.map((c)=> c.name);
+        const clientIDs = projectsMeta?.clients?.map((c) => c.id);
+        const clientNames= projectsMeta?.clients?.map((c)=> c.name);
 
         const indIDs = indicators?.map((ind) => (ind.id));
         const indNames = indicators?.map((ind) => (`${ind.code}: ${ind.name}`));

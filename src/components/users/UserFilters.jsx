@@ -10,7 +10,7 @@ import ComponentLoading from '../reuseables/ComponentLoading';
 import { useProfiles } from '../../contexts/ProfilesContext';
 import { useOrganizations } from '../../contexts/OrganizationsContext';
 import { useProjects } from '../../contexts/ProjectsContext';
-
+import { useAuth } from '../../contexts/UserAuth';
 export default function ProfileFilters({ onFilterChange }){
     const [loading, setLoading] = useState(true);
     const {organizations, setOrganizations } = useOrganizations();
@@ -26,6 +26,7 @@ export default function ProfileFilters({ onFilterChange }){
     });
     const [showFilters, setShowFilters] = useState(false);
     const containerRef = useRef(null);
+    const { user } = useAuth();
     
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -94,9 +95,8 @@ export default function ProfileFilters({ onFilterChange }){
     useEffect(() => {
         const orgIDs = organizations?.map((o) => (o.id));
         const orgNames = organizations?.map((o) => (o.name));
-
-        const clientIDs = data.clients.map((c) => c.id);
-        const clientNames= data.clients.map((c)=> c.name);
+        const clientIDs = projectsMeta?.clients?.map((c) => c.id);
+        const clientNames= projectsMeta?.clients?.map((c)=> c.name);
 
         setSelectTools({
             orgs: {
