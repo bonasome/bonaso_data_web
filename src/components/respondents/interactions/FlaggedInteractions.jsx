@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import { useAuth } from '../../../contexts/UserAuth'
 import FlaggedInteractionsFilters from './FlaggedInteractionsFilters';
-import IndexViewWrapper from '../reuseables/IndexView';
-import Loading from '../reuseables/Loading';
+import IndexViewWrapper from '../../reuseables/IndexView';
+import Loading from '../../reuseables/Loading';
 import { Link } from 'react-router-dom';
 import { useInteractions } from '../../../contexts/InteractionsContext';
 
