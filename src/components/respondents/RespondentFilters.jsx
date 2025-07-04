@@ -12,9 +12,9 @@ import ComponentLoading from '../reuseables/ComponentLoading';
 export default function RespondentFilters({ onFilterChange }){
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
-        sex: null,
-        district: null,
-        age_range: null,
+        sex: '',
+        district: '',
+        age_range: '',
     })
     const {respondentsMeta, setRespondentsMeta} = useRespondents();
     const [showFilters, setShowFilters] = useState(false);
@@ -40,7 +40,9 @@ export default function RespondentFilters({ onFilterChange }){
             }
         }
         getRespondentMeta();
-        
+    }, [])
+    
+    useEffect(() => {
         const handleClickOutside = (e) => {
             if (containerRef.current && !containerRef.current.contains(e.target)) {
                 setShowFilters(false);
@@ -48,13 +50,22 @@ export default function RespondentFilters({ onFilterChange }){
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-
-    }, [])
-    
+    },[])
     const handleChange = () =>{
         onFilterChange(filters);
     }
-
+    const clearFilters = () => {
+        setFilters({
+            sex: '',
+            district: '',
+            age_range: '',
+        });
+        onFilterChange({
+            sex: '',
+            district: '',
+            age_range: '',
+        });
+    }
     if(loading) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
@@ -64,10 +75,11 @@ export default function RespondentFilters({ onFilterChange }){
             {showFilters && (
                 <div className={styles.filters}>
                     {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-                        <SimpleSelect name='sex' optionValues={respondentsMeta.sexs} optionLabels={respondentsMeta.sex_labels} callback={(val) => setFilters(prev => ({...prev, sex: val}))} />
-                        <SimpleSelect name='age_range' optionValues={respondentsMeta.age_ranges} optionLabels={respondentsMeta.age_range_labels} callback={(val) => setFilters(prev => ({...prev, age_range: val}))} />
-                        <SimpleSelect name='district' optionValues={respondentsMeta.districts} optionLabels={respondentsMeta.district_labels} callback={(val) => setFilters(prev => ({...prev, district: val}))} />
+                        <SimpleSelect name='sex' optionValues={respondentsMeta.sexs} optionLabels={respondentsMeta.sex_labels} callback={(val) => setFilters(prev => ({...prev, sex: val}))} value={filters.sex} />
+                        <SimpleSelect name='age_range' optionValues={respondentsMeta.age_ranges} optionLabels={respondentsMeta.age_range_labels} callback={(val) => setFilters(prev => ({...prev, age_range: val}))} value={filters.age_range}/>
+                        <SimpleSelect name='district' optionValues={respondentsMeta.districts} optionLabels={respondentsMeta.district_labels} callback={(val) => setFilters(prev => ({...prev, district: val}))} value={filters.district}/>
                     <button onClick={()=>handleChange()}>Apply</button>
+                    <button onClick={()=>clearFilters()}>Clear</button>
                 </div>
             )}
         </div>

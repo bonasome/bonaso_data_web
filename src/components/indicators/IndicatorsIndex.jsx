@@ -78,7 +78,7 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
     const [entries, setEntries] = useState(0);
     const { indicators, setIndicators } = useIndicators();
     const [loading, setLoading] = useState(true);
-    const [prereqFilter, setPrereqFilter] = useState('');
+    const [orgFilter, setOrgFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
 
@@ -86,7 +86,7 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
         const loadOrgs = async () => {
             try {
                 const filterQuery = 
-                    (prereqFilter ? `&prerequisite=${prereqFilter}` : '') +
+                    (prereqFilter ? `&organization=${orgFilter}` : '') +
                     (projectFilter ? `&project=${projectFilter}` : '') + 
                     (statusFilter ? `&status=${statusFilter}` : '');
                 

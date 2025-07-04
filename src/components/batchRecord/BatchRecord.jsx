@@ -10,6 +10,8 @@ export default function BatchRecord(){
     const { user } = useAuth();
     const [projects, setProjects] = useState([]);
     const [organizations, setOrganizations] = useState([]);
+    const [projectSearch, setProjectSearch] = useState('');
+    const [orgSearch, setOrgSearch] = useState('');
     const [file, setFile] = useState(null);
     const [selectTools, setSelectTools] = useState({})
     const [targetOrg, setTargetOrg] = useState('');
@@ -24,7 +26,7 @@ export default function BatchRecord(){
         const getProjects = async() => {
             try{
                 console.log('fetching projects...')
-                const response = await fetchWithAuth(`/api/manage/projects/`);
+                const response = await fetchWithAuth(`/api/manage/projects/?${projectSearch}`);
                 const data = await response.json();
                 setProjects(data.results)
             }
@@ -33,10 +35,13 @@ export default function BatchRecord(){
             }
         }
         getProjects();
+    }, [projectSearch])
+
+    useEffect(() => {
         const getOrganizations = async () => {
             try{
                 console.log('fetching organizations...')
-                const response = await fetchWithAuth(`/api/organizations/`);
+                const response = await fetchWithAuth(`/api/organizations/?${orgSearch}`);
                 const data = await response.json();
                 setOrganizations(data.results)
                 setLoading(false)
@@ -47,7 +52,7 @@ export default function BatchRecord(){
             }
         }
         getOrganizations();
-    }, [])
+    }, [orgSearch])
 
     useEffect(() => {
         const orgIDs = organizations?.map((o) => (o.id));
@@ -147,10 +152,12 @@ export default function BatchRecord(){
                 <i>1. Select your organization and the project to get a ready to use template for recording data. There are directions and examples in the template for your reference.</i>
                 {selectTools?.orgs && <SimpleSelect name={'organization'} label={'Select an Organization'} 
                     optionValues={selectTools.orgs.ids} optionLabels={selectTools.orgs.names}
-                    callback={(val)=>setTargetOrg(val)} />}
+                    callback={(val)=>setTargetOrg(val)} search={true} searchCallback={(val) => setOrgSearch(val)}
+                    />}
                 {selectTools?.projects && <SimpleSelect name={'project'} label={'Select a Project'} 
                     optionValues={selectTools.projects.ids} optionLabels={selectTools.projects.names}
-                    callback={(val)=>setTargetProject(val)} />}
+                    callback={(val)=>setTargetProject(val)} search={true} searchCallback={(val) => setProjectSearch(val)}
+                    />}
                 <button onClick={() => handleClick()} disabled={gettingFile}>Get my file!</button>
             </div>
             

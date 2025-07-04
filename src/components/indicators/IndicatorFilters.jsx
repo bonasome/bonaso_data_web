@@ -6,43 +6,60 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import SimpleSelect from '../reuseables/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
 import { useProjects } from '../../contexts/ProjectsContext';
+import {useOrganizations } from '../../contexts/OrganizationsContext';
 import { useIndicators } from '../../contexts/IndicatorsContext';
 import ComponentLoading from '../reuseables/ComponentLoading';
 
 export default function IndicatorFilters({ onFilterChange, indicators=[] }){
     const { projects, setProjects } = useProjects();
+    const { organizations, setOrganizations } = useOrganizations();
     const { indicatorsMeta, setIndicatorsMeta } = useIndicators();
+    const [projectSearch, setProjectSearch] = useState('');
+    const [orgSearch, setOrgSearch] = useState('');
+    const [selectTools, setSelectTools] = useState({});
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
-        project: null,
-        prereq: null,
-        status: null,
+        project: '',
+        organization: '',
+        status: '',
     })
     const [showFilters, setShowFilters] = useState(false);
     const [errors, setErrors] = useState([])
     const containerRef = useRef(null);
 
+    useEffect(() => {
+        const getProjects = async() => {
+            try{
+                console.log('fetching projects...')
+                const response = await fetchWithAuth(`/api/manage/projects/?${projectSearch}`);
+                const data = await response.json();
+                setProjects(data.results)
+            }
+            catch(err){
+                console.error('Failed to fetch projects: ', err);
+            }
+        }
+        getProjects();
+    }, [projectSearch])
 
-    const fetchedRef = useRef(false);
+    useEffect(() => {
+        const getOrganizations = async () => {
+            try{
+                console.log('fetching organizations...')
+                const response = await fetchWithAuth(`/api/organizations/?${orgSearch}`);
+                const data = await response.json();
+                setOrganizations(data.results)
+                setLoading(false)
+            }
+            catch(err){
+                console.error('Failed to fetch projects: ', err);
+                setLoading(false)
+            }
+        }
+        getOrganizations();
+    }, [orgSearch])
     
     useEffect(() => {
-        const getProjects = async () => {
-            if (fetchedRef.current) return;
-            fetchedRef.current = true;
-
-            try {
-                console.log('fetching projects info...');
-                const response = await fetchWithAuth(`/api/manage/projects/`);
-                const data = await response.json();
-                setProjects(data.results);
-                setLoading(false);
-            } catch (err) {
-                console.error('Failed to fetch projects: ', err);
-                setLoading(false);
-            }
-        };
-        getProjects();
-        
         const getMeta = async() => {
             if(Object.keys(indicatorsMeta).length != 0){
                 setLoading(false);
@@ -63,7 +80,26 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
             }
         }
         getMeta()
+    }, []);
 
+    useEffect(() => {
+        const orgIDs = organizations?.map((o) => (o.id));
+        const orgNames = organizations?.map((o) => (o.name))
+        const pIDs = projects?.map((p) => (p.id))
+        const pNames = projects?.map((p) => (p.name))
+        setSelectTools({
+            orgs: {
+            names: orgNames,
+            ids: orgIDs
+            },
+            projects: {
+            names: pNames,
+            ids: pIDs
+            }
+        })
+    }, [projects, organizations]);
+
+    useEffect(() => {
         const handleClickOutside = (e) => {
             if (containerRef.current && !containerRef.current.contains(e.target)) {
                 setShowFilters(false);
@@ -72,18 +108,17 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-    
-    const projectIDs = useMemo(() => projects.map(p => p.id), [projects]);
-    const projectNames = useMemo(() => projects.map(p => p.name), [projects]);
 
-    const indicatorIDs = useMemo(() => indicators.map(ind => ind.id), [indicators]);
-    const indicatorNames = useMemo(
-        () => indicators.map(ind => `${ind.code}: ${ind.name}`),
-        [indicators]
-    );
 
     const handleChange = () =>{
         onFilterChange(filters);
+    }
+    const clearFilters = () => {
+        onFilterChange({
+        project: '',
+        organization: '',
+        status: '',
+    })
     }
 
     if(loading) return <ComponentLoading />
@@ -96,24 +131,25 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
                 <div className={styles.filters}>
                     {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                     <SimpleSelect
-                        name='prereq'
-                        optionValues={indicatorIDs}
-                        optionLabels={indicatorNames} search={true}
-                        callback={(val) => setFilters(prev => ({...prev, prereq: val}))}
+                        name='organizations'
+                        optionValues={selectTools.orgs.ids} searchCallback={(val) => setOrgSearch(val)}
+                        optionLabels={selectTools.orgs.names} search={true} value={filters.organization}
+                        callback={(val) => setFilters(prev => ({...prev, organization: val}))}
                     />
                     <SimpleSelect
-                        name='project'
-                        optionValues={projectIDs}
-                        optionLabels={projectNames} search={true}
+                        name='project' value={filters.project}
+                        optionValues={selectTools.projects.ids} searchCallback={(val) => setProjectSearch(val)}
+                        optionLabels={selectTools.projects.names} search={true}
                         callback={(val) => setFilters(prev => ({...prev, project: val}))}
                     />
                     <SimpleSelect
                         name='status'
                         optionValues={indicatorsMeta.statuses}
-                        optionLabels={indicatorsMeta.statuses}
+                        optionLabels={indicatorsMeta.statuses} value={filters.status}
                         callback={(val) => setFilters(prev => ({...prev, status: val}))}
                     />
                     <button onClick={()=>handleChange()}>Apply</button>
+                    <button onClick={()=>clearFilters()}>Clear</button>
                 </div>
             )}
         </div>

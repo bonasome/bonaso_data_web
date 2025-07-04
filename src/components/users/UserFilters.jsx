@@ -7,38 +7,27 @@ import SimpleSelect from '../reuseables/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
 import Checkbox from '../reuseables/Checkbox';
 import ComponentLoading from '../reuseables/ComponentLoading';
+import { useProfiles } from '../../contexts/ProfilesContext';
+import { useOrganizations } from '../../contexts/OrganizationsContext';
+import { useProjects } from '../../contexts/ProjectsContext';
 
 export default function ProfileFilters({ onFilterChange }){
     const [loading, setLoading] = useState(true);
-    const [orgs, setOrgs] = useState([]);
+    const {organizations, setOrganizations } = useOrganizations();
+    const { projectsMeta, setProjectsMeta } = useProjects();
+    const { profilesMeta, setProfilesMeta } = useProfiles();
+    const [orgSearch, setOrgSearch] = useState('');
+    const [selectTools, setSelectTools] = useState({});
     const [filters, setFilters] = useState({
         role: '',
         organization: '',
+        client_organization: '',
         inactive: false,
-    })
+    });
     const [showFilters, setShowFilters] = useState(false);
     const containerRef = useRef(null);
-
-    const fetchedRef = useRef(false);
     
     useEffect(() => {
-        const getOrgs = async () => {
-            if (fetchedRef.current) return;
-            fetchedRef.current = true;
-
-            try {
-                console.log('fetching organizations info...');
-                const response = await fetchWithAuth(`/api/organizations/`);
-                const data = await response.json();
-                setOrgs(data.results);
-                setLoading(false);
-            } catch (err) {
-                console.error('Failed to fetch projects: ', err);
-                setLoading(false);
-            }
-        };
-        getOrgs();
-
         const handleClickOutside = (e) => {
             if (containerRef.current && !containerRef.current.contains(e.target)) {
                 setShowFilters(false);
@@ -47,21 +36,99 @@ export default function ProfileFilters({ onFilterChange }){
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-    
-    const orgIDs = useMemo(() => orgs.map(p => p?.id), [orgs]);
-    const orgNames = useMemo(() => orgs.map(p => p?.name), [orgs]);
-    const roleVals = ['data_collector', 'meofficer', 'manager', 'admin', 'view_only']
-    const roleNames =  ['Data Collector', 'M&E Officer', 'Manager', 'Site Administrator', 'View Only/Uninitiated']
+
+    useEffect(() => {
+        const getProfilesMeta = async() => {
+            if(Object.keys(profilesMeta).length != 0){
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/profiles/users/meta/`);
+                    const data = await response.json();
+                    setProfilesMeta(data);
+                }
+                catch(err){
+                    console.error('Failed to fetch profiles meta: ', err)
+                }
+            }
+        }
+        getProfilesMeta();
+        const getProjectMeta = async () => {
+            if(Object.keys(projectsMeta).length != 0){
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/manage/projects/meta/`);
+                    const data = await response.json();
+                    setProjectsMeta(data);
+                }
+                catch(err){
+                    console.error('Failed to fetch projects: ', err)
+                }
+            }
+        }
+        getProjectMeta();
+    }, [])
+
+    useEffect(() => {
+        const getOrganizations = async () => {
+            try{
+                console.log('fetching organizations...')
+                const response = await fetchWithAuth(`/api/organizations/?${orgSearch}`);
+                const data = await response.json();
+                setOrganizations(data.results)
+                setLoading(false)
+            }
+            catch(err){
+                console.error('Failed to fetch projects: ', err);
+                setLoading(false)
+            }
+        }
+        getOrganizations();
+    }, [orgSearch]);
+
+    useEffect(() => {
+        const orgIDs = organizations?.map((o) => (o.id));
+        const orgNames = organizations?.map((o) => (o.name));
+
+        const clientIDs = data.clients.map((c) => c.id);
+        const clientNames= data.clients.map((c)=> c.name);
+
+        setSelectTools({
+            orgs: {
+            names: orgNames,
+            ids: orgIDs
+            },
+            clients: {
+            names: clientNames,
+            ids: clientIDs
+            },  
+        })
+    }, [projectsMeta, organizations]);
+
+
 
     const handleChange = () =>{
         onFilterChange(filters);
     }
+
     const clearFilter = () => {
         setFilters({
-        role: '',
-        organization: '',
-        inactive: false,
-    })
+            role: '',
+            organization: '',
+            client_organization: '',
+            inactive: false,
+        })
+        onFilterChange({
+            role: '',
+            organization: '',
+            client_organization: '',
+            inactive: false,
+        })
     }
 
     if(loading) return <ComponentLoading />
@@ -76,14 +143,22 @@ export default function ProfileFilters({ onFilterChange }){
                         name='role'
                         defaultOption={''}
                         value={filters.role}
-                        optionValues={roleVals}
-                        optionLabels={roleNames}
+                        optionValues={profilesMeta.roles}
+                        optionLabels={profilesMeta.role_labels}
                         callback={(val) => setFilters(prev => ({...prev, role: val}))}
                     />
+                    {['admin'].includes(user.role) && <SimpleSelect
+                        name='client'
+                        optionValues={selectTools.clients.ids} value={filters.client_organization}
+                        optionLabels={selectTools.clients.names} search={true}
+                        callback={(val) => setFilters(prev => ({...prev, client: val}))}
+                    />}
+                    
                     <SimpleSelect
                         name='organization'
-                        optionValues={orgIDs}
-                        optionLabels={orgNames} search={true}
+                        label='Organization'
+                        optionValues={selectTools.orgs.ids} value={filters.organization}
+                        optionLabels={selectTools.orgs.names} search={true}
                         callback={(val) => setFilters(prev => ({...prev, organization: val}))}
                     />
                     <Checkbox label={'Inactive User'} checked={filters.inactive} name={'active'} callback={(checked) => setFilters(prev => ({...prev, inactive: checked}))}/>
