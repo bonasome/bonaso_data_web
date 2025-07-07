@@ -48,8 +48,11 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
                 console.log('fetching interactions...');
                 const urlFilters = (organizationID ? `&organization=${organizationID}` : '') +
                     (projectID ? `&project=${projectID}` : '');
+                    console.log(`/api/indicators/chart-data/?indicator=${indicatorID}${urlFilters}`)
+
                 const response = await fetchWithAuth(`/api/indicators/chart-data/?indicator=${indicatorID}${urlFilters}`);
                 const data = await response.json();
+                console.log(data)
                 setData(data[0]);
                 setLegendOptions(data[0].legend)
                 setLegendLabels(data[0].legend_labels)

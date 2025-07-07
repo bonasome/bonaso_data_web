@@ -70,7 +70,8 @@ export default function ProjectsIndex(){
     const [endFilter, setEndFilter] = useState('');
     const [clientFilter, setClientFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-
+    const [orgFilter, setOrgFilter] = useState('')
+    const [indicatorFilter, setIndicatorFilter] = useState('')
     useEffect(() => {
         const loadProjects = async () => {
             try {
@@ -78,8 +79,9 @@ export default function ProjectsIndex(){
                     (startFilter ? `&start=${startFilter}` : '') + 
                     (endFilter ? `&end=${endFilter}` : '') + 
                     (clientFilter ? `&client=${clientFilter}` : '') + 
-                    (statusFilter ? `&status=${statusFilter}` : '');
-                
+                    (statusFilter ? `&status=${statusFilter}` : '') +
+                    (indicatorFilter ? `&indicators=${indicatorFilter}` : '') +
+                    (orgFilter ? `&organizations=${orgFilter}` : '');
                 const url = `/api/manage/projects/?search=${search}&page=${page}` + filterQuery;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
@@ -97,13 +99,15 @@ export default function ProjectsIndex(){
             }
         };
         loadProjects();
-    }, [page, search, endFilter, startFilter, clientFilter, statusFilter, setProjects]);
+    }, [page, search, endFilter, startFilter, clientFilter, statusFilter, indicatorFilter, orgFilter]);
 
     const setFilters = (filters) => {
         setStartFilter(filters.filter);
         setEndFilter(filters.end);
         setClientFilter(filters.client)
         setStatusFilter(filters.status)
+        setOrgFilter(filters.organization)
+        setIndicatorFilter(filters.indicator)
     }
 
     if(loading) return <Loading />

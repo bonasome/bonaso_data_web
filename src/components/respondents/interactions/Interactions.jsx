@@ -11,6 +11,7 @@ import styles from '../respondentDetail.module.css';
 import errorStyles from '../../../styles/errors.module.css';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import ComponentLoading from '../../reuseables/ComponentLoading';
+import Checkbox from '../../reuseables/Checkbox';
 
 function InteractionCard({ interaction, onUpdate, onDelete }){
     const { user } = useAuth();
@@ -19,13 +20,34 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     const [perm, setPerm] = useState(false);
     const [errors, setErrors] = useState([]);
     const[interactionDate, setInteractionDate] = useState('');
-    const[subcats, setSubcats] = useState('');
+    const [allowedSubcats, setAllowedSubcats] = useState([]);
+    const[subcats, setSubcats] = useState([]);
     const[number, setNumber] = useState('');
-    const[availableSubcats, setAvailableSubcats] = useState([]);
     const [del, setDel] = useState(false);
     const [flagged, setFlagged] = useState(interaction.flagged)
     const {setInteractions} = useInteractions();
 
+    const checkPrereqs = async() =>{
+        const prereq = interaction.task_detail.indicator.prerequisite
+        try{
+            const response = await fetchWithAuth(`/api/record/interactions/?respondent=${interaction.respondent}&task_indicator=${prereq.id}&before=${interaction.interaction_date}`);
+            const data = await response.json();
+            if(data.results.length > 0){
+                const validPastInt = data.results.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
+                if (validPastInt && validPastInt.interaction_date <= interactionDate) {
+                    if (validPastInt?.subcategories) {
+                        setAllowedSubcats(validPastInt.subcategories);
+                    }
+                }
+            }
+        }
+        catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
+            console.error(err)
+        }
+        
+            
+    }
     useEffect(() => {
         const permCheck = () => {
             if(user.role == 'admin'){
@@ -41,14 +63,22 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                 
             }
         }
-        
-        setInteractionDate(interaction.interaction_date)
-        if (interaction.task_detail?.indicator?.subcategories?.length > 0) {
-            const subcatNames = interaction.task_detail.indicator.subcategories.map(c => c.name);
-            setAvailableSubcats(subcatNames);
-            const existingSubcats = interaction.subcategories.map((cat) => (cat.name));
-            setSubcats(existingSubcats)
+
+        setInteractionDate(interaction.interaction_date);
+        setSubcats(interaction.subcategories);
+
+        if(interaction.subcategories){
+            setSubcats(interaction.subcategories);
+            if(interaction.task_detail.indicator.prerequisite){
+                checkPrereqs();
+            }
+            else{
+                setAllowedSubcats(interaction.task_detail.indicator.subcategories);
+            }
         }
+
+
+
         if(interaction.numeric_component){
             setNumber(interaction.numeric_component);
         }
@@ -62,9 +92,10 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             'task': interaction.task_detail.id,
             'interaction_date': interactionDate,
             'numeric_component': number || null,
-            'subcategory_names': subcats,
+            'subcategories_data': subcats,
             'flagged': flaggedOverride,
         }
+        console.log(data)
         try{
             console.log('submitting edits...')
             const url = `/api/record/interactions/${interaction.id}/`; 
@@ -166,6 +197,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
         )
         
     }
+    console.log(subcats)
     if(edit){
         return(
             <div className={styles.card}>
@@ -179,14 +211,28 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                         <input type='number' min="0" id='number' name='number' value={number} onChange={(e)=>setNumber(e.target.value)} />
                     </div>
                 }
-                {interaction.subcategories &&
-                    <SimpleSelect name='subcategories' label='Subcategories' 
-                        optionValues={availableSubcats} 
-                        multiple={true}
-                        defaultOption={subcats}
-                        callback={(val) => {setSubcats(val);
-                        }} 
-                    />
+                {interaction.subcategories && allowedSubcats &&
+                    allowedSubcats.map((cat) => (
+                        <div style={{ display: 'flex', flexDirection: 'row', marginTop: 'auto', marginBottom: 'auto' }}>
+                            <Checkbox key={cat.id}
+                                label={cat.name}
+                                checked={subcats.filter(c => c.id === cat.id).length > 0}
+                                name={cat.name}
+                                callback={(checked) => setSubcats(prev =>
+                                    checked ? [...prev, cat] : prev.filter(c => c.id !== cat.id)
+                                )}
+                            />
+                            {interaction.task_detail.indicator.require_numeric && subcats.filter(c => c.id ==cat.id).length > 0 &&
+                                <div>
+                                <label>Number</label>
+                                <input type="number" onChange={(e) => setSubcats(prev => {
+                                    const others = prev.filter(c => c.id !== cat.id);
+                                    return [...others, {id: cat.id, name: cat.name, numeric_component: e.target.value}];
+                                })} value={subcats.find(c => c.id==cat.id)?.numeric_component || ''}/>
+                                </div>
+                            }
+                        </div>
+                    ))
                 }
                 <button onClick={() => handleSubmit()}>Save Changes</button>
                 <button onClick={() => setEdit(!edit)}>Cancel</button>
@@ -208,7 +254,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                     <div>
                         <p>Subcategories:</p>
                         <ul>
-                            {interaction.subcategories.map((cat) => (<li key={cat.name}>{cat.name}</li> ))}
+                            {interaction.subcategories.map((cat) => (<li key={cat.name}>{cat.name} {cat.numeric_component && `(${cat.numeric_component})`}</li> ))}
                         </ul>
                     </div>
                 }

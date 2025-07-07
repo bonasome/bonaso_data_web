@@ -20,7 +20,7 @@ export default function CreateUser(){
     const [clientIDs, setClientIDs] = useState([]);
     const [clientNames, setClientNames] = useState([]);
 
-    const { setProfileDetails, profilesMeta, setProfilesMeta } = useProfiles();
+    const { setProfiles, profilesMeta, setProfilesMeta } = useProfiles();
     const {projectsMeta, setProjectsMeta} = useProjects();
     useEffect(() => {
         const getMeta = async() => {
@@ -112,7 +112,7 @@ export default function CreateUser(){
             });
             const returnData = await response.json();
             if(response.ok){
-                setProfileDetails(prev => [...prev, returnData])
+                setProfiles(prev => [...prev, returnData])
                 navigate(`/profiles/${returnData.id}`);
             }
             else{

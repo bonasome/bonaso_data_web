@@ -113,7 +113,6 @@ export default function IndicatorDetail(){
         }
         setDel(false);
     } 
-
     if (loading) return <Loading />
     return(
         <div className={styles.container}>
@@ -126,14 +125,20 @@ export default function IndicatorDetail(){
                 <h1>{activeIndicator.code}: {activeIndicator.name}</h1>
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 <p>{activeIndicator.description}</p>
+                {activeIndicator.prerequisite && <p><strong>Prerequisite {activeIndicator.prerequisite.code}: {activeIndicator.prerequisite.name}</strong></p>}
+                <p><i>{activeIndicator.status}{activeIndicator.require_numeric && ', Requires a number'}</i></p>
                 {activeIndicator.subcategories.length > 0 && 
+                    <div>
+                        <h4>Subcategories</h4>
                     <ul>
                         {activeIndicator.subcategories.map((cat) => (
                             <li key={cat.id}>{cat.name}</li>
                         ))}
                     </ul>
+                    </div>
                 }
-                <p><i>{activeIndicator.status}</i></p>
+                
+                
                 <Link to={`/indicators/${id}/edit`}><button>Edit Details</button></Link>
                 {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Indicator</button>}
                 {user.role == 'admin' && 
@@ -152,7 +157,7 @@ export default function IndicatorDetail(){
             <div className={styles.section}>
                 <h2>In projects</h2>
                 {projects.length > 0 && projects.map((p) =>(
-                    <div className={styles.card}>
+                    <div key={p.id} className={styles.card}>
                         <Link to={`/projects/${p.id}`}><h3>{p.name}</h3></Link>
                     </div>
                 ))}
