@@ -113,12 +113,18 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
     const handleChange = () =>{
         onFilterChange(filters);
     }
+
     const clearFilters = () => {
+        setFilters({
+            project: '',
+            organization: '',
+            status: '',
+        });
         onFilterChange({
-        project: '',
-        organization: '',
-        status: '',
-    })
+            project: '',
+            organization: '',
+            status: '',
+        });
     }
 
     if(loading) return <ComponentLoading />

@@ -71,7 +71,7 @@ function ProjectInfo({ project }){
             />}
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <i>Lasts from {project.start} to {project.end} {user.role =='admin' && '('+project.status+')'} </i>
-            {project?.client && <h4>From {project.client.name}</h4>}
+            {project?.client && <h4>From <Link to={`/clients/${project.client.id}`}>{project.client.name}</Link></h4>}
             <h5>Project Description</h5>
             <p>{project.description}</p>
             {user.role == 'admin' && <Link to={`/projects/${project.id}/edit`}><button>Edit Details</button></Link>}

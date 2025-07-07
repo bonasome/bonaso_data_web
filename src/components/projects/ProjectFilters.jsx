@@ -60,7 +60,7 @@ export default function ProjectFilters({ onFilterChange }){
         const getOrganizations = async () => {
             try{
                 console.log('fetching organizations...')
-                const response = await fetchWithAuth(`/api/organizations/?${orgSearch}`);
+                const response = await fetchWithAuth(`/api/organizations/?search=${orgSearch}`);
                 const data = await response.json();
                 setOrganizations(data.results)
                 setLoading(false)
@@ -77,9 +77,9 @@ export default function ProjectFilters({ onFilterChange }){
         const getIndicators = async () => {
             try{
                 console.log('fetching indicators...')
-                const response = await fetchWithAuth(`/api/indicators/?${indicatorSearch}`);
+                const response = await fetchWithAuth(`/api/indicators/?search=${indicatorSearch}`);
                 const data = await response.json();
-                setOrganizations(data.results)
+                setIndicators(data.results)
                 setLoading(false)
             }
             catch(err){

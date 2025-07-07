@@ -8,7 +8,7 @@ vi.mock('../../../services/fetchWithAuth', () => {
         default: vi.fn(),
     };
 });
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import fetchWithAuth from '../../../../services/fetchWithAuth';
 
 describe('CreateClient', () => {
     const onCreate = vi.fn();

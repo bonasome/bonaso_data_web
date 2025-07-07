@@ -7,7 +7,6 @@ import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useProjects } from '../../contexts/ProjectsContext';
 import ProjectForm from './ProjectForm';
-import CreateClientModal from './CreateClientModal'
 import styles from '../reuseables/dynamicForm.module.css';
 
 export default function CreateProject(){
@@ -18,7 +17,6 @@ export default function CreateProject(){
     const { projectsMeta, setProjectsMeta, setProjectDetails } = useProjects();
     const [clientIDs, setClientIDs] = useState([]);
     const [clientNames, setClientNames] = useState([]);
-    const [modal, setModal] = useState(false);
 
     useEffect(() => {
         const getProjectMeta = async () => {
@@ -75,13 +73,6 @@ export default function CreateProject(){
         ])
     }, [clientNames, clientIDs, projectsMeta])
 
-
-    const updateClients = (id, name) => {
-        setClientNames(prev => [... prev, name]);
-        setClientIDs(prev => [...prev, id]);
-        setModal(false);
-    }
-
     const handleCancel = () => {
         navigate(`/projects`)
     }
@@ -129,10 +120,8 @@ export default function CreateProject(){
 
     return(
         <div className={styles.container}>
-            {modal && <CreateClientModal onCreate={updateClients} onCancel={() => setModal(false)} />}
             <h1>Creating a New Project</h1>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <button onClick={() => setModal(true)}>Create a client</button>
             <ProjectForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors}/>
         </div>
     )

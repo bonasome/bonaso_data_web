@@ -12,14 +12,14 @@ import { useIndicators } from '../../contexts/IndicatorsContext';
 
 export default function OrganizationFilters({ onFilterChange }){
     const { projects, setProjects } = useProjects();
-    const {organizations, setOrganizations} = useOrganizations();
-    const {indicators, setIndicators} = useIndicators();
+    const [ organizations, setOrganizations ] = useState();
+    const { indicators, setIndicators } = useIndicators();
 
     const [selectTools, setSelectTools] = useState({});
     const [projectSearch, setProjectSearch] = useState('');
     const [orgSearch, setOrgSearch] = useState('');
     const [indicatorSearch, setIndicatorSearch] = useState('')
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
         indicator: '',
         parent_organization: '',
@@ -34,7 +34,7 @@ export default function OrganizationFilters({ onFilterChange }){
         const getProjects = async() => {
             try{
                 console.log('fetching projects...')
-                const response = await fetchWithAuth(`/api/manage/projects/?${projectSearch}`);
+                const response = await fetchWithAuth(`/api/manage/projects/?search=${projectSearch}`);
                 const data = await response.json();
                 setProjects(data.results)
             }
@@ -49,14 +49,12 @@ export default function OrganizationFilters({ onFilterChange }){
         const getOrganizations = async () => {
             try{
                 console.log('fetching organizations...')
-                const response = await fetchWithAuth(`/api/organizations/?${orgSearch}`);
+                const response = await fetchWithAuth(`/api/organizations/?search=${orgSearch}`);
                 const data = await response.json();
                 setOrganizations(data.results)
-                setLoading(false)
             }
             catch(err){
                 console.error('Failed to fetch projects: ', err);
-                setLoading(false)
             }
         }
         getOrganizations();
@@ -66,14 +64,12 @@ export default function OrganizationFilters({ onFilterChange }){
         const getIndicators = async () => {
             try{
                 console.log('fetching indicators...')
-                const response = await fetchWithAuth(`/api/indicators/?${indicatorSearch}`);
+                const response = await fetchWithAuth(`/api/indicators/?search=${indicatorSearch}`);
                 const data = await response.json();
-                setOrganizations(data.results)
-                setLoading(false)
+                setIndicators(data.results)
             }
             catch(err){
                 console.error('Failed to fetch projects: ', err);
-                setLoading(false)
             }
         }
         getIndicators();
@@ -126,7 +122,7 @@ export default function OrganizationFilters({ onFilterChange }){
             project: '',
         });
     }
-
+    console.log(selectTools)
     if(loading) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
@@ -144,6 +140,7 @@ export default function OrganizationFilters({ onFilterChange }){
                         searchCallback={(val) => setOrgSearch(val)}
                         callback={(val) => setFilters(prev => ({...prev, parent_organization: val}))}
                     />
+
                     <SimpleSelect
                         name='project'
                         label='Project' searchCallback={(val) => setProjectSearch(val)}

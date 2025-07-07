@@ -34,6 +34,9 @@ import EditProject from '../components/projects/EditProject';
 import NarrativeReportUpload from '../components/narrativeReports/NarrativeReportUpload';
 import NarrativeReportDownload from '../components/narrativeReports/NarrativeReportDownload';
 
+import ClientsIndex from '../components/projects/clients/ClientsIndex';
+import ClientDetail from '../components/projects/clients/ClientsDetail';
+
 //template manager
 import BatchRecord from '../components/batchRecord/BatchRecord';
 
@@ -234,35 +237,23 @@ function Router() {
         </Route>
 
         <Route 
-            path='/indicators' 
+            path='/clients' 
             element = {
                 <RedirectIfNotAuthenticated>
                     <Navbar />
-                    <RespondentsLayout />
+                    <ProjectLayout />
                 </RedirectIfNotAuthenticated>
-            }
-        >
+        }>
             <Route index element={
                 <RedirectIfNoPerm level={['admin']}>
-                    <IndicatorsIndex />
+                    <ClientsIndex />
                 </RedirectIfNoPerm>
-                }/>
+            }/>
             <Route path=':id' element={
                 <RedirectIfNoPerm level={['admin']}>
-                    <IndicatorDetail />
+                    <ClientDetail />
                 </RedirectIfNoPerm>
-                }/>
-            
-            <Route path='new' element={
-                <RedirectIfNoPerm level={['admin']}>
-                    <CreateIndicator/>
-                </RedirectIfNoPerm>
-                }/>
-            <Route path=':id/edit' element={
-                <RedirectIfNoPerm level={['admin']}>
-                    <EditIndicator />
-                </RedirectIfNoPerm>
-                }/>
+            }/>
         </Route>
         
         <Route 

@@ -58,8 +58,8 @@ function Dropdown({ name }){
     const { user } = useAuth();
     useEffect(() => {
         if(name =='Projects' && user.role == 'admin'){
-            setUrls(['/projects', '/indicators', '/organizations'])
-            setLabels(['Manage Projects', 'Manage Indicators', 'Manage Organizations'])
+            setUrls(['/projects', '/indicators', '/organizations', '/clients'])
+            setLabels(['Manage Projects', 'Manage Indicators', 'Manage Organizations', 'Manage Clients'])
         }
         if(name =='Respondents' && ['meofficer', 'manager', 'admin'].includes(user.role)){
             setUrls(['/respondents', '/batch-record'])
@@ -132,6 +132,7 @@ function ThinMenu() {
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/organizations'}>Organizations</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/indicators'}>Indicators</Link></div>}
+            {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/clients'}>Clients</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <h3>Team</h3>}
             {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>My Team</Link></div>} 
             <h3>Profile</h3>

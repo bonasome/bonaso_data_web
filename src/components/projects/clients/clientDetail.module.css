@@ -1,0 +1,19 @@
+.container{
+    margin: 4vh;
+}
+
+.segment {
+    background-color: var(--bonaso-dark-accent);
+    margin-top: 2vh;
+    padding: 3vh;
+}
+
+.card {
+    background-color: var(--bonaso-uber-dark-accent);
+    padding: 2vh;
+    margin: 2vh;
+    transition: all .6s;
+}
+.card:hover{
+    transform: scale(1.05);
+}
