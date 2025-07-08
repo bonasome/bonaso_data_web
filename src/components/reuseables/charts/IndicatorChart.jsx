@@ -268,28 +268,47 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
             {showFilters && <div>
                 <h3>Filters</h3>
                 <div className={styles.filters}>
-                <SimpleSelect name='sex' optionValues={respondentsMeta.sexs} optionLabels={respondentsMeta.sex_labels} callback={(val) => setFilters(prev => ({...prev, sex: val}))} />
-                <SimpleSelect name='age_range' label={'Age Range'} optionValues={respondentsMeta.age_ranges} optionLabels={respondentsMeta.age_range_labels} callback={(val) => setFilters(prev => ({...prev, age_range: val}))} />
-                <SimpleSelect name='district' optionValues={respondentsMeta.districts} optionLabels={respondentsMeta.district_labels} callback={(val) => setFilters(prev => ({...prev, district: val}))} />
-                <SimpleSelect name='citizen' optionValues={[true, false]} optionLabels={['Citizen', 'Non-Citizen']} callback={(val) => setFilters(prev => ({...prev, citizen: val}))} value={filters.citizen}/>
-                <SimpleSelect name='kp_status' label='Key Population Status' 
-                    optionValues={respondentsMeta.kp_types} 
-                    multiple={true} optionLabels={respondentsMeta.kp_type_labels}
-                    callback={(val) => setFilters(prev => ({ ...prev, kp_status: val }))} 
-                />
-                <SimpleSelect name='disability_status' label='Disability Status' 
-                    optionValues={respondentsMeta.disability_types} 
-                    multiple={true} optionLabels={respondentsMeta.disability_type_labels}
-                    callback={(val) => setFilters(prev => ({ ...prev, disability_status: val }))}
-                />
-                <SimpleSelect name='organization' label='Organization' 
-                    optionValues={orgIDs} search={true} searchCallback={(val) => setSearch(val)}
-                    multiple={false} optionLabels={orgNames}
-                    callback={(val) => setFilters(prev => ({ ...prev, organization: val }))}
-                />
-                <SimpleSelect name='pregnant' optionValues={[true, false]} optionLabels={['Pregnant', 'Not Pregnant']} callback={(val) => setFilters(prev => ({...prev, pregnant: val}))} value={filters.pregnant}/>
-                <SimpleSelect name='hiv_status' optionValues={[true, false]} optionLabels={['HIV Positive', 'HIV Negative']} callback={(val) => setFilters(prev => ({...prev, hiv_status: val}))} value={filters.hiv_status}/>
-                <div>
+                    <div className={styles.filter}>
+                        <SimpleSelect name='sex' optionValues={respondentsMeta.sexs} optionLabels={respondentsMeta.sex_labels} callback={(val) => setFilters(prev => ({...prev, sex: val}))} />
+                    </div>
+                    <div className={styles.filter}>
+                        <SimpleSelect name='age_range' label={'Age Range'} optionValues={respondentsMeta.age_ranges} optionLabels={respondentsMeta.age_range_labels} callback={(val) => setFilters(prev => ({...prev, age_range: val}))} />
+                    </div>
+                    <div className={styles.filter}>
+                        <SimpleSelect name='district' optionValues={respondentsMeta.districts} optionLabels={respondentsMeta.district_labels} callback={(val) => setFilters(prev => ({...prev, district: val}))} />
+                    </div >
+                    <div className={styles.filter}>
+                        <SimpleSelect name='citizen' optionValues={[true, false]} optionLabels={['Citizen', 'Non-Citizen']} callback={(val) => setFilters(prev => ({...prev, citizen: val}))} value={filters.citizen}/>
+                    </div>
+                    <div className={styles.filter}>
+                        <SimpleSelect name='kp_status' label='Key Population Status' 
+                            optionValues={respondentsMeta.kp_types} 
+                            multiple={true} optionLabels={respondentsMeta.kp_type_labels}
+                            callback={(val) => setFilters(prev => ({ ...prev, kp_status: val }))} 
+                        />
+                    </div>
+                    <div className={styles.filter}>
+                        <SimpleSelect name='disability_status' label='Disability Status' 
+                            optionValues={respondentsMeta.disability_types} 
+                            multiple={true} optionLabels={respondentsMeta.disability_type_labels}
+                            callback={(val) => setFilters(prev => ({ ...prev, disability_status: val }))}
+                        />
+                    </div>
+                    <div className={styles.filter}>
+                        <SimpleSelect name='organization' label='Organization' 
+                            optionValues={orgIDs} search={true} searchCallback={(val) => setSearch(val)}
+                            multiple={false} optionLabels={orgNames}
+                            callback={(val) => setFilters(prev => ({ ...prev, organization: val }))}
+                        />
+                    </div>
+                    <div className={styles.filter}>
+                        <SimpleSelect name='pregnant' optionValues={[true, false]} optionLabels={['Pregnant', 'Not Pregnant']} callback={(val) => setFilters(prev => ({...prev, pregnant: val}))} value={filters.pregnant}/>
+                    </div>   
+                    <div className={styles.filter}>
+                        <SimpleSelect name='hiv_status' optionValues={[true, false]} optionLabels={['HIV Positive', 'HIV Negative']} callback={(val) => setFilters(prev => ({...prev, hiv_status: val}))} value={filters.hiv_status}/>
+                    
+                    </div> 
+                <div className={styles.filter}>
                     <div>
                         <label htmlFor='after' >After</label>
                         <input id='after' type='date' value={filters.after} onChange={(e) => setFilters(prev => ({...prev, after: e.target.value}))} />
