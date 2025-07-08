@@ -68,7 +68,7 @@ export default function OrganizationDetail(){
                 } 
                 catch (err) {
                     setErrors(['Something went wrong. Please try again later.'])
-                    console.error('Failed to fetch indicator: ', err);
+                    console.error('Failed to fetch projects: ', err);
                     setLoading(false)
                 } 
             };
@@ -153,7 +153,7 @@ export default function OrganizationDetail(){
                         <Link to={`/projects/${p.id}`}><h3>{p.name}</h3></Link>
                     </div>
                 ))}
-                {projects.length === 0 && <p><i>This indicator is not in any projects.</i></p>}
+                {projects.length === 0 && <p><i>This organization is not in any projects.</i></p>}
             </div>
             <div className={styles.section}>
                 <h2>Details</h2>

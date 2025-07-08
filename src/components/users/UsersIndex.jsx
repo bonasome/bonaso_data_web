@@ -78,12 +78,7 @@ export default function ProfilesIndex(){
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
-                if (page === 1) {
-                    setProfiles(data.results);
-                } 
-                else {
-                    setProfiles((prev) => [...prev, ...data.results]);
-                }
+                setProfiles(data.results);
                 setLoading(false);
             } 
             catch (err) {
@@ -105,7 +100,7 @@ export default function ProfilesIndex(){
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Users' : 'My Team'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
                 <Link to='/profiles/new'><button>{user.role === 'admin' ? 'Create New User' : 'Apply For a New User'}</button></Link>
                 <UserFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>
                 {profiles && profiles.map((profile) => (<ProfileCard key={profile.id} profile={profile}/>))}

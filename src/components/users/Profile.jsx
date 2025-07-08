@@ -42,6 +42,7 @@ export default function Profile(){
                     const data = await response.json();
                     setProfile(data)
                     setProfiles(prev => [...prev, data]);
+                    console.log(data)
                     if(data.is_active){
                         setActive(true)
                     }
@@ -134,10 +135,10 @@ export default function Profile(){
             </Link>}
             <h1>{profile?.first_name} {profile?.last_name}</h1>
             {profile?.username === user.username && <h3><i>This is you.</i></h3>}
-            {!active && <h3>User is inactive.</h3>}
+            {!profile?.is_active && <h3>User is inactive.</h3>}
             {changePass && <AdminResetPassword id={profile.id} />}
             <Link to={`/profiles/${profile?.id}/edit`}> <button>Edit Profile</button></Link>
-            {user.role === 'admin' &&<button className={errorStyles.deleteButton} onClick={() => changeStatus(!active)}>{active ? 'Deactivate User' : 'Activate User'}</button>}
+            {user.role === 'admin' &&<button className={errorStyles.deleteButton} onClick={() => changeStatus(!active)}>{profile?.is_active ? 'Deactivate User' : 'Activate User'}</button>}
             {user.role === 'admin' && <button className={errorStyles.warningButton} onClick={() => setChangePass(true)}>Reset User Password</button>}
             <div className={styles.card}>
                 <h3>Username</h3>
@@ -158,7 +159,7 @@ export default function Profile(){
                 <h3>Interactions Over Time</h3>
                 <ActivityChart profile={profile} />
                 <h3>Activity Feed</h3>
-                <IndexView onPageChange={setPage} entries={entries} onSearchChange={setSearch}>
+                <IndexView onPageChange={setPage} page={page} entries={entries} onSearchChange={setSearch}>
                     {feed.length > 0 ? 
                         <div>
                         {feed.map((a) => (

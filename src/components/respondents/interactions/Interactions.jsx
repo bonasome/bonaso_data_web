@@ -44,9 +44,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
         catch(err){
             setErrors(['Something went wrong. Please try again later.'])
             console.error(err)
-        }
-        
-            
+        }   
     }
     useEffect(() => {
         const permCheck = () => {
@@ -292,12 +290,7 @@ export default function Interactions({ id, tasks, onUpdate, setAddingTask }){
                 const response = await fetchWithAuth(`/api/record/interactions/?respondent=${id}&search=${search}&page=${page}`);
                 const data = await response.json();
                 setEntries(data.count); 
-                if (page === 1) {
-                    setInteractions(data.results);
-                } 
-                else {
-                    setInteractions(prev => [...prev, ...data.results]);
-                }
+                setInteractions(data.results);
                 setLoading(false)
             } 
             catch (err) {
@@ -327,9 +320,10 @@ export default function Interactions({ id, tasks, onUpdate, setAddingTask }){
         <div>
                 {success && <div className={errorStyles.success}>{success}</div>}
                 {!['client'].includes(user.role) && <AddInteractions id={id} tasks={tasks} interactions={interactions} onUpdate={onUpdate} onFinish={onFinish} setAddingTask={setAddingTask}/>}
-                <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
+                <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
                     <h4>Previous Interactions</h4>
-                    {interactions.map((interaction) => (<InteractionCard key={interaction.id} interaction={interaction} onUpdate={onEdit} onDelete={onDelete}/>))}
+                    {interactions.length === 0 && <p>No interactions yet.</p>}
+                    {interactions.length > 0 && interactions.map((interaction) => (<InteractionCard key={interaction.id} interaction={interaction} onUpdate={onEdit} onDelete={onDelete}/>))}
                 </IndexViewWrapper>
         </div>
     )

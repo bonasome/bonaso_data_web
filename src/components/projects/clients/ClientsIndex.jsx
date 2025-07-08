@@ -58,7 +58,7 @@ export default function ClientsIndex(){
             <h1>Clients</h1>
             {showClientModal && <CreateClient onCreate={(client) => {setClients(prev=> [...prev, client]); setShowClientModal(false)}} onCancel={() => setShowClientModal(false)} /> }
             <button onClick={() => setShowClientModal(true)}>Create New Client</button>
-            <IndexViewWrapper entries={entries} onSearchChange={setSearch} onPageChange={setPage}>
+            <IndexViewWrapper entries={entries} page={page} onSearchChange={setSearch} onPageChange={setPage}>
                 {clients?.length > 0 ? 
                     clients.map((c) => (
                         <ClientCard key={c.id} client={c} />
