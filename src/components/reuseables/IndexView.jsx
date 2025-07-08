@@ -6,7 +6,6 @@ export default function IndexViewWrapper({ children, page, onSearchChange, onPag
     const [search, setSearch] = useState('');
     //const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    console.log(page)
     useEffect(() => {
         const pages = Math.ceil(entries / 20) == 0 ? 1 : Math.ceil(entries / 20);
         setTotalPages(pages)

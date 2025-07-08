@@ -10,6 +10,7 @@ import useWindowWidth from '../../../../services/useWindowWidth';
 export default function AddInteractions({ id, tasks, interactions, onUpdate, onFinish, setAddingTask }) {
     const { setInteractions } = useInteractions();
     const [interactionDate, setInteractionDate] = useState('');
+    const [interactionLocation, setInteractionLocation] = useState('');
     const [number, setNumber] = useState({});
     const [subcats, setSubcats] = useState({});
     const [comments, setComments] = useState({});
@@ -88,7 +89,6 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
         // localSubcats = [{id: 1, name: 'this', numeric_component: null}]
         const [modalErrors, setModalErrors] = useState('');
         const [localSubcats, setLocalSubcats] = useState([]);
-        console.log(localSubcats)
         const handleCheckbox = (checked, cat) => {
             setLocalSubcats(prev =>
                 checked ? [...prev, cat] : prev.filter(c => c.id !== cat.id)
@@ -279,13 +279,13 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             subcategories_data: subcats[task.id] || [],
             comments: comments[task.id] || null
         }))
-        console.log(allTaskData)
         if(submissionErrors.length > 0){
             setErrors(submissionErrors)
             return;
         }
+        console.log(interactionLocation)
         try{
-            console.log('submitting data...',)
+            console.log('submitting data...', interactionLocation)
             const url = `/api/record/interactions/batch/`; 
             const response = await fetchWithAuth(url, {
                 method: 'POST',
@@ -295,6 +295,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                 body: JSON.stringify({
                     'respondent': id,
                     'interaction_date': interactionDate,
+                    'interaction_location': interactionLocation,
                     'tasks': allTaskData,
                 })
             });
@@ -305,6 +306,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                 allTaskData.forEach((task) => {
                     interactions.push({
                         'interaction_date': interactionDate,
+                        'interaction_location': interactionLocation,
                         'task_detail': task,
                         'subcategories': task.subcategories,
                         'numeric_component': task.numeric_component,
@@ -359,6 +361,8 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             {!active && <i>Start dragging and dropping tasks to begin.</i>}
             {active && <label htmlFor="interaction_date">Interaction Date</label>}
             {active && <input id='interaction_date' type='date' onChange={(e) => handleDateChange(e)}/>}
+            {active && <label htmlFor="interaction_location">Interaction Location</label>}
+            {active && <input id='interaction_location' type='text' onChange={(e) => setInteractionLocation(e.target.value)}/>}
             <div className={styles.dropBox} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray' }}>
                 {added.length === 0 && width >=768 && <p>Drag an indicator from the sidebar to start.</p>}
                 {added.length === 0 && width < 768 && <p>Click the "Add to interaction" button on a task below to add it to the interaciton.</p>}

@@ -4,7 +4,7 @@
     gap: 1rem;
 }
 .filter {
-    padding: 2vh;
+    padding: 3vh;
     background-color: var(--bonaso-uber-dark-accent);
     max-width: fit-content;
 }

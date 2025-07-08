@@ -20,6 +20,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     const [perm, setPerm] = useState(false);
     const [errors, setErrors] = useState([]);
     const[interactionDate, setInteractionDate] = useState('');
+    const [interactionLocation, setInteractionLocation] = useState('')
     const [allowedSubcats, setAllowedSubcats] = useState([]);
     const[subcats, setSubcats] = useState([]);
     const[number, setNumber] = useState('');
@@ -61,7 +62,8 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                 
             }
         }
-
+        const loc = interaction?.interaction_location ? interaction.interaction_location : '';
+        setInteractionLocation(loc)
         setInteractionDate(interaction.interaction_date);
         setSubcats(interaction.subcategories);
 
@@ -89,6 +91,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             'respondent': interaction.respondent,
             'task': interaction.task_detail.id,
             'interaction_date': interactionDate,
+            'interaction_location': interactionLocation,
             'numeric_component': number || null,
             'subcategories_data': subcats,
             'flagged': flaggedOverride,
@@ -195,7 +198,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
         )
         
     }
-    console.log(subcats)
+
     if(edit){
         return(
             <div className={styles.card}>
@@ -203,6 +206,8 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 <label htmlFor='interaction_date'>Date</label>
                 <input type='date' name='interaction_date' id='interaction_date' value={interactionDate} onChange={(e)=>setInteractionDate(e.target.value)}/>
+                <label htmlFor='interaction_date'>Location</label>
+                <input type='text' name='interaction_location' id='interaction_location' value={interactionLocation} onChange={(e)=>setInteractionLocation(e.target.value)}/>
                 {interaction.numeric_component &&
                     <div>
                         <label htmlFor='number'>Enter a number.</label>
@@ -245,6 +250,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {flagged && <div className={errorStyles.warnings}><h3>FLAGGED</h3></div>}
             <p>{prettyDates(interaction.interaction_date)}</p>
+            <p>{interaction.interaction_location ? interaction.interaction_location : 'No Location on Record'}</p>
             {expanded && 
                 <div>
                 <p>By {interaction.task_detail.organization.name}</p>
