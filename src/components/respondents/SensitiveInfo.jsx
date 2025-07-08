@@ -6,8 +6,10 @@ import SimpleSelect from "../reuseables/SimpleSelect";
 import { useRespondents } from "../../contexts/RespondentsContext";
 import styles from './respondentDetail.module.css';
 import ComponentLoading from '../reuseables/ComponentLoading';
+import { useAuth } from '../../contexts/UserAuth';
 
 export default function SensitiveInfo({ id }) {
+    const { user } = useAuth();
     const { respondentsMeta, setRespondentsMeta } = useRespondents();
     const [form, setForm] = useState({
         hiv_positive: false,
@@ -206,7 +208,7 @@ export default function SensitiveInfo({ id }) {
                 }
                 <p>HIV Status: {form.hiv_positive ? 'Positive': 'Negative'}</p>
                 {form.is_pregnant && <p>Pregnant Since: {form.term_began}</p>}
-                <button type='button' onClick={() => setEdit(!edit)}>Edit</button>
+                {!['client'].includes(user?.role) && <button type='button' onClick={() => setEdit(!edit)}>Edit</button>}
             </div>
         )
     }
