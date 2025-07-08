@@ -123,7 +123,7 @@ export default function EditUser(){
     }
     
     const handleSubmit = async(data) => {
-        console.log('submitting data...')
+        console.log('submitting data...', data)
         try{
             const response = await fetchWithAuth(`/api/profiles/users/${id}/`, {
                 method: 'PATCH',

@@ -5,7 +5,7 @@ export default function userConfig(orgIDs, orgNames, clientIDs, clientNames, met
         {name: 'username', label: 'Username', type: 'text', required: true, value: existing?.username ? existing.username : ''},
         {name: 'password', label: 'Enter Password', type: 'password', required: true, value: ''},
         {name: 'confirm_password', label: 'Confirm Password', type: 'password', required: true, value: ''},
-        {name: 'organization', label: 'User Organization', type: 'select', required: false, value: existing?.organization?.id ? existing.organization?.id : '', 
+        {name: 'organization', label: 'User Organization', type: 'select', required: false, value: existing?.organization_detail?.id ? existing.organization_detail?.id : '', 
             constructors: {
                 values: orgIDs,
                 labels: orgNames,
@@ -32,7 +32,7 @@ export default function userConfig(orgIDs, orgNames, clientIDs, clientNames, met
     if(existing){
         return [
             {name: 'username', label: 'Username', type: 'text', required: true, value: existing?.username ? existing.username : ''},
-            {name: 'organization', label: 'User Organization', type: 'select', required: false, value: existing?.organization?.id ? existing.organization?.id : '', 
+            {name: 'organization', label: 'User Organization', type: 'select', required: false, value: existing?.organization_detail?.id ? existing.organization_detail?.id : '', 
                 constructors: {
                     values: orgIDs,
                     labels: orgNames,

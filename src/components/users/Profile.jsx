@@ -124,7 +124,7 @@ export default function Profile(){
             console.error('Failed to fetch profile: ', err);
         }
     }
-
+    console.log(profile)
     if(loading) return <Loading />
     return(
         <div className={styles.container}>
@@ -136,7 +136,7 @@ export default function Profile(){
             <h1>{profile?.first_name} {profile?.last_name}</h1>
             {profile?.username === user.username && <h3><i>This is you.</i></h3>}
             {!profile?.is_active && <h3>User is inactive.</h3>}
-            <Link to={`/organizations/${profile.organization.id}`}><p>{profile.organization.name}</p></Link>
+            <Link to={`/organizations/${profile?.organization_detail?.id}`}><p>{profile?.organization_detail?.name}</p></Link>
             {changePass && <AdminResetPassword id={profile.id} />}
             <Link to={`/profiles/${profile?.id}/edit`}> <button>Edit Profile</button></Link>
             {user.role === 'admin' &&<button className={errorStyles.deleteButton} onClick={() => changeStatus(!active)}>{profile?.is_active ? 'Deactivate User' : 'Activate User'}</button>}

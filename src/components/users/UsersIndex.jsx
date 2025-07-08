@@ -46,7 +46,7 @@ function ProfileCard({ profile }) {
             <Link to={`/profiles/${profile.id}`} style={{display:'flex', width:"fit-content"}}><h2>{profile.first_name} {profile.last_name}</h2></Link>
             {expanded && (
                 <>
-                    <p>Organization: {profile?.organization?.name}</p>
+                    <p>Organization: {profile?.organization_detail?.name}</p>
                     <p>Role: {labels.role}</p>
                     <Link to={`/profiles/${profile.id}`}><button>View Details</button></Link>
                     <Link to={`/profiles/${profile.id}/edit`}><button>Edit Details</button></Link>
