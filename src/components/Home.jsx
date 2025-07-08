@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './home.module.css';
 import { useAuth } from '../contexts/UserAuth';
 import { useTasks } from '../contexts/TasksContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import fetchWithAuth from '../../services/fetchWithAuth';
@@ -60,7 +60,7 @@ function Home() {
                 {['meofficer', 'manager', 'client', 'admin'].includes(user.role) && 
                     <div>
                         <h2>At a Glance</h2>
-                        <IndicatorChart indicatorID={1} />
+                        <IndicatorChart indicatorID={6} />
                     </div>
                 }
             </div>
