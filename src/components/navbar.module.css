@@ -148,6 +148,14 @@
     padding: 6vh;
     margin-left: auto;
 }
+.hamburger{
+    transition: all .6s;
+}
+.hamburger:hover{
+    box-shadow: white 1px 1px 3px;
+    cursor: pointer;
+    scale: 1.3;
+}
 .menuExpanded {
     background-color: white;
     padding: 2vh;

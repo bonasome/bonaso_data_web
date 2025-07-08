@@ -179,7 +179,7 @@ export default function Navbar() {
                 {width > 1100 ?
                     <ExpandedMenu /> :
                 <div className={styles.slimMenu} ref={containerRef}>
-                    <TfiMenu onClick={() => setMenuExpanded(!menuExpanded)}/>
+                    <TfiMenu className={styles.hamburger} onClick={() => setMenuExpanded(!menuExpanded)}/>
                     {menuExpanded && <ThinMenu />}
                 </div>
                 }
