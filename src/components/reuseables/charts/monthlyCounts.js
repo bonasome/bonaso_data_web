@@ -74,10 +74,15 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
         if (data.require_numeric && interaction.numeric_component) {
             amount = interaction.numeric_component;
         }
-
+        else if(legend !== 'subcategories' && data?.subcategories?.length > 0 && data.require_numeric){
+            amount = 0
+            interaction.subcategories.forEach(s => amount += s.numeric_component)
+        }
         if (legend==='subcategories' && data?.subcategories?.length > 0) {
             interaction.subcategories.forEach(cat => {
-                axisGroups[key][cat] = (axisGroups[key][cat] || 0) + amount;
+                amount = (data.require_numeric && cat.numeric_component) ? cat.numeric_component : 1
+                console.log(amount)
+                axisGroups[key][cat.name] = (axisGroups[key][cat.name] || 0) + amount;
             });
         } 
         else if (legend === 'organization' && interaction?.organization){

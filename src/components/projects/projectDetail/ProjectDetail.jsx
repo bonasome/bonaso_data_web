@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import { IoMdReturnLeft } from "react-icons/io";
 import useWindowWidth from '../../../../services/useWindowWidth';
+import prettyDates from '../../../../services/prettyDates';
 
 function ProjectInfo({ project }){
     const navigate = useNavigate();
@@ -70,7 +71,7 @@ function ProjectInfo({ project }){
                     onConfirm={() => deleteProject()} onCancel={() => setDel(false)} 
             />}
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <i>Lasts from {project.start} to {project.end} {user.role =='admin' && '('+project.status+')'} </i>
+            <i>Lasts from {prettyDates(project.start)} to {prettyDates(project.end)} {user.role =='admin' && '('+project.status+')'} </i>
             {project?.client && <h4>From <Link to={`/clients/${project.client.id}`}>{project.client.name}</Link></h4>}
             <h5>Project Description</h5>
             <p>{project.description}</p>

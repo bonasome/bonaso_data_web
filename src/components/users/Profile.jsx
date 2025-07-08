@@ -128,10 +128,10 @@ export default function Profile(){
     return(
         <div className={styles.container}>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <Link to={'/profiles'} className={styles.return}>
+            {['admin', 'meofficer', 'manager'].includes(user.role) && <Link to={'/profiles'} className={styles.return}>
                 <IoMdReturnLeft className={styles.returnIcon} />
                 <p>Return to team overview</p>   
-            </Link>
+            </Link>}
             <h1>{profile?.first_name} {profile?.last_name}</h1>
             {profile?.username === user.username && <h3><i>This is you.</i></h3>}
             {!active && <h3>User is inactive.</h3>}

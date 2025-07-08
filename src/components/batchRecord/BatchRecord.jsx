@@ -136,6 +136,11 @@ export default function BatchRecord(){
                     setWarnings(data.warnings);
                     
                 }
+                else{
+                    console.error(data)
+                    setErrors(data.errors);
+                    setWarnings(data.warnings);
+                }
             }
             catch(err){
                 console.error('File upload failed: ', err);

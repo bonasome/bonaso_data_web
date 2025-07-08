@@ -97,12 +97,7 @@ export default function RespondentsIndex(){
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
-                if (page === 1) {
-                    setRespondents(data.results);
-                } 
-                else {
-                    setRespondents(prev => [...prev, ...data.results]);
-                }
+                setRespondents(data.results);
                 setLoading(false);
             } catch (err) {
                 console.error('Failed to fetch respondents: ', err);
@@ -123,7 +118,7 @@ export default function RespondentsIndex(){
     return(
         <div className={styles.index}>
             <h1>Respondents</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries} filter={<RespondentFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<RespondentFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 <Link to='/respondents/new'><button> <IoPersonAddSharp style={{marginRight: '1vh'}}/> Create New Respondent</button></Link>
                 {Array.isArray(respondents) && respondents.length === 0 ? (
                         <p>No respondents match your criteria.</p>

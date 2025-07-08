@@ -114,7 +114,7 @@ export default function ProjectsIndex(){
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Projects' : 'My Projects'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries} filter={<ProjectFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<ProjectFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 {user.role == 'admin' && <Link to='/projects/new'><button>Create New Project</button></Link>}
                 
                 {(projects && projects?.length) == 0 ? 

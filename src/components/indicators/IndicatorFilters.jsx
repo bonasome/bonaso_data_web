@@ -10,14 +10,14 @@ import {useOrganizations } from '../../contexts/OrganizationsContext';
 import { useIndicators } from '../../contexts/IndicatorsContext';
 import ComponentLoading from '../reuseables/ComponentLoading';
 
-export default function IndicatorFilters({ onFilterChange, indicators=[] }){
+export default function IndicatorFilters({ onFilterChange }){
     const { projects, setProjects } = useProjects();
     const { organizations, setOrganizations } = useOrganizations();
     const { indicatorsMeta, setIndicatorsMeta } = useIndicators();
     const [projectSearch, setProjectSearch] = useState('');
     const [orgSearch, setOrgSearch] = useState('');
     const [selectTools, setSelectTools] = useState({});
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
         project: '',
         organization: '',
@@ -49,11 +49,9 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
                 const response = await fetchWithAuth(`/api/organizations/?${orgSearch}`);
                 const data = await response.json();
                 setOrganizations(data.results)
-                setLoading(false)
             }
             catch(err){
                 console.error('Failed to fetch projects: ', err);
-                setLoading(false)
             }
         }
         getOrganizations();
@@ -89,12 +87,12 @@ export default function IndicatorFilters({ onFilterChange, indicators=[] }){
         const pNames = projects?.map((p) => (p.name))
         setSelectTools({
             orgs: {
-            names: orgNames,
-            ids: orgIDs
+                names: orgNames,
+                ids: orgIDs
             },
             projects: {
-            names: pNames,
-            ids: pIDs
+                names: pNames,
+                ids: pIDs
             }
         })
     }, [projects, organizations]);

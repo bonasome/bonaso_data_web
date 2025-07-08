@@ -83,7 +83,7 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
     const [statusFilter, setStatusFilter] = useState('');
 
     useEffect(() => {
-        const loadOrgs = async () => {
+        const loadIndicators = async () => {
             try {
                 const filterQuery = 
                     (orgFilter ? `&organization=${orgFilter}` : '') +
@@ -94,12 +94,7 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
-                if (page === 1) {
-                    setIndicators(data.results);
-                } 
-                else {
-                    setIndicators((prev) => [...prev, ...data.results]);
-                }
+                setIndicators(data.results);
                 setLoading(false);
             } 
             catch (err) {
@@ -107,20 +102,22 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
                 setLoading(false)
             }
         };
-        loadOrgs();
+        loadIndicators();
     }, [page, search, orgFilter, projectFilter, statusFilter]);
 
     const setFilters = (filters) => {
         setOrgFilter(filters.organization);
         setProjectFilter(filters.project);
         setStatusFilter(filters.status);
+        setPage(1);
     }
+    console.log(page)
     const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
     if(loading) return <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Indicators' : 'My Indicators'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries} filter={<IndicatorFilters indicators={indicators} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<IndicatorFilters indicators={indicators} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <Link to='/indicators/new'><button>Create a New Indicator</button></Link>} 
                 {visibleIndicators?.length === 0 ? 

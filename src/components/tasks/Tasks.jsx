@@ -149,17 +149,11 @@ export default function Tasks({ callback, update=null, target=false, organizatio
                 const includeOrg = organization ? `&organization=${organization.id}` : ''
                 const includeTargets = target ? `&include_targets=true` : ''
                 const includeProject = project ? `&project=${project.id}` : ''
-                const url = `/api/manage/tasks/?search=${search}` + includeTargets + includeOrg + includeProject
+                const url = `/api/manage/tasks/?search=${search}&page=${page}` + includeTargets + includeOrg + includeProject
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setTasks(data.results);
                 setEntries(data.count); 
-                if (page === 1) {
-                    setTasks(data.results);
-                } 
-                else {
-                    setTasks(prev => [...prev, ...data.results]);
-                }
                 if(callback){
                     callback(data.results)
                 }
@@ -189,7 +183,7 @@ export default function Tasks({ callback, update=null, target=false, organizatio
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <h2>Tasks</h2>
             <p><i>Search your tasks by name, organization, or project.</i></p>
-            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
             {tasks.length > 0 ? filteredTasks.map((task) => (
                 <TaskCard task={task} key={task.id} target={target} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} addCallback={addCallback}/>
             )) : <p>No tasks yet.</p>}

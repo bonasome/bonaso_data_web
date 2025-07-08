@@ -58,7 +58,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                     setPerm(true);
                 }
             }
-            else if(user.id == interaction.created_by.id){
+            else if(user?.id == interaction?.created_by?.id){
                     setPerm(true);
                 
             }

@@ -70,24 +70,22 @@ export default function OrganizationsIndex( { callback=null, blacklist=[] }){
     const [loading, setLoading] = useState(true);
     const [parentFilter, setParentFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('')
+    const [indicatorFilter, setIndicatorFilter] = useState('');
 
     useEffect(() => {
         const loadOrgs = async () => {
             try {
                 const filterQuery = 
                     (parentFilter ? `&parent_organization=${parentFilter}` : '') +
+                    (indicatorFilter ? `&indicator=${indicatorFilter}` : '') +
                     (projectFilter ? `&project=${projectFilter}` : '');
                 
                 const url = `/api/organizations/?search=${search}&page=${page}` + filterQuery;
+                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
-                if (page === 1) {
-                    setOrganizations(data.results);
-                } 
-                else {
-                    setOrganizations((prev) => [...prev, ...data.results]);
-                }
+                setOrganizations(data.results);
                 setLoading(false);
             } 
             catch (err) {
@@ -96,18 +94,19 @@ export default function OrganizationsIndex( { callback=null, blacklist=[] }){
             }
         };
         loadOrgs();
-    }, [page, search, parentFilter, projectFilter]);
+    }, [page, search, parentFilter, projectFilter, indicatorFilter]);
 
     const setFilters = (filters) => {
         setParentFilter(filters.parent_organization);
-        setProjectFilter(filters.project)
+        setProjectFilter(filters.project);
+        setIndicatorFilter(filters.indicator);
     }
     const visibleOrgs = organizations?.filter(org => !blacklist.includes(org.id)) || [];
     if(loading) return <ComponentLoading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Organizations' : 'My Organizations'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} onPageChange={setPage} entries={entries} filter={<OrganizationFilters organizations={organizations} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<OrganizationFilters organizations={organizations} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <Link to='/organizations/new'><button>Add an Organiation</button></Link>}
                 {visibleOrgs?.length == 0 ? 
