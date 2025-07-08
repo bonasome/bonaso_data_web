@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useProjects } from '../../../contexts/ProjectsContext';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import { useAuth } from '../../../contexts/UserAuth';
@@ -127,21 +127,18 @@ export function OrganizationTasks({ project, organization, setAddingTask }){
         setOrgTasks(data);
     }
 
-    useEffect(() => {
-        setAddingTask(() => handleAdd)
-    }, [setAddingTask])
-
+    console.log(organization)
     const handleDrop = async(e) => {
         e.preventDefault();
         const indicator = JSON.parse(e.dataTransfer.getData('application/json'));
         handleAdd(indicator)
     }
 
-    const handleAdd = async (indicator) => {
+    const handleAdd = useCallback(async (indicator) => {
         if(!['meofficer', 'manager', 'admin'].includes(user.role)){return;}
         let taskWarnings = []
         let taskErrors = []
-        
+        console.log(indicator, organization)
         const forbidden = orgTasks.map((task) => task.indicator.id);
         if(forbidden.includes(indicator.id)){
             taskErrors.push('Cannot assign the same indicator to the same org twice!')
@@ -194,8 +191,13 @@ export function OrganizationTasks({ project, organization, setAddingTask }){
         }
         setWarnings(taskWarnings);
         setErrors(taskErrors);
-    };
+    }, [organization, orgTasks, project, user]);
 
+    useEffect(() => {
+        setAddingTask(() => handleAdd)
+    }, [handleAdd, setAddingTask])
+
+    
     const handleDragOver = (e) => {
         e.preventDefault(); // Required to allow drop
     };
@@ -214,7 +216,6 @@ export function OrganizationTasks({ project, organization, setAddingTask }){
             <div className={styles.tasksContainer}>
                 <Tasks className={styles.tasks} callback={loadTasks} update={reload} organization={organization} project={project} target={true} canDelete={true}/>
             </div>
-
         </div>
     )
     
@@ -251,6 +252,7 @@ export function ViewOrganization({ project, organization, onRemove, setAddingTas
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
     const { setProjectDetails } = useProjects();
+
     const removeOrg = async() => {
         try {
             console.log('deleting organization...');

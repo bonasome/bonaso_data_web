@@ -196,7 +196,8 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
     }
 
 
-    if (loading || !chartData) return <ComponentLoading />;
+    if (loading || !chartData ) return <ComponentLoading />;
+    if(!chartData || !data) return <p>No data yet...</p>
     return(
         <div>
             {(chartType === '' || chartType ==='bar') && 
