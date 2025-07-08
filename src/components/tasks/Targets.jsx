@@ -94,7 +94,8 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
     const [errors, setErrors] = useState([])
     const [taskIDs, setTaskIDs] = useState([])
     const [asPercentage, setAsPercentage] = useState(false)
-
+    const [search, setSearch] = useState('');
+    const [relatedTasks, setRelatedTasks] = useState([])
     const [targetInfo, setTargetInfo] = useState({
         task_id: task.id,
         amount: existing ? existing?.amount : '',
@@ -115,6 +116,32 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
         }
     }, [tasks, existing, task])
 
+    useEffect(() => {
+        const getTasks = async () => {
+            try {
+                console.log('fetching tasks...');
+                const url = `/api/manage/tasks/?search=${search}&organization=${task.organization.id}&project=${task.project.id}`
+                console.log(url)
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setRelatedTasks(data.results);
+            } 
+            catch (err) {
+                console.error('Failed to fetch tasks:', err);
+                setErrors(['Something went wrong. Please try again later.'])
+            } 
+            finally {
+            }
+        };
+        getTasks();
+    }, [search]);
+
+    useEffect(() => {
+        const ids = relatedTasks.map((t) => (t.id))
+        const names = relatedTasks.map((t) => (t.indicator.code + ': ' + t.indicator.name));
+        setTaskIDs(ids);
+        setTaskNames(names);
+    }, [relatedTasks]);
 
     const onSubmit = async() => {
         let submissionErrors = []
@@ -213,7 +240,11 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
             }
             {asPercentage && 
                 <div>
-                    <SimpleSelect name={'task_id'} label={'Related Task'} optionValues={taskIDs} optionLabels={taskNames} defaultOption={existing ? targetInfo.related_to_id : ''} callback={(val) => setTargetInfo(prev => ({...prev, related_to_id: val}))} required={true}/>
+                    <SimpleSelect name={'task_id'} label={'Related Task'} optionValues={taskIDs} 
+                    optionLabels={taskNames} defaultOption={existing ? targetInfo.related_to_id : ''} 
+                    callback={(val) => setTargetInfo(prev => ({...prev, related_to_id: val}))} 
+                    required={true} search={true} searchCallback={(v) => setSearch(v)}
+                    />
                     <label htmlFor='percentage'>Percentage of Task</label>
                     <input id='percentage' name='percentage' type='number' min='0' max='100' value={targetInfo.percentage_of_related || ''} onChange={(e) => setTargetInfo(prev => ({...prev, percentage_of_related: e.target.value}))} required={true}/>
                 </div>
