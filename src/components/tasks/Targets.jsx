@@ -121,7 +121,6 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
             try {
                 console.log('fetching tasks...');
                 const url = `/api/manage/tasks/?search=${search}&organization=${task.organization.id}&project=${task.project.id}`
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setRelatedTasks(data.results);
@@ -130,8 +129,6 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
                 console.error('Failed to fetch tasks:', err);
                 setErrors(['Something went wrong. Please try again later.'])
             } 
-            finally {
-            }
         };
         getTasks();
     }, [search]);

@@ -65,6 +65,7 @@ export default function ProfilesIndex(){
     const [loading, setLoading] = useState(true);
     const [orgFilter, setOrgFilter] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
+    const [clientFilter, setClientFilter] = useState('')
     const[inactiveFilter, setInactiveFilter] = useState(false)
     useEffect(() => {
         const loadProfiles = async () => {
@@ -72,9 +73,11 @@ export default function ProfilesIndex(){
                 const filterQuery = 
                     (orgFilter ? `&organization=${orgFilter}` : '') +
                     (roleFilter ? `&role=${roleFilter}` : '') + 
+                    (clientFilter ? `&client_organization=${clientFilter}` : '') + 
                     (inactiveFilter ? `&is_active=${!inactiveFilter}` : '')
                 
                 const url = `/api/profiles/users/?search=${search}&page=${page}` + filterQuery;
+                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
@@ -88,21 +91,21 @@ export default function ProfilesIndex(){
         };
         loadProfiles();
 
-    }, [page, search, orgFilter, roleFilter, inactiveFilter]);
+    }, [page, search, orgFilter, roleFilter, inactiveFilter, clientFilter]);
 
     const setFilters = (filters) => {
         setOrgFilter(filters.organization);
         setRoleFilter(filters.role)
-        setInactiveFilter(filters.inactive)
+        setInactiveFilter(filters.inactive);
+        setClientFilter(filters.client)
     }
 
     if(loading) return <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Users' : 'My Team'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<UserFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 <Link to='/profiles/new'><button>{user.role === 'admin' ? 'Create New User' : 'Apply For a New User'}</button></Link>
-                <UserFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>
                 {profiles && profiles.map((profile) => (<ProfileCard key={profile.id} profile={profile}/>))}
             </IndexViewWrapper>
         </div>
