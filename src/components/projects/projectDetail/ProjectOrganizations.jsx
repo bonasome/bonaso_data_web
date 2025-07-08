@@ -207,7 +207,7 @@ export function OrganizationTasks({ project, organization, setAddingTask }){
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {warnings.length != 0 && <div className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {success !== '' && <div className={errorStyles.success}><p>{success}</p></div>}
-            {!['client'].includes(user.role) && width > 768 && (user.role === 'admin' || user.organization_id != organization.parent_organization.id) && <div className={styles.addTask}>
+            {!['client'].includes(user.role) && width > 768 && (user.role === 'admin' || user.organization_id === organization?.parent_organization?.id) && <div className={styles.addTask}>
                 <h3>Add Tasks</h3>
                 <div className={styles.dropZone} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray', height: '100px', padding: '10px' }}>
                     <p>Drag an indicator from the sidebar to assign it to this organization.</p>

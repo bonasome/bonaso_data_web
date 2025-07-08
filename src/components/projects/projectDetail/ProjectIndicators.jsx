@@ -21,7 +21,7 @@ function IndicatorCard({ indicator, callback, active, activeOrganization, button
     return(
         <div className={active ? styles.activeCard : styles.card} draggable onDragStart={handleDragStart} onClick={() => callback('view-indicator', indicator)}>
             <h3>{indicator.code}: {indicator.name}</h3>
-            {activeOrganization && (user.role === 'admin' || user.organization_id != organization.parent_organization.id) && <button onClick={(e) => {e.stopPropagation(); buttonAdd(indicator)}}>Assign as task</button>}
+            {activeOrganization && (user.role === 'admin' || user?.organization_id === activeOrganization?.parent_organization?.id) && <button onClick={(e) => {e.stopPropagation(); buttonAdd(indicator)}}>Assign as task</button>}
             {activeOrganization && <button onClick={(e) => {e.stopPropagation(); buttonViewChart(indicator)}}>Chart</button>}
         </div>
     )
