@@ -203,7 +203,7 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
             {(chartType === '' || chartType ==='bar') && 
                 <ResponsiveContainer width="100%" height={300}>
                     <BarChart width={600} height={300} data={chartData}>
-                        <XAxis dataKey="ag" tick={{fill: '#fff'}}/>
+                        <XAxis dataKey="ag" tick={{fill: '#fff'}} />
                         <YAxis tick={{fill: '#fff'}}/>
                         <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
                         <Legend />

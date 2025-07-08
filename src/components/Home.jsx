@@ -21,7 +21,7 @@ function Home() {
                 const url = `/api/manage/tasks/`
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
-                const myTasks = data.results.filter(task => task.organization.id == user.id)
+                const myTasks = data.results.filter(task => task.organization.id == user.organization_id)
                 setTasks(myTasks);
             } 
             catch (err) {
@@ -59,7 +59,7 @@ function Home() {
                 </div>}
                 {['meofficer', 'manager', 'client', 'admin'].includes(user.role) && 
                     <div>
-                        <h2>At a Glance</h2>
+                        <h2>At a Glance: Number of Condoms Distributed</h2>
                         <IndicatorChart indicatorID={6} />
                     </div>
                 }
