@@ -6,6 +6,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import fetchWithAuth from '../../services/fetchWithAuth';
+import IndicatorChart from './reuseables/charts/IndicatorChart';
+
 function Home() {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -38,20 +40,29 @@ function Home() {
             <h1 className={styles.header}>Welcome, {user.username}!</h1>
             <div className={styles.content}>
             <div className={styles.tasksBox}>
+                {['data_collector'].includes(user.role) && 
+                <div>
                 <h2>My Tasks</h2>
                     <div className={styles.tasks}>
-                    {tasks.length == 0 && <h3>No tasks, great work!</h3>}
-                    {tasks.length > 0 && tasks.map((task) =>  (
-                        <div key={task.id} 
-                            className={['meofficer', 'admin', 'manager'].includes(user.role) ? styles.taskLink : styles.task}
-                            onClick={['meofficer', 'admin', 'manager'].includes(user.role) ? () => navigate(`/projects/${task.project.id}`) : null}
-                        >
-                            <h3>{task.indicator.code}: {task.indicator.name}</h3>
-                            <i>For Project {task.project.name}</i>
-                        </div>
+                        {tasks.length == 0 && <h3>No tasks, great work!</h3>}
+                        {tasks.length > 0 && tasks.map((task) =>  (
+                            <div key={task.id} 
+                                className={['meofficer', 'admin', 'manager'].includes(user.role) ? styles.taskLink : styles.task}
+                                onClick={['meofficer', 'admin', 'manager'].includes(user.role) ? () => navigate(`/projects/${task.project.id}`) : null}
+                            >
+                                <h3>{task.indicator.code}: {task.indicator.name}</h3>
+                                <i>For Project {task.project.name}</i>
+                            </div>
 
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                </div>}
+                {['meofficer', 'manager', 'client', 'admin'].includes(user.role) && 
+                    <div>
+                        <h2>At a Glance</h2>
+                        <IndicatorChart indicatorID={1} />
+                    </div>
+                }
             </div>
             <div className={styles.actions}>
                 <h2>Where should we start today?</h2>

@@ -62,12 +62,14 @@ function Dropdown({ name }){
             setLabels(['Manage Projects', 'Manage Indicators', 'Manage Organizations', 'Manage Clients'])
         }
         if(name =='Respondents' && ['meofficer', 'manager', 'admin'].includes(user.role)){
-            setUrls(['/respondents', '/batch-record'])
-            setLabels(['Manage Respondents', 'Batch Record'])
-        }
-        if(name == 'Respondent' && !['client'].includes(user.role)){
-            setUrls(prev => [...prev, '/respondents/flagged'])
-            setLabels(prev => [...prev, 'Flagged Interactions'])
+            let urls = ['/respondents', '/batch-record']
+            let labels = ['Manage Respondents', 'Batch Record']
+            if(!['client'].includes(user.role)){
+                urls.push('/respondents/flagged')
+                labels.push('Flagged Interactions')
+            }
+            setUrls(urls)
+            setLabels(labels)
         }
         if(name ==`${user.username}`){
             setUrls([`/profiles/${user.id}`,'/help', '/users/logout'])
