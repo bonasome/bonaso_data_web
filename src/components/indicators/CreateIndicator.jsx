@@ -66,6 +66,15 @@ export default function CreateIndicator(){
     }
 
     const handleSubmit = async(data) => {
+        const names = data.subcategory_names
+        let commas = []
+        names.forEach(n => {
+            if(n.includes(',') || n.includes(':')) commas.push(`Subcategory names cannot include commas or colons. Please fix ${n}`);
+        })
+        if(commas.length > 0){
+            setErrors(commas);
+            return;
+        }
         console.log('submitting data...')
         try{
             const response = await fetchWithAuth('/api/indicators/', {

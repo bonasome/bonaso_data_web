@@ -96,7 +96,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             'subcategories_data': subcats,
             'flagged': flaggedOverride,
         }
-        console.log(data)
+
         try{
             console.log('submitting edits...')
             const url = `/api/record/interactions/${interaction.id}/`; 
