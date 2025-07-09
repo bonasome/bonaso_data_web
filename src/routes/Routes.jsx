@@ -61,6 +61,10 @@ import UsersIndex from '../components/users/UsersIndex';
 import CreateUser from '../components/users/CreateUser';
 import EditUser from '../components/users/EditUser';
 
+import EventDetail from '../components/events/EventDetail';
+import CreateEvent from '../components/events/CreateEvent';
+import EditEvent from '../components/events/EditEvent';
+
 function Router() {
     return (
         <Routes>
@@ -256,6 +260,36 @@ function Router() {
             }/>
         </Route>
         
+        <Route 
+            path='/events' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <ProjectLayout />
+                </RedirectIfNotAuthenticated>
+        }>
+            <Route index element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <ClientsIndex />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path='create' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <CreateEvent />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path=':id' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <EventDetail />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path=':id/edit' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <EditEvent />
+                </RedirectIfNoPerm>
+            }/>
+        </Route>
+
         <Route 
             path='/help' 
             element = {

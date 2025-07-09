@@ -119,7 +119,7 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
                         </div>
                     )}
                     <p>{task.indicator.require_numeric ? 'Requires Number' : ''}</p>
-                    {isDraggable && <button onClick={() => addCallback(task)}>Add to Interaction</button>}
+                    {addCallback && <button onClick={() => addCallback(task)}>Add to Interaction</button>}
                     {targets && targets.length > 0 && <h3>Targets:</h3>}
                     {targets && targets.length > 0 && targets.map((t) => (
                         <Target key={t.id} target={t} task={task} tasks={tasks} onUpdate={(data) => onUpdate(data)} onDelete={(id) => checkTargets(id)}/>
