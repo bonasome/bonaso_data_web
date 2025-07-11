@@ -87,6 +87,14 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
 
     
     const handleSubmit = async(flaggedOverride = flagged) =>{
+        let submissionErrors = []
+        if(!interactionLocation || interactionLocation == ''){
+            submissionErrors.push('Interaction location is required.');
+        }
+        if(submissionErrors.length > 0){
+            setErrors(submissionErrors)
+            return;
+        }
         const data={
             'respondent': interaction.respondent,
             'task': interaction.task_detail.id,
@@ -278,7 +286,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     )
 }
 
-export default function Interactions({ id, tasks, onUpdate, setAddingTask }){
+export default function Interactions({ id, tasks, onUpdate, setAddingTask, onAdd }){
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
 
@@ -311,6 +319,7 @@ export default function Interactions({ id, tasks, onUpdate, setAddingTask }){
 
     const onFinish = () => {
         setInteractionRefresh(prev => prev + 1)
+        onAdd()
     }
     const onEdit = () => {
         setInteractionRefresh(prev => prev +1)

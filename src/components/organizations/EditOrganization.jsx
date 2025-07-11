@@ -1,15 +1,16 @@
 import React from 'react';
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
 import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useOrganizations } from '../../contexts/OrganizationsContext';
 import { useParams } from 'react-router-dom';
-import OrganizationForm from './OrganizationForm';
 import styles from '../reuseables/dynamicForm.module.css';
 import organizationConfig from './organizationConfig';
 import { useAuth } from '../../contexts/UserAuth';
+import errorStyles from '../../styles/errors.module.css';
+
 export default function EditOrganization(){
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -20,8 +21,16 @@ export default function EditOrganization(){
     const [existing, setExisting] = useState({})
     const [orgIDs, setOrgIDs] = useState([]);
     const [orgNames, setOrgNames] = useState([]);
-    const [search, setSearch] = useState('')
+    const [search, setSearch] = useState('');
 
+    const alertRef = useRef(null);
+
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
     useEffect(() => {
         const getOrganizations = async () => {
             try{
@@ -130,7 +139,13 @@ export default function EditOrganization(){
     return(
         <div className={styles.container}>
             <h1>Editing Details for Organization {organizationDetails.name}</h1>
-            <OrganizationForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
+            {errors.length != 0 &&
+            <div className={errorStyles.errors} ref={alertRef}>
+                <ul>{errors.map((msg)=>
+                    <li key={msg}>{msg}</li>)}
+                </ul>
+            </div>}
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
         </div>
     )
 }

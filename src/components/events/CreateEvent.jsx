@@ -1,12 +1,13 @@
 import React from 'react';
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useEvents } from '../../contexts/EventsContext';
-import EventsForm from './EventsForm';
 import eventConfig from './eventConfig';
 import styles from '../reuseables/dynamicForm.module.css';
+import DynamicForm from '../reuseables/DynamicForm';
+import errorStyles from '../../styles/errors.module.css';
 
 export default function CreateEvent(){
     const navigate = useNavigate();
@@ -16,6 +17,14 @@ export default function CreateEvent(){
     const [orgIDs, setOrgIDs] = useState([]);
     const [orgNames, setOrgNames] = useState([]);
     const [search, setSearch] = useState('')
+
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
 
     useEffect(() => {
         const getMeta = async() => {
@@ -83,11 +92,11 @@ export default function CreateEvent(){
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
                         returnData[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
+                        serverResponse.push(`${msg}`);
                         });
                     } 
                     else {
-                        serverResponse.push(`${field}: ${returnData[field]}`);
+                        serverResponse.push(`${returnData[field]}`);
                     }
                 }
                 setErrors(serverResponse)
@@ -103,8 +112,14 @@ export default function CreateEvent(){
 
     return(
         <div className={styles.container}>
-            <h1>New Indicator</h1>
-            <EventsForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
+            <h1>New Event</h1>
+            {errors.length != 0 &&
+            <div className={errorStyles.errors} ref={alertRef}>
+                <ul>{errors.map((msg)=>
+                    <li key={msg}>{msg}</li>)}
+                </ul>
+            </div>}
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
         </div>
     )
 }

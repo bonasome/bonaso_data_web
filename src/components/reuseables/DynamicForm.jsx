@@ -8,14 +8,14 @@ import errorStyles from '../../styles/errors.module.css';
 import { useAuth } from '../../contexts/UserAuth';
 
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]
-export default function DynamicForm({ config, onSubmit, onCancel }){
+export default function DynamicForm({ config, onSubmit, onCancel, onError }){
     const { user } = useAuth();
     const [formData, setFormData] = useState({})
     const [errors, setErrors] = useState([])
     const [switchpath, setSwitchpath] = useState(false);
 
     const rowRefs = useRef({});
-
+    
     useEffect(() => {
         const struct = {};
         config.forEach(field => {
@@ -61,7 +61,7 @@ export default function DynamicForm({ config, onSubmit, onCancel }){
             if(fieldErrors.length > 0) newErrors.push(...fieldErrors);
         });
         if (newErrors.length > 0) {
-            setErrors(newErrors);
+            onError(newErrors);
             return;
         }
         onSubmit(newFormData);
@@ -69,7 +69,6 @@ export default function DynamicForm({ config, onSubmit, onCancel }){
     return(
         <div className={styles.formElement}>
             <form onSubmit={handleSubmit} noValidate={true}>
-                {errors.length != 0 && <div className={errorStyles.errors} role="alert"><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 {config.map(field => {
                     if(!field) return
                     if(field?.rolerestrict && !field.rolerestrict.includes(user.role)) return <div key={field.name}></div>

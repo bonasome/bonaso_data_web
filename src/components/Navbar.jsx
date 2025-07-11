@@ -18,39 +18,6 @@ function useWindowWidth() {
     return width;
 }
 
-function Hover({ options }){
-    const { user } = useAuth();
-    if(!options || options == 'none') return;
-    if(options=='user'){
-        return(
-            <div className={styles.onHoverMenu}>
-                <div className={styles.triangle}></div>
-                <div className={styles.onHoverLinks}>
-                    <div className={styles.hoverLink}>
-                        <Link to={`/profiles/${user.id}`}>Profile</Link>
-                    </div>
-                    <div className={styles.hoverLink}>
-                        <Link href='/users/logout'>Logout</Link>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-    if(options == 'projects' && user.role == 'admin'){
-         <div className={styles.onHoverMenu}>
-            <div className={styles.triangle}></div>
-            <div className={styles.onHoverLinks}>
-                <div className={styles.hoverLink}>
-                    <Link to={`/organizations`}>Organizations</Link>
-                </div>
-                <div className={styles.hoverLink}>
-                    <Link href='/indicators'>Indicators</Link>
-                </div>
-            </div>
-        </div>
-    }
-}
-
 
 function Dropdown({ name }){
     const [labels, setLabels] = useState([]);
@@ -111,8 +78,8 @@ function MenuLink({ name, url }) {
 
 function ExpandedMenu() {
     const { user } = useAuth();
-    const links = ['Projects', 'Respondents', 'Team', `${user.username}`]
-    const urls = ['/projects', '/respondents', '/profiles', `/profiles/${user.id}`]
+    const links = ['Projects', 'Events', 'Respondents', 'Team', `${user.username}`]
+    const urls = ['/projects', '/events', '/respondents', '/profiles', `/profiles/${user.id}`]
 
     return(
         <div className={styles.expandedMenu}>
@@ -137,6 +104,8 @@ function ThinMenu() {
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/clients'}>Clients</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <h3>Team</h3>}
             {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>My Team</Link></div>} 
+            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h3>Events</h3>}
+            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/events'}>Events</Link></div>}
             <h3>Profile</h3>
             <div className={styles.menuBar}><Link to={`/profiles/${user.id}`}>Profile</Link></div>
             <div className={styles.menuBar}><Link to={'/users/logout'}>Logout</Link></div>

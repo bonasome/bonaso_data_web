@@ -1,14 +1,14 @@
 import React from 'react';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
-import RespondentForm from './RespondentForm';
+import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useRespondents } from '../../contexts/RespondentsContext';
 import { useParams } from 'react-router-dom';
 import respondentsConfig from './respondentsConfig';
 import styles from '../reuseables/dynamicForm.module.css';
-
+import errorStyles from '../../styles/errors.module.css';
 export default function EditRespondent(){
     const { id } = useParams();
     const navigate = useNavigate();
@@ -17,6 +17,14 @@ export default function EditRespondent(){
     const [errors, setErrors] = useState([]);
     const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
     const [active, setActive] = useState({});
+
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
 
     useEffect(() => {
         const getRespondentMeta = async () => {
@@ -42,6 +50,7 @@ export default function EditRespondent(){
                 const data = await response.json();
                 if(response.ok){
                     setRespondentDetails(prev => [...prev, data]);
+                    console.log(data)
                     setActive(data);
                     setLoading(false);
                 }
@@ -136,7 +145,13 @@ export default function EditRespondent(){
     return(
         <div className={styles.container}>
             <h1>Editing Respondent {active.is_anonymous ? active.uuid : (active.first_name + ' ' + active.last_name) }</h1>
-            <RespondentForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors}/>
+            {errors.length != 0 &&
+                <div className={errorStyles.errors} ref={alertRef}>
+                    <ul>{errors.map((msg)=>
+                        <li key={msg}>{msg}</li>)}
+                    </ul>
+                </div>}
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)}/>
         </div>
     )
 }

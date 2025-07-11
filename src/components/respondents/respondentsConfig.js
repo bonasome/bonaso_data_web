@@ -1,4 +1,9 @@
 export default function respondentsConfig(respondentsMeta, existing=null){
+    let special = []
+    if(existing && existing.special_attribute){
+        special = existing.special_attribute.map((s) => (s.name))
+    }
+    console.log(respondentsMeta)
         return [
             //always show
             {name: 'is_anonymous', label: 'Does this respondent want to remain anonymous', type: 'checkbox', required: true, switchpath: true, value: existing?.is_anonymous ? existing.is_anonymous : false},
@@ -35,6 +40,12 @@ export default function respondentsConfig(respondentsMeta, existing=null){
             }},
             {name: 'citizenship', label: 'Citizenship', type: 'text', value: existing?.citizenship ? existing.citizenship : 'Motswana', required: true, },
             
+            {name: 'special_attribute_names', label: 'Special Attributes', type: 'select', required: false, value: existing?.special_attribute ? special : [], constructors: {
+                values: respondentsMeta?.special_attributes,
+                multiple: true,
+                labels: respondentsMeta?.special_attribute_labels
+            }},
+
             //show if not anonymous
             {name: 'email', label: 'Email', type: 'email', required: false, hideonpath: true, value: existing?.email ? existing.email : ''},
             {name: 'phone_number', label: 'Phone Number', type: 'number', required: false, hideonpath: true, value: existing?.phone_number ? existing.phone_number : ''},

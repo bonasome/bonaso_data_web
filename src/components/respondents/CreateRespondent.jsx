@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import errorStyles from '../../styles/errors.module.css'
 import Loading from '../reuseables/Loading';
@@ -19,6 +19,16 @@ export default function CreateRespondent(){
     const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
     const [existing, setExisting] = useState(null)
     const [showModal, setShowModal] = useState(true)
+
+        
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
+    
     useEffect(() => {
         const getRespondentMeta = async () => {
             console.log(respondentsMeta)
@@ -147,14 +157,14 @@ export default function CreateRespondent(){
             {showModal && <DataModal />}
             <h1>Creating a New Respondent</h1>
             {errors.length != 0 &&
-                <div className={errorStyles.errors}>
+                <div className={errorStyles.errors} ref={alertRef}>
                     <ul>{errors.map((msg)=>
                         <li key={msg}>{msg}</li>)}
                     </ul>
                     {existing && <Link to={`/respondents/${existing}`}> <p>Click here to view their profile.</p></Link>}
                 </div>}
             
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors}/>
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)}/>
         </div>
     )
 }

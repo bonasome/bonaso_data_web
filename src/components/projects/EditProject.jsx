@@ -1,12 +1,12 @@
 import React from 'react';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
 import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useProjects } from '../../contexts/ProjectsContext';
 import { useParams } from 'react-router-dom';
-import ProjectForm from './ProjectForm';
+import errorStyles from '../../styles/errors.module.css';
 
 export default function EditProject(){
     const navigate = useNavigate();
@@ -19,6 +19,13 @@ export default function EditProject(){
     const [clientIDs, setClientIDs] = useState([]);
     const [clientNames, setClientNames] = useState([]);
 
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
     useEffect(() => {
         const getProjectMeta = async () => {
             if(Object.keys(projectsMeta).length != 0){
@@ -154,7 +161,13 @@ export default function EditProject(){
     return(
         <div>
             <h1>Editing Project {projectDetails.name}</h1>
-            <ProjectForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
+            {errors.length != 0 &&
+            <div className={errorStyles.errors} ref={alertRef}>
+                <ul>{errors.map((msg)=>
+                    <li key={msg}>{msg}</li>)}
+                </ul>
+            </div>}
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
         </div>
     )
 }

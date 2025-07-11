@@ -71,7 +71,7 @@ function IndicatorCard({ indicator, callback = null }) {
     );
 }
 
-export default function IndicatorsIndex({ callback=null, blacklist=[] }){
+export default function IndicatorsIndex({ callback=null, excludeProject=null, projectTrigger=null }){
     const { user } = useAuth()
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -88,9 +88,10 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
                 const filterQuery = 
                     (orgFilter ? `&organization=${orgFilter}` : '') +
                     (projectFilter ? `&project=${projectFilter}` : '') + 
-                    (statusFilter ? `&status=${statusFilter}` : '');
-                
+                    (statusFilter ? `&status=${statusFilter}` : '') +
+                    (excludeProject ? `&exclude_project=${excludeProject}` : '');
                 const url = `/api/indicators/?search=${search}&page=${page}` + filterQuery;
+                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
@@ -103,7 +104,7 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
             }
         };
         loadIndicators();
-    }, [page, search, orgFilter, projectFilter, statusFilter]);
+    }, [page, search, orgFilter, projectFilter, statusFilter, projectTrigger]);
 
     const setFilters = (filters) => {
         setOrgFilter(filters.organization);
@@ -112,7 +113,7 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
         setPage(1);
     }
     console.log(page)
-    const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
+    //const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
     if(loading) return <Loading />
     return(
         <div className={styles.index}>
@@ -120,9 +121,9 @@ export default function IndicatorsIndex({ callback=null, blacklist=[] }){
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<IndicatorFilters indicators={indicators} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <Link to='/indicators/new'><button>Create a New Indicator</button></Link>} 
-                {visibleIndicators?.length === 0 ? 
+                {indicators?.length === 0 ? 
                     <p>No indicators match your criteria.</p> :
-                    visibleIndicators.map(ind => (
+                    indicators.map(ind => (
                         <IndicatorCard key={ind.id} indicator={ind} callback={callback ? (indicator)=> callback(indicator) : null}/>)
                     )
                 }

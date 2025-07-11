@@ -24,7 +24,9 @@
 .card:hover {
     transform: scale(1.05);
 }
-
+.spacer {
+    padding-bottom: 5vh;
+}
 td 
 td > input {
     max-width: 7vh;

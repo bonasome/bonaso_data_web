@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import IndexViewWrapper from "../reuseables/IndexView";
 import { useAuth } from '../../contexts/UserAuth'
@@ -119,7 +119,7 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
                         </div>
                     )}
                     <p>{task.indicator.require_numeric ? 'Requires Number' : ''}</p>
-                    {addCallback && <button onClick={() => addCallback(task)}>Add to Interaction</button>}
+                    {addCallback && <button onClick={() => addCallback(task)}>Add Task</button>}
                     {targets && targets.length > 0 && <h3>Targets:</h3>}
                     {targets && targets.length > 0 && targets.map((t) => (
                         <Target key={t.id} target={t} task={task} tasks={tasks} onUpdate={(data) => onUpdate(data)} onDelete={(id) => checkTargets(id)}/>
@@ -134,14 +134,21 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
     );
 }
 
-export default function Tasks({ callback, update=null, target=false, organization=null, project=null, isDraggable=false, blacklist=[], canDelete=false, addCallback=null }) {
+export default function Tasks({ callback, update=null, target=false, organization=null, project=null, isDraggable=false, blacklist=[], canDelete=false, addCallback=null, type=null, event=null, eventTrigger=null, onError=[], onSuccess=null }) {
     const [loading, setLoading] = useState(true);
     const [ tasks, setTasks ] = useState([]);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-    const [success, setSuccess] = useState('')
-    const [errors, setErrors] = useState([]);
+
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (onError.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [onError]);
+
     useEffect(() => {
         const getTasks = async () => {
             try {
@@ -149,7 +156,9 @@ export default function Tasks({ callback, update=null, target=false, organizatio
                 const includeOrg = organization ? `&organization=${organization.id}` : ''
                 const includeTargets = target ? `&include_targets=true` : ''
                 const includeProject = project ? `&project=${project.id}` : ''
-                const url = `/api/manage/tasks/?search=${search}&page=${page}` + includeTargets + includeOrg + includeProject
+                const includeType = type ? `&indicator_type=${type}` : ''
+                const includeEvent = event ? `&event=${event}` : '';
+                const url = `/api/manage/tasks/?search=${search}&page=${page}` + includeTargets + includeOrg + includeProject + includeType + includeEvent
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setTasks(data.results);
@@ -168,7 +177,7 @@ export default function Tasks({ callback, update=null, target=false, organizatio
         };
         getTasks();
 
-    }, [search, page, update, organization]);
+    }, [search, page, update, organization, eventTrigger]);
 
     const updateTasks = (id) => {
         const updated = tasks.filter(t => t.id !=id)
@@ -179,9 +188,9 @@ export default function Tasks({ callback, update=null, target=false, organizatio
     if(loading) return <ComponentLoading />
     return (
         <div className={styles.tasks}>
-            {success && <div className={errorStyles.success}>{success}</div>}
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <h2>Tasks</h2>
+            {onSuccess && <div className={errorStyles.success}>{onSuccess}</div>}
+            {onError.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{onError.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <p><i>Search your tasks by name, organization, or project.</i></p>
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
             {tasks.length > 0 ? filteredTasks.map((task) => (

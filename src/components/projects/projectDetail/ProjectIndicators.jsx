@@ -126,7 +126,7 @@ export function AddIndicator({ project }){
     return (
         <div>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <IndicatorsIndex blacklist={projectIndicators} callback={(ind) => addIndicator(ind)} />
+            <IndicatorsIndex excludeProject={project.id} projectTrigger={projectIndicators} callback={(ind) => addIndicator(ind)} />
         </div>
     )
 }

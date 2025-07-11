@@ -1,14 +1,14 @@
 import React from 'react';
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useIndicators } from '../../contexts/IndicatorsContext';
-import IndicatorForm from './IndicatorForm';
+import DynamicForm from '../reuseables/DynamicForm';
 import { useParams } from 'react-router-dom';
 import indicatorConfig from './indicatorConfig';
 import styles from '../reuseables/dynamicForm.module.css';
-
+import errorStyles from '../../styles/errors.module.css';
 export default function EditIndicator(){
     const navigate = useNavigate();
     const { id } = useParams();
@@ -19,6 +19,15 @@ export default function EditIndicator(){
     const [indicatorIDs, setIndicatorIDs] = useState([]);
     const [indicatorNames, setIndicatorNames] = useState([]);
     const [search, setSearch] = useState('');
+
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
+
 
     useEffect(() => {
 
@@ -33,6 +42,7 @@ export default function EditIndicator(){
                     console.log('fetching indicator details...');
                     const response = await fetchWithAuth(`/api/indicators/${id}/`);
                     const data = await response.json();
+                    console.log(data)
                     if(response.ok){
                         setIndicatorDetails(prev => [...prev, data]);
                         setExisting(data);
@@ -92,7 +102,7 @@ export default function EditIndicator(){
     }, [search])
 
     const formConfig = useMemo(() => {
-        return indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta.statuses, (val) => setSearch(val), existing);
+        return indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta, (val) => setSearch(val), existing);
     }, [indicatorIDs, indicatorNames, indicatorsMeta, existing]);
 
     const handleCancel = () => {
@@ -156,7 +166,13 @@ export default function EditIndicator(){
     return(
         <div className={styles.container}>
             <h1>Editing Indicator {existing?.code}: {existing?.name}</h1>
-            <IndicatorForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
+            {errors.length != 0 &&
+                <div className={errorStyles.errors} ref={alertRef}>
+                    <ul>{errors.map((msg)=>
+                        <li key={msg}>{msg}</li>)}
+                    </ul>
+                </div>}
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
         </div>
     )
 }

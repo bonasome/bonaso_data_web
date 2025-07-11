@@ -1,9 +1,10 @@
 .index{
     margin: 5vh;
-    padding-bottom: 5vh;
+    padding: 5vh;
+    background-color: var(--bonaso-dark-accent);
 }
 .card{
-    background-color: var(--bonaso-dark-accent);
+    background-color: var(--bonaso-uber-dark-accent);
     margin: 5vh;
     padding: 3vh;
     height: fit-content;
@@ -15,7 +16,7 @@
 }
 
 .expandedCard{
-    background-color: var(--bonaso-dark-accent);
+    background-color: var(--bonaso-uber-dark-accent);
     margin: 6vh;
     padding: 3vh;
     height: fit-content;

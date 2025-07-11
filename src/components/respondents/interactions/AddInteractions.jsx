@@ -26,6 +26,14 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
     const width = useWindowWidth();
     const interactionDateRef = useRef('');
 
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
+
     useEffect(() => {
         interactionDateRef.current = interactionDate;
     }, [interactionDate]);
@@ -273,6 +281,9 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
         if(interactionDate=='' || isNaN(Date.parse(interactionDate)) || new Date(interactionDate) > new Date()){
             submissionErrors.push('Interaction date must be a valid date and may not be in the future.');
         }
+        if(!interactionLocation || interactionLocation == ''){
+            submissionErrors.push('Interaction location is required.');
+        }
         const allTaskData = added.map((task) => ({
             task: task.id,
             numeric_component: number[task.id] || null,
@@ -283,9 +294,9 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             setErrors(submissionErrors)
             return;
         }
-        console.log(interactionLocation)
+
         try{
-            console.log('submitting data...', interactionLocation)
+            console.log('submitting data...')
             const url = `/api/record/interactions/batch/`; 
             const response = await fetchWithAuth(url, {
                 method: 'POST',
@@ -356,7 +367,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                 </>
             )}
             <h3>New Interaction</h3>
-            {errors.length != 0 && <div role='alert' className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {errors.length != 0 && <div ref={alertRef} role='alert' className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {warnings.length != 0 && <div role='alert' className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {!active && <i>Start dragging and dropping tasks to begin.</i>}
             {active && <label htmlFor="interaction_date">Interaction Date</label>}

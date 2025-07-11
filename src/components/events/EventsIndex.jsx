@@ -9,7 +9,7 @@ import ComponentLoading from '../reuseables/ComponentLoading';
 import { useEvents } from '../../contexts/EventsContext';
 import { Link } from 'react-router-dom';
 import EventFilters from './EventFilters';
-
+import prettyDates from '../../../services/prettyDates';
 function EventCard({ event }) {
     const [loading, setLoading] = useState(false);
     const { eventDetails, setEventDetails } = useEvents();
@@ -50,7 +50,9 @@ function EventCard({ event }) {
             {expanded && loading && <ComponentLoading />}
             {expanded && active && (
                 <>
+                    <h3>{active.event_type} {active.host && `hosted by ${active.host.name}`}</h3>
                     <p>{active.description}</p>
+                    <p>{active.event_date && (new Date(active.event_date) > new Date() ? 'Occurs on' : 'Occured on')} {prettyDates(active.event_date)} at {active.location}</p>
                     <Link to={`/events/${event.id}`}>
                         <button onClick={(e) => e.stopPropagation()}>View Details</button>
                     </Link>
@@ -114,13 +116,13 @@ export default function EventsIndex(){
     if(loading) return <Loading />
     return(
         <div className={styles.index}>
-            <h1>{user.role == 'admin' ? 'All Indicators' : 'My Indicators'}</h1> 
+            <h1>{user.role == 'admin' ? 'All Events' : 'My Events'}</h1> 
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<EventFilters onFilterChange={setFilters} />} >
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <Link to='/events/new'><button>Create a New Event</button></Link>} 
                 {events?.length === 0 ? 
                     <p>No events match your criteria.</p> :
-                    events.map(ind => (
+                    events?.map(ind => (
                         <EventCard key={ind.id}event={ind} />)
                     )
                 }

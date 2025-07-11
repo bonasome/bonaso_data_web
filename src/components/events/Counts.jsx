@@ -24,7 +24,6 @@ function Warn( {onConfirm, onCancel }) {
 export default function Counts({ event, breakdownOptions, task, onSave, onCancel, onDelete, existing=null}) {
     const [breakdowns, setBreakdowns] = useState({
         sex: false,
-        age_range: false,
         citizenship: false,
         status: false,
         age_range: false,

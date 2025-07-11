@@ -274,7 +274,7 @@ function Router() {
                     <EventsIndex />
                 </RedirectIfNoPerm>
             }/>
-            <Route path='create' element={
+            <Route path='new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
                     <CreateEvent />
                 </RedirectIfNoPerm>

@@ -61,7 +61,7 @@ function OrganizationCard({ org, callback = null }) {
     );
 }
 
-export default function OrganizationsIndex( { callback=null, blacklist=[] }){
+export default function OrganizationsIndex( { callback=null, excludeProject=null, excludeProjectTrigger=null, excludeEvent=null, excludeEventTrigger=null }){
     const { user } = useAuth()
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -78,8 +78,9 @@ export default function OrganizationsIndex( { callback=null, blacklist=[] }){
                 const filterQuery = 
                     (parentFilter ? `&parent_organization=${parentFilter}` : '') +
                     (indicatorFilter ? `&indicator=${indicatorFilter}` : '') +
-                    (projectFilter ? `&project=${projectFilter}` : '');
-                
+                    (projectFilter ? `&project=${projectFilter}` : '') +
+                    (excludeProject ? `&exclude_project=${excludeProject}` : '') +
+                    (excludeEvent ? `&exclude_event=${excludeEvent}` : '');
                 const url = `/api/organizations/?search=${search}&page=${page}` + filterQuery;
                 console.log(url)
                 const response = await fetchWithAuth(url);
@@ -94,14 +95,14 @@ export default function OrganizationsIndex( { callback=null, blacklist=[] }){
             }
         };
         loadOrgs();
-    }, [page, search, parentFilter, projectFilter, indicatorFilter]);
+    }, [page, search, parentFilter, projectFilter, indicatorFilter, excludeProjectTrigger, excludeEventTrigger]);
 
     const setFilters = (filters) => {
         setParentFilter(filters.parent_organization);
         setProjectFilter(filters.project);
         setIndicatorFilter(filters.indicator);
     }
-    const visibleOrgs = organizations?.filter(org => !blacklist.includes(org.id)) || [];
+
     if(loading) return <ComponentLoading />
     return(
         <div className={styles.index}>
@@ -109,9 +110,9 @@ export default function OrganizationsIndex( { callback=null, blacklist=[] }){
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<OrganizationFilters organizations={organizations} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <Link to='/organizations/new'><button>Add an Organiation</button></Link>}
-                {visibleOrgs?.length == 0 ? 
+                {organizations?.length == 0 ? 
                     <p>No organizations match your criteria.</p> :
-                    visibleOrgs.map(org => (
+                    organizations.map(org => (
                     <OrganizationCard key={org.id} org={org} callback={callback ? callback : null}/>
                     ))
                 }

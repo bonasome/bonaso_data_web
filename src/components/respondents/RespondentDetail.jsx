@@ -90,10 +90,13 @@ export default function RespondentDetail(){
         const sexIndex = respondentsMeta.sexs.indexOf(activeRespondent.sex);
         const districtIndex = respondentsMeta.districts.indexOf(activeRespondent.district)
         const ageRangeIndex = respondentsMeta.age_ranges.indexOf(activeRespondent.age_range)
+        const specialAttrIndexes = activeRespondent.special_attribute.map((s) => (respondentsMeta.special_attributes.indexOf(s.name))).filter(s => s!= -1)
+        console.log(specialAttrIndexes)
         setLabels({
             district: respondentsMeta.district_labels[districtIndex],
             sex: respondentsMeta.sex_labels[sexIndex],
-            age_range: respondentsMeta.age_range_labels[ageRangeIndex]
+            age_range: respondentsMeta.age_range_labels[ageRangeIndex],
+            special_attr: specialAttrIndexes.map((s) => (respondentsMeta.special_attribute_labels[s]))
         })
     }, [respondentsMeta, activeRespondent])
 
@@ -163,7 +166,7 @@ export default function RespondentDetail(){
                     />}
                     {activeRespondent.is_anonymous && <h1>Anonymous Respondent {activeRespondent.uuid}</h1>}
                     {!activeRespondent.is_anonymous && <h1>{activeRespondent.first_name} {activeRespondent.last_name}</h1>}
-                    <p>{labels.sex}, Age {labels.age_range}</p>
+                    <p>{labels.sex}, Age {labels.age_range}{activeRespondent?.special_attribute.length > 0 && labels.special_attr && labels.special_attr.map((s) => `, ${s}`)}</p>
                     <p>{activeRespondent.ward && activeRespondent.ward + ', '}{activeRespondent.village}, {labels.district}</p>
                     <p>{activeRespondent.citizenship}</p>
                     <p>{}</p>
@@ -182,14 +185,14 @@ export default function RespondentDetail(){
                 </div>
                 <div className={styles.interactions}>
                     <h2>Interactions</h2>
-                    <Interactions id={id} tasks={tasks} onUpdate={onUpdate} setAddingTask={setAddingTask}/>
+                    <Interactions id={id} tasks={tasks} onUpdate={onUpdate} setAddingTask={setAddingTask} onAdd={() => setAdded([])}/>
                 </div>
             </div>
             {!['client'].includes(user.role) && <div className={styles.sidebar}>
                 {width > 768 && <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
                     {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
                 </div>}
-                {sbVisible && <Tasks callback={loadTasks} isDraggable={true} addCallback={(t) => handleButtonAdd(t)} blacklist={added} />}
+                {sbVisible && <Tasks callback={loadTasks} isDraggable={true} addCallback={(t) => handleButtonAdd(t)} blacklist={added} type={'Respondent'} />}
             </div>}
         </div>
     )

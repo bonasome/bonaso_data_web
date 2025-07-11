@@ -1,12 +1,11 @@
 import React from 'react';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import errorStyles from '../../styles/errors.module.css'
 import Loading from '../reuseables/Loading';
 import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useProjects } from '../../contexts/ProjectsContext';
-import ProjectForm from './ProjectForm';
 import styles from '../reuseables/dynamicForm.module.css';
 
 export default function CreateProject(){
@@ -17,6 +16,14 @@ export default function CreateProject(){
     const { projectsMeta, setProjectsMeta, setProjectDetails } = useProjects();
     const [clientIDs, setClientIDs] = useState([]);
     const [clientNames, setClientNames] = useState([]);
+
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
 
     useEffect(() => {
         const getProjectMeta = async () => {
@@ -121,8 +128,8 @@ export default function CreateProject(){
     return(
         <div className={styles.container}>
             <h1>Creating a New Project</h1>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <ProjectForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors}/>
+            {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)}/>
         </div>
     )
 }

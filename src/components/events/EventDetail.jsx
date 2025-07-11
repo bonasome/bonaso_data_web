@@ -31,6 +31,8 @@ export default function EventDetail(){
             const found = eventDetails.find(e => e.id.toString() === id.toString());
             if (found) {
                 setEvent(found);
+                setEventTasks(found.tasks || []);
+                setEventOrgs(found.organizations || []);
                 return;
             }
             else{
@@ -119,7 +121,7 @@ export default function EventDetail(){
     }
 
     const addOrganization = async (org) => {
-        console.log('adding indicator...')
+        console.log('adding organization...')
             try{
                 const response = await fetchWithAuth(`/api/activities/events/${id}/`, {
                     method: 'PATCH',
@@ -142,7 +144,7 @@ export default function EventDetail(){
                         )
                     );
                     setErrors([]);
-                    setEventOrgs(prev => [...prev, task])
+                    setEventOrgs(prev => [...prev, org])
                 }
                 else{
                     const data = await response.json();
@@ -232,6 +234,7 @@ export default function EventDetail(){
                     )
                 );
                 setEventOrgs(prev => prev.filter(org => org.id != orgID))
+                setEventTasks([...eventTasks])
             } 
             else {
                 let data = {};
@@ -339,14 +342,13 @@ export default function EventDetail(){
         setNewCount(false)
         setNewTask(null)
     }
-    const taskIDs = useMemo(() => {return eventTasks.map((t) => t.id)}, [eventTasks])
-    const orgIDs = useMemo(() => {return eventOrgs.map((o) => o.id)}, [eventOrgs])
+
 
     const filterTasks = useMemo(() => {
         const countKeys = Object.keys(eventCounts);
         return eventTasks.filter((t) => !countKeys.includes(t.id.toString()));
     }, [eventCounts])
-    console.log(eventCounts)
+
     if(loading) return <Loading />
     return(
         <div>
@@ -372,6 +374,9 @@ export default function EventDetail(){
                             </div>
                         )) : <p>No organizations yet.</p>
                     }
+                     {addingOrg && <div>
+                        <OrganizationsIndex callback={(org) => addOrganization(org)} excludeEvent={id} excludeEventTrigger={eventOrgs} />
+                    </div>}
                 </div>
                 <div>
                     <h2>Tasks</h2>
@@ -384,9 +389,12 @@ export default function EventDetail(){
                             </div>
                         )) : <p>No tasks yet.</p>
                     }
+                    {addingTask && <div>
+                        <Tasks addCallback={(t) => addTask(t)} event={id} eventTrigger={eventTasks}/>
+                    </div>}
                 </div>
             </div>
-            <div className={styles.segment}>
+            {event?.event_date && new Date(event.event_date) <= new Date() && <div className={styles.segment}>
                 <h2>Select a task to start adding counts.</h2>
                 {eventTasks.length > 0 && <SimpleSelect name={'task'} label={'Select a Task'} 
                     optionValues={filterTasks.map((t) => (t.id))} 
@@ -394,11 +402,12 @@ export default function EventDetail(){
                     callback={(val) => {setNewTask(val); if(val != '') setNewCount(true)}} 
                     value = {newTask}
                 />}
-            </div>
-
+            </div>}
+            {event?.event_date && new Date(event.event_date) > new Date() && 
+                <div className={styles.segment}><p>Looking to add counts? You cannot add counts for events in the future.</p></div>}
             {newCount && newTask !== '' && <Counts onSave={() => handleChange()} onCancel={() => handleCancel()} breakdownOptions={breakdowns} event={event} task={eventTasks.find(t => t.id == newTask)} />}
-            {addingOrg && <OrganizationsIndex callback={(org) => addOrganization(org)} blacklist={orgIDs}/>}
-            {addingTask && <Tasks addCallback={(t) => addTask(t)} blacklist={taskIDs}/>}
+           
+            
             {eventCounts && Object.keys(eventCounts)?.length > 0 && Object.keys(eventCounts).map((c) => {
                 const taskId = parseInt(c);
                 const task = eventTasks.find(t => t.id === taskId);
@@ -415,7 +424,11 @@ export default function EventDetail(){
                     />
                 );
                 })
-        }
+            }
+            <div className={styles.spacer}>
+                <p></p>
+            </div>
         </div>
+        
     )
 }

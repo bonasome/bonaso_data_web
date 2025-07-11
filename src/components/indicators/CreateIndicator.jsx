@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useIndicators } from '../../contexts/IndicatorsContext';
-import IndicatorForm from './IndicatorForm';
+import DynamicForm from '../reuseables/DynamicForm';
 import indicatorConfig from './indicatorConfig';
 import styles from '../reuseables/dynamicForm.module.css';
-
+import errorStyles from '../../styles/errors.module.css';
 export default function CreateIndicator(){
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -16,7 +16,14 @@ export default function CreateIndicator(){
     const [indicatorIDs, setIndicatorIDs] = useState([]);
     const [indicatorNames, setIndicatorNames] = useState([]);
     const [search, setSearch] = useState('')
-    //const fetchedRef = useRef(false);
+    
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
 
     useEffect(() => {
         const getMeta = async() => {
@@ -58,7 +65,7 @@ export default function CreateIndicator(){
     }, [search]);
 
     const formConfig = useMemo(() => {
-        return indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta.statuses, (val) => setSearch(val));
+        return indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta, (val) => setSearch(val));
     }, [indicatorIDs, indicatorNames, indicatorsMeta]);
 
     const handleCancel = () => {
@@ -115,7 +122,13 @@ export default function CreateIndicator(){
     return(
         <div className={styles.container}>
             <h1>New Indicator</h1>
-            <IndicatorForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
+            {errors.length != 0 &&
+                <div className={errorStyles.errors} ref={alertRef}>
+                    <ul>{errors.map((msg)=>
+                        <li key={msg}>{msg}</li>)}
+                    </ul>
+                </div>}
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
         </div>
     )
 }
