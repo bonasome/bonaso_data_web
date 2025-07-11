@@ -2,3 +2,30 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
+
+.segment{
+    max-width: 100vw;
+    overflow-y: scroll;
+    background-color: var(--bonaso-dark-accent);
+    margin: 4vh;
+    padding: 4vh;
+}
+
+.card {
+    margin: 2vh;
+    padding: 2vh;
+    background-color: var(--bonaso-uber-dark-accent);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    transition: all 1s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+td 
+td > input {
+    max-width: 7vh;
+}

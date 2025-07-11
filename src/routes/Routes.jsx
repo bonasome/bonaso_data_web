@@ -64,6 +64,7 @@ import EditUser from '../components/users/EditUser';
 import EventDetail from '../components/events/EventDetail';
 import CreateEvent from '../components/events/CreateEvent';
 import EditEvent from '../components/events/EditEvent';
+import EventsIndex from '../components/events/EventsIndex';
 
 function Router() {
     return (
@@ -270,7 +271,7 @@ function Router() {
         }>
             <Route index element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <ClientsIndex />
+                    <EventsIndex />
                 </RedirectIfNoPerm>
             }/>
             <Route path='create' element={

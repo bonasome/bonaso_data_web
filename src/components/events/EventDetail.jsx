@@ -7,104 +7,9 @@ import prettyDates from "../../../services/prettyDates";
 import Tasks from "../tasks/Tasks";
 import OrganizationsIndex from "../organizations/OrganizationsIndex";
 import errorStyles from '../../styles/errors.module.css';
-import Checkbox from "../reuseables/Checkbox";
 import styles from './eventDetail.module.css'
-function Counts({ event, breakdownOptions, task, eventOrgs, eventTasks }) {
-
-    const [breakdowns, setBreakdowns] = useState({
-        sex: false,
-        age_range: false,
-        citizenship: false,
-        status: false,
-        age_range: false,
-        kp_type: false,
-        disability_type: false,
-        hiv_status: false,
-        pregnant: false,
-        subcategories: false,
-    });
-    
-    const [breakdownSplits, setBreakdownSplits] = useState({
-        sex: {values: breakdownOptions.sex, labels: breakdownOptions.sex_labels, col: 5},
-        age_range: {values: breakdownOptions.age_range, labels: breakdownOptions.age_range_labels, col: 0},
-        citizenship: {values: breakdownOptions.citizenship, labels: breakdownOptions.citizenship_labels, col: 6},
-        status: {values: breakdownOptions.status, labels: breakdownOptions.status_labels, col: 4},
-        kp_type: {values: breakdownOptions.kp_type, labels: breakdownOptions.kp_type_labels, col: 1},
-        disability_type: {values: breakdownOptions.disability_type, labels: breakdownOptions.disability_type_labels, col: 2},
-        hiv_status: {values: [true, false], labels: ['HIV Positive', 'HIV Negative'], col: 7},
-        pregnant: {values: [true, false], labels: ['Pregnant', 'Not Pregnant'], col: 8},
-        subcategories: {values: [], labels: [], col: 3}
-    })
-    useEffect(() => {
-        if(task?.indicator.subcategories.length > 0){
-            setBreakdowns(prev => ({...prev, subcategories: true}))
-            setBreakdownSplits(prev => ({...prev, subcategories: {values: task.indicator.subcategories.map((c) => c.id), labels: task.indicator.subcategories.map((c) => c.name)}}))
-        }
-    }, [task]);
-
-    const [active, setActive] = useState(0);
-    useEffect(() => {
-        const activeSplits = Object.entries(breakdownSplits)
-            .filter(([key]) => breakdowns[key])
-            .sort(([, a], [, b]) => a.col - b.col);
-        setActive(activeSplits)
-    }, [breakdowns])
-    console.log(active)
-    return(
-        <div>
-            <h2>Counts for {task?.indicator.name}</h2>
-            <div className={styles.choices}>
-                {Object.keys(breakdowns).map((b) => {
-                    if(b == 'subcategories') return
-                    return <Checkbox key={b}
-                        label={(b.charAt(0).toUpperCase() + b.slice(1)).replace('_', ' ')} 
-                        name={b} checked={breakdowns[b]} 
-                        callback={(c) => setBreakdowns(prev => ({...prev, [b]: c}))} 
-                    />
-                })}
-            </div>
-            <div>
-                {active.length === 0 && 
-                    <div>
-                        <label htmlFor="count">Count</label>
-                        <input id="count" type="number" />
-                    </div>
-                }
-                {active.length === 1 &&
-                    active[0][1].labels.map((b) => (
-                        <div>
-                            <label htmlFor={b}>{b}</label>
-                            <input id={b} type="number" />
-                        </div>
-                    ))
-                }
-                {
-                    active.length > 1 &&
-                    <table>
-                        <thead>
-                            <tr>
-                                {active.map((a, index) => {if(index===0) {return} else {return <td>{a[0]}</td>}})}
-                                {active[0][1].labels.map((c) => (<td>{c}</td>))}
-                            </tr>
-                        </thead>
-
-                        <tbody> 
-                            {active.map((a, index) => {if(index===0){return}
-                            else{
-                                a[1].labels.map((o) => (
-                                    <tr>
-                                        
-                                    </tr>
-                                ))
-                            }
-                        })}
-                        </tbody>
-                    </table>
-                }
-            </div>
-        </div>
-    )
-}
+import SimpleSelect from "../reuseables/SimpleSelect";
+import Counts from "./Counts";
 
 export default function EventDetail(){
     const { id } = useParams()
@@ -117,7 +22,10 @@ export default function EventDetail(){
     const [eventOrgs, setEventOrgs] = useState([]);
     const [eventTasks, setEventTasks] = useState([]);
     const [breakdowns, setBreakdowns] = useState(null);
-
+    const [eventCounts, setEventCounts] = useState([]);
+    const [newCount, setNewCount] = useState(false);
+    const [newTask, setNewTask] = useState(null);
+    const [_, forceUpdate] = useState(0);
      useEffect(() => {
         const getEventDetails = async () => {
             const found = eventDetails.find(e => e.id.toString() === id.toString());
@@ -132,7 +40,6 @@ export default function EventDetail(){
                     const data = await response.json();
                     if(response.ok){
                         setEventDetails(prev => [...prev, data]);
-                        console.log(data)
                         setEvent(data);
                         setEventOrgs(data.organizations);
                         setEventTasks(data.tasks);
@@ -149,6 +56,32 @@ export default function EventDetail(){
         };
         getEventDetails();
 
+        const getEventCounts = async () => {
+            const found = eventDetails.find(e => e.id.toString() === id.toString());
+            if (found) {
+                setEvent(found);
+                return;
+            }
+            else{
+                try {
+                    console.log('fetching event details...');
+                    const response = await fetchWithAuth(`/api/activities/events/${id}/get-counts/`);
+                    const data = await response.json();
+                    if(response.ok){
+                        setEventCounts(prepareCounts(data))
+                    }
+                    else{
+                        navigate('/not-found')
+                    }
+                    
+                } 
+                catch (err) {
+                    console.error('Failed to fetch event: ', err);
+                } 
+            }
+        };
+        getEventCounts();
+
         const getEventBreakdowns = async () => {
             const found = eventDetails.find(e => e.id.toString() === id.toString());
             if (found) {
@@ -163,7 +96,6 @@ export default function EventDetail(){
                     const data = await response.json();
                     if(response.ok){
                         setBreakdowns(data)
-                        console.log(data)
                     }
                 } 
                 catch (err) {
@@ -177,7 +109,14 @@ export default function EventDetail(){
         getEventBreakdowns();
     }, [id]);
 
-    
+    const prepareCounts = (data) => {
+        const map = {}
+        data.forEach(d => {
+            map[d.task] = map[d.task] || {}
+            map[d.task][d.id] = d;
+        })
+        return map
+    }
 
     const addOrganization = async (org) => {
         console.log('adding indicator...')
@@ -228,6 +167,7 @@ export default function EventDetail(){
     }
     const addTask = async (task) => {
         console.log('adding indicator...')
+            console.log(task.id)
             try{
                 const response = await fetchWithAuth(`/api/activities/events/${id}/`, {
                     method: 'PATCH',
@@ -274,6 +214,7 @@ export default function EventDetail(){
             }
     }
     const removeOrg = async(orgID) => {
+        setErrors([])
         try {
             console.log('removingorganization...');
             const response = await fetchWithAuth(`/api/activities/events/${id}/remove-organization/${orgID}/`, {
@@ -320,6 +261,7 @@ export default function EventDetail(){
         }
     }
     const removeTask = async(taskID) => {
+        setErrors([])
         try {
             console.log('removing task...');
             const response = await fetchWithAuth(`/api/activities/events/${id}/remove-task/${taskID}/`, {
@@ -366,44 +308,114 @@ export default function EventDetail(){
         }
     }
 
+    const handleChange = () => {
+        
+        const getEventCounts = async () => {
+            const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            await sleep(1000);
+            try {
+                console.log('fetching event details...');
+                const response = await fetchWithAuth(`/api/activities/events/${id}/get-counts/`);
+                const data = await response.json();
+                if(response.ok){
+                    setNewCount(false);
+                    setNewTask(null);
+                    console.log()
+                    setEventCounts(prepareCounts(data))
+                    
+                }
+                else{
+                    navigate('/not-found')
+                }
+                
+            } 
+            catch (err) {
+                console.error('Failed to fetch event: ', err);
+            } 
+        };
+        getEventCounts();
+    }
+    const handleCancel = () => {
+        setNewCount(false)
+        setNewTask(null)
+    }
     const taskIDs = useMemo(() => {return eventTasks.map((t) => t.id)}, [eventTasks])
     const orgIDs = useMemo(() => {return eventOrgs.map((o) => o.id)}, [eventOrgs])
 
+    const filterTasks = useMemo(() => {
+        const countKeys = Object.keys(eventCounts);
+        return eventTasks.filter((t) => !countKeys.includes(t.id.toString()));
+    }, [eventCounts])
+    console.log(eventCounts)
     if(loading) return <Loading />
     return(
         <div>
-            <h1>{event?.name}</h1>
-            <Link to={`/events/${id}/edit`}><button>Edit Details</button></Link>
-            <p>Issa me, Mario</p>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <div>
-                <button onClick={() => {setAddingOrg(!addingOrg); setAddingTask(false)}}>{addingOrg ? 'Done' : 'Add an Organization'}</button>
-                <button onClick={() => {setAddingTask(!addingTask); setAddingOrg(false)}}>{addingTask ? 'Done' : 'Add an Task'}</button>
+            <div className={styles.segment}>
+                <h1>{event?.name}</h1>
+                <h2>Details</h2>
+                <h3>{prettyDates(event?.event_date)}, {event?.location} </h3>
+                <h3>Host: {event?.host ? event.host.name : 'No host'}</h3>
+                <h3>Description</h3>
+                <p>{event?.description}</p>
+                <Link to={`/events/${id}/edit`}><button>Edit Details</button></Link>
             </div>
-            <div>
-                <h2>Organizations</h2>
-                {eventOrgs.length > 0 ? 
-                    eventOrgs.map((org) =>  (
-                        <div style={{ display: 'flex', flexDirection: 'row'}}>
-                            <Link to={`/organizations/${org.id}`}> <h3>{org.name}</h3></Link>
-                            <button onClick={() => removeOrg(org.id)}>Remove</button>
-                        </div>
-                    )) : <p>No organizations yet.</p>
-                }
+            <div className={styles.segment}>
+                {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                <div>
+                    <h2>Organizations</h2>
+                    <button onClick={() => {setAddingOrg(!addingOrg); setAddingTask(false)}}>{addingOrg ? 'Done' : 'Add an Organization'}</button>
+                    {eventOrgs.length > 0 ? 
+                        eventOrgs.map((org) =>  (
+                            <div className={styles.card}>
+                                <Link to={`/organizations/${org.id}`}> <h3>{org.name}</h3></Link>
+                                <button className={errorStyles.deleteButton} onClick={() => removeOrg(org.id)}>Remove</button>
+                            </div>
+                        )) : <p>No organizations yet.</p>
+                    }
+                </div>
+                <div>
+                    <h2>Tasks</h2>
+                    <button onClick={() => {setAddingTask(!addingTask); setAddingOrg(false)}}>{addingTask ? 'Done' : 'Add an Task'}</button>
+                    {eventTasks.length > 0 ? 
+                        eventTasks.map((task) =>  (
+                            <div className={styles.card}>
+                                <Link to={`/projects/${task.project.id}`}> <h3>{task.indicator.name} for {task.organization.name}</h3></Link>
+                                <button className={errorStyles.deleteButton} onClick={() => removeTask(task.id)}>Remove</button>
+                            </div>
+                        )) : <p>No tasks yet.</p>
+                    }
+                </div>
             </div>
-            <div>
-                {eventTasks.length > 0 ? 
-                    eventTasks.map((task) =>  (
-                        <div style={{ display: 'flex', flexDirection: 'row'}}>
-                            <Link to={`/projects/${task.project.id}`}> <h3>{task.indicator.name}</h3></Link>
-                            <button onClick={() => removeTask(task.id)}>Remove</button>
-                        </div>
-                    )) : <p>No tasks yet.</p>
-                }
+            <div className={styles.segment}>
+                <h2>Select a task to start adding counts.</h2>
+                {eventTasks.length > 0 && <SimpleSelect name={'task'} label={'Select a Task'} 
+                    optionValues={filterTasks.map((t) => (t.id))} 
+                    optionLabels={filterTasks.map((t) => (t.indicator.name + ' ' + t.organization.name))} 
+                    callback={(val) => {setNewTask(val); if(val != '') setNewCount(true)}} 
+                    value = {newTask}
+                />}
             </div>
+
+            {newCount && newTask !== '' && <Counts onSave={() => handleChange()} onCancel={() => handleCancel()} breakdownOptions={breakdowns} event={event} task={eventTasks.find(t => t.id == newTask)} />}
             {addingOrg && <OrganizationsIndex callback={(org) => addOrganization(org)} blacklist={orgIDs}/>}
             {addingTask && <Tasks addCallback={(t) => addTask(t)} blacklist={taskIDs}/>}
-            <Counts breakdownOptions={breakdowns} event={event} eventOrgs={eventOrgs} eventTasks={eventTasks} task={eventTasks[0]}/>
+            {eventCounts && Object.keys(eventCounts)?.length > 0 && Object.keys(eventCounts).map((c) => {
+                const taskId = parseInt(c);
+                const task = eventTasks.find(t => t.id === taskId);
+                return (
+                    <Counts
+                    key={taskId}
+                    onCancel={handleCancel}
+                    event={event}
+                    breakdownOptions={breakdowns}
+                    task={task}
+                    onSave={handleChange}
+                    onDelete={handleChange}
+                    existing={eventCounts[taskId]}
+                    />
+                );
+                })
+        }
         </div>
     )
 }
