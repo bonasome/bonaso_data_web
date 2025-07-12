@@ -6,12 +6,16 @@ import ComponentLoading from '../reuseables/ComponentLoading';
 import errorStyles from '../../styles/errors.module.css';
 import styles from './narrative.module.css';
 import { Link } from 'react-router-dom';
+import ButtonLoading from '../reuseables/ButtonLoading';
 
 function NarrativeReportCard({ report }){
     const [expanded, setExpanded] = useState(false);
     const[errors, setErrors] = useState([]);
+    const [downloading, setDownloading] = useState(false);
+
     const handleDownload = async (report) => {
         try {
+            setDownloading(true);
             const response = await fetchWithAuth(`/api/uploads/narrative-report/${report.id}/download/`);
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -23,9 +27,13 @@ function NarrativeReportCard({ report }){
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
-        } catch (error) {
+        } 
+        catch (error) {
             setErrors(['Failed to download file.']);
             console.error('Download failed:', error);
+        }
+        finally{
+            setDownloading(false);
         }
     };
     return(
@@ -37,12 +45,12 @@ function NarrativeReportCard({ report }){
             )}
             <div className={styles.downloadRow}>
                 <h3>{report.title}</h3>
-                {!expanded && <button onClick={() => handleDownload(report)}>Download</button>}
+                {!expanded && downloading ? <ButtonLoading />  : <button onClick={() => handleDownload(report)}>Download</button>}
             </div>
             {expanded && 
                 <div>
                     <p>{report.description}</p>
-                    <button onClick={() => handleDownload(report)}>Download</button>
+                    {downloading ? <ButtonLoading /> : <button onClick={() => handleDownload(report)}>Download</button>}
                 </div>
             }
         </div>
@@ -54,17 +62,18 @@ export default function NarrativeReportDownload({ organization, project }) {
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [files, setFiles] = useState([]);
-
     useEffect(() => {
         const getFiles = async () => {
             try {
                 const response = await fetchWithAuth(`/api/uploads/narrative-report/?project=${project.id}&organization=${organization.id}`);
                 const data = await response.json();
                 setFiles(data.results || []);  // assuming paginated API
-            } catch (error) {
+            } 
+            catch (error) {
                 setErrors(['Failed to load reports.']);
                 console.error('Fetch failed:', error);
-            } finally {
+            } 
+            finally {
                 setLoading(false);
             }
         };

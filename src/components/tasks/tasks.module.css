@@ -10,7 +10,6 @@
     margin: 1vh;
     cursor: pointer;
     transform: scale(1.05);
-    background-color: var(--bonaso-main);
     z-index: 2;
 }
 

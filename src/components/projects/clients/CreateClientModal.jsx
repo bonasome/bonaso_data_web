@@ -2,11 +2,13 @@ import styles from '../../../styles/modals.module.css';
 import errorStyles from '../../../styles/errors.module.css';
 import { useState } from 'react';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
+import ButtonLoading from '../../reuseables/ButtonLoading';
 
 export default function CreateClient({ onCreate, onCancel }){
     const[name, setName] = useState('');
     const [fullName, setFullName] = useState('');
     const[errors, setErrors] = useState([])
+    const [saving, setSaving] = useState(false);
 
     const handleSubmit = async () => {
         if(name == ''){
@@ -14,6 +16,7 @@ export default function CreateClient({ onCreate, onCancel }){
             return;
         }
         try{
+            setSaving(true);
             const response = await fetchWithAuth(`/api/manage/clients/`, {
                 method: 'POST',
                 headers: {
@@ -48,6 +51,9 @@ export default function CreateClient({ onCreate, onCancel }){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record indicator: ', err)
         }
+        finally{
+            setSaving(false)
+        }
     }
     return(
         <div className={styles.modal} >
@@ -61,7 +67,7 @@ export default function CreateClient({ onCreate, onCancel }){
             <input type='text' name='name' id='name' value={name} onChange={(e) => setName(e.target.value)}/>
             <label htmlFor='full_name'>Client Name (Full)</label>
             <input type='text' name='full_name' id='name' value={fullName} onChange={(e) => setFullName(e.target.value)}/>
-            <button onClick={() => handleSubmit()}>Save</button>
+            {saving ? <ButtonLoading /> : <button onClick={() => handleSubmit()}>Save</button>}
             <button onClick={() => onCancel()}>Cancel</button>
             <></>
         </div>

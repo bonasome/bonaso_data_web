@@ -11,7 +11,7 @@ import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
 import styles from './organizationDetail.module.css';
 import { IoMdReturnLeft } from "react-icons/io";
-
+import ButtonLoading from '../reuseables/ButtonLoading';
 
 export default function OrganizationDetail(){
     const { user } = useAuth();
@@ -110,7 +110,10 @@ export default function OrganizationDetail(){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Failed to delete organization:', err);
         }
-        setDel(false);
+        finally{
+            setDel(false);
+        }
+        
     } 
 
 
@@ -143,7 +146,8 @@ export default function OrganizationDetail(){
                     } 
                 <div style={{ paddingTop: 15 }}>
                     <Link to={`/organizations/${id}/edit`}><button>Edit Details</button></Link>
-                    {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Organization</button>}
+                    {user.role == 'admin' && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Organization</button>}
+                    {del && <ButtonLoading forDelete={true} /> }
                 </div>
             </div>
             <div className={styles.section}>

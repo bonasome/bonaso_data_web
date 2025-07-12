@@ -13,7 +13,7 @@ import styles from './indicatorDetail.module.css';
 import IndicatorChart from '../reuseables/charts/IndicatorChart';
 import Checkbox from '../reuseables/Checkbox';
 import { IoMdReturnLeft } from "react-icons/io";
-
+import ButtonLoading from '../reuseables/ButtonLoading';
 export default function IndicatorDetail(){
     const { user } = useAuth();
     const { id } = useParams();
@@ -111,7 +111,10 @@ export default function IndicatorDetail(){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Failed to delete indicator:', err);
         }
-        setDel(false);
+        finally{
+            setDel(false);
+        }
+        
     } 
     if (loading) return <Loading />
     return(
@@ -144,7 +147,8 @@ export default function IndicatorDetail(){
                 
                 
                 <Link to={`/indicators/${id}/edit`}><button>Edit Details</button></Link>
-                {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Indicator</button>}
+                {user.role == 'admin' && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Indicator</button>}
+                {del && <ButtonLoading forDelete={true} /> }
                 {user.role == 'admin' && 
                     <div>
                         <p><i>Created by: {activeIndicator.created_by?.first_name} {activeIndicator.created_by?.last_name} at {new Date(activeIndicator.created_at).toLocaleString()}</i></p>

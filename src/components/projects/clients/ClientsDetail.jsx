@@ -8,6 +8,8 @@ import Loading from '../../reuseables/Loading';
 import errorStyles from '../../../styles/errors.module.css';
 import { useProfiles } from '../../../contexts/ProfilesContext';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
+import { useAuth } from '../../../contexts/UserAuth';
+import ButtonLoading from '../../reuseables/ButtonLoading';
 
 export default function ClientDetail(){
     const {clients, setClients } = useProjects();
@@ -16,10 +18,13 @@ export default function ClientDetail(){
     const [loading, setLoading] = useState(true);
     const [client, setClient] = useState(null);
     const { id } = useParams();
+    const { user } = useAuth();
     const [editing, setEditing] = useState(false);
     const [formData, setFormData] = useState({});
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
+    const [saving, setSaving] = useState(false);
+
     const navigate = useNavigate();
     useEffect(() => {
         const getClient = async () => {
@@ -89,7 +94,9 @@ export default function ClientDetail(){
     }, [client])
 
     const handleSubmit = async (data) => {
+        setErrors([])
         try{
+            setSaving(true);
             console.log('updating client information...')
             const response = await fetchWithAuth(`/api/manage/clients/${id}/`, {
                 method: 'PATCH',
@@ -126,6 +133,9 @@ export default function ClientDetail(){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record indicator: ', err)
         }
+        finally{
+            setSaving(false);
+        }
     }
 
     const deleteClient = async() => {
@@ -149,11 +159,11 @@ export default function ClientDetail(){
                 for (const field in data) {
                     if (Array.isArray(data[field])) {
                     data[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
+                        serverResponse.push(`${msg}`);
                     });
                     } 
                     else {
-                    serverResponse.push(`${field}: ${data[field]}`);
+                    serverResponse.push(`${data[field]}`);
                     }
                 }
                 setErrors(serverResponse);
@@ -163,7 +173,10 @@ export default function ClientDetail(){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Failed to delete indicator:', err);
         }
-        setDel(false);
+        finally{
+            setDel(false);
+        }
+        
     } 
 
     const formConfig = useMemo(() => {
@@ -188,12 +201,13 @@ export default function ClientDetail(){
                 )}
                 <div>
                     {!editing && <button onClick={() => setEditing(!editing)}>Edit Details</button>}
-                    <button className={errorStyles.deleteButton} onClick = {() => setDel(true)}>Delete Client</button>
+                    {user.role === 'admin' && !del && <button className={errorStyles.deleteButton} onClick = {() => setDel(true)}>Delete Client</button>}
+                    {del && <ButtonLoading forDelete={true} />}
                 </div>
                 
                 {editing && 
                     <div>
-                        <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={() => setEditing(false)} />
+                        <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={() => setEditing(false)} onError={(e) => setErrors(e)} saving={saving}/>
                     </div>
                 }
                 </div>

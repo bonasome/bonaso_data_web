@@ -7,6 +7,7 @@ import styles from './tasks.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ComponentLoading from '../reuseables/ComponentLoading';
+import ButtonLoading from "../reuseables/ButtonLoading";
 
 function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelete=false, onDelete=null }) {
     const [errors, setErrors] = useState([]);
@@ -39,10 +40,10 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
     const checkTargets = (id) => {
         const updated = targets.filter((t) => t.id != id);
         setTargets(updated)
-
     }
 
     const removeTask = async() => {
+        setErrors([]);
         try {
             console.log('deleting task...');
             const response = await fetchWithAuth(`/api/manage/tasks/${task.id}/`, {
@@ -79,7 +80,9 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
             console.error('Failed to delete organization:', err);
             setErrors(['Something went wrong. Please try again later.'])
         }
-        setDel(false)
+        finally{
+            setDel(false)
+        }
 
     }
 
@@ -127,7 +130,8 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
                     }
                     {targets && addingTarget && user.role == 'admin' && <TargetEdit task={task} tasks={tasks} onUpdate={onUpdate} />}
                     {targets && user.role == 'admin' && <button onClick={(e) => {e.stopPropagation(); setAddingTarget(!addingTarget)}}>{addingTarget ? 'Cancel' : 'Add Target'}</button> }
-                    {canDelete && (user.role == 'admin' || task?.organization?.parent_organization?.id == user.organization_id) && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)}>Remove Task</button> }
+                    {canDelete && (user.role == 'admin' || task?.organization?.parent_organization?.id == user.organization_id) && !del && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)}>Remove Task</button> }
+                    {del && <ButtonLoading forDelete={true} /> }
                 </div>
             )}
         </div>
@@ -140,8 +144,9 @@ export default function Tasks({ callback, update=null, target=false, organizatio
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-
+    const [success, setSuccess] = useState('')
     const alertRef = useRef(null);
+    
     useEffect(() => {
         if (onError.length > 0 && alertRef.current) {
         alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -190,6 +195,7 @@ export default function Tasks({ callback, update=null, target=false, organizatio
         <div className={styles.tasks}>
             <h2>Tasks</h2>
             {onSuccess && <div className={errorStyles.success}>{onSuccess}</div>}
+            {success !== '' && <div className={errorStyles.success}>{onSuccess}</div>}
             {onError.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{onError.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <p><i>Search your tasks by name, organization, or project.</i></p>
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>

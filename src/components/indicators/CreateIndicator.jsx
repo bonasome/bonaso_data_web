@@ -16,7 +16,8 @@ export default function CreateIndicator(){
     const [indicatorIDs, setIndicatorIDs] = useState([]);
     const [indicatorNames, setIndicatorNames] = useState([]);
     const [search, setSearch] = useState('')
-    
+    const [saving, setSaving] = useState(false);
+
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
@@ -84,6 +85,7 @@ export default function CreateIndicator(){
         }
         console.log('submitting data...')
         try{
+            setSaving(true);
             const response = await fetchWithAuth('/api/indicators/', {
                 method: 'POST',
                 headers: {
@@ -115,6 +117,9 @@ export default function CreateIndicator(){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record indicator: ', err)
         }
+        finally{
+            setSaving(false);
+        }
     }
 
     if(loading) return <Loading />
@@ -128,7 +133,7 @@ export default function CreateIndicator(){
                         <li key={msg}>{msg}</li>)}
                     </ul>
                 </div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
         </div>
     )
 }

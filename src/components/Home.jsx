@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import fetchWithAuth from '../../services/fetchWithAuth';
 import IndicatorChart from './reuseables/charts/IndicatorChart';
+import ButtonLoading from './reuseables/ButtonLoading';
 
 function Home() {
     const navigate = useNavigate();

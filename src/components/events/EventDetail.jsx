@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { useEvents } from "../../contexts/EventsContext";
 import { useState, useEffect, useMemo, useRef } from "react";
 import Loading from "../reuseables/Loading";
@@ -10,13 +10,19 @@ import errorStyles from '../../styles/errors.module.css';
 import styles from './eventDetail.module.css'
 import SimpleSelect from "../reuseables/SimpleSelect";
 import Counts from "./Counts";
+import ConfirmDelete from "../reuseables/ConfirmDelete";
+import ButtonLoading from '../reuseables/ButtonLoading';
+import { useAuth } from "../../contexts/UserAuth";
 
 export default function EventDetail(){
+    const { user } = useAuth();
     const { id } = useParams()
+    const navigate = useNavigate();
     const [event, setEvent] = useState(null);
     const { eventDetails, setEventDetails } = useEvents();
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
+    const [taskErrors, setTaskErrors] = useState([]);
     const [addingTask, setAddingTask] = useState(false);
     const [addingOrg, setAddingOrg] = useState(false);
     const [eventOrgs, setEventOrgs] = useState([]);
@@ -25,7 +31,18 @@ export default function EventDetail(){
     const [eventCounts, setEventCounts] = useState([]);
     const [newCount, setNewCount] = useState(false);
     const [newTask, setNewTask] = useState(null);
+    const [del, setDel] = useState(false);
     const [_, forceUpdate] = useState(0);
+    
+
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
+
      useEffect(() => {
         const getEventDetails = async () => {
             const found = eventDetails.find(e => e.id.toString() === id.toString());
@@ -120,6 +137,47 @@ export default function EventDetail(){
         return map
     }
 
+    const deleteEvent = async() => {
+        setErrors([])
+        try {
+            console.log('deleting event...');
+            const response = await fetchWithAuth(`/api/activities/events/${id}/`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                navigate('/events');
+            } 
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } 
+                catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete event:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setDel(false);
+        }
+    }
+
     const addOrganization = async (org) => {
         console.log('adding organization...')
             try{
@@ -168,8 +226,7 @@ export default function EventDetail(){
             }
     }
     const addTask = async (task) => {
-        console.log('adding indicator...')
-            console.log(task.id)
+        console.log('adding task...')
             try{
                 const response = await fetchWithAuth(`/api/activities/events/${id}/`, {
                     method: 'PATCH',
@@ -192,7 +249,7 @@ export default function EventDetail(){
                         )
                     );
                     setEventTasks(prev => [...prev, task])
-                    setErrors([]);
+                    setTaskErrors([]);
                 }
                 else{
                     const data = await response.json();
@@ -200,19 +257,19 @@ export default function EventDetail(){
                     for (const field in data) {
                         if (Array.isArray(data[field])) {
                             data[field].forEach(msg => {
-                                serverResponse.push(`${field}: ${msg}`);
+                                serverResponse.push(`${msg}`);
                             });
                         } 
                         else {
-                        serverResponse.push(`${field}: ${data[field]}`);
+                        serverResponse.push(`${data[field]}`);
                         }
                     }
-                    setErrors(serverResponse);
+                    setTaskErrors(serverResponse);
                 }
             }
             catch(err){
                 console.error('Failed to add task:', err);
-                setErrors(['Something went wrong. Please try again later.'])
+                setTaskErrors(['Something went wrong. Please try again later.'])
             }
     }
     const removeOrg = async(orgID) => {
@@ -312,7 +369,6 @@ export default function EventDetail(){
     }
 
     const handleChange = () => {
-        
         const getEventCounts = async () => {
             const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
             await sleep(1000);
@@ -352,6 +408,7 @@ export default function EventDetail(){
     if(loading) return <Loading />
     return(
         <div>
+            {del && <ConfirmDelete name={event?.name} statusWarning={'You will not be allowed to delete this event if it has counts associated with it.'} onConfirm={() => deleteEvent()} onCancel={() => setDel(false)} /> }
             <div className={styles.segment}>
                 <h1>{event?.name}</h1>
                 <h2>Details</h2>
@@ -360,6 +417,8 @@ export default function EventDetail(){
                 <h3>Description</h3>
                 <p>{event?.description}</p>
                 <Link to={`/events/${id}/edit`}><button>Edit Details</button></Link>
+                {user.role == 'admin' && !del && <button className={errorStyles.deleteButton} onClick= {() => setDel(true)}>Delete Event</button>}
+                {del && <ButtonLoading forDelete={true} />}
             </div>
             <div className={styles.segment}>
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
@@ -390,7 +449,7 @@ export default function EventDetail(){
                         )) : <p>No tasks yet.</p>
                     }
                     {addingTask && <div>
-                        <Tasks addCallback={(t) => addTask(t)} event={id} eventTrigger={eventTasks}/>
+                        <Tasks addCallback={(t) => addTask(t)} event={id} eventTrigger={eventTasks} onError={taskErrors}/>
                     </div>}
                 </div>
             </div>

@@ -19,13 +19,13 @@ export default function CreateRespondent(){
     const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
     const [existing, setExisting] = useState(null)
     const [showModal, setShowModal] = useState(true)
-
+    const [saving, setSaving] = useState(false);
         
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
-        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        alertRef.current.focus({ preventScroll: true });
+            alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            alertRef.current.focus({ preventScroll: true });
         }
     }, [errors]);
     
@@ -87,6 +87,7 @@ export default function CreateRespondent(){
         }
 
         try{
+            setSaving(true)
             const url = '/api/record/respondents/'; 
             const response = await fetchWithAuth(url, {
                 method: 'POST',
@@ -123,6 +124,9 @@ export default function CreateRespondent(){
         catch(err){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record respondent: ', err)
+        }
+        finally{
+            setSaving(false)
         }
     }
 
@@ -164,7 +168,7 @@ export default function CreateRespondent(){
                     {existing && <Link to={`/respondents/${existing}`}> <p>Click here to view their profile.</p></Link>}
                 </div>}
             
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)}/>
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
         </div>
     )
 }

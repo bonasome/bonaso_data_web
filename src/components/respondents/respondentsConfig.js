@@ -1,7 +1,15 @@
 export default function respondentsConfig(respondentsMeta, existing=null){
     let special = []
+    let kps = []
+    let dis = []
     if(existing && existing.special_attribute){
         special = existing.special_attribute.map((s) => (s.name))
+    }
+    if(existing && existing.kp_status){
+        kps = existing.kp_status.map((kp) => (kp.name))
+    }
+    if(existing && existing.disability_status){
+        dis = existing.disability_status.map((d) => (d.name))
     }
     console.log(respondentsMeta)
         return [
@@ -45,6 +53,18 @@ export default function respondentsConfig(respondentsMeta, existing=null){
                 multiple: true,
                 labels: respondentsMeta?.special_attribute_labels
             }},
+
+            {name: 'kp_status_names', label: 'Key Population Status', type: 'select', required: false, value: existing?.kp_status ? kps : [], constructors: {
+                values: respondentsMeta?.kp_types,
+                multiple: true,
+                labels: respondentsMeta?.kp_type_labels
+            }},
+            {name: 'disability_status_names', label: 'Disability Status', type: 'select', required: false, value: existing?.disability_status ? dis: [], constructors: {
+                values: respondentsMeta?.disability_types,
+                multiple: true,
+                labels: respondentsMeta?.disability_type_labels
+            }},
+
 
             //show if not anonymous
             {name: 'email', label: 'Email', type: 'email', required: false, hideonpath: true, value: existing?.email ? existing.email : ''},

@@ -6,14 +6,14 @@ import validate from '../../../services/validate';
 import styles from './dynamicForm.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import { useAuth } from '../../contexts/UserAuth';
+import ButtonLoading from '../reuseables/ButtonLoading';
 
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]
-export default function DynamicForm({ config, onSubmit, onCancel, onError }){
+export default function DynamicForm({ config, onSubmit, onCancel, onError, saving }){
     const { user } = useAuth();
     const [formData, setFormData] = useState({})
     const [errors, setErrors] = useState([])
     const [switchpath, setSwitchpath] = useState(false);
-
     const rowRefs = useRef({});
     
     useEffect(() => {
@@ -162,7 +162,7 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError }){
                         )
                     }
                 })}
-                <button type="submit">Save</button>
+                {saving ? <ButtonLoading /> : <button type="submit">Save</button>}
                 <button type="button" onClick={onCancel}>Cancel</button>
             </form>
         </div>

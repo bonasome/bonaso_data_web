@@ -19,7 +19,7 @@ export default function EditIndicator(){
     const [indicatorIDs, setIndicatorIDs] = useState([]);
     const [indicatorNames, setIndicatorNames] = useState([]);
     const [search, setSearch] = useState('');
-
+    const [saving, setSaving] = useState(false);
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
@@ -125,6 +125,7 @@ export default function EditIndicator(){
 
         console.log('submitting data...')
         try{
+            setSaving(true);
             const response = await fetchWithAuth(`/api/indicators/${id}/`, {
                 method: 'PATCH',
                 headers: {
@@ -145,11 +146,11 @@ export default function EditIndicator(){
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
                         returnData[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
+                        serverResponse.push(`${msg}`);
                         });
                     } 
                     else {
-                        serverResponse.push(`${field}: ${returnData[field]}`);
+                        serverResponse.push(`${returnData[field]}`);
                     }
                 }
                 setErrors(serverResponse)
@@ -158,6 +159,9 @@ export default function EditIndicator(){
         catch(err){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record indicator: ', err)
+        }
+        finally{
+            setSaving(false);
         }
     }
     console.log(existing)
@@ -172,7 +176,7 @@ export default function EditIndicator(){
                         <li key={msg}>{msg}</li>)}
                     </ul>
                 </div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
         </div>
     )
 }

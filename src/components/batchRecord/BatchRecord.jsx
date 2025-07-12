@@ -1,10 +1,12 @@
 import { useAuth } from '../../contexts/UserAuth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import SimpleSelect from '../reuseables/SimpleSelect';
 import Loading from '../reuseables/Loading';
 import errorStyles from '../../styles/errors.module.css';
 import styles from './batchRecord.module.css';
+import ConflictManagerModal from './ConflictManagerModal'
+import ButtonLoading from '../reuseables/ButtonLoading';
 
 export default function BatchRecord(){
     const { user } = useAuth();
@@ -20,6 +22,17 @@ export default function BatchRecord(){
     const [warnings, setWarnings] = useState([]);
     const [errors, setErrors] = useState([]);
     const [ok, setOK] = useState(false)
+    const [conflict, setConflict] = useState(false);
+    const [conflictList, setConflictList] = useState([]);
+    const [uploading, setUploading] = useState(false);
+    
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
 
     const [gettingFile, setGettingFile] = useState(false);
     useEffect(() => {
@@ -103,6 +116,28 @@ export default function BatchRecord(){
                 a.remove();
                 window.URL.revokeObjectURL(url)
             }
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } 
+                catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
         }
         catch(err){
             setErrors(['Something went wrong, please try again.'])
@@ -116,43 +151,74 @@ export default function BatchRecord(){
     };
 
     const handleSubmit = async (e) => {
+        setErrors([]);
         e.preventDefault();
-        if (!file) return;
+        if (!file) {
+            setErrors(['Please select a file!'])
+            return;
+        }
 
         const formData = new FormData();
         formData.append('file', file); // 'file' should match the key Django expects
         try{
-                console.log('submitting file...')
-                const response = await fetchWithAuth(`/api/record/interactions/upload/`, {
-                    method: 'POST',
-                    body: formData,
-                });
-                const data = await response.json();
-                if(response.ok){
-                    if(data.errors.length == 0 && data.warnings.length ==0){
-                        setOK(true);
+            setUploading(true);
+            console.log('submitting file...')
+            const response = await fetchWithAuth(`/api/record/interactions/upload/`, {
+                method: 'POST',
+                body: formData,
+            });
+            const data = await response.json();
+            if(response.ok){
+                console.log(data)
+                if(data.errors.length == 0 && data.warnings.length ==0){
+                    setOK(true);
+                }
+                setErrors(data.errors);
+                setWarnings(data.warnings);
+                if(data.conflicts.length > 0) {
+                    setConflict(true);
+                    setConflictList(data.conflicts);
+                }
+            }
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } 
+                catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${data[field]}`);
                     }
-                    setErrors(data.errors);
-                    setWarnings(data.warnings);
-                    
                 }
-                else{
-                    console.error(data)
-                    setErrors(data.errors);
-                    setWarnings(data.warnings);
-                }
+                setErrors(serverResponse);
             }
-            catch(err){
-                console.error('File upload failed: ', err);
-            }
+        }
+        catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
+            console.error('File upload failed: ', err);
+        }
+        finally{
+            setUploading(false);
+        }
     }
     if (loading) return <Loading />
     return(
         <div className={styles.fileUpload}>
             <h1>Batch Uploading</h1>
-            {errors.length != 0 && <div role='alert' className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {errors.length != 0 && <div ref={alertRef} role='alert' className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {warnings.length != 0 && <div role='alert' className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {ok && <div className={errorStyles.success}><p>Upload successful!</p></div>}
+            {conflict && conflictList.length > 0 && <ConflictManagerModal existing={conflictList} handleClose={()=>setConflict(false)} />}
             <div className={styles.template}>
                 <i>1. Select your organization and the project to get a ready to use template for recording data. There are directions and examples in the template for your reference.</i>
                 {selectTools?.orgs && <SimpleSelect name={'organization'} label={'Select an Organization'} 
@@ -163,7 +229,7 @@ export default function BatchRecord(){
                     optionValues={selectTools.projects.ids} optionLabels={selectTools.projects.names}
                     callback={(val)=>setTargetProject(val)} search={true} searchCallback={(val) => setProjectSearch(val)}
                     />}
-                <button onClick={() => handleClick()} disabled={gettingFile}>Get my file!</button>
+                {gettingFile ? <ButtonLoading /> :  <button onClick={() => handleClick()}>Get my file!</button>}
             </div>
             
             <div className={styles.upload}>
@@ -171,8 +237,8 @@ export default function BatchRecord(){
                 <form onSubmit={handleSubmit}  noValidate={true}>
                     <label htmlFor="upload_file">Upload file</label>
                     <input id="upload_file" type="file" onChange={handleChange} />
-                    <button type="submit">Upload</button>
-                    <button type="button">Clear</button>
+                    {uploading ? <ButtonLoading /> :  <button type="submit">Upload</button>}
+                    <button type="button" onClick={() => setFile(null)}>Clear</button>
                 </form>
             </div>
             <div className={styles.spacer}></div>

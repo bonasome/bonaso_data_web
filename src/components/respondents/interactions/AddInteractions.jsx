@@ -6,7 +6,7 @@ import modalStyles from '../../../styles/modals.module.css';
 import { useInteractions} from '../../../contexts/InteractionsContext';
 import styles from '../respondentDetail.module.css';
 import useWindowWidth from '../../../../services/useWindowWidth';
-
+import ButtonLoading from '../../reuseables/ButtonLoading'
 export default function AddInteractions({ id, tasks, interactions, onUpdate, onFinish, setAddingTask }) {
     const { setInteractions } = useInteractions();
     const [interactionDate, setInteractionDate] = useState('');
@@ -21,6 +21,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
     const [commentsModalActive, setCommentsModalActive] = useState(false);
     const [modalTask, setModalTask] = useState(null);
     const [subcatModalActive, setSubcatModalActive] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState([]);
     const [warnings, setWarnings] = useState([]);
     const width = useWindowWidth();
@@ -276,6 +277,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
     };
 
     const handleSubmit = async () => {
+        
         setErrors([])
         let submissionErrors = [];
         if(interactionDate=='' || isNaN(Date.parse(interactionDate)) || new Date(interactionDate) > new Date()){
@@ -294,7 +296,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             setErrors(submissionErrors)
             return;
         }
-
+        setSaving(true)
         try{
             console.log('submitting data...')
             const url = `/api/record/interactions/batch/`; 
@@ -348,6 +350,9 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record interactions: ', err)
         }
+        finally{
+            setSaving(false)
+        }
     }
     const removeItem = (task) => {
         setAdded(prev => {
@@ -392,7 +397,8 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                     </div>
                 ))}
             </div>
-            {active && added.length >0 && <button onClick={() => handleSubmit()} >Save</button>}
+            {active && added.length >0 && !saving && <button disabled={saving} onClick={() => handleSubmit()} >Save</button>}
+            {saving && <ButtonLoading />}
         </div>
     )
 }

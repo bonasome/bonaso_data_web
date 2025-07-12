@@ -7,6 +7,7 @@ import errorStyles from '../../styles/errors.module.css';
 import styles from './tasks.module.css';
 import prettyDates from '../../../services/prettyDates';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
+import ButtonLoading from "../reuseables/ButtonLoading";
 
 export function Target({ target, task, tasks, onUpdate, onDelete }){
     const { user } = useAuth();
@@ -16,7 +17,7 @@ export function Target({ target, task, tasks, onUpdate, onDelete }){
     const [related, setRelated] = useState(null);
     const [del, setDel] = useState(false);
     const [errors, setErrors] = useState([]);
-
+    const [acting, setActing] = useState(false);
     useEffect(() => {
         if (currentTarget?.related_to) {
             const related = tasks.find(t => t.id === currentTarget.related_to.id);
@@ -33,6 +34,7 @@ export function Target({ target, task, tasks, onUpdate, onDelete }){
     }
     const deleteTarget = async() => {
         try {
+            setActing(true);
             console.log('deleting targets...');
             const response = await fetchWithAuth(`/api/manage/targets/${target.id}/`, {
                 method: 'DELETE',
@@ -68,7 +70,10 @@ export function Target({ target, task, tasks, onUpdate, onDelete }){
             console.error('Failed to delete target:', err);
             setErrors(['Something went wrong. Please try again later.'])
         }
-        setDel(false)
+        finally{
+            setActing(false);
+            setDel(false);
+        }
 
     }
 
@@ -82,7 +87,8 @@ export function Target({ target, task, tasks, onUpdate, onDelete }){
             }
             <div>
                 {user.role == 'admin' && <button className={styles.cancel} onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit Target'}</button>}
-                {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={del ? () => deleteTarget() : () => {setDel(true); setErrors(['Are you sure you want to delete this target?'])}}> {del ? 'Confirm' : 'Delete Target'}</button>}
+                {user.role == 'admin' && !acting && <button className={errorStyles.deleteButton} onClick={del ? () => deleteTarget() : () => {setDel(true); setErrors(['Are you sure you want to delete this target?'])}}> {del ? 'Confirm' : 'Delete Target'}</button>}
+                {acting && <ButtonLoading forDelete={true} /> }
             </div>
         </div>
     )
@@ -95,7 +101,8 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
     const [taskIDs, setTaskIDs] = useState([])
     const [asPercentage, setAsPercentage] = useState(false)
     const [search, setSearch] = useState('');
-    const [relatedTasks, setRelatedTasks] = useState([])
+    const [relatedTasks, setRelatedTasks] = useState([]);
+    const [saving, setSaving] = useState(false);
     const [targetInfo, setTargetInfo] = useState({
         task_id: task.id,
         amount: existing ? existing?.amount : '',
@@ -181,6 +188,7 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
         setErrors([])
 
         try{
+            setSaving(true);
             console.log('submitting target...')
             const url = existing ? `/api/manage/targets/${targetID}/` : `/api/manage/targets/`;
             const response = await fetchWithAuth(url, {
@@ -214,6 +222,9 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record respondent: ', err)
         }
+        finally{
+            setSaving(false);
+        }
     }
     if(!user.role == 'admin') return(<p>You do not have permission to perform this action.</p>)
     return(
@@ -246,7 +257,7 @@ export function TargetEdit({ task, tasks, onUpdate, existing }){
                     <input id='percentage' name='percentage' type='number' min='0' max='100' value={targetInfo.percentage_of_related || ''} onChange={(e) => setTargetInfo(prev => ({...prev, percentage_of_related: e.target.value}))} required={true}/>
                 </div>
             }
-            <button onClick={()=>onSubmit()}>Save</button>
+            {saving ? <ButtonLoading /> : <button onClick={()=>onSubmit()}>Save</button>}
         </div>
     )
     

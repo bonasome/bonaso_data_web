@@ -16,6 +16,7 @@ export default function CreateProject(){
     const { projectsMeta, setProjectsMeta, setProjectDetails } = useProjects();
     const [clientIDs, setClientIDs] = useState([]);
     const [clientNames, setClientNames] = useState([]);
+    const [saving, setSaving] = useState(false);
 
     const alertRef = useRef(null);
     useEffect(() => {
@@ -90,6 +91,7 @@ export default function CreateProject(){
         }
         console.log('submitting data...')
         try{
+            setSaving(true);
             const response = await fetchWithAuth('/api/manage/projects/', {
                 method: 'POST',
                 headers: {
@@ -121,6 +123,9 @@ export default function CreateProject(){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record project: ', err)
         }
+        finally{
+            setSaving(false);
+        }
     }
 
     if(loading) return <Loading />
@@ -129,7 +134,7 @@ export default function CreateProject(){
         <div className={styles.container}>
             <h1>Creating a New Project</h1>
             {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)}/>
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving}/>
         </div>
     )
 }

@@ -6,6 +6,7 @@ import Loading from '../reuseables/Loading';
 import errorStyles from '../../styles/errors.module.css';
 import styles from './narrative.module.css';
 import { useParams } from 'react-router-dom';
+import ButtonLoading from '../reuseables/ButtonLoading';
 
 export default function NarrativeReportUpload() {
     const { id } = useParams();
@@ -85,7 +86,10 @@ export default function NarrativeReportUpload() {
             console.error('Error uploading file:', err);
             setErrors(['Something went wrong. Please try again later.']);
         }
-        setUploading(false)
+        finally{
+            setUploading(false)
+        }
+        
     };
 
     if (loading) return <Loading />;
@@ -134,7 +138,7 @@ export default function NarrativeReportUpload() {
 
                     <input type="file" accept=".pdf,.doc,.docx" onChange={handleChange} />
                     <div className={styles.buttons}>
-                        <button type="submit" disabled={uploading}>Upload</button>
+                        {uploading ? <ButtonLoading /> : <button type="submit">Upload</button>}
                         <button type="button" onClick={() => setFile(null)}>Clear</button>
                     </div>
                     </div>

@@ -15,6 +15,7 @@ import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import { IoMdReturnLeft } from "react-icons/io";
 import useWindowWidth from '../../../../services/useWindowWidth';
 import prettyDates from '../../../../services/prettyDates';
+import ButtonLoading from '../../reuseables/ButtonLoading';
 
 function ProjectInfo({ project }){
     const navigate = useNavigate();
@@ -57,9 +58,10 @@ function ProjectInfo({ project }){
             console.error('Failed to delete organization:', err);
             setErrors(['Something went wrong. Please try again later.'])
         }
-        setDel(false);
+        finally{
+            setDel(false);
+        }
     } 
-
 
     const { user } = useAuth();
     return(
@@ -76,7 +78,8 @@ function ProjectInfo({ project }){
             <h5>Project Description</h5>
             <p>{project.description}</p>
             {user.role == 'admin' && <Link to={`/projects/${project.id}/edit`}><button>Edit Details</button></Link>}
-            {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)} >Delete</button>}
+            {user.role == 'admin' && !del && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)} >Delete</button>}
+            {del && <ButtonLoading forDelete={true} />}
             {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/narrative-reports/upload`} ><button>Upload a Narrative Report for this Project</button></Link>}
         </div>
     )

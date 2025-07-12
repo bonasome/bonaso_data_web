@@ -6,6 +6,7 @@ import styles from './eventDetail.module.css';
 import modalStyles from '../../styles/modals.module.css'
 import SimpleSelect from "../reuseables/SimpleSelect";
 import ConfirmDelete from "../reuseables/ConfirmDelete";
+import ButtonLoading from "../reuseables/ButtonLoading";
 
 function Warn( {onConfirm, onCancel }) {
     return(
@@ -56,7 +57,8 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
     const [warning, setWarning] = useState(null);
     const [flagged, setFlagged] = useState(false);
     const [ogCounts, setOGCounts] = useState([])
-    
+    const [saving, setSaving] = useState(false);
+
     const mapExisting = () => {
         let ids = []
         let combos = []
@@ -220,44 +222,48 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         const data = [];
         Object.keys(counts).forEach((c) => {if(counts[c].count != '') data.push(counts[c])})
         console.log('submitting data...')
-                try{
-                    const response = await fetchWithAuth(`/api/activities/events/${event.id}/update-counts/`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': "application/json",
-                        },
-                        body: JSON.stringify({'counts': data})
+            try{
+                setSaving(true);
+                const response = await fetchWithAuth(`/api/activities/events/${event.id}/update-counts/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': "application/json",
+                    },
+                    body: JSON.stringify({'counts': data})
+                });
+                const returnData = await response.json();
+                if(response.ok){
+                    setEditing(false)
+
+                    const structured = {};
+                    returnData.created.forEach((c) => {
+                        structured[c.id] = c;
                     });
-                    const returnData = await response.json();
-                    if(response.ok){
-                        setEditing(false)
 
-                        const structured = {};
-                        returnData.created.forEach((c) => {
-                            structured[c.id] = c;
-                        });
-
-                        onSave({ [task.id]: structured });
-                    }
-                    else{
-                        const serverResponse = []
-                        for (const field in returnData) {
-                            if (Array.isArray(returnData[field])) {
-                                returnData[field].forEach(msg => {
-                                serverResponse.push(`${field}: ${msg}`);
-                                });
-                            } 
-                            else {
-                                serverResponse.push(`${field}: ${returnData[field]}`);
-                            }
+                    onSave({ [task.id]: structured });
+                }
+                else{
+                    const serverResponse = []
+                    for (const field in returnData) {
+                        if (Array.isArray(returnData[field])) {
+                            returnData[field].forEach(msg => {
+                            serverResponse.push(`${field}: ${msg}`);
+                            });
+                        } 
+                        else {
+                            serverResponse.push(`${field}: ${returnData[field]}`);
                         }
-                        setErrors(serverResponse)
                     }
+                    setErrors(serverResponse)
                 }
-                catch(err){
-                    setErrors(['Something went wrong. Please try again later.'])
-                    console.error('Could not record indicator: ', err)
-                }
+            }
+            catch(err){
+                setErrors(['Something went wrong. Please try again later.'])
+                console.error('Could not record indicator: ', err)
+            }
+            finally{
+                setSaving(false);
+            }
     }
      const deleteCount = async() => {
         try {
@@ -294,7 +300,10 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             console.error('Failed to delete task:', err);
             setErrors(['Something went wrong. Please try again later.'])
         }
-        setDel(false)
+        finally{
+            setDel(false)
+        }
+        
     }
     const calcCellIndex = (iter, index) => {
         const n = rows.length
@@ -397,8 +406,9 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                 }
                 <div>
                     <button onClick={() => editing ? handleCancel() : setEditing(true)}>{editing ? 'Cancel' : 'Edit'}</button>
-                    {editing && <button onClick={() => saveCount()}>Save</button>}
-                    {editing && existing && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
+                    {editing && saving ? <ButtonLoading /> : <button onClick={() => saveCount()}>Save</button>}
+                    {editing && existing && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
+                    {del && <ButtonLoading forDelete={true} />}
                 </div>
             </div>
         </div>

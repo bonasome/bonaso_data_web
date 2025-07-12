@@ -12,6 +12,7 @@ import errorStyles from '../../../styles/errors.module.css';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import ComponentLoading from '../../reuseables/ComponentLoading';
 import Checkbox from '../../reuseables/Checkbox';
+import ButtonLoading from '../../reuseables/ButtonLoading';
 
 function InteractionCard({ interaction, onUpdate, onDelete }){
     const { user } = useAuth();
@@ -27,7 +28,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     const [del, setDel] = useState(false);
     const [flagged, setFlagged] = useState(interaction.flagged)
     const {setInteractions} = useInteractions();
-
+    const [saving, setSaving] = useState(false);
     const checkPrereqs = async() =>{
         const prereq = interaction.task_detail.indicator.prerequisite
         try{
@@ -106,6 +107,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
         }
 
         try{
+            setSaving(true);
             console.log('submitting edits...')
             const url = `/api/record/interactions/${interaction.id}/`; 
             const response = await fetchWithAuth(url, {
@@ -143,6 +145,9 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
         catch(err){
             console.error('Failed to apply changes to interaction:', err);
             setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setSaving(false);
         }
     }
     const flagInteraction = async() => {
@@ -188,7 +193,10 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             console.error('Failed to delete interaction:', err);
             setErrors(['Something went wrong. Please try again later.'])
         }
-        setDel(false)
+        finally{
+            setDel(false)
+        }
+        
     }
 
     if(!interaction.task_detail) return <></>
@@ -245,7 +253,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                         </div>
                     ))
                 }
-                <button onClick={() => handleSubmit()}>Save Changes</button>
+                {saving ? <ButtonLoading /> : <button onClick={() => handleSubmit()}>Save Changes</button>}
                 <button onClick={() => setEdit(!edit)}>Cancel</button>
                 
             </div>
@@ -274,12 +282,13 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                 {perm && <button onClick={() => setEdit(!edit)}>{edit ? 'Cancel' : 'Edit Interaction'}</button>}
                 {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
                 {perm && <button className={errorStyles.warningButton} onClick={() => flagInteraction()} >{flagged ? 'Mark as OK' :'Flag'} </button>}
-                {user.role == 'admin' && 
+                {user.role == 'admin' && !del &&
                     <div>
                         <p><i>Created by: {interaction.created_by?.first_name} {interaction.created_by?.last_name} at {new Date(interaction.created_at).toLocaleString()}</i></p>
                         {interaction.updated_by && interaction.updated_by && <p><i>Updated by: {interaction.updated_by?.first_name} {interaction.updated_by?.last_name} at {new Date(interaction.updated_at).toLocaleString()}</i></p>}
                     </div>
                 } 
+                {del && <ButtonLoading forDelete={true} /> }
                 </div>
             }
         </div>

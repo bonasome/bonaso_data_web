@@ -22,6 +22,7 @@ export default function EditOrganization(){
     const [orgIDs, setOrgIDs] = useState([]);
     const [orgNames, setOrgNames] = useState([]);
     const [search, setSearch] = useState('');
+    const [saving, setSaving] = useState(false);
 
     const alertRef = useRef(null);
 
@@ -31,6 +32,7 @@ export default function EditOrganization(){
         alertRef.current.focus({ preventScroll: true });
         }
     }, [errors]);
+
     useEffect(() => {
         const getOrganizations = async () => {
             try{
@@ -99,6 +101,7 @@ export default function EditOrganization(){
     const handleSubmit = async(data) => {
         console.log('submitting data...')
         try{
+            setSaving(true);
             const response = await fetchWithAuth(`/api/organizations/${id}/`, {
                 method: 'PATCH',
                 headers: {
@@ -132,6 +135,9 @@ export default function EditOrganization(){
         catch(err){
             console.error('Could not record organization: ', err)
         }
+        finally{
+            setSaving(false);
+        }
     }
 
     if(loading) return <Loading />
@@ -145,7 +151,7 @@ export default function EditOrganization(){
                     <li key={msg}>{msg}</li>)}
                 </ul>
             </div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
         </div>
     )
 }

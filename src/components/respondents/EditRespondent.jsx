@@ -17,6 +17,7 @@ export default function EditRespondent(){
     const [errors, setErrors] = useState([]);
     const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
     const [active, setActive] = useState({});
+    const [saving, setSaving] = useState(false);
 
     const alertRef = useRef(null);
     useEffect(() => {
@@ -104,6 +105,7 @@ export default function EditRespondent(){
                 return;
             }
             try{
+                setSaving(true);
                 const url = `/api/record/respondents/${active.id}/`; 
                 const response = await fetchWithAuth(url, {
                     method: 'PATCH',
@@ -139,6 +141,9 @@ export default function EditRespondent(){
                 setErrors(['Something went wrong. Please try again later.'])
                 console.error('Could not record respondent: ', err)
             }
+            finally{
+                setSaving(false)
+            }
         }
     
     if(loading) return <Loading />
@@ -151,7 +156,7 @@ export default function EditRespondent(){
                         <li key={msg}>{msg}</li>)}
                     </ul>
                 </div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)}/>
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving}/>
         </div>
     )
 }

@@ -19,7 +19,7 @@ export default function EditEvent(){
     const [orgIDs, setOrgIDs] = useState([]);
     const [orgNames, setOrgNames] = useState([]);
     const [search, setSearch] = useState('')
-    
+    const [saving, setSaving] = useState(false);
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
@@ -106,6 +106,7 @@ export default function EditEvent(){
     const handleSubmit = async(data) => {
         console.log('submitting data...', data)
         try{
+            setSaving(true);
             const response = await fetchWithAuth(`/api/activities/events/${id}/`, {
                 method: 'PATCH',
                 headers: {
@@ -140,6 +141,9 @@ export default function EditEvent(){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record indicator: ', err)
         }
+        finally{
+            setSaving(false);
+        }
     }
 
     if(loading) return <Loading />
@@ -153,7 +157,7 @@ export default function EditEvent(){
                     <li key={msg}>{msg}</li>)}
                 </ul>
             </div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
         </div>
     )
 }

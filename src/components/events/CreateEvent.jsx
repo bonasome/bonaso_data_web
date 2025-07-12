@@ -17,6 +17,7 @@ export default function CreateEvent(){
     const [orgIDs, setOrgIDs] = useState([]);
     const [orgNames, setOrgNames] = useState([]);
     const [search, setSearch] = useState('')
+    const [saving, setSaving] = useState(false);
 
     const alertRef = useRef(null);
     useEffect(() => {
@@ -75,6 +76,7 @@ export default function CreateEvent(){
     const handleSubmit = async(data) => {
         console.log('submitting data...',)
         try{
+            setSaving(true);
             const response = await fetchWithAuth('/api/activities/events/', {
                 method: 'POST',
                 headers: {
@@ -106,6 +108,9 @@ export default function CreateEvent(){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record indicator: ', err)
         }
+        finally{
+            setSaving(false);
+        }
     }
 
     if(loading) return <Loading />
@@ -119,7 +124,7 @@ export default function CreateEvent(){
                     <li key={msg}>{msg}</li>)}
                 </ul>
             </div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
         </div>
     )
 }

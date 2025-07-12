@@ -18,6 +18,7 @@ export default function EditProject(){
     const [existing, setExisting] = useState({})
     const [clientIDs, setClientIDs] = useState([]);
     const [clientNames, setClientNames] = useState([]);
+    const [saving, setSaving] = useState(false);
 
     const alertRef = useRef(null);
     useEffect(() => {
@@ -120,6 +121,7 @@ export default function EditProject(){
         }
         console.log('submitting data...')
         try{
+            setSaving(true);
             const response = await fetchWithAuth(`/api/manage/projects/${existing.id}/`, {
                 method: 'PATCH',
                 headers: {
@@ -154,6 +156,9 @@ export default function EditProject(){
             setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record project: ', err)
         }
+        finally{
+            setSaving(false)
+        }
     }
 
     if(loading) return <Loading />
@@ -167,7 +172,7 @@ export default function EditProject(){
                     <li key={msg}>{msg}</li>)}
                 </ul>
             </div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} />
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
         </div>
     )
 }
