@@ -2,11 +2,12 @@ export default function indicatorConfig(ids, names, meta, searchCallback, existi
     let subcats = []
     let attrs = []
     if(existing?.subcategories.length > 0){
-        subcats = existing.subcategories.map((cat) => (cat.name))
+        subcats = existing.subcategories.map((cat) => (cat))
     }
     if(existing?.required_attribute.length > 0){
         attrs = existing.required_attribute.map((a) => (a.name))
     }
+    
     return [
         {name: 'code', label: 'Indicator code', type: 'text', required: true, value: existing?.code ? existing.code : ''},
         {name: 'name', label: 'Indicator Name', type: 'textarea', required: true, value: existing?.name ? existing.name : ''},

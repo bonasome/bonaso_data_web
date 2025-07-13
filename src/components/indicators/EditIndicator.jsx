@@ -115,15 +115,14 @@ export default function EditIndicator(){
         const names = data.subcategory_names
         let commas = []
         names.forEach(n => {
-            console.log(n)
-            if(n.includes(',') || n.includes(':')) commas.push(`Subcategory names cannot include commas or colons. Please fix subcategory "${n}"`);
+            if(n.name.includes(',') || n.name.includes(':')) commas.push(`Subcategory names cannot include commas or colons. Please fix subcategory "${n.value}"`);
         })
         if(commas.length > 0){
             setErrors(commas);
             return;
         }
 
-        console.log('submitting data...')
+        console.log('submitting data...', data)
         try{
             setSaving(true);
             const response = await fetchWithAuth(`/api/indicators/${id}/`, {

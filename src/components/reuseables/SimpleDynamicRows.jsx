@@ -4,27 +4,31 @@ import errorStyles from "../../styles/errors.module.css";
 
 // Row component
 function Row({ row, onCollect, onRemove, index, count }) {
-  const [value, setValue] = useState(row.value);
+    const [value, setValue] = useState(row.value);
+    const [id, setID] = useState(row?.id || null);
+    const [deprecated, setDeprecated] = useState(false)
 
   // Register a collector function with the parent
     useEffect(() => {
         onCollect(() => {
         if (value === '') return { error: true };
-        return { value };
+        return { id, value, deprecated };
         });
     }, [value, onCollect]);
 
     return (
         <div className={styles.row}>
             <label htmlFor={row.key}>{index+1}.</label>
+            {deprecated ? <p>{value} (Deprecated)</p> :
             <input
                 id={row.key}
                 type="text"
                 name={row.key}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-            />
-            <button type="button" onClick={() => onRemove(row.key)} disabled={count === 1}>Remove</button>
+            />}
+            {id ? <button type="button" onClick={() => setDeprecated(!deprecated)}>{deprecated ? 'Mark as Active' : 'Deprecate'}</button>:
+             <button type="button" onClick={() => onRemove(row.key)} disabled={count === 1}>Remove</button>}
         </div>
   );
 }
@@ -37,10 +41,12 @@ const SimpleDynamicRows = forwardRef(({ label, existing=[] }, ref) => {
 
     useEffect(() => {
         if(existing.length > 0){
-            const existingRows = existing.map((ex) => ({key: Date.now().toString() + Math.random().toString(), value: ex}));
+            console.log(existing)
+            const existingRows = existing.map((ex) => ({key: Date.now().toString() + Math.random().toString(), value: ex.name, id: ex.id }));
             setRows(existingRows);
         }
     }, [existing])
+
     // Expose collect method to parent
     useImperativeHandle(ref, () => ({
         collect: () => {
@@ -54,7 +60,7 @@ const SimpleDynamicRows = forwardRef(({ label, existing=[] }, ref) => {
                 rowErrors.push(`Row "${row.key}" is invalid`);
             } 
             else {
-                results.push(result.value);
+                results.push({name: result.value, id: result?.id || null, deprecated: result?.deprecated || null});
             }
         }
         if (rowErrors.length > 0) {
