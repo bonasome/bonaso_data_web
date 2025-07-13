@@ -14,6 +14,7 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
     const [formData, setFormData] = useState({})
     const [errors, setErrors] = useState([])
     const [switchpath, setSwitchpath] = useState(false);
+    const [switchpath2, setSwitchpath2] = useState(false);
     const rowRefs = useRef({});
     
     useEffect(() => {
@@ -31,6 +32,9 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
             }
             if(field.switchpath){
                 setSwitchpath(field.value)
+            }
+            else if(field.switchpath2){
+                setSwitchpath2(field.value)
             }
         });
         setFormData(struct);
@@ -74,6 +78,8 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                     if(field?.rolerestrict && !field.rolerestrict.includes(user.role)) return <div key={field.name}></div>
                     if(switchpath && field.hideonpath) return <div key={field.name}></div>
                     if(!switchpath && field.showonpath) return <div key={field.name}></div>
+                    if(switchpath2 && field.hideonpath2) return <div key={field.name}></div>
+                    if(!switchpath2 && field.showonpath2) return <div key={field.name}></div>
                     const label = (field.label || (field.name.charAt(0).toUpperCase() + field.name.slice(1))) + (field.required ? ' *': ' (Optional)');
                     const max = field.max || null
                     if(field.type == 'text'){
@@ -141,6 +147,8 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                                         ...prev,
                                         [field.name]: val
                                     }));
+                                    field.switchpath && setSwitchpath(field.switchpath === val);
+                                    field.switchpath2 && setSwitchpath2(field.switchpath2===val);
                                 }} />
                             </div>
                         )
@@ -148,7 +156,7 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                     else if(field.type == 'checkbox'){
                         return(
                             <div key={field.name} className={styles.checkboxField}>
-                                <input type="checkbox" id={field.name} name={field.name} checked={!!formData[field.name]}  onChange={(e) => {setFormData(prev=>({...prev, [field.name]: e.target.checked })); field.switchpath && setSwitchpath(e.target.checked)}} />
+                                <input type="checkbox" id={field.name} name={field.name} checked={!!formData[field.name]}  onChange={(e) => {setFormData(prev=>({...prev, [field.name]: e.target.checked })); field.switchpath && setSwitchpath(e.target.checked); field.switchpath2 && setSwitchpath2(e.target.checked)}} />
                                 <label htmlFor={field.name}>{label}</label>
                             </div>
                         )

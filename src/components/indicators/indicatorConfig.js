@@ -25,21 +25,21 @@ export default function indicatorConfig(ids, names, meta, searchCallback, existi
                 labels: meta.statuses,
                 multiple: false,
         }},
-        {name: 'indicator_type', label: 'Indicator Type', type: 'select',  required: true, value: existing?.indicator_type ? existing.indicator_type : 'Respondent',
+        {name: 'indicator_type', label: 'Indicator Type', type: 'select',  required: true, switchpath2: 'Respondent', value: existing?.indicator_type ? existing.indicator_type : 'Respondent',
             constructors: {
                 values: meta.indicator_types,
                 labels: meta.indicator_types,
                 multiple: false,
         }},
-        {name: 'required_attribute_names', label: 'Requires Special Respondent Attribute', type: 'select',  required: false, value: existing?.required_attribute ? attrs : [],
+        {name: 'required_attribute_names', label: 'Requires Special Respondent Attribute', type: 'select',  required: false, showonpath2: true, value: existing?.required_attribute ? attrs : [],
             constructors: {
                 values: meta.required_attributes,
                 labels: meta.required_attribute_labels,
                 multiple: true,
         }},
+        {name: 'allow_repeat', label:'Allow repeat interactions (within 30 days)?', type: 'checkbox', showonpath2:true, required: false, value: existing?.allow_repeat ? true: false},
         {name: 'require_numeric', label:'Require a Numeric Value?', type: 'checkbox', required: false, value: existing?.require_numeric ? true: false},
         {name: 'require_subcategories', label: 'Require Subcategories', type: 'checkbox', required: false, value: existing?.subcategories.length>0 ? true : false, switchpath: true},
         {name: 'subcategory_names', label: 'Subcategories', type: 'dynamic', required: false, value: existing?.subcategories.length > 0 ? subcats : [], showonpath: true},
     ]
-
 }

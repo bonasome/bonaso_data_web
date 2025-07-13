@@ -128,7 +128,7 @@ export default function IndicatorDetail(){
                 <h1>{activeIndicator.code}: {activeIndicator.name}</h1>
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 <p>{activeIndicator.description}</p>
-                <p><i>{activeIndicator.status}, {activeIndicator.indicator_type}{activeIndicator.require_numeric && ', Requires a number'}</i></p>
+                <p><i>{activeIndicator.status}, {activeIndicator.indicator_type}{activeIndicator.require_numeric && ', Requires a number'} {activeIndicator.allow_repeat && '(Allows Repeats)'}</i></p>
                 {activeIndicator.prerequisite && <p><strong>Prerequisite {activeIndicator.prerequisite.code}: {activeIndicator.prerequisite.name}</strong></p>}
                 {activeIndicator.required_attribute.length > 0 && <div>
                     <p>Requires Special Respondent Attributes:</p>

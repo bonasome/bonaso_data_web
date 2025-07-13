@@ -27,6 +27,7 @@ export default function EventDetail(){
     const [addingOrg, setAddingOrg] = useState(false);
     const [eventOrgs, setEventOrgs] = useState([]);
     const [eventTasks, setEventTasks] = useState([]);
+    const [filteredTasks, setFilteredTasks] = useState([]);
     const [breakdowns, setBreakdowns] = useState(null);
     const [eventCounts, setEventCounts] = useState([]);
     const [newCount, setNewCount] = useState(false);
@@ -76,28 +77,21 @@ export default function EventDetail(){
         getEventDetails();
 
         const getEventCounts = async () => {
-            const found = eventDetails.find(e => e.id.toString() === id.toString());
-            if (found) {
-                setEvent(found);
-                return;
-            }
-            else{
-                try {
-                    console.log('fetching event details...');
-                    const response = await fetchWithAuth(`/api/activities/events/${id}/get-counts/`);
-                    const data = await response.json();
-                    if(response.ok){
-                        setEventCounts(prepareCounts(data))
-                    }
-                    else{
-                        navigate('/not-found')
-                    }
-                    
-                } 
-                catch (err) {
-                    console.error('Failed to fetch event: ', err);
-                } 
-            }
+            try {
+                console.log('fetching event details...');
+                const response = await fetchWithAuth(`/api/activities/events/${id}/get-counts/`);
+                const data = await response.json();
+                if(response.ok){
+                    setEventCounts(prepareCounts(data))
+                }
+                else{
+                    navigate('/not-found')
+                }
+                
+            } 
+            catch (err) {
+                console.error('Failed to fetch event: ', err);
+            } 
         };
         getEventCounts();
 
@@ -400,10 +394,10 @@ export default function EventDetail(){
     }
 
 
-    const filterTasks = useMemo(() => {
+    useEffect(() => {
         const countKeys = Object.keys(eventCounts);
-        return eventTasks.filter((t) => !countKeys.includes(t.id.toString()));
-    }, [eventCounts])
+        setFilteredTasks(eventTasks.filter((t) => !countKeys.includes(t.id.toString())))
+    }, [eventCounts, eventTasks])
 
     if(loading) return <Loading />
     return(
@@ -455,12 +449,12 @@ export default function EventDetail(){
             </div>
             {event?.event_date && new Date(event.event_date) <= new Date() && <div className={styles.segment}>
                 <h2>Select a task to start adding counts.</h2>
-                {eventTasks.length > 0 && <SimpleSelect name={'task'} label={'Select a Task'} 
-                    optionValues={filterTasks.map((t) => (t.id))} 
-                    optionLabels={filterTasks.map((t) => (t.indicator.name + ' ' + t.organization.name))} 
+                {filteredTasks.length > 0 ? <SimpleSelect name={'task'} label={'Select a Task'} 
+                    optionValues={filteredTasks.map((t) => (t.id))} 
+                    optionLabels={filteredTasks.map((t) => (t.indicator.name + ' ' + t.organization.name))} 
                     callback={(val) => {setNewTask(val); if(val != '') setNewCount(true)}} 
                     value = {newTask}
-                />}
+                /> : <p>No tasks left! Either edit your existing counts or add a new task.</p>}
             </div>}
             {event?.event_date && new Date(event.event_date) > new Date() && 
                 <div className={styles.segment}><p>Looking to add counts? You cannot add counts for events in the future.</p></div>}
@@ -472,14 +466,14 @@ export default function EventDetail(){
                 const task = eventTasks.find(t => t.id === taskId);
                 return (
                     <Counts
-                    key={taskId}
-                    onCancel={handleCancel}
-                    event={event}
-                    breakdownOptions={breakdowns}
-                    task={task}
-                    onSave={handleChange}
-                    onDelete={handleChange}
-                    existing={eventCounts[taskId]}
+                        key={taskId}
+                        onCancel={handleCancel}
+                        event={event}
+                        breakdownOptions={breakdowns}
+                        task={task}
+                        onSave={handleChange}
+                        onDelete={handleChange}
+                        existing={eventCounts[taskId]}
                     />
                 );
                 })

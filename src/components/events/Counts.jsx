@@ -36,12 +36,12 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
     });
     
     const [breakdownSplits, setBreakdownSplits] = useState({
-        sex: {values: breakdownOptions.sex, labels: breakdownOptions.sex_labels, col: 5},
-        age_range: {values: breakdownOptions.age_range, labels: breakdownOptions.age_range_labels, col: 0},
-        citizenship: {values: breakdownOptions.citizenship, labels: breakdownOptions.citizenship_labels, col: 6},
-        status: {values: breakdownOptions.status, labels: breakdownOptions.status_labels, col: 4},
-        kp_type: {values: breakdownOptions.kp_type, labels: breakdownOptions.kp_type_labels, col: 1},
-        disability_type: {values: breakdownOptions.disability_type, labels: breakdownOptions.disability_type_labels, col: 2},
+        sex: {values: breakdownOptions?.sex, labels: breakdownOptions?.sex_labels, col: 5},
+        age_range: {values: breakdownOptions?.age_range, labels: breakdownOptions?.age_range_labels, col: 0},
+        citizenship: {values: breakdownOptions?.citizenship, labels: breakdownOptions?.citizenship_labels, col: 6},
+        status: {values: breakdownOptions?.status, labels: breakdownOptions?.status_labels, col: 4},
+        kp_type: {values: breakdownOptions?.kp_type, labels: breakdownOptions?.kp_type_labels, col: 1},
+        disability_type: {values: breakdownOptions?.disability_type, labels: breakdownOptions?.disability_type_labels, col: 2},
         hiv_status: {values: [true, false], labels: ['HIV Positive', 'HIV Negative'], col: 7},
         pregnant: {values: [true, false], labels: ['Pregnant', 'Not Pregnant'], col: 8},
         subcategory_id: {values: [], labels: [], col: 3}
@@ -375,11 +375,11 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                 }
                 {
                     active.length > 1 &&
-                    <table>
+                    <table className={styles.countsTable}>
                         <thead>
                             <tr>
-                                {active.map((a, index) => {if(index != 0) return <td>{(a[0].charAt(0).toUpperCase() + a[0].slice(1)).replace('_id', '').replace('_', ' ')}</td>})}
-                                {active[0][1].labels.map((c) => (<td>{c}</td>))}
+                                {active.map((a, index) => {if(index != 0) return <th>{(a[0].charAt(0).toUpperCase() + a[0].slice(1)).replace('_id', '').replace('_', ' ')}</th>})}
+                                {active[0][1].labels.map((c) => (<th>{c}</th>))}
                             </tr>
                         </thead>
                         
@@ -396,7 +396,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                                                 ...prev[pos],
                                                 count: e.target.value,
                                                 },
-                                            }))} /> : <p>{counts[pos]?.count == '' ? '-' : counts[pos]?.count}</p>}
+                                            }))} /> : <p><strong>{counts[pos]?.count == '' ? '-' : counts[pos]?.count}</strong></p>}
                                         </td>}
                                     )}
                                 </tr>

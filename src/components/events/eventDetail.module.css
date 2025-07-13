@@ -27,7 +27,25 @@
 .spacer {
     padding-bottom: 5vh;
 }
-td 
-td > input {
-    max-width: 7vh;
+
+.countsTable {
+    min-width: 100%;
+}
+
+th{
+    padding: 2vh;
+    background-color: var(--bonaso-uber-dark-accent);
+}
+tr:nth-child(even) {
+  background-color: var(--bonaso-main);
+}
+
+tr:nth-child(odd) {
+  background-color: var(--bonaso-dark-accent);
+}
+td {
+    padding: .5vh;
+}
+td >* {
+    text-align: center;
 }
