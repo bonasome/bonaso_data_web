@@ -123,7 +123,7 @@ export default function IndicatorsIndex({ callback=null, excludeProject=null, pr
                 <Link to='/indicators/new'><button>Create a New Indicator</button></Link>} 
                 {indicators?.length === 0 ? 
                     <p>No indicators match your criteria.</p> :
-                    indicators.map(ind => (
+                    indicators?.map(ind => (
                         <IndicatorCard key={ind.id} indicator={ind} callback={callback ? (indicator)=> callback(indicator) : null}/>)
                     )
                 }
