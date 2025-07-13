@@ -4,24 +4,26 @@ function getQuarter(date) {
 }
 
 function quarterSort(a, b) {
-  const [qa, ya] = a.split(' ').slice(1); // 'Quarter 1 2025' => ['1', '2025']
-  const [qb, yb] = b.split(' ').slice(1);
-  return new Date(`${ya}-0${qa * 3 - 2}-01`) - new Date(`${yb}-0${qb * 3 - 2}-01`);
+    const [qa, ya] = a.split(' ').slice(1); // 'Quarter 1 2025' => ['1', '2025']
+    const [qb, yb] = b.split(' ').slice(1);
+    return new Date(`${ya}-0${qa * 3 - 2}-01`) - new Date(`${yb}-0${qb * 3 - 2}-01`);
 }
 
 export default function monthlyCounts(data, filters = null, axis='month', legend='', meta=null) {
+    const events = data?.events || [];
     const interactions = data?.interactions || [];
     const targets = legend==='targets' ? (data?.targets || []) : [];
 
     const axisGroups = {};
     const targetAxisGroups = {};
-
+    let fromIr = 0
+    let fromCounts = 0
     for (const interaction of interactions) {
         let amount = 1;
         const date = new Date(interaction.interaction_date);
         if (filters) {
             const respondent = interaction.respondent;
-
+            if(filters.type === 'event') continue;
             if (filters.age_range && filters.age_range !== respondent.age_range) continue;
             if (filters.sex && filters.sex !== respondent.sex) continue;
             if (filters.district && filters.district !== respondent.district) continue;
@@ -71,9 +73,6 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
             axisGroups[key] = !['', 'targets'].includes(legend) ? {} : 0;
         }
 
-        if (data.require_numeric && interaction.numeric_component) {
-            amount = interaction.numeric_component;
-        }
         else if(legend !== 'subcategories' && data?.subcategories?.length > 0 && data.require_numeric){
             amount = 0
             interaction.subcategories.forEach(s => amount += s.numeric_component)
@@ -82,7 +81,8 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
             interaction.subcategories.forEach(cat => {
                 amount = (data.require_numeric && cat.numeric_component) ? cat.numeric_component : 1
                 console.log(amount)
-                axisGroups[key][cat.name] = (axisGroups[key][cat.name] || 0) + amount;
+                const name = cat.deprecated ? `${cat.name} (Deprecated)` : cat.name
+                axisGroups[key][name] = (axisGroups[key][name] || 0) + amount;
             });
         } 
         else if (legend === 'organization' && interaction?.organization){
@@ -127,7 +127,120 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
         else {
             axisGroups[key] += amount;
         }
+        fromIr += amount;
     }
+
+
+    //events
+    for (const event of events) {
+        const date = new Date(event.event.event_date);
+        for(const count of event.counts){
+            if(legend==='district') continue;
+            if (filters) {
+                if(filters.type === 'interaction') continue;
+                if (filters.age_range && filters.age_range !== count?.age_range) continue;
+                if (filters.sex && filters.sex !== count?.sex) continue;
+                if (filters.organization && filters.organization != count?.task.organization.id) continue;
+                if (filters.citizen !== '') {
+                    const citizenship = filters.citizen === 'true';
+                    if (citizenship !== count?.citizenship) continue;
+                }
+                if (filters.pregnant !== '') {
+                    const preg = filters.pregnant === 'true';
+                    if (preg !== count.pregnancy) continue;
+                }
+                if (filters.hiv_status !== '') {
+                    const hiv = filters.hiv_status === 'true';
+                    if (hiv !== count.hiv_status) continue;
+                }
+                if (filters.kp_status.length > 0 && !filters.kp_status.includes(count.kp_type)) continue;
+                if (filters.disability_status.length > 0 && !filters.disability_status.includes(count.disability_type)) continue;
+
+                if (filters.after.trim() !== '') {
+                    const after = new Date(filters.after);
+                    if (!isNaN(after) && date < after) continue;
+                }
+
+                if (filters.before.trim() !== '') {
+                    const before = new Date(filters.before);
+                    if (!isNaN(before) && date > before) continue;
+                }
+            }
+        
+        
+            let key = 'count';
+            if(axis==='month'){
+                key = date.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+            }
+            else if(axis==='quarter'){
+                key = getQuarter(date);
+            }
+            if (!axisGroups[key]) {
+                axisGroups[key] = !['', 'targets'].includes(legend) ? {} : 0;
+            }
+            const amount = count?.count;
+            if (legend==='subcategories' && data?.subcategories?.length > 0) {
+                const name = count?.subcategory?.deprecated ? `${ count?.subcategory?.name} (Deprecated)` :  count?.subcategory?.name
+                axisGroups[key][name] = (axisGroups[key][name] || 0) + amount;
+            } 
+            else if (legend === 'organization' && count?.task?.organization?.name){
+                const label = count?.task.organization.name
+                axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
+            }
+            else if(legend==='kp_status'){
+                if(!count.kp_type) continue;
+                const metaName = legend.replace('status', 'types');
+                const metaLabel = legend.replace('status', 'type') + '_labels';
+                const labelIndex = meta[metaName].indexOf(count.kp_type)
+                const label = meta[metaLabel][labelIndex]
+                axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
+            }
+            else if(legend==='disability_status'){
+                if(!count.disability_type) continue;
+                const metaName = legend.replace('status', 'types');
+                const metaLabel = legend.replace('status', 'type') + '_labels';
+                const labelIndex = meta[metaName].indexOf(count.disability_type)
+                const label = meta[metaLabel][labelIndex]
+                axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
+            }
+        
+            if(legend==='citizenship'){
+                if(!count.citizenship) continue;
+                const cat=count.citizenship;
+                const label = cat ? 'Citizen' : 'Non-Citizen';
+                axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
+            }
+            else if(legend==='pregnant'){
+                if(!count.pregancy) continue;
+                const cat=count.pregnancy;
+                console.log(cat)
+                const label = cat ? 'Pregnant' : 'Not Pregnant';
+                axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
+            }
+            else if(legend==='hiv_status'){
+                if(!count.hiv_status) continue;
+                const cat=count.hiv_status;
+                const label = cat ? 'HIV Positive' : 'HIV Negative';
+                axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
+            }
+            else if (count && Object.keys(count).includes(legend)){
+                const metaName = legend + 's';
+                const metaLabel = legend + '_labels';
+                if(!count[legend]) continue;
+                const cat=count[legend];
+                const labelIndex = meta[metaName].indexOf(cat);
+                const label = meta[metaLabel][labelIndex];
+                axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
+            }
+            
+            else {
+                axisGroups[key] += amount;
+            }
+            fromCounts += amount
+        }
+        
+    }
+    console.log('interactions:', fromIr, 'events:', fromCounts)
     // Targets
     for (const target of targets) {
         const start = new Date(target.start);

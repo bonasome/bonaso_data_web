@@ -125,8 +125,8 @@ export default function EventDetail(){
     const prepareCounts = (data) => {
         const map = {}
         data.forEach(d => {
-            map[d.task] = map[d.task] || {}
-            map[d.task][d.id] = d;
+            map[d.task.id] = map[d.task.id] || {}
+            map[d.task.id][d.id] = d;
         })
         return map
     }
@@ -393,7 +393,7 @@ export default function EventDetail(){
         setNewTask(null)
     }
 
-
+    
     useEffect(() => {
         const countKeys = Object.keys(eventCounts);
         setFilteredTasks(eventTasks.filter((t) => !countKeys.includes(t.id.toString())))
@@ -433,7 +433,10 @@ export default function EventDetail(){
                 </div>
                 <div>
                     <h2>Tasks</h2>
-                    <button onClick={() => {setAddingTask(!addingTask); setAddingOrg(false)}}>{addingTask ? 'Done' : 'Add an Task'}</button>
+                    <button onClick={() => {setAddingTask(!addingTask); setAddingOrg(false)}}>{addingTask ? 'Done' : 'Add a Task'}</button>
+                    {addingTask && <div>
+                        <Tasks addCallback={(t) => addTask(t)} event={id} eventTrigger={eventTasks} onError={taskErrors}/>
+                    </div>}
                     {eventTasks.length > 0 ? 
                         eventTasks.map((task) =>  (
                             <div className={styles.card}>
@@ -442,9 +445,6 @@ export default function EventDetail(){
                             </div>
                         )) : <p>No tasks yet.</p>
                     }
-                    {addingTask && <div>
-                        <Tasks addCallback={(t) => addTask(t)} event={id} eventTrigger={eventTasks} onError={taskErrors}/>
-                    </div>}
                 </div>
             </div>
             {event?.event_date && new Date(event.event_date) <= new Date() && <div className={styles.segment}>

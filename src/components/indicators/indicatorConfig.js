@@ -11,14 +11,7 @@ export default function indicatorConfig(ids, names, meta, searchCallback, existi
     return [
         {name: 'code', label: 'Indicator code', type: 'text', required: true, value: existing?.code ? existing.code : ''},
         {name: 'name', label: 'Indicator Name', type: 'textarea', required: true, value: existing?.name ? existing.name : ''},
-        {name: 'prerequisite_id', label: 'Prerequisite', type: 'select',  required: false, value: existing?.prerequisite?.id ? existing.prerequisite?.id : '',
-            constructors: {
-                values: ids,
-                labels: names,
-                multiple: false,
-                search: true,
-                searchCallback: searchCallback
-        }},
+        {name: 'prerequisite_id', label: 'Prerequisite', type: 'indicator',  required: false, value: existing?.prerequisite ? existing.prerequisite : null,},
         {name: 'description', label: 'Description', type: 'textarea', required: false, value: existing?.description ? existing.description : ''},
         {name: 'status', label: 'Indicator Status', type: 'select',  required: true, value: existing?.status ? existing.status : 'Active',
             constructors: {
@@ -29,7 +22,7 @@ export default function indicatorConfig(ids, names, meta, searchCallback, existi
         {name: 'indicator_type', label: 'Indicator Type', type: 'select',  required: true, switchpath2: 'Respondent', value: existing?.indicator_type ? existing.indicator_type : 'Respondent',
             constructors: {
                 values: meta.indicator_types,
-                labels: meta.indicator_types,
+                labels: meta.indicator_type_labels,
                 multiple: false,
         }},
         {name: 'required_attribute_names', label: 'Requires Special Respondent Attribute', type: 'select',  required: false, showonpath2: true, value: existing?.required_attribute ? attrs : [],

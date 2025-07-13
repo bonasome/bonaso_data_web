@@ -11,8 +11,8 @@ export default function IndexViewWrapper({ children, page, onSearchChange, onPag
         setTotalPages(pages)
     }, [entries])
 
-    const handleSearch = () => {
-        onSearchChange?.(search); // optional chaining in case the prop isn't passed
+    const handleSearch = (val) => {
+        onSearchChange?.(val); // optional chaining in case the prop isn't passed
         //setPage(1); // reset to first page on new search
         onPageChange?.(1); // tell parent we moved to page 1
     };
@@ -25,16 +25,18 @@ export default function IndexViewWrapper({ children, page, onSearchChange, onPag
     return( 
         <div >
             <div>
-                <input type='text' onChange={(e) => setSearch(e.target.value)}/>
-                <button onClick={handleSearch}><FaSearch /> Search</button>
+                <input type='text' onChange={(e) => handleSearch(e.target.value)}/>
+                
                 {filter && filter}
             </div>
             { children }
             <div>
-                <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}>Previous Page</button>
+                <button type="button" onClick={() => handlePageChange(page - 1)} disabled={page === 1}>Previous Page</button>
                     <span>Showing Page {page} of {totalPages}</span>
-                <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}>Next Page</button>
+                <button type="button" onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}>Next Page</button>
             </div>
         </div>
     )
 }
+
+//<button type="button" onClick={handleSearch}><FaSearch /> Search</button>

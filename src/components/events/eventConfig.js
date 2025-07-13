@@ -3,14 +3,7 @@ export default function eventConfig(orgIDs, orgNames, types, searchCallback, exi
     return [
         {name: 'name', label: 'Event Name', type: 'text', required: true, value: existing?.name ? existing.name : ''},
         {name: 'description', label: 'Event Description', type: 'textarea', required: false, value: existing?.description ? existing.description : ''},
-        {name: 'host_id', label: 'Hosting Organization', type: 'select',  required: true, value: existing?.host?.id ? existing.host?.id : '',
-            constructors: {
-                values: orgIDs,
-                labels: orgNames,
-                multiple: false,
-                search: true,
-                searchCallback: searchCallback
-        }},
+        {name: 'host_id', label: 'Hosting Organization', type: 'organization',  required: true, value: existing?.host ? existing.host : null},
         {name: 'location', label: 'Event Location', type: 'text', required: true, value: existing?.location ? existing.location : ''},
         {name: 'event_type', label: 'Event Type', type: 'select',  required: true, value: existing?.event_type ? existing.event_type : '',
             constructors: {

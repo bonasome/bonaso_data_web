@@ -77,7 +77,7 @@ export default function CreateIndicator(){
         const names = data.subcategory_names
         let commas = []
         names.forEach(n => {
-            if(n.value.includes(',') || n.value.includes(':')) commas.push(`Subcategory names cannot include commas or colons. Please fix ${n.value}`);
+            if(n.name.includes(',') || n.name.includes(':')) commas.push(`Subcategory names cannot include commas or colons. Please fix ${n.value}`);
         })
         if(commas.length > 0){
             setErrors(commas);

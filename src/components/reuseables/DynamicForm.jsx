@@ -7,6 +7,8 @@ import styles from './dynamicForm.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import { useAuth } from '../../contexts/UserAuth';
 import ButtonLoading from '../reuseables/ButtonLoading';
+import IndicatorSelect from '../indicators/IndicatorSelect';
+import OrganizationSelect from '../organizations/OrganizationSelect';
 
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]
 export default function DynamicForm({ config, onSubmit, onCancel, onError, saving }){
@@ -167,6 +169,20 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                         }
                         return (
                             <SimpleDynamicRows key={field.name} label={field.label} ref={rowRefs.current[field.name]} existing={formData[field.name] || []}/>
+                        )
+                    }
+                    else if(field.type == 'indicator'){
+                        return(
+                            <div className={styles.field}>
+                                <IndicatorSelect title={field.label} existing={field.value} onChange={(ind) => setFormData(prev=>({...prev, [field.name]: ind?.id || null }))} /> 
+                            </div>
+                        )
+                    }
+                    else if(field.type == 'organization'){
+                        return(
+                            <div className={styles.field}>
+                                <OrganizationSelect title={field.label} existing={field.value} onChange={(org) => setFormData(prev=>({...prev, [field.name]: org?.id || null }))} /> 
+                            </div>
                         )
                     }
                 })}

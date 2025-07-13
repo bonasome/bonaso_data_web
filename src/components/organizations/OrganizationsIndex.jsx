@@ -9,7 +9,7 @@ import { useOrganizations } from '../../contexts/OrganizationsContext';
 import { Link } from 'react-router-dom';
 import ComponentLoading from '../reuseables/ComponentLoading';
 
-function OrganizationCard({ org, callback = null }) {
+function OrganizationCard({ org, callback = null, callbackText }) {
     const [loading, setLoading] = useState(false);
     const { organizationDetails, setOrganizationDetails } = useOrganizations();
     const [active, setActive] = useState(null);
@@ -45,7 +45,7 @@ function OrganizationCard({ org, callback = null }) {
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             <Link to={`/organizations/${org.id}`} style={{display:'flex', width:"fit-content"}}><h2>{org.name}</h2></Link>
-            {callback && <button onClick={() => callback(org)}>Add to Project</button>}
+            {callback && <button onClick={() => callback(org)}>{callbackText}</button>}
             {expanded && active && (
                 <>
                     {active && org?.parent_organization && <h4> Parent: {org.parent_organization.name}</h4>}
@@ -61,7 +61,7 @@ function OrganizationCard({ org, callback = null }) {
     );
 }
 
-export default function OrganizationsIndex( { callback=null, excludeProject=null, excludeProjectTrigger=null, excludeEvent=null, excludeEventTrigger=null }){
+export default function OrganizationsIndex( { callback=null, callbackText='Add Organization', excludeProject=null, excludeProjectTrigger=null, excludeEvent=null, excludeEventTrigger=null }){
     const { user } = useAuth()
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -113,7 +113,7 @@ export default function OrganizationsIndex( { callback=null, excludeProject=null
                 {organizations?.length == 0 ? 
                     <p>No organizations match your criteria.</p> :
                     organizations.map(org => (
-                    <OrganizationCard key={org.id} org={org} callback={callback ? callback : null}/>
+                    <OrganizationCard key={org.id} org={org} callback={callback ? callback : null} callbackText={callbackText} />
                     ))
                 }
             </IndexViewWrapper>

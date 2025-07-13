@@ -7,14 +7,15 @@ function Row({ row, onCollect, onRemove, index, count }) {
     const [value, setValue] = useState(row.value);
     const [id, setID] = useState(row?.id || null);
     const [deprecated, setDeprecated] = useState(false)
-
+    console.log(deprecated)
   // Register a collector function with the parent
     useEffect(() => {
         onCollect(() => {
         if (value === '') return { error: true };
+        console.log(id, value, deprecated)
         return { id, value, deprecated };
         });
-    }, [value, onCollect]);
+    }, [value, deprecated, id, onCollect]);
 
     return (
         <div className={styles.row}>
@@ -60,6 +61,7 @@ const SimpleDynamicRows = forwardRef(({ label, existing=[] }, ref) => {
                 rowErrors.push(`Row "${row.key}" is invalid`);
             } 
             else {
+                console.log(result)
                 results.push({name: result.value, id: result?.id || null, deprecated: result?.deprecated || null});
             }
         }

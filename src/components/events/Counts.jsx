@@ -31,7 +31,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         kp_type: false,
         disability_type: false,
         hiv_status: false,
-        pregnant: false,
+        pregnancy: false,
         subcategory_id: false,
     });
     
@@ -43,7 +43,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         kp_type: {values: breakdownOptions?.kp_type, labels: breakdownOptions?.kp_type_labels, col: 1},
         disability_type: {values: breakdownOptions?.disability_type, labels: breakdownOptions?.disability_type_labels, col: 2},
         hiv_status: {values: [true, false], labels: ['HIV Positive', 'HIV Negative'], col: 7},
-        pregnant: {values: [true, false], labels: ['Pregnant', 'Not Pregnant'], col: 8},
+        pregnancy: {values: [true, false], labels: ['Pregnant', 'Not Pregnant'], col: 8},
         subcategory_id: {values: [], labels: [], col: 3}
     })
     const [editing, setEditing] = useState(existing ? false: true);
@@ -158,6 +158,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             })
             setCounts(map)
         }
+        console.log(splits)
         const splitMap = splits.map((s) => s[0])
         const valuesArrays = splits.map((s) => (s[1].values))
         const valuesMap = cartesianProduct(valuesArrays)
@@ -185,8 +186,12 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
 
 
     function cartesianProduct(arrays) {
+        if (!arrays || arrays.length === 0) return [];
         return arrays.reduce(
-            (acc, curr) => acc.flatMap(d => curr.map(e => [...d, e])),
+            (acc, curr) => {
+                if (!Array.isArray(curr)) return acc;
+                return acc.flatMap(d => curr.map(e => [...d, e]));
+            },
             [[]]
         );
     }

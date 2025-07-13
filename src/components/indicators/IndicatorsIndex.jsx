@@ -10,7 +10,7 @@ import ComponentLoading from '../reuseables/ComponentLoading';
 import { useIndicators } from '../../contexts/IndicatorsContext';
 import { Link } from 'react-router-dom';
 
-function IndicatorCard({ indicator, callback = null }) {
+function IndicatorCard({ indicator, callback = null, callbackText }) {
     const [loading, setLoading] = useState(false);
     const { indicatorDetails, setIndicatorDetails } = useIndicators();
     const [active, setActive] = useState(null);
@@ -49,7 +49,7 @@ function IndicatorCard({ indicator, callback = null }) {
             <Link to={`/indicators/${indicator.id}`} style={{display:'flex', width:"fit-content"}}><h2>{indicator.code}: {indicator.name}</h2></Link>
             {callback && (
                 <button onClick={(e) => { e.stopPropagation(); callback(indicator); }}>
-                    Add to Project
+                    {callbackText}
                 </button>
             )}
             {expanded && loading && <ComponentLoading />}
@@ -71,7 +71,7 @@ function IndicatorCard({ indicator, callback = null }) {
     );
 }
 
-export default function IndicatorsIndex({ callback=null, excludeProject=null, projectTrigger=null }){
+export default function IndicatorsIndex({ callback=null, callbackText='Add Indicator', excludeProject=null, projectTrigger=null }){
     const { user } = useAuth()
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -114,7 +114,7 @@ export default function IndicatorsIndex({ callback=null, excludeProject=null, pr
     }
     console.log(page)
     //const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
-    if(loading) return <Loading />
+    if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Indicators' : 'My Indicators'}</h1> 
@@ -124,7 +124,7 @@ export default function IndicatorsIndex({ callback=null, excludeProject=null, pr
                 {indicators?.length === 0 ? 
                     <p>No indicators match your criteria.</p> :
                     indicators?.map(ind => (
-                        <IndicatorCard key={ind.id} indicator={ind} callback={callback ? (indicator)=> callback(indicator) : null}/>)
+                        <IndicatorCard key={ind.id} indicator={ind} callback={callback ? (indicator)=> callback(indicator) : null} callbackText={callbackText} />)
                     )
                 }
             </IndexViewWrapper>

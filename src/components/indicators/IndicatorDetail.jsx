@@ -18,12 +18,12 @@ export default function IndicatorDetail(){
     const { user } = useAuth();
     const { id } = useParams();
     const[loading, setLoading] = useState(true)
-    const { indicatorDetails, setIndicatorDetails } = useIndicators();
+    const { indicatorDetails, setIndicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
     const[activeIndicator, setActiveIndicator] = useState(null);
     const [projects, setProjects] = useState([]);
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
-
+    const [labels, setLabels] = useState({})
     const navigate = useNavigate();
     useEffect(() => {
         const getIndicatorDetails = async () => {
@@ -53,8 +53,29 @@ export default function IndicatorDetail(){
             }
         };
         getIndicatorDetails();
+        
+        const getMeta = async() => {
+            if(Object.keys(indicatorsMeta).length != 0){
+                setLoading(false);
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/indicators/meta/`);
+                    const data = await response.json();
+                    setIndicatorsMeta(data);
+                    setLoading(false);
+                }
+                catch(err){
+                    console.error('Failed to fetch indicators meta: ', err)
+                    setLoading(false)
+                }
+            }
+        }
+        getMeta()
 
-    }, [id, indicatorDetails, setIndicatorDetails]);
+    }, [id, indicatorDetails]);
 
     useEffect(() => {
         const getProjects = async () => {
@@ -74,6 +95,16 @@ export default function IndicatorDetail(){
         };
         getProjects();
     }, [activeIndicator])
+
+    useEffect(() => {
+        if (!indicatorsMeta?.indicator_types || !activeIndicator) return;
+        const typeIndex = indicatorsMeta.indicator_types.indexOf(activeIndicator.indicator_type);
+        const attrIndexes = activeIndicator?.required_attribute?.map((s) => (indicatorsMeta.required_attributes.indexOf(s.name))).filter(s => s!= -1)
+        setLabels({
+            indicator_type: indicatorsMeta.indicator_type_labels[typeIndex],
+            required_attribute: attrIndexes?.map((s) => (indicatorsMeta.required_attribute_labels[s]))
+        })
+    }, [indicatorsMeta, activeIndicator])
 
     const deleteIndicator = async() => {
         try {
@@ -116,7 +147,7 @@ export default function IndicatorDetail(){
         }
         
     } 
-    if (loading) return <Loading />
+    if (loading || !activeIndicator) return <Loading />
     return(
         <div className={styles.container}>
             {del && <ConfirmDelete name={activeIndicator.name} statusWarning={'We advise against deleting indicators. Instead, please consider setting its status as "deprecated".'} onConfirm={() => deleteIndicator()} onCancel={() => setDel(false)} />}
@@ -125,16 +156,16 @@ export default function IndicatorDetail(){
                 <p>Return to indicators overview</p>   
             </Link>
             <div className={styles.section}>
-                <h1>{activeIndicator.code}: {activeIndicator.name}</h1>
+                <h1>{activeIndicator?.code}: {activeIndicator?.name}</h1>
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-                <p>{activeIndicator.description}</p>
-                <p><i>{activeIndicator.status}, {activeIndicator.indicator_type}{activeIndicator.require_numeric && ', Requires a number'} {activeIndicator.allow_repeat && '(Allows Repeats)'}</i></p>
-                {activeIndicator.prerequisite && <p><strong>Prerequisite {activeIndicator.prerequisite.code}: {activeIndicator.prerequisite.name}</strong></p>}
-                {activeIndicator.required_attribute.length > 0 && <div>
+                <p>{activeIndicator?.description}</p>
+                <p><i>{activeIndicator?.status}, {labels?.indicator_type}{activeIndicator?.require_numeric && ', Requires a number'} {activeIndicator?.allow_repeat && '(Allows Repeats)'}</i></p>
+                {activeIndicator?.prerequisite && <p><strong>Prerequisite {activeIndicator.prerequisite.code}: {activeIndicator.prerequisite.name}</strong></p>}
+                {activeIndicator?.required_attribute.length > 0 && <div>
                     <p>Requires Special Respondent Attributes:</p>
-                    <ul>{activeIndicator.required_attribute.map((a) => (<li key={a.id}>{a.name}</li>))}</ul>
+                    <ul>{labels?.required_attribute?.map((a) => (<li key={a}>{a}</li>))}</ul>
                 </div>}
-                {activeIndicator.subcategories.length > 0 && 
+                {activeIndicator?.subcategories.length > 0 && 
                     <div>
                         <h4>Subcategories</h4>
                     <ul>
@@ -151,14 +182,14 @@ export default function IndicatorDetail(){
                 {del && <ButtonLoading forDelete={true} /> }
                 {user.role == 'admin' && 
                     <div>
-                        <p><i>Created by: {activeIndicator.created_by?.first_name} {activeIndicator.created_by?.last_name} at {new Date(activeIndicator.created_at).toLocaleString()}</i></p>
-                        {activeIndicator.updated_by && activeIndicator.updated_by && <p><i>Updated by: {activeIndicator.updated_by?.first_name} {activeIndicator.updated_by?.last_name} at {new Date(activeIndicator.updated_at).toLocaleString()}</i></p>}
+                        <p><i>Created by: {activeIndicator?.created_by?.first_name} {activeIndicator?.created_by?.last_name} at {new Date(activeIndicator?.created_at).toLocaleString()}</i></p>
+                        {activeIndicator?.updated_by && activeIndicator?.updated_by && <p><i>Updated by: {activeIndicator.updated_by?.first_name} {activeIndicator.updated_by?.last_name} at {new Date(activeIndicator?.updated_at).toLocaleString()}</i></p>}
                     </div>
                 } 
             </div>
-            {activeIndicator.status != 'Planned' && <div className={styles.section}>
+            {activeIndicator?.status != 'Planned' && <div className={styles.section}>
                 <h2>Performance Over Time</h2>
-                <IndicatorChart indicatorID={activeIndicator.id} showFilters={true} />
+                <IndicatorChart indicatorID={activeIndicator?.id} showFilters={true} />
             </div>}
             
             

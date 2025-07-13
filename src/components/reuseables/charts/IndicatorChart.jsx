@@ -8,6 +8,7 @@ import Checkbox from '../Checkbox';
 import styles from './chart.module.css';
 import theme from '../../../../theme/theme';
 import ComponentLoading from '../ComponentLoading';
+import autoCounts from './autoCounts';
 
 export default function IndicatorChart({ indicatorID, organizationID=null, projectID=null }) {
     const { respondentsMeta, setRespondentsMeta } = useRespondents();
@@ -25,6 +26,7 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
     const [orgIDs, setOrgIDs] = useState([]);
     const [orgNames, setOrgNames] = useState([]);
     const[search, setSearch] = useState('');
+    const [type, setType] = useState('Respondent');
     const [filters, setFilters] = useState({
         sex: '',
         age_range: '',
@@ -37,12 +39,13 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
         before: '',
         hiv_status: '',
         pregnant: '',
+        type: '',
     });
     const [chartData, setChartData] = useState(null)
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const getInteractions = async() => {
+        const getData = async() => {
             setLoading(true)
             try {
                 console.log('fetching interactions...');
@@ -56,6 +59,7 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
                 setData(data[0]);
                 setLegendOptions(data[0].legend)
                 setLegendLabels(data[0].legend_labels)
+                setType(data[0].indicator_type);
                 setChartData(monthlyCounts(data[0]));
                 setLoading(false)
             } 
@@ -64,7 +68,7 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
                 setLoading(false)
             }
         }
-        getInteractions();
+        getData();
     }, [indicatorID, projectID, organizationID])
 
     useEffect(() => {
@@ -116,7 +120,19 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
 
     useEffect(() => {
         if(data){
-            setChartData(monthlyCounts(data, filters, axis, legend, respondentsMeta));
+            if(type==='Event_No' || type==='Org_Event_No'){
+                setChartData(autoCounts(data,type, filters, axis, legend))
+                let options = ['organization']
+                if(legendOptions.includes('targets')) options.push('targets')
+                setLegendOptions(options)
+                let labels = ['By Organization']
+                if(legendOptions.includes('targets')) labels.push('vs. Targets')
+                setLegendLabels(labels)
+            }
+            else{
+                setChartData(monthlyCounts(data, filters, axis, legend, respondentsMeta));
+            }
+        
         }
     }, [data, filters, axis, legend])
 
@@ -267,7 +283,7 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
             <Checkbox label='Show Filters?' name="filters" checked={showFilters} callback={(c) => setShowFilters(c)} />
             {showFilters && <div>
                 <h3>Filters</h3>
-                <div className={styles.filters}>
+                {!['Event_No', 'Org_Event_No'].includes(type) && <div className={styles.filters}>
                     <div className={styles.filter}>
                         <SimpleSelect name='sex' optionValues={respondentsMeta.sexs} optionLabels={respondentsMeta.sex_labels} callback={(val) => setFilters(prev => ({...prev, sex: val}))} />
                     </div>
@@ -295,19 +311,21 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
                         />
                     </div>
                     <div className={styles.filter}>
-                        <SimpleSelect name='organization' label='Organization' 
-                            optionValues={orgIDs} search={true} searchCallback={(val) => setSearch(val)}
-                            multiple={false} optionLabels={orgNames}
-                            callback={(val) => setFilters(prev => ({ ...prev, organization: val }))}
-                        />
-                    </div>
-                    <div className={styles.filter}>
                         <SimpleSelect name='pregnant' optionValues={[true, false]} optionLabels={['Pregnant', 'Not Pregnant']} callback={(val) => setFilters(prev => ({...prev, pregnant: val}))} value={filters.pregnant}/>
                     </div>   
                     <div className={styles.filter}>
                         <SimpleSelect name='hiv_status' optionValues={[true, false]} optionLabels={['HIV Positive', 'HIV Negative']} callback={(val) => setFilters(prev => ({...prev, hiv_status: val}))} value={filters.hiv_status}/>
-                    
                     </div> 
+                    <div className={styles.filter}>
+                        <SimpleSelect name='type' optionValues={['event', 'interaction']} optionLabels={['Counts from Events', 'Individual Interactions']} callback={(val) => setFilters(prev => ({...prev, type: val}))} value={filters.type}/>
+                    </div> 
+                <div className={styles.filter}>
+                    <SimpleSelect name='organization' label='Organization' 
+                        optionValues={orgIDs} search={true} searchCallback={(val) => setSearch(val)}
+                        multiple={false} optionLabels={orgNames}
+                        callback={(val) => setFilters(prev => ({ ...prev, organization: val }))}
+                    />
+                </div>
                 <div className={styles.filter}>
                     <div>
                         <label htmlFor='after' >After</label>
@@ -318,7 +336,28 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
                         <input id='before' type='date' value={filters.before} onChange={(e) => setFilters(prev => ({...prev, before: e.target.value}))} />
                     </div>
                     </div>
+                </div>}
+            {['Event_No', 'Org_Event_No'].includes(type) &&
+            <div className={styles.filters}>
+                    <div className={styles.filter}>
+                        <SimpleSelect name='organization' label='Organization' 
+                            optionValues={orgIDs} search={true} searchCallback={(val) => setSearch(val)}
+                            multiple={false} optionLabels={orgNames}
+                            callback={(val) => setFilters(prev => ({ ...prev, organization: val }))}
+                        />
+                    </div>
+                    <div className={styles.filter}>
+                        <div>
+                            <label htmlFor='after' >After</label>
+                            <input id='after' type='date' value={filters.after} onChange={(e) => setFilters(prev => ({...prev, after: e.target.value}))} />
+                        </div>
+                        <div>
+                            <label htmlFor='before' >Before</label>
+                            <input id='before' type='date' value={filters.before} onChange={(e) => setFilters(prev => ({...prev, before: e.target.value}))} />
+                        </div>
+                    </div>
                 </div>
+            }
             </div>}
         </div>
     )
