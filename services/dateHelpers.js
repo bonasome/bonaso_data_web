@@ -30,11 +30,11 @@ export function tryMatchDates(start, end, project){
         return {type: 'months', value: `${startYear}-${String(startMonth).padStart(2, '0')}`}
     }
     const quarters = [
-  { start: new Date(`${startYear}-01-01`), end: new Date(`${startYear}-03-31`), str: `Q1 ${startYear}` },
-  { start: new Date(`${startYear}-04-01`), end: new Date(`${startYear}-06-30`), str: `Q2 ${startYear}` },
-  { start: new Date(`${startYear}-07-01`), end: new Date(`${startYear}-09-30`), str: `Q3 ${startYear}` },
-  { start: new Date(`${startYear}-10-01`), end: new Date(`${startYear}-12-31`), str: `Q4 ${startYear}` },
-];
+        { start: new Date(`${startYear}-01-01`), end: new Date(`${startYear}-03-31`), str: `Q1 ${startYear}` },
+        { start: new Date(`${startYear}-04-01`), end: new Date(`${startYear}-06-30`), str: `Q2 ${startYear}` },
+        { start: new Date(`${startYear}-07-01`), end: new Date(`${startYear}-09-30`), str: `Q3 ${startYear}` },
+        { start: new Date(`${startYear}-10-01`), end: new Date(`${startYear}-12-31`), str: `Q4 ${startYear}` },
+    ];
 
 let quarter = null;
 for (const q of quarters) {
@@ -164,3 +164,43 @@ export function getMonthDates(month, year, project) {
 
     return { start, end };
 }
+
+export function getMonthStringsBetween(startDateStr, endDateStr) {
+    const start = new Date(startDateStr);
+    const end = new Date(endDateStr);
+
+    const months = [];
+    const current = new Date(start.getFullYear(), start.getMonth(), 1);
+
+    while (current <= end) {
+        const year = current.getFullYear();
+        const month = String(current.getMonth() + 1).padStart(2, '0');
+        months.push(current.toLocaleString('en-US', { month: 'short', year: 'numeric' }));
+
+        current.setMonth(current.getMonth() + 1);
+    }
+
+    return months;
+}
+
+export function getQuarterStringsBetween(startDateStr, endDateStr) {
+    const start = new Date(startDateStr);
+    const end = new Date(endDateStr);
+
+    const quarters = [];
+    let year = start.getFullYear();
+    let quarter = Math.floor(start.getMonth() / 3) + 1;
+
+    while (year < end.getFullYear() || (year === end.getFullYear() && quarter <= Math.floor(end.getMonth() / 3) + 1)) {
+        quarters.push(`Q${quarter} ${year}`);
+        
+        quarter += 1;
+        if (quarter > 4) {
+        quarter = 1;
+        year += 1;
+        }
+    }
+
+    return quarters;
+}
+

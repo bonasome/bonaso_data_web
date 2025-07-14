@@ -15,11 +15,12 @@ import Checkbox from '../../reuseables/Checkbox';
 import ButtonLoading from '../../reuseables/ButtonLoading';
 import SimpleSelect from '../../reuseables/SimpleSelect';
 import { tryMatchDates, getMonthDatesStr, getQuarterDatesStr, getWindowsBetween } from '../../../../services/dateHelpers';
+import ConfirmDelete from '../../reuseables/ConfirmDelete';
+import ComponentLoading from '../../reuseables/ComponentLoading';
 
-
-export function TargetCard({ existing, project, organization }){
+export function TargetCard({ existing=null, project, organization, handleChange, onCancel }){
     const { user } = useAuth();
-    const [editing, setEditing] = useState(false);
+    const [editing, setEditing] = useState(existing ? false : true);
     const [del, setDel] = useState(false);
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState([]);
@@ -88,8 +89,8 @@ export function TargetCard({ existing, project, organization }){
             });
             const returnData = await response.json();
             if(response.ok){
+                handleChange()
                 setEditing(false);
-                console.log('good');
             }
             else{
                 const serverResponse = []
@@ -117,14 +118,12 @@ export function TargetCard({ existing, project, organization }){
 
     const deleteTarget = async() => {
         try {
-            setActing(true);
             console.log('deleting targets...');
             const response = await fetchWithAuth(`/api/manage/targets/${existing.id}/`, {
                 method: 'DELETE',
             });
             if (response.ok) {
-                setSuccess('Target deleted.')
-                onDelete(existing.id);
+                handleChange()
                 setErrors([]);
             } 
             else {
@@ -155,22 +154,20 @@ export function TargetCard({ existing, project, organization }){
             setErrors(['Something went wrong. Please try again later.'])
         }
         finally{
-            setActing(false);
             setDel(false);
         }
-
     }
 
-    console.log(dateType)
-
+    if(!project || !organization) return <ComponentLoading />
     return(
         <div className={styles.card} onClick={(e) => e.stopPropagation()}>
+            {del && <ConfirmDelete name='Target' onConfirm={() => deleteTarget()} onCancel={() => setDel(false)} />}
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {task && <h2>Target for {task?.indicator.code}: {task.indicator.name}</h2>}
             {!task && <h2>New Target</h2>}
             {editing &&
                 <div>
-                <TaskSelect existing={task} title={'Target for Task'} onChange={(task) => {setFormData(prev => ({...prev, task_id: task?.id})); setTask(task)}} callbackText={'Select Task'} projectID={project?.id} organizationID={organization?.id}/>
+                <TaskSelect existing={task} title={'Target for Task'} onChange={(task) => {setFormData(prev => ({...prev, task_id: task?.id})); setTask(task)}} callbackText={'Select Task'} projectID={project.id} organizationID={organization.id}/>
                 
                 <SimpleSelect name={'date_type'} label={'Select a Date Form'} optionValues={['months', 'quarters', 'custom']} 
                     optionLabels={['By Month', 'By Quarter', 'Custom']} callback={(val) => setDateType(prev => ({...prev, type: val}))} 
@@ -219,10 +216,15 @@ export function TargetCard({ existing, project, organization }){
                 }
                 </div>
             }
+            {!editing && <div>
+                <p>{dateType?.value} ({(prettyDates(formData?.start))} to {prettyDates(formData?.end)})</p>
+                {formData.amount && <p>Achievement: {existing.achievement || 0} of {formData.amount} ({formData.amount != 0 ? Math.round((existing.achievement/formData.amount)*100) : '0'}%)</p>}
+                {relatedTo && <p>{formData.percentage_of_related}% of {relatedTo?.indicator.name} ({existing.achievement} of {existing.related_as_number}, {existing.related_as_number !== 0 ? Math.round((existing.achievement/existing.related_as_number)*100) : '0'}%)</p>}
+            </div>}
             <div>
                 {editing && (saving ? <ButtonLoading /> : <button onClick={() => saveTarget()}>Save</button>)}
-                {user.role == 'admin' && <button className={styles.cancel} onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit Target'}</button>}
-                {user.role == 'admin' && !editing && <button className={errorStyles.deleteButton} onClick={del ? () => deleteTarget() : () => {setDel(true); setErrors(['Are you sure you want to delete this target?'])}}> {del ? 'Confirm' : 'Delete Target'}</button>}
+                {user.role == 'admin' && <button className={styles.cancel} onClick={existing ? () => setEditing(!editing) : () => onCancel() }>{editing ? 'Cancel' : 'Edit Target'}</button>}
+                {user.role == 'admin' && !editing && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete Target</button>}
                 {del && <ButtonLoading forDelete={true} />}
             </div>
         </div>
@@ -239,7 +241,7 @@ export default function Targets() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState([]);
-    
+    const [adding, setAdding] =useState(false);
     const [project, setProject] = useState(null);
     const [org, setOrg] = useState(null);
     const [targets, setTargets] = useState([]);
@@ -343,17 +345,42 @@ export default function Targets() {
         getTargets();
     }, [id, orgID])
 
+    const handleChange = async () => {
+        const getTargets = async () => {
+            if(!id || !orgID) return;
+            try {
+                console.log('fetching targets...');
+                const response = await fetchWithAuth(`/api/manage/targets/?task__organization=${orgID}&task__project=${id}`);
+                const data = await response.json();
+                if(response.ok){
+                    setEntries(data.count);
+                    setTargets(data.results);
+                    setAdding(false);
+                }
+                else{
+                    navigate(`/not-found`);
+                }
+                
+            } 
+            catch (err) {
+                setErrors(['Failed to fetch targets. Please try again later.'])
+                console.error('Failed to fetch organization: ', err);
+            }
+        }
+        getTargets();
+    }
+    console.log(targets)
     if (loading) return <Loading />
     return (
         <div>
             <h1>Targets for {org?.name} for {project?.name}</h1>
             <IndexViewWrapper entries={entries} onSearchChange={setSearch} page={page} onPageChange={setPage}>
-                {user.role == 'admin' && <Link to='/projects/new'><button>Create New Project</button></Link>}
-                
+                {user.role == 'admin' && <button onClick={() => setAdding(true)}>Add Target for {org?.name}</button>}
+                {adding && <TargetCard organization={org} project={project} handleChange={handleChange} onCancel={() => setAdding(false)} /> }
                 {(targets && project && org && targets?.length) == 0 ? 
                     <p>No targets yet. Make one!</p> :
                     targets?.map(tar => (
-                    <TargetCard key={tar.id} existing={tar} org={org} project={project} />
+                    <TargetCard key={tar.id} existing={tar} organization={org} project={project} handleChange={handleChange} />
                     ))
                 }
             </IndexViewWrapper>

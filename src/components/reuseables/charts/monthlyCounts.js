@@ -1,6 +1,8 @@
+import { getMonthStringsBetween, getQuarterStringsBetween } from "../../../../services/dateHelpers";
+
 function getQuarter(date) {
-  const month = date.getMonth(); // 0 = Jan, 11 = Dec
-  return 'Quarter ' + (Math.floor(month / 3) + 1);
+    const month = date.getMonth(); // 0 = Jan, 11 = Dec
+    return 'Q' + (Math.floor(month / 3) + 1) + ' ' + (date.getFullYear());
 }
 
 function quarterSort(a, b) {
@@ -8,6 +10,7 @@ function quarterSort(a, b) {
     const [qb, yb] = b.split(' ').slice(1);
     return new Date(`${ya}-0${qa * 3 - 2}-01`) - new Date(`${yb}-0${qb * 3 - 2}-01`);
 }
+
 
 export default function monthlyCounts(data, filters = null, axis='month', legend='', meta=null) {
     const events = data?.events || [];
@@ -257,10 +260,21 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
         }
         if(filters?.organization && filters.organization != target.organization) continue;
         let key = 'count';
+
         if(axis==='month'){
-            key = end.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+            const targetDateMonths = getMonthStringsBetween(target.start, target.end)
+            console.log(targetDateMonths)
+            targetDateMonths.forEach(m => {
+                targetAxisGroups[m] = (targetAxisGroups[m] || 0) + (target.amount)/targetDateMonths.length;
+            })
         }
-        targetAxisGroups[key] = (targetAxisGroups[key] || 0) + target.amount;
+        else if(axis==='quarter'){
+            const targetDateQuarters = getQuarterStringsBetween(target.start, target.end)
+            targetDateQuarters.forEach(q => {
+                targetAxisGroups[q] = (targetAxisGroups[q] || 0) + (target.amount)/targetDateQuarters.length;
+            })
+        }
+        else targetAxisGroups[key] = (targetAxisGroups[key] || 0) + target.amount;
     }
 
     // Combine into final array

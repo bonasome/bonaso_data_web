@@ -273,7 +273,10 @@ export default function IndicatorChart({ indicatorID, organizationID=null, proje
                     </PieChart>
                 </ResponsiveContainer>
             )}
-
+            {legend==='targets' && ['month', 'quarter'].includes(axis) && <p><i>
+                Please note that if a targets start/end date does not align with the given {axis} it may not 
+                reflect perfectly on the graph. Please consult the actual targets for more accurate information.
+            </i></p>}
 
 
             <SimpleSelect name='legend' optionValues={legendOptions} optionLabels={legendLabels} callback={(val) => setLegend(val)} value={legend} />
