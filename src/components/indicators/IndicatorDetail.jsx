@@ -27,30 +27,22 @@ export default function IndicatorDetail(){
     const navigate = useNavigate();
     useEffect(() => {
         const getIndicatorDetails = async () => {
-        const found = indicatorDetails.find(p => p.id.toString() === id.toString());
-            if (found) {
-                setActiveIndicator(found);
-                setLoading(false);
-                return;
-            }
-            else{
-                try {
-                    console.log('fetching indicator details...');
-                    const response = await fetchWithAuth(`/api/indicators/${id}/`);
-                    const data = await response.json();
-                    if(response.ok){
-                        setIndicatorDetails(prev => [...prev, data]);
-                        setActiveIndicator(data);
-                    }
-                    else{
-                        navigate('/not-found')
-                    }
-                    
-                } 
-                catch (err) {
-                    console.error('Failed to fetch indicator: ', err);
-                } 
-            }
+            try {
+                console.log('fetching indicator details...');
+                const response = await fetchWithAuth(`/api/indicators/${id}/`);
+                const data = await response.json();
+                if(response.ok){
+                    setIndicatorDetails(prev => [...prev, data]);
+                    setActiveIndicator(data);
+                }
+                else{
+                    navigate('/not-found')
+                }
+                
+            } 
+            catch (err) {
+                console.error('Failed to fetch indicator: ', err);
+            } 
         };
         getIndicatorDetails();
         
@@ -75,7 +67,7 @@ export default function IndicatorDetail(){
         }
         getMeta()
 
-    }, [id, indicatorDetails]);
+    }, [id]);
 
     useEffect(() => {
         const getProjects = async () => {

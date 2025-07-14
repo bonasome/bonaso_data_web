@@ -13,6 +13,7 @@ import Counts from "./Counts";
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ButtonLoading from '../reuseables/ButtonLoading';
 import { useAuth } from "../../contexts/UserAuth";
+import { IoMdReturnLeft } from "react-icons/io";
 
 export default function EventDetail(){
     const { user } = useAuth();
@@ -33,6 +34,7 @@ export default function EventDetail(){
     const [newCount, setNewCount] = useState(false);
     const [newTask, setNewTask] = useState(null);
     const [del, setDel] = useState(false);
+    const [countsSearch, setCountsSearch] = useState('');
     const [_, forceUpdate] = useState(0);
     
 
@@ -75,8 +77,29 @@ export default function EventDetail(){
             }
         };
         getEventDetails();
+        const getEventBreakdowns = async () => {
+            try {
+                console.log('fetching event details...');
+                const response = await fetchWithAuth(`/api/activities/events/breakdowns-meta/`);
+                const data = await response.json();
+                if(response.ok){
+                    setBreakdowns(data)
+                }
+            } 
+            catch (err) {
+                console.error('Failed to fetch event: ', err);
+            } 
+            finally{
+                setLoading(false);
+            }
+        }
+        getEventBreakdowns();
+    }, [id]);
 
+    useEffect(() => {
         const getEventCounts = async () => {
+            console.log(breakdowns)
+            if(!breakdowns) return;
             try {
                 console.log('fetching event details...');
                 const response = await fetchWithAuth(`/api/activities/events/${id}/get-counts/`);
@@ -94,33 +117,7 @@ export default function EventDetail(){
             } 
         };
         getEventCounts();
-
-        const getEventBreakdowns = async () => {
-            const found = eventDetails.find(e => e.id.toString() === id.toString());
-            if (found) {
-                setEvent(found);
-                setLoading(false);
-                return;
-            }
-            else{
-                try {
-                    console.log('fetching event details...');
-                    const response = await fetchWithAuth(`/api/activities/events/breakdowns-meta/`);
-                    const data = await response.json();
-                    if(response.ok){
-                        setBreakdowns(data)
-                    }
-                } 
-                catch (err) {
-                    console.error('Failed to fetch event: ', err);
-                } 
-                finally{
-                    setLoading(false);
-                }
-            }
-        }
-        getEventBreakdowns();
-    }, [id]);
+    }, [breakdowns])
 
     const prepareCounts = (data) => {
         const map = {}
@@ -399,11 +396,16 @@ export default function EventDetail(){
         setFilteredTasks(eventTasks.filter((t) => !countKeys.includes(t.id.toString())))
     }, [eventCounts, eventTasks])
 
+    console.log(eventCounts)
     if(loading) return <Loading />
     return(
         <div>
             {del && <ConfirmDelete name={event?.name} statusWarning={'You will not be allowed to delete this event if it has counts associated with it.'} onConfirm={() => deleteEvent()} onCancel={() => setDel(false)} /> }
             <div className={styles.segment}>
+                <Link to={'/events'} className={styles.return}>
+                    <IoMdReturnLeft className={styles.returnIcon} />
+                    <p>Return to events overview</p>   
+                </Link>
                 <h1>{event?.name}</h1>
                 <h2>Details</h2>
                 <h3>{prettyDates(event?.event_date)}, {event?.location} </h3>
@@ -461,22 +463,31 @@ export default function EventDetail(){
             {newCount && newTask !== '' && <Counts onSave={() => handleChange()} onCancel={() => handleCancel()} breakdownOptions={breakdowns} event={event} task={eventTasks.find(t => t.id == newTask)} />}
            
             
-            {eventCounts && Object.keys(eventCounts)?.length > 0 && Object.keys(eventCounts).map((c) => {
-                const taskId = parseInt(c);
-                const task = eventTasks.find(t => t.id === taskId);
-                return (
-                    <Counts
-                        key={taskId}
-                        onCancel={handleCancel}
-                        event={event}
-                        breakdownOptions={breakdowns}
-                        task={task}
-                        onSave={handleChange}
-                        onDelete={handleChange}
-                        existing={eventCounts[taskId]}
-                    />
-                );
-                })
+            {eventCounts && breakdowns &&
+                <div className={styles.segment}> 
+                    <input type='text' value={countsSearch} onChange={(e) => setCountsSearch(e.target.value)} />
+                    {Object.keys(eventCounts)?.length > 0 && Object.keys(eventCounts).map((c) => {
+                        const taskId = parseInt(c);
+                        const task = eventTasks.find(t => t.id === taskId);
+                        console.log(countsSearch, task)
+                        if (!task) return null;
+                        if(countsSearch =='' || task.organization.name.toLowerCase().includes(countsSearch.toLowerCase()) || task.indicator.name.toLowerCase().includes(countsSearch.toLowerCase())){
+                            return (
+                                <Counts
+                                    key={taskId}
+                                    onCancel={handleCancel}
+                                    event={event}
+                                    breakdownOptions={breakdowns}
+                                    task={task}
+                                    onSave={handleChange}
+                                    onDelete={handleChange}
+                                    existing={eventCounts[taskId]}
+                                />
+                            );
+                        }
+                        return null;
+                    })}
+                </div>
             }
             <div className={styles.spacer}>
                 <p></p>

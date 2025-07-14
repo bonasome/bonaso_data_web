@@ -112,7 +112,6 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
         setStatusFilter(filters.status);
         setPage(1);
     }
-    console.log(page)
     //const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
     if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(

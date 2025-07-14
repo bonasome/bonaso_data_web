@@ -107,6 +107,7 @@ export default function EditEvent(){
         console.log('submitting data...', data)
         try{
             setSaving(true);
+            if(typeof data?.host_id === 'object' && data?.host_id?.id) data.host_id = data.host_id.id;
             const response = await fetchWithAuth(`/api/activities/events/${id}/`, {
                 method: 'PATCH',
                 headers: {

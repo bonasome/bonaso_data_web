@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/UserAuth';
 import ButtonLoading from '../reuseables/ButtonLoading';
 import IndicatorSelect from '../indicators/IndicatorSelect';
 import OrganizationSelect from '../organizations/OrganizationSelect';
+import ClientSelect from '../projects/clients/ClientSelect';
 
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]
 export default function DynamicForm({ config, onSubmit, onCancel, onError, saving }){
@@ -17,6 +18,8 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
     const [errors, setErrors] = useState([])
     const [switchpath, setSwitchpath] = useState(false);
     const [switchpath2, setSwitchpath2] = useState(false);
+    const [switchpath3, setSwitchpath3] = useState(false);
+    const [switchpathIndex, setSwitchpathIndex] = useState(false);
     const rowRefs = useRef({});
     
     useEffect(() => {
@@ -37,6 +40,9 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
             }
             else if(field.switchpath2){
                 setSwitchpath2(field.value)
+            }
+            else if(field.switchpath3){
+                setSwitchpath3(field.value)
             }
         });
         setFormData(struct);
@@ -82,6 +88,10 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                     if(!switchpath && field.showonpath) return <div key={field.name}></div>
                     if(switchpath2 && field.hideonpath2) return <div key={field.name}></div>
                     if(!switchpath2 && field.showonpath2) return <div key={field.name}></div>
+                    if(switchpath3 && field.hideonpath3) return <div key={field.name}></div>
+                    if(!switchpath3 && field.showonpath3) return <div key={field.name}></div>
+                    if(switchpathIndex && field.hideonpathIndex) return <div key={field.name}></div>
+                    if(!switchpathIndex && field.showonpathIndex) return <div key={field.name}></div>
                     const label = (field.label || (field.name.charAt(0).toUpperCase() + field.name.slice(1))) + (field.required ? ' *': ' (Optional)');
                     const max = field.max || null
                     if(field.type == 'text'){
@@ -151,6 +161,7 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                                     }));
                                     field.switchpath && setSwitchpath(field.switchpath === val);
                                     field.switchpath2 && setSwitchpath2(field.switchpath2===val);
+                                    field.switchpath3 && setSwitchpath3(field.switchpath3===val);
                                 }} />
                             </div>
                         )
@@ -158,7 +169,13 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                     else if(field.type == 'checkbox'){
                         return(
                             <div key={field.name} className={styles.checkboxField}>
-                                <input type="checkbox" id={field.name} name={field.name} checked={!!formData[field.name]}  onChange={(e) => {setFormData(prev=>({...prev, [field.name]: e.target.checked })); field.switchpath && setSwitchpath(e.target.checked); field.switchpath2 && setSwitchpath2(e.target.checked)}} />
+                                <input type="checkbox" id={field.name} name={field.name} checked={!!formData[field.name]}  
+                                    onChange={(e) => {setFormData(prev=>({...prev, [field.name]: e.target.checked })); 
+                                        field.switchpath && setSwitchpath(e.target.checked); 
+                                        field.switchpath2 && setSwitchpath2(e.target.checked); 
+                                        field.switchpath3 && setSwitchpath3(e.target.checked)
+                                    }} 
+                                />
                                 <label htmlFor={field.name}>{label}</label>
                             </div>
                         )
@@ -174,14 +191,25 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                     else if(field.type == 'indicator'){
                         return(
                             <div className={styles.field}>
-                                <IndicatorSelect title={field.label} existing={field.value} onChange={(ind) => setFormData(prev=>({...prev, [field.name]: ind?.id || null }))} /> 
+                                <IndicatorSelect title={field.label} existing={field.value} 
+                                    onChange={(ind, setPath) => {setFormData(prev=>({...prev, [field.name]: ind?.id || null })); 
+                                        setPath ? setSwitchpathIndex(setPath) : setSwitchpathIndex(false)
+                                    }} 
+                                /> 
                             </div>
                         )
                     }
                     else if(field.type == 'organization'){
                         return(
                             <div className={styles.field}>
-                                <OrganizationSelect title={field.label} existing={field.value} onChange={(org) => setFormData(prev=>({...prev, [field.name]: org?.id || null }))} /> 
+                                <OrganizationSelect title={field.label} callbackText={field?.callbackText || 'Select'} existing={field.value} onChange={(org) => setFormData(prev=>({...prev, [field.name]: org?.id || null }))} /> 
+                            </div>
+                        )
+                    }
+                    else if(field.type == 'client'){
+                        return(
+                            <div className={styles.field}>
+                                <ClientSelect title={field.label} existing={field.value} onChange={(cl) => setFormData(prev=>({...prev, [field.name]: cl?.id || null }))} /> 
                             </div>
                         )
                     }

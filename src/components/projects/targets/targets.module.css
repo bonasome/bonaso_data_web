@@ -1,0 +1,5 @@
+.card{
+    margin: 4vh;
+    padding: 3vh;
+    background-color: var(--bonaso-dark-accent);
+}

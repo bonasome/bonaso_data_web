@@ -3,6 +3,22 @@
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
+.return{
+    display: flex;
+    flex-direction: row;
+    margin-top: auto;
+    margin-bottom: auto;
+    border-bottom: 2px solid white;
+    background-color: var(--bonaso-dark-accent);
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+    padding-left: 5vh;
+}
+.returnIcon{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 3vh;
+}
 .segment{
     max-width: 100vw;
     overflow-y: scroll;
@@ -28,13 +44,34 @@
     padding-bottom: 5vh;
 }
 
+.countSegment{
+    background-color: var(--bonaso-uber-dark-accent);
+    padding: 2vh;
+    margin-bottom: 2vh;
+}
+
 .countsTable {
     min-width: 100%;
 }
 
+.expander > * {
+    margin-left: 2vh;
+    transition: all 1s;
+}
+
+.expander:hover{
+    cursor: pointer;
+}
+.expander:hover > * {
+    transform: scale(1.02);
+    color: var(--bonaso-light-accent);
+    font-weight: bold;
+}
+
 th{
     padding: 2vh;
-    background-color: var(--bonaso-uber-dark-accent);
+    background-color: var(--bonaso-light-accent);
+    color: var(--bonaso-uber-dark-accent);
 }
 tr:nth-child(even) {
   background-color: var(--bonaso-main);
@@ -48,4 +85,12 @@ td {
 }
 td >* {
     text-align: center;
+}
+td > input {
+    width: 5vh;
+    text-align: center;
+}
+.flaggedCount{
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
 }

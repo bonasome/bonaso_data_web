@@ -33,6 +33,7 @@ import CreateProject from '../components/projects/CreateProject';
 import EditProject from '../components/projects/EditProject';
 import NarrativeReportUpload from '../components/narrativeReports/NarrativeReportUpload';
 import NarrativeReportDownload from '../components/narrativeReports/NarrativeReportDownload';
+import Targets from '../components/projects/targets/Targets';
 
 import ClientsIndex from '../components/projects/clients/ClientsIndex';
 import ClientDetail from '../components/projects/clients/ClientsDetail';
@@ -144,6 +145,11 @@ function Router() {
             <Route path=':id/narrative-reports/download' element={
                 <RedirectIfNoPerm level={['admin', 'client']}>
                     <NarrativeReportDownload />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path=':id/targets/:orgID' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
+                    <Targets />
                 </RedirectIfNoPerm>
             }/>
 

@@ -210,7 +210,7 @@ export function OrganizationTasks({ project, organization, setAddingTask }){
                 </div>
             </div>}
             <div className={styles.tasksContainer}>
-                <Tasks className={styles.tasks} callback={loadTasks} update={reload} organization={organization} project={project} target={true} canDelete={true} onError={errors} onSuccess={success}/>
+                <Tasks className={styles.tasks} callback={loadTasks} update={reload} organizationID={organization.id} projectID={project.id} target={true} canDelete={true} onError={errors} onSuccess={success}/>
             </div>
         </div>
     )
@@ -220,7 +220,7 @@ export function OrganizationTasks({ project, organization, setAddingTask }){
 export function OrganizationPerformance({ project, organization, setViewingInd }){
     const [indicator, setIndicator] = useState(null)
     const width = useWindowWidth();
-    
+    const {user} = useAuth();
     const handleDrop = async (e) => {
         e.preventDefault();
         const indicatorPackage = JSON.parse(e.dataTransfer.getData('application/json'));
@@ -240,6 +240,8 @@ export function OrganizationPerformance({ project, organization, setViewingInd }
             {width > 768 && <div className={styles.dropZone} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray', height: '100px', padding: '10px', marginBottom: '30px' }}>
                 <p>Drag an indicator from the sidebar to view {organization.name}'s performance.</p>
             </div>}
+             {!['client'].includes(user.role) && (user.role === 'admin' || user.organization_id === organization?.parent_organization?.id) &&
+             <Link to={`/projects/${project.id}/targets/${organization.id}`}><button>View/Set Targets for {organization.name}</button></Link>}
         </div>
     )
 }

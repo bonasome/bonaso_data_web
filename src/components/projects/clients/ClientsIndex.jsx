@@ -3,10 +3,12 @@ import { useProjects } from "../../../contexts/ProjectsContext";
 import styles from '../../../styles/indexView.module.css';
 import fetchWithAuth from "../../../../services/fetchWithAuth";
 import Loading from "../../reuseables/Loading";
+import ComponentLoading from "../../reuseables/ComponentLoading";
 import { useState, useEffect } from 'react';
 import CreateClient from "./CreateClientModal";
 import { Link } from "react-router-dom";
-function ClientCard({ client }){
+import { ca } from "date-fns/locale";
+function ClientCard({ client, callback=null, callbackText }){
     const [expanded, setExpanded] = useState(false);
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
@@ -14,13 +16,14 @@ function ClientCard({ client }){
             {expanded &&
                 <div>
                     {client.full_name && <p>{client.full_name}</p>}
+                    {callback && <button onClick={() => callback(client)}>{callbackText}</button> }
                 </div>
             }
         </div>
     )
 }
 
-export default function ClientsIndex(){
+export default function ClientsIndex({ callback=null, callbackText='Select a Client' }){
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -52,7 +55,7 @@ export default function ClientsIndex(){
     }, [search])
 
     console.log(clients)
-    if(loading) return <Loading />
+    if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
             <h1>Clients</h1>
@@ -61,7 +64,7 @@ export default function ClientsIndex(){
             <IndexViewWrapper entries={entries} page={page} onSearchChange={setSearch} onPageChange={setPage}>
                 {clients?.length > 0 ? 
                     clients.map((c) => (
-                        <ClientCard key={c.id} client={c} />
+                        <ClientCard key={c.id} client={c} callback={callback ? callback : null} callbackText={callbackText}/>
                     )) :
                     <p>No clients yet!</p>
                 }

@@ -1,30 +1,29 @@
 import { useState, useEffect } from 'react';
-import IndicatorsIndex from './IndicatorsIndex';
+import Tasks from './Tasks';
 import styles from '../../styles/indexSelect.module.css';
-export default function IndicatorSelect({ title, onChange, existing=null }){
+export default function TaskSelect({ title, callbackText, onChange, organizationID=null, projectID=null, existing=null }){
     const [selecting, setSelecting] = useState(false);
     const [selected, setSelected] = useState(existing);
-
+    
     useEffect(() => {
         if (existing && existing !== selected) {
             setSelected(existing);
         }
     }, [existing]);
-
+    
     useEffect(() => {
-        const path = selected?.subcategories > 0 || false
         console.log(selected)
-        onChange(selected, path);
+        onChange(selected);
     }, [selected]);
 
     return(
         <div>
             <p>{title}</p>
             <div className={styles.card}>
-                {selected ? <p>Selected: <i>{selected?.code}: {selected?.name}</i></p> : <p>Nothing selected</p>}
-                <button type="button" onClick={() => setSelecting(!selecting)}>{selecting ? 'Done' : 'Choose New Indicator'}</button>
+                {selected ? <p>Selected: <i>{selected?.indicator.code}: {selected?.indicator.name}</i></p> : <p>Nothing selected</p>}
+                <button type="button" onClick={() => setSelecting(!selecting)}>{selecting ? 'Done' : 'Choose New Task'}</button>
                 <button type="button" onClick={() => setSelected(null)}>Clear Selection</button>
-                {selecting && <IndicatorsIndex callback={(ind) => {setSelected(ind); setSelecting(false)}} callbackText={'Select as Prerequisite'}/>}
+                {selecting && <Tasks addCallback={(t) => {setSelected(t); setSelecting(false)}} addCallbackText={callbackText} projectID={projectID} organizationID={organizationID} />}
             </div>
         </div>
     )

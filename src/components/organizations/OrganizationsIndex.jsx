@@ -8,6 +8,7 @@ import IndexViewWrapper from '../reuseables/IndexView';
 import { useOrganizations } from '../../contexts/OrganizationsContext';
 import { Link } from 'react-router-dom';
 import ComponentLoading from '../reuseables/ComponentLoading';
+import Loading from '../reuseables/Loading';
 
 function OrganizationCard({ org, callback = null, callbackText }) {
     const [loading, setLoading] = useState(false);
@@ -103,7 +104,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Add O
         setIndicatorFilter(filters.indicator);
     }
 
-    if(loading) return <ComponentLoading />
+    if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Organizations' : 'My Organizations'}</h1> 

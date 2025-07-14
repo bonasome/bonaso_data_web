@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
 import DynamicForm from '../reuseables/DynamicForm';
@@ -7,17 +7,15 @@ import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useProjects } from '../../contexts/ProjectsContext';
 import { useParams } from 'react-router-dom';
 import errorStyles from '../../styles/errors.module.css';
+import projectsConfig from './projectsConfig';
 
 export default function EditProject(){
     const navigate = useNavigate();
     const { id } = useParams();
-    const [formConfig, setFormConfig] = useState([]);
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const { projectsMeta, setProjectsMeta, projectDetails, setProjectDetails } = useProjects();
     const [existing, setExisting] = useState({})
-    const [clientIDs, setClientIDs] = useState([]);
-    const [clientNames, setClientNames] = useState([]);
     const [saving, setSaving] = useState(false);
 
     const alertRef = useRef(null);
@@ -30,12 +28,6 @@ export default function EditProject(){
     useEffect(() => {
         const getProjectMeta = async () => {
             if(Object.keys(projectsMeta).length != 0){
-                if(projectsMeta.clients){
-                    const clientIDs = projectsMeta.clients.map((c) => c.id);
-                    const clientNames= projectsMeta.clients.map((c)=> c.name);
-                    setClientIDs(clientIDs);
-                    setClientNames(clientNames);
-                }
                 return;
             }
             else{
@@ -44,12 +36,6 @@ export default function EditProject(){
                     const response = await fetchWithAuth(`/api/manage/projects/meta/`);
                     const data = await response.json();
                     setProjectsMeta(data);
-                    if(data.clients){
-                        const clientIDs = data.clients.map((c) => c.id);
-                        const clientNames= data.clients.map((c)=> c.name);
-                        setClientIDs(clientIDs);
-                        setClientNames(clientNames);
-                    }
                 }
                 catch(err){
                     console.error('Failed to fetch projects: ', err)
@@ -92,22 +78,9 @@ export default function EditProject(){
 
     }, [projectsMeta, setProjectsMeta, projectDetails, setProjectDetails, id])
 
-    useEffect(() => {
-        setFormConfig([
-            {name: 'name', label: 'Project Name', type: 'text', required: true, value: existing.name ? existing.name : ''},
-            {name: 'start', type: 'date', required: true, value: existing.start ? existing.start : ''},
-            {name: 'end', type: 'date', required: true, value: existing.end ? existing.end : ''},
-            {name: 'client_id', type: 'select', label: 'Select a Client',  required: true, value: existing.client ? existing.client.id : '', constructors: {
-                values: clientIDs,
-                labels: clientNames,
-                multiple: false,
-            }},
-            {name: 'status', type: 'select', required: true, value: existing.status ? existing.status : '', constructors: {
-                values: projectsMeta.statuses,
-            }},
-            {name: 'description', type: 'textarea', required: false, value: existing.description ? existing.description : ''}
-        ])
-    }, [clientNames, clientIDs, projectsMeta, existing])
+    const formConfig = useMemo(() => {
+        return projectsConfig(projectsMeta, existing);
+    }, [existing, projectsMeta]);
 
     
     const handleCancel = () => {
@@ -119,8 +92,9 @@ export default function EditProject(){
             setErrors(['Start date must be after the end date.'])
             return;
         }
-        console.log('submitting data...')
+        console.log('submitting data...', data)
         try{
+            if(typeof data.client_id === 'object' && data.client_id?.id) data.client_id = data.client_id.id
             setSaving(true);
             const response = await fetchWithAuth(`/api/manage/projects/${existing.id}/`, {
                 method: 'PATCH',

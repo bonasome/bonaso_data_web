@@ -7,7 +7,8 @@ import modalStyles from '../../styles/modals.module.css'
 import SimpleSelect from "../reuseables/SimpleSelect";
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ButtonLoading from "../reuseables/ButtonLoading";
-
+import cleanLabels from '../../../services/cleanLabels';
+import { useAuth } from "../../contexts/UserAuth";
 function Warn( {onConfirm, onCancel }) {
     return(
         <div className={modalStyles.modal}>
@@ -46,30 +47,36 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         pregnancy: {values: [true, false], labels: ['Pregnant', 'Not Pregnant'], col: 8},
         subcategory_id: {values: [], labels: [], col: 3}
     })
+    console.log(existing)
     const [editing, setEditing] = useState(existing ? false: true);
     const [active, setActive] = useState([]);
     const [rows, setRows] = useState([]);
     const [counts, setCounts] = useState({});
     const [errors, setErrors] = useState([])
     const [existingCounts, setExistingCounts] = useState([]);
+    const [existingFlags, setExistingFlags] = useState([]);
     const [existingMap, setExistingMap] = useState([]);
     const [del, setDel] = useState(false);
     const [warning, setWarning] = useState(null);
     const [flagged, setFlagged] = useState(false);
-    const [ogCounts, setOGCounts] = useState([])
     const [saving, setSaving] = useState(false);
-
+    const [expanded, setExpanded] = useState(existing ? false : true);
+    const { user } = useAuth(); 
     const mapExisting = () => {
         let ids = []
         let combos = []
         let countsArray = []
-        let splits = []
+        let flagsArray = []
         Object.keys(existing).forEach((group) => {
             let groupMap = {}
             Object.keys(existing[group]).forEach((ind) => {
                 if(ind === 'id') ids.push(existing[group][ind])
                 if(ind === 'count') countsArray.push(existing[group][ind]);
-                if(ind === 'flagged' && existing[group][ind] == true) setFlagged(true);
+                if(ind === 'flagged'){
+                    const isFlagged = existing[group][ind]
+                    if(isFlagged) setFlagged(true);
+                    flagsArray.push(existing[group][ind] == true)
+                }
                 if(existing[group][ind] != null && !['created_by', 'created_at', 'updated_by', 'updated_at', 'id', 'event', 'count', 'task', 'task_id', 'flagged'].includes(ind)){
                     const key = ind === 'subcategory' ? 'subcategory_id' : ind
                     groupMap[key] = existing[group][ind]
@@ -77,8 +84,8 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             })
             combos.push(groupMap)
         })
-        setOGCounts(splits);
         setExistingCounts(countsArray)
+        setExistingFlags(flagsArray)
         setExistingMap(combos)
         
     }
@@ -173,11 +180,18 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                 existingMap.forEach((m, index) => {
                     if(shallowEqual(map[i], m)) found = index
                 })
-                if(found !== null) map[i].count = existingCounts[found]
-                else  map[i].count = ''
+                if(found !== null){ 
+                    map[i].count = existingCounts[found];
+                    map[i].flagged = existingFlags[found] 
+                }
+                else{  
+                    map[i].count = ''
+                    map[i].flagged = false
+                }
             }
             else{
                 map[i].count = ''
+                map[i].flagged = false
             }
             map[i].task_id = task.id
         }
@@ -220,9 +234,6 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         if(warn) {
             setErrors(['You must enter at least one value to save a count.']);
             return;
-        }
-        if(existing && currentBD != ogCounts){ 
-            console.warn('This triggered');
         }
         const data = [];
         Object.keys(counts).forEach((c) => {if(counts[c].count != '') data.push(counts[c])})
@@ -270,7 +281,8 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                 setSaving(false);
             }
     }
-     const deleteCount = async() => {
+    const deleteCount = async() => {
+        setErrors([])
         try {
             console.log('removing task...');
             const response = await fetchWithAuth(`/api/activities/events/${event.id}/delete-count/${task.id}/`, {
@@ -310,6 +322,52 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         }
         
     }
+    const flagCount = async() => {
+        setErrors([]);
+        try {
+            setSaving(true)
+            console.log('changing flag status...');
+            const response = await fetchWithAuth(`/api/activities/events/${event.id}/flag-counts/${task.id}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify({'set_flag': !flagged})
+            });
+            if (response.ok) {
+                onSave();
+                setFlagged(!flagged)
+            } 
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } 
+                catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${field}: ${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete task:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setSaving(false)
+        }
+    }
     const calcCellIndex = (iter, index) => {
         const n = rows.length
         return n*index + iter
@@ -321,101 +379,111 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
     }
     if(!task) return <div className={errorStyles.erors}>This count is not associated with any task.</div>
     return(
-        <div className={styles.segment}>
+        <div className={existing ? styles.countSegment : styles.segment}>
             {warning && <Warn onConfirm={() => confirmChange()} onCancel={() => setWarning(null)} />}
             {del && <ConfirmDelete name={`Counts for Task: ${task.indicator.name} for for ${task?.organization.name} Event: ${event.name}`} onConfirm={() => deleteCount()} onCancel={() => setDel(false)} />}
-            <h2>Counts for {task?.indicator.name} ({task?.organization.name})</h2>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {existing && flagged && 
-                <div className={errorStyles.warnings}>
-                    <h3>Flagged</h3>
-                        <p>This interaction has been flagged. This is most likely because:</p>
-                        <ul>
-                            {task.indicator.prerequisite && <li>This task has a prerequisite that has no counts associated with it.</li>}
-                            {task.indicator.prerequisite && <li>This task has a prerequisite that has counts associated wtih it but the counts use a different demographic breakdown and we couldn't verify them.</li>}
-                            {task.indicator.prerequisite && <li>This task has a prerequisite with counts 
-                                but the counts for this task are not aligned with its prerequisite. Double check 
-                                that no number in this task is larger than its corresponding number in the prerequisite task.</li>}
-                        </ul>
-                </div>
-            }
-            
-            {editing && <h3>Select your breakdowns here</h3>}
-            {editing && <div className={styles.choices}>
-                {Object.keys(breakdowns).map((b) => {
-                    if(b == 'subcategory_id') return
-                    return <Checkbox key={b}
-                        label={(b.charAt(0).toUpperCase() + b.slice(1)).replace('_', ' ')} 
-                        name={b} checked={breakdowns[b]} 
-                        callback={(c) => changeBreakdowns(b, c)} 
-                    />
-                })}
-            </div>}
-            <div>
-                {active.length === 0 && 
-                    <div>
-                        <label htmlFor="count">Count</label>
-                        {editing ? <input id="count" type="number" min={0}  value={counts[0]?.count} onChange={(e) => setCounts(prev => ({
-                                    ...prev,
-                                    0: {
-                                    ...prev[0],
-                                    count: e.target.value,
-                                    },
-                                }))} /> : <p>{counts[0]?.count}</p>}
+            <div onClick={() => setExpanded(!expanded)} className={styles.expander}>
+                <h2>Counts for {task?.indicator.name} ({task?.organization.name})</h2>
+                {!editing && 
+                    <p>By {active.map((a) => (`${cleanLabels(a[0])}`)).join(', ')}</p>
+                }
+            </div>
+            {expanded && <div>
+                {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                {existing && flagged && 
+                    <div className={errorStyles.warnings}>
+                        <h3>Flagged</h3>
+                            <p>This interaction has been flagged. This is most likely because:</p>
+                            <ul>
+                                {task.indicator.prerequisite && <li>This task has a prerequisite that has no counts associated with it.</li>}
+                                {task.indicator.prerequisite && <li>This task has a prerequisite that has counts associated wtih it but the counts use a different demographic breakdown and we couldn't verify them.</li>}
+                                {task.indicator.prerequisite && <li>This task has a prerequisite with counts 
+                                    but the counts for this task are not aligned with its prerequisite. Double check 
+                                    that no number in this task is larger than its corresponding number in the prerequisite task.
+                                    Any number that is not aligned with the prerequisite will be marked in yellow.
+                                </li>}
+                            </ul>
                     </div>
                 }
-                {active.length === 1 &&
-                    active[0][1].labels.map((b, index) => (
-                        <div>
-                            <label htmlFor={b}>{b}</label>
-                            {editing ? <input id={b} type="number" min={0} value={counts[index]?.count} onChange={(e) => setCounts(prev => ({
-                                    ...prev,
-                                    [index]: {
-                                    ...prev[index],
-                                    count: e.target.value,
-                                    },
-                                }))} /> : <p>{counts[index]?.count}</p>}
-                        </div>
-                    ))
-                }
-                {
-                    active.length > 1 &&
-                    <table className={styles.countsTable}>
-                        <thead>
-                            <tr>
-                                {active.map((a, index) => {if(index != 0) return <th>{(a[0].charAt(0).toUpperCase() + a[0].slice(1)).replace('_id', '').replace('_', ' ')}</th>})}
-                                {active[0][1].labels.map((c) => (<th>{c}</th>))}
-                            </tr>
-                        </thead>
-                        
-                        <tbody> 
-                            {rows.map((row, iter) => 
-                                <tr key={iter}>
-                                    {row.map((r) => (<td>{r}</td>))}
-                                    {active[0][1].labels.map((c, index) => {
-                                        const pos = calcCellIndex(iter, index); 
-                                        return <td key={pos}> {editing ? <input id={pos} min={0} type="number" value={counts[pos]?.count} onChange={(e) => 
-                                            setCounts(prev => ({
-                                                ...prev,
-                                                [pos]: {
-                                                ...prev[pos],
-                                                count: e.target.value,
-                                                },
-                                            }))} /> : <p><strong>{counts[pos]?.count == '' ? '-' : counts[pos]?.count}</strong></p>}
-                                        </td>}
-                                    )}
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                }
+                {editing && <h3>Select your breakdowns here</h3>}
+                {editing && <p><i>Please note that selecting too many breakdown categories may result in poor performance.</i></p>}
+                {editing && <div className={styles.choices}>
+                    {Object.keys(breakdowns).map((b) => {
+                        if(b == 'subcategory_id') return
+                        return <Checkbox key={b}
+                            label={cleanLabels(b)} 
+                            name={b} checked={breakdowns[b]} 
+                            callback={(c) => changeBreakdowns(b, c)} 
+                        />
+                    })}
+                </div>}
                 <div>
-                    <button onClick={() => editing ? handleCancel() : setEditing(true)}>{editing ? 'Cancel' : 'Edit'}</button>
-                    {editing && saving ? <ButtonLoading /> : <button onClick={() => saveCount()}>Save</button>}
-                    {editing && existing && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
-                    {del && <ButtonLoading forDelete={true} />}
+                    {active.length === 0 && 
+                        <div>
+                            <label htmlFor="count">Count</label>
+                            {editing ? <input id="count" type="number" min={0}  value={counts[0]?.count} onChange={(e) => setCounts(prev => ({
+                                        ...prev,
+                                        0: {
+                                        ...prev[0],
+                                        count: e.target.value,
+                                        },
+                                    }))} /> : <p>{counts[0]?.count}</p>}
+                        </div>
+                    }
+                    {active.length === 1 &&
+                        active[0][1].labels.map((b, index) => (
+                            <div>
+                                <label htmlFor={b}>{b}</label>
+                                {editing ? <input id={b} type="number" min={0} value={counts[index]?.count} onChange={(e) => setCounts(prev => ({
+                                        ...prev,
+                                        [index]: {
+                                        ...prev[index],
+                                        count: e.target.value,
+                                        },
+                                    }))} /> : <p>{counts[index]?.count}</p>}
+                            </div>
+                        ))
+                    }
+                    {
+                        active.length > 1 &&
+                        <table className={styles.countsTable}>
+                            <thead>
+                                <tr>
+                                    {active.map((a, index) => {if(index != 0) return <th>{cleanLabels(a[0])}</th>})}
+                                    {active[0][1].labels.map((c) => (<th>{c}</th>))}
+                                </tr>
+                            </thead>
+                            
+                            <tbody> 
+                                {rows.map((row, iter) => 
+                                    <tr key={iter}>
+                                        {row.map((r) => (<td>{r}</td>))}
+                                        {active[0][1].labels.map((c, index) => {
+                                            const pos = calcCellIndex(iter, index); 
+                                            return <td key={pos} className={counts[pos]?.flagged ? styles.flaggedCount : styles.OK}> {editing ? <input id={pos} min={0} type="number" value={counts[pos]?.count} onChange={(e) => 
+                                                setCounts(prev => ({
+                                                    ...prev,
+                                                    [pos]: {
+                                                    ...prev[pos],
+                                                    count: e.target.value,
+                                                    },
+                                                }))} /> : <p><strong>{counts[pos]?.count == '' ? '-' : counts[pos]?.count}</strong></p>}
+                                            </td>}
+                                        )}
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    }
+                    <div>
+                        {editing && (saving ? <ButtonLoading /> : <button onClick={() => saveCount()}>Save</button>)}
+                        <button onClick={() => editing ? handleCancel() : setEditing(true)}>{editing ? 'Cancel' : 'Edit'}</button>
+                        {existing && !editing && <button className={errorStyles.warningButton} onClick={() => flagCount()}> {flagged ? 'Mark as OK' : 'Mark as Flagged'}</button>}
+                        {editing && existing && user.role ==='admin' && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
+                        {del && <ButtonLoading forDelete={true} />}
+                    </div>
                 </div>
-            </div>
+            </div>}
         </div>
     )
 }

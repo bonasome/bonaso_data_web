@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
 import errorStyles from '../../styles/errors.module.css'
 import Loading from '../reuseables/Loading';
@@ -7,10 +7,10 @@ import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useProjects } from '../../contexts/ProjectsContext';
 import styles from '../reuseables/dynamicForm.module.css';
+import projectsConfig from './projectsConfig';
 
 export default function CreateProject(){
     const navigate = useNavigate();
-    const [formConfig, setFormConfig] = useState([]);
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const { projectsMeta, setProjectsMeta, setProjectDetails } = useProjects();
@@ -64,22 +64,9 @@ export default function CreateProject(){
 
     }, [projectsMeta])
 
-    useEffect(() => {
-        setFormConfig([
-            {name: 'name', label: 'Project Name', type: 'text', required: true},
-            {name: 'client_id', label: 'Select a Client', type: 'select', required: false, constructors: {
-                values: clientIDs,
-                labels: clientNames,
-                multiple: false,
-            }},
-            {name: 'start', type: 'date', required: true},
-            {name: 'end', type: 'date', required: true},
-            {name: 'status', type: 'select', required: true, constructors: {
-                values: projectsMeta.statuses,
-            }},
-            {name: 'description', type: 'textarea', required: false}
-        ])
-    }, [clientNames, clientIDs, projectsMeta])
+    const formConfig = useMemo(() => {
+        return projectsConfig(projectsMeta);
+    }, [projectsMeta]);
 
     const handleCancel = () => {
         navigate(`/projects`)
@@ -89,7 +76,7 @@ export default function CreateProject(){
             setErrors(['Start date must be after the end date.'])
             return;
         }
-        console.log('submitting data...')
+        console.log('submitting data...', data)
         try{
             setSaving(true);
             const response = await fetchWithAuth('/api/manage/projects/', {

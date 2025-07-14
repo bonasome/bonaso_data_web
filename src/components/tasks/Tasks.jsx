@@ -9,7 +9,7 @@ import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ComponentLoading from '../reuseables/ComponentLoading';
 import ButtonLoading from "../reuseables/ButtonLoading";
 
-function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelete=false, onDelete=null }) {
+function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelete=false, onDelete=null, addCallbackText }) {
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -122,7 +122,7 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
                         </div>
                     )}
                     <p>{task.indicator.require_numeric ? 'Requires Number' : ''}</p>
-                    {addCallback && <button onClick={() => addCallback(task)}>Add Task</button>}
+                    {addCallback && <button onClick={() => addCallback(task)}>{addCallbackText}</button>}
                     {targets && targets.length > 0 && <h3>Targets:</h3>}
                     {targets && targets.length > 0 && targets.map((t) => (
                         <Target key={t.id} target={t} task={task} tasks={tasks} onUpdate={(data) => onUpdate(data)} onDelete={(id) => checkTargets(id)}/>
@@ -138,7 +138,7 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
     );
 }
 
-export default function Tasks({ callback, update=null, target=false, organization=null, project=null, isDraggable=false, blacklist=[], canDelete=false, addCallback=null, type=null, event=null, eventTrigger=null, onError=[], onSuccess=null }) {
+export default function Tasks({ callback, update=null, target=false, organizationID=null, projectID=null, isDraggable=false, blacklist=[], canDelete=false, addCallback=null, addCallbackText='Add Task', type=null, event=null, eventTrigger=null, onError=[], onSuccess=null }) {
     const [loading, setLoading] = useState(true);
     const [ tasks, setTasks ] = useState([]);
     const [search, setSearch] = useState('');
@@ -158,12 +158,13 @@ export default function Tasks({ callback, update=null, target=false, organizatio
         const getTasks = async () => {
             try {
                 console.log('fetching tasks...');
-                const includeOrg = organization ? `&organization=${organization.id}` : ''
+                const includeOrg = organizationID ? `&organization=${organizationID}` : ''
                 const includeTargets = target ? `&include_targets=true` : ''
-                const includeProject = project ? `&project=${project.id}` : ''
+                const includeProject = projectID ? `&project=${projectID}` : ''
                 const includeType = type ? `&indicator_type=${type}` : ''
                 const includeEvent = event ? `&event=${event}` : '';
                 const url = `/api/manage/tasks/?search=${search}&page=${page}` + includeTargets + includeOrg + includeProject + includeType + includeEvent
+                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setTasks(data.results);
@@ -182,7 +183,7 @@ export default function Tasks({ callback, update=null, target=false, organizatio
         };
         getTasks();
 
-    }, [search, page, update, organization, eventTrigger]);
+    }, [search, page, update, organizationID, projectID, eventTrigger]);
 
     const updateTasks = (id) => {
         const updated = tasks.filter(t => t.id !=id)
@@ -200,7 +201,7 @@ export default function Tasks({ callback, update=null, target=false, organizatio
             <p><i>Search your tasks by name, organization, or project.</i></p>
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
             {tasks.length > 0 ? filteredTasks.map((task) => (
-                <TaskCard task={task} key={task.id} target={target} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} addCallback={addCallback}/>
+                <TaskCard task={task} key={task.id} target={target} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} addCallback={addCallback} addCallbackText={addCallbackText} />
             )) : <p>No tasks yet.</p>}
             </IndexViewWrapper>
         </div>
