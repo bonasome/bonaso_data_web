@@ -91,9 +91,11 @@ export default function IndicatorDetail(){
     useEffect(() => {
         if (!indicatorsMeta?.indicator_types || !activeIndicator) return;
         const typeIndex = indicatorsMeta.indicator_types.indexOf(activeIndicator.indicator_type);
+        const govIndex = indicatorsMeta.required_attributes.indexOf(activeIndicator.governs_attribute);
         const attrIndexes = activeIndicator?.required_attribute?.map((s) => (indicatorsMeta.required_attributes.indexOf(s.name))).filter(s => s!= -1)
         setLabels({
             indicator_type: indicatorsMeta.indicator_type_labels[typeIndex],
+            governs_attribute: indicatorsMeta.required_attribute_labels[govIndex],
             required_attribute: attrIndexes?.map((s) => (indicatorsMeta.required_attribute_labels[s]))
         })
     }, [indicatorsMeta, activeIndicator])
@@ -139,6 +141,7 @@ export default function IndicatorDetail(){
         }
         
     } 
+    console.log(activeIndicator)
     if (loading || !activeIndicator) return <Loading />
     return(
         <div className={styles.container}>
@@ -162,6 +165,7 @@ export default function IndicatorDetail(){
                     <p>Requires Special Respondent Attributes:</p>
                     <ul>{labels?.required_attribute?.map((a) => (<li key={a}>{a}</li>))}</ul>
                 </div>}
+                {activeIndicator?.governs_attribute && <p><i>Controls Respondent Attribute: {labels.governs_attribute}</i></p> }
                 {activeIndicator?.subcategories.length > 0 && 
                     <div>
                         <h4>Subcategories</h4>
@@ -172,6 +176,7 @@ export default function IndicatorDetail(){
                     </ul>
                     </div>
                 }
+
                 
                 
                 <Link to={`/indicators/${id}/edit`}><button>Edit Details</button></Link>

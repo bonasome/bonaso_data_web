@@ -18,28 +18,34 @@
     padding: 1vh;
 }
 
-.loadingDots {
+.loadingBars {
     margin-top: 2vh;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.loadingDots span {
+.loadingBars span {
     display: inline-block;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 24px;
     background-color: white;
-    border-radius: 50%;
     margin: 0 5px;
     animation: pulse 1.5s infinite ease-in-out;
 }
-.loadingDots span:nth-child(2) {
-    animation-delay: 0.5s;
+.loadingBars span:nth-child(2) {
+    animation-delay: 0.3s;
 }
 
-.loadingDots span:nth-child(3) {
-    animation-delay: 1s;
+.loadingBars span:nth-child(3) {
+    animation-delay: .6s;
+}
+
+.loadingBars span:nth-child(4) {
+    animation-delay: .9s;
+}
+.loadingBars span:nth-child(5) {
+    animation-delay: 1.2s;
 }
 
 @keyframes pulse {

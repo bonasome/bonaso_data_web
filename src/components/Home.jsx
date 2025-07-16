@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import fetchWithAuth from '../../services/fetchWithAuth';
 import IndicatorChart from './reuseables/charts/IndicatorChart';
 import ButtonLoading from './reuseables/ButtonLoading';
+import Loading from './reuseables/Loading';
 
 function Home() {
     const navigate = useNavigate();
@@ -35,7 +36,7 @@ function Home() {
         };
         getTasks();
     }, [])
-
+    if(loading) return <Loading />
     return (
         <div className={styles.home}>
             <h1 className={styles.header}>Welcome, {user.username}!</h1>

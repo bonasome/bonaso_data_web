@@ -4,8 +4,13 @@ import styles from './loading.module.css';
 export default function ComponentLoading (){
     return( 
         <div className={styles.componentLoading}>
-            <div className={styles.spinner}></div>
-            <p>Loading</p>
+            <div className={styles.loadingBars}>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
     )
 };

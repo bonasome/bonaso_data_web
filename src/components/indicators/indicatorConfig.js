@@ -1,6 +1,8 @@
 export default function indicatorConfig(ids, names, meta, searchCallback, existing=null){
     let subcats = []
     let attrs = []
+    const allowed_attrs = meta.required_attributes.filter(a => a==='PLWHIV')
+    const allowed_attr_labels = meta.required_attribute_labels.filter(a => a==='Person Living with HIV')
     if(existing?.subcategories.length > 0){
         subcats = existing.subcategories.map((cat) => (cat))
     }
@@ -37,6 +39,12 @@ export default function indicatorConfig(ids, names, meta, searchCallback, existi
         {name: 'allow_repeat', label:'Allow repeat interactions (within 30 days)?', type: 'checkbox', showonpath2:true, required: false, value: existing?.allow_repeat ? true: false},
         {name: 'require_numeric', label:'Require a Numeric Value?', type: 'checkbox', required: false, value: existing?.require_numeric ? true: false},
         {name: 'require_subcategories', label: 'Require Subcategories', type: 'checkbox', required: false, value: existing?.subcategories.length>0 ? true : false, switchpath: true, hideonpath3: true},
+        {name: 'governs_attribute', label: 'Set to Govern Respondent Attribute', type: 'select',  required: false, showonpath2: true, value: existing?.governs_attribute ? existing.governs_attribute : '',
+            constructors: {
+                values: allowed_attrs,
+                labels: allowed_attr_labels,
+                multiple: false,
+        }},
         {name: 'subcategory_data', label: 'Subcategories', type: 'dynamic', required: false, 
             value: (existing?.subcategories.length > 0 && !existing?.match_subcategories) ? subcats : [], 
             showonpath: true, hideonpath3: true},
