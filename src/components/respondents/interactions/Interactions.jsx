@@ -24,14 +24,14 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     const [errors, setErrors] = useState([]);
     const[interactionDate, setInteractionDate] = useState('');
     const [interactionLocation, setInteractionLocation] = useState('')
-    const [allowedSubcats, setAllowedSubcats] = useState([]);
+    //const [allowedSubcats, setAllowedSubcats] = useState([]);
     const[subcats, setSubcats] = useState([]);
     const[number, setNumber] = useState('');
     const [del, setDel] = useState(false);
     const {setInteractions} = useInteractions();
     const [saving, setSaving] = useState(false);
 
-
+    /*
     const checkPrereqs = async() =>{
         const prereq = interaction.task_detail.indicator.prerequisite
         try{
@@ -54,6 +54,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             console.error(err)
         }   
     }
+        */
 
     const activeFlags = useMemo(() => {
         if(!interaction) return false
@@ -80,6 +81,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
         setInteractionDate(interaction.interaction_date);
         setSubcats(interaction.subcategories);
 
+        /*
         if(interaction.subcategories){
             setSubcats(interaction.subcategories);
             if(interaction.task_detail.indicator.prerequisite){
@@ -89,6 +91,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                 setAllowedSubcats(interaction.task_detail.indicator.subcategories);
             }
         }
+        */
 
         if(interaction.numeric_component){
             setNumber(interaction.numeric_component);
@@ -232,8 +235,8 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                         <input type='number' min="0" id='number' name='number' value={number} onChange={(e)=>setNumber(e.target.value)} />
                     </div>
                 }
-                {interaction.subcategories && allowedSubcats &&
-                    allowedSubcats.map((cat) => (
+                {interaction.subcategories.length > 0 &&
+                    interaction.subcategories.map((cat) => (
                         <div style={{ display: 'flex', flexDirection: 'row', marginTop: 'auto', marginBottom: 'auto' }}>
                             <Checkbox key={cat.id}
                                 label={cat.name}

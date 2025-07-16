@@ -204,36 +204,39 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             dropWarnings.push(`This task is already included in this interaction.`);
             return;
         }
-
-        if (task?.indicator?.prerequisite) {
-            const prereq = task.indicator.prerequisite;
-            const requiredTask = tasks.find(t => t.indicator.id === prereq.id);
-            let isValid = false;
-            const inBatch = added.filter(t => t.indicator.id.toString() === requiredTask?.indicator.id.toString())
-            if (inBatch.length > 0) {
-                isValid = true;
-                const interSubcats = subcats[inBatch[0].id]
-                setAllowedSubcats(prev=> ({...prev, [task.id]: interSubcats}));
-            } 
-            else if (interactions?.length > 0) {
-                const response = await fetchWithAuth(`/api/record/interactions/?respondent=${interactions[0].respondent}&task_indicator=${prereq.id}&before=${interactionDate}`);
-                const data = await response.json()
-                if(data.results.length > 0){
-                    const validPastInt = data.results.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
-                    if (validPastInt && validPastInt.interaction_date <= date) {
-                        isValid = true;
-                        if (validPastInt?.subcategories) {
-                            setAllowedSubcats(prev=> ({...prev, [task.id]: validPastInt.subcategories}));
+        if (task?.indicator?.prerequisites.length > 0) {
+            for (const prereq of task.indicator.prerequisites) {
+                if (!prereq || !prereq.id) continue;
+                const requiredTask = tasks.find(t => t.indicator.id === prereq.id);
+                const inBatch = added.filter(t => t.indicator.id.toString() === requiredTask?.indicator.id.toString())
+                let found = false
+                if (inBatch.length > 0) {
+                    found = true
+                    if(task.indicator.match_subcategories_to === prereq.id){
+                        const interSubcats = subcats[inBatch[0].id]
+                        setAllowedSubcats(prev=> ({...prev, [task.id]: interSubcats}));
+                    }
+                } 
+                else if (interactions?.length > 0) {
+                    const response = await fetchWithAuth(`/api/record/interactions/?respondent=${interactions[0].respondent}&task_indicator=${prereq.id}&before=${interactionDate}`);
+                    const data = await response.json()
+                    if(data.results.length > 0){
+                        const validPastInt = data.results.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
+                        if (validPastInt && validPastInt.interaction_date <= date) {
+                            found=true
+                            if(task.indicator.match_subcategories_to === prereq.id){
+                                setAllowedSubcats(prev=> ({...prev, [task.id]: validPastInt.subcategories}));
+                            }
                         }
                     }
                 }
+                if (!found) {
+                    dropWarnings.push(
+                        `This indicator requires this respondent to have had an interaction associated with task ${prereq.name}, however, we could not find a prior record of this interaction. Make sure you have a date set.`
+                    );
+                }
             }
-            if (!isValid) {
-                dropWarnings.push(
-                    `This indicator requires this respondent to have been ${prereq.name}, however, we could not find a prior record of this interaction. Make sure you have a date set.`
-                );
-                setWarnings(dropWarnings);
-            }
+            setWarnings(dropWarnings);
         }
         addedIDs.push(task.id)
         setAdded(prev => [...prev, task])

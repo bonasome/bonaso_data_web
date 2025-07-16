@@ -48,7 +48,7 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
         >
             <Link to={`/indicators/${indicator.id}`} style={{display:'flex', width:"fit-content"}}><h2>{indicator.code}: {indicator.name}</h2></Link>
             {callback && (
-                <button onClick={(e) => { e.stopPropagation(); callback(indicator); }}>
+                <button type="button" onClick={(e) => { e.stopPropagation(); callback(indicator); }}>
                     {callbackText}
                 </button>
             )}
@@ -56,9 +56,12 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
             {expanded && active && (
                 <>
                     <p>{active.description}</p>
-                    {active.prerequisite && (
-                        <p>Prerequisite: {active.prerequisite.code}: {active.prerequisite.name}</p>
-                    )}
+                    {active.prerequisites?.length > 0 && <div>
+                        <p>Prerequisites: </p>
+                        <ul>
+                            {active.prerequisites.map((p) => (<li>{p.code}: {p.name}</li>))}
+                        </ul>
+                    </div>}
                     <Link to={`/indicators/${indicator.id}`}>
                         <button onClick={(e) => e.stopPropagation()}>View Details</button>
                     </Link>

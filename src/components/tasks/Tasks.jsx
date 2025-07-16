@@ -104,13 +104,18 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
         <div className={styles.card} onClick={() => setExpanded(!expanded)} draggable={isDraggable} onDragStart={isDraggable ? handleDragStart : undefined}>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <h3>{task.indicator.code}: {task.indicator.name}</h3>
+            {addCallback && <button onClick={() => addCallback(task)}>{addCallbackText}</button>}
             {expanded && (
                 <div>
                     <p><i>{task.organization.name}</i></p>
                     <p><i>{task.project.name}</i></p>
                     <p>{task.indicator.description}</p>
-                    <p>{task.indicator.prerequisite && `Prerequisite Task: ${task.indicator.prerequisite.code +': '+ task.indicator.prerequisite.name }`}</p>
-
+                    {task.indicator.prerequisites.length > 0 && <div>
+                        <p>Prerequisites: </p>
+                        <ul>
+                            {task.indicator.prerequisites.map((p) => (<li>{p.code}: {p.name}</li>))}
+                        </ul>
+                    </div>}
                     {task.indicator.subcategories && task.indicator.subcategories.length > 0 && (
                         <div>
                             <p>Subcategories:</p>
@@ -121,17 +126,12 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
                             </ul>
                         </div>
                     )}
-                    <p>{task.indicator.require_numeric ? 'Requires Number' : ''}</p>
-                    {addCallback && <button onClick={() => addCallback(task)}>{addCallbackText}</button>}
+                    {task.indicator.require_numeric && <p>Requires Number</p>}
                     {targets && targets.length > 0 && <h3>Targets:</h3>}
                     {targets && targets.length > 0 && targets.map((t) => (
                         <Target key={t.id} target={t} task={task} tasks={tasks} onUpdate={(data) => onUpdate(data)} onDelete={(id) => checkTargets(id)}/>
                         ))
                     }
-                    {targets && addingTarget && user.role == 'admin' && <TargetEdit task={task} tasks={tasks} onUpdate={onUpdate} />}
-                    {targets && user.role == 'admin' && <button onClick={(e) => {e.stopPropagation(); setAddingTarget(!addingTarget)}}>{addingTarget ? 'Cancel' : 'Add Target'}</button> }
-                    {canDelete && (user.role == 'admin' || task?.organization?.parent_organization?.id == user.organization_id) && !del && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)}>Remove Task</button> }
-                    {del && <ButtonLoading forDelete={true} /> }
                 </div>
             )}
         </div>

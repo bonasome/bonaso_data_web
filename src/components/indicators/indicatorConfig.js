@@ -11,8 +11,10 @@ export default function indicatorConfig(ids, names, meta, searchCallback, existi
     return [
         {name: 'code', label: 'Indicator code', type: 'text', required: true, value: existing?.code ? existing.code : ''},
         {name: 'name', label: 'Indicator Name', type: 'textarea', required: true, value: existing?.name ? existing.name : ''},
-        {name: 'prerequisite_id', label: 'Prerequisite', type: 'indicator',  required: false, value: existing?.prerequisite ? existing.prerequisite : null,},
-        {name: 'match_subcategories', label: 'Match Prerequisite Subcategories?', type: 'checkbox', required: false, showonpathIndex: true, switchpath3: true, value: existing ? existing?.match_subcategories : false},
+        {name: 'prerequisite_id', label: 'Prerequisite', type: 'multi-indicators', required: false, value: existing?.prerequisites ? existing.prerequisites : [], callbackText: 'Add as Prerequisite', 
+            followUp: 'match_subcategories_to', followUpValue: existing?.match_subcategories_to ? existing.match_subcategories_to : '', switchpath3: existing?.match_subcategories_to ? true : false,
+        },
+        
         {name: 'description', label: 'Description', type: 'textarea', required: false, value: existing?.description ? existing.description : ''},
         {name: 'status', label: 'Indicator Status', type: 'select',  required: true, value: existing?.status ? existing.status : 'Active',
             constructors: {
@@ -35,7 +37,7 @@ export default function indicatorConfig(ids, names, meta, searchCallback, existi
         {name: 'allow_repeat', label:'Allow repeat interactions (within 30 days)?', type: 'checkbox', showonpath2:true, required: false, value: existing?.allow_repeat ? true: false},
         {name: 'require_numeric', label:'Require a Numeric Value?', type: 'checkbox', required: false, value: existing?.require_numeric ? true: false},
         {name: 'require_subcategories', label: 'Require Subcategories', type: 'checkbox', required: false, value: existing?.subcategories.length>0 ? true : false, switchpath: true, hideonpath3: true},
-        {name: 'subcategory_names', label: 'Subcategories', type: 'dynamic', required: false, 
+        {name: 'subcategory_data', label: 'Subcategories', type: 'dynamic', required: false, 
             value: (existing?.subcategories.length > 0 && !existing?.match_subcategories) ? subcats : [], 
             showonpath: true, hideonpath3: true},
     ]

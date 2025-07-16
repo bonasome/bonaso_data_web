@@ -145,9 +145,6 @@ export function OrganizationTasks({ project, organization, setAddingTask }){
             setErrors(taskErrors);
             return;
         }
-        if(indicator?.prerequisite && !forbidden.includes(indicator?.prerequisite?.id)){
-            taskErrors.push(`${indicator.prerequisite.name} is required for this task. Please make sure you add it.`)
-        }
         try {
             console.log('assigning task...');
             const response = await fetchWithAuth(`/api/manage/tasks/`, {

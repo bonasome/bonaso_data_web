@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import IndicatorsIndex from './IndicatorsIndex';
 import styles from '../../styles/indexSelect.module.css';
-export default function IndicatorSelect({ title, onChange, existing=null }){
+export default function IndicatorSelect({ title, callbackText, onChange, existing=null }){
     const [selecting, setSelecting] = useState(false);
     const [selected, setSelected] = useState(existing);
 
@@ -24,7 +24,7 @@ export default function IndicatorSelect({ title, onChange, existing=null }){
                 {selected ? <p>Selected: <i>{selected?.code}: {selected?.name}</i></p> : <p>Nothing selected</p>}
                 <button type="button" onClick={() => setSelecting(!selecting)}>{selecting ? 'Done' : 'Choose New Indicator'}</button>
                 <button type="button" onClick={() => setSelected(null)}>Clear Selection</button>
-                {selecting && <IndicatorsIndex callback={(ind) => {setSelected(ind); setSelecting(false)}} callbackText={'Select as Prerequisite'}/>}
+                {selecting && <IndicatorsIndex callback={(ind) => {setSelected(ind); setSelecting(false)}} callbackText={callbackText}/>}
             </div>
         </div>
     )

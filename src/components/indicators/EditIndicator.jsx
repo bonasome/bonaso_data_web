@@ -111,7 +111,9 @@ export default function EditIndicator(){
 
     const handleSubmit = async(data) => {
         if(!Array.isArray(data.subcategory_names)) data.subcategory_names = []
-        if(typeof data?.prerequisite_id === 'object' && data.prerequisite_id?.id) data.prerequisite_id = data.prerequisite_id.id
+        if(data.prerequisite_id.length > 0) {
+            data.prerequisite_id = data.prerequisite_id.map(pre => (pre.id))
+        }
         if(data.match_subcategories) data.subcategory_names = []
         const names = data.subcategory_names
         let commas = []

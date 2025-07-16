@@ -10,6 +10,7 @@ import ButtonLoading from '../reuseables/ButtonLoading';
 import IndicatorSelect from '../indicators/IndicatorSelect';
 import OrganizationSelect from '../organizations/OrganizationSelect';
 import ClientSelect from '../projects/clients/ClientSelect';
+import IndicatorMultiSelect from '../indicators/IndicatorMultiSelect';
 
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]
 export default function DynamicForm({ config, onSubmit, onCancel, onError, saving }){
@@ -19,7 +20,6 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
     const [switchpath, setSwitchpath] = useState(false);
     const [switchpath2, setSwitchpath2] = useState(false);
     const [switchpath3, setSwitchpath3] = useState(false);
-    const [switchpathIndex, setSwitchpathIndex] = useState(false);
     const rowRefs = useRef({});
     
     useEffect(() => {
@@ -90,8 +90,6 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                     if(!switchpath2 && field.showonpath2) return <div key={field.name}></div>
                     if(switchpath3 && field.hideonpath3) return <div key={field.name}></div>
                     if(!switchpath3 && field.showonpath3) return <div key={field.name}></div>
-                    if(switchpathIndex && field.hideonpathIndex) return <div key={field.name}></div>
-                    if(!switchpathIndex && field.showonpathIndex) return <div key={field.name}></div>
                     const label = (field.label || (field.name.charAt(0).toUpperCase() + field.name.slice(1))) + (field.required ? ' *': ' (Optional)');
                     const max = field.max || null
                     if(field.type == 'text'){
@@ -192,8 +190,18 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                         return(
                             <div className={styles.field}>
                                 <IndicatorSelect title={field.label} existing={field.value} 
-                                    onChange={(ind, setPath) => {setFormData(prev=>({...prev, [field.name]: ind?.id || null })); 
-                                        setPath ? setSwitchpathIndex(setPath) : setSwitchpathIndex(false)
+                                    onChange={(ind) => setFormData(prev=>({...prev, [field.name]: ind?.id || null }))}
+                                /> 
+                            </div>
+                        )
+                    }
+                    else if(field.type === 'multi-indicators'){
+                        return(
+                            <div className={styles.field}>
+                                <IndicatorMultiSelect title={field.label} existing={field.value} callbackText={field.callbackText}
+                                    subcats={true} exisitingFollowUp={field.followUpValue}
+                                    onChange={(sel, setPath, fuv) => {setFormData(prev=>({...prev, [field.name]: sel || null, [field.followUp]: fuv || null })); 
+                                        setPath ? setSwitchpath3(setPath) : setSwitchpath3(false)
                                     }} 
                                 /> 
                             </div>

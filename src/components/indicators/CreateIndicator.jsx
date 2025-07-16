@@ -74,7 +74,7 @@ export default function CreateIndicator(){
     }
 
     const handleSubmit = async(data) => {
-        const names = data.subcategory_names
+        const names = data.subcategory_data
         let commas = []
         names.forEach(n => {
             if(n.name.includes(',') || n.name.includes(':')) commas.push(`Subcategory names cannot include commas or colons. Please fix ${n.value}`);
@@ -82,6 +82,9 @@ export default function CreateIndicator(){
         if(commas.length > 0){
             setErrors(commas);
             return;
+        }
+        if(data.prerequisite_id.length > 0) {
+            data.prerequisite_id = data.prerequisite_id.map(pre => (pre.id))
         }
         console.log('submitting data...')
         try{
