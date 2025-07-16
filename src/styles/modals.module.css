@@ -21,6 +21,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow-y: scroll;
 }
 @media screen and (max-width: 768px){
     .modal{

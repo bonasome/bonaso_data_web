@@ -94,3 +94,48 @@ td > input {
     background-color: var(--warning-bg);
     color: var(--warning-text);
 }
+
+.flag {
+    width: 75%;
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+    margin: 1vh;
+    padding: 1vh;
+    transition: all .5s;
+}
+
+.resolved {
+    width: 75%;
+    background-color: var(--bonaso-light-accent);
+    color: var(--bonaso-uber-dark-accent);
+    margin: 1vh;
+    padding: 1vh;
+    transition: all 1s;
+}
+.flag:hover, .resolved:hover {
+    transform: scale(1.05);
+}
+
+.tooltipWrapper {
+  position: relative;
+}
+
+.tooltip {
+    width: 20vw;
+    white-space: normal;
+    word-wrap: break-word;
+    visibility: hidden;
+    position: absolute;
+    background-color: rgba(50, 50, 50, 0.9);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    top: -5px;
+    left: 100%;
+    z-index: 100;
+}
+
+.tooltipWrapper:hover .tooltip {
+  visibility: visible;
+}

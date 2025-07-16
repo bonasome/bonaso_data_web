@@ -4,12 +4,14 @@ import errorStyles from '../../styles/errors.module.css';
 import Checkbox from "../reuseables/Checkbox";
 import styles from './eventDetail.module.css';
 import modalStyles from '../../styles/modals.module.css'
-import SimpleSelect from "../reuseables/SimpleSelect";
+import ComponentLoading from '../reuseables/ComponentLoading';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ButtonLoading from "../reuseables/ButtonLoading";
 import cleanLabels from '../../../services/cleanLabels';
 import { useAuth } from "../../contexts/UserAuth";
-function Warn( {onConfirm, onCancel }) {
+import theme from '../../../theme/theme'
+import prettyDates from "../../../services/prettyDates";
+function Warn( {onConfirm, onClose }) {
     return(
         <div className={modalStyles.modal}>
             <h1>Warning!</h1>
@@ -19,6 +21,160 @@ function Warn( {onConfirm, onCancel }) {
             </strong></p>
             <button onClick={() => onConfirm()}>Confirm, my data will be erased.</button>
             <button onClick={() => onCancel()}>Cancel</button>
+        </div>
+    )
+}
+
+function Flag({ event, flag, onUpdate }){
+    const [errors, setErrors] = useState([]);
+    const [reason, setReason] = useState('')
+    const [resolving, setResolving] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const handleResolve = async() => {
+        setErrors([]);
+        if(reason === ''){
+            setErrors(['You must give a reason for resolving this flag.']);
+            return;
+        }
+        try{
+            setSaving(true);
+            console.log('submitting flag...')
+            const url = `/api/activities/events/${event.id}/resolve-flag/${flag.id}/`
+            console.log(url)
+            const response = await fetchWithAuth(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify({'resolved_reason': reason})
+            });
+            const returnData = await response.json();
+            if(response.ok){
+                onUpdate(returnData.flag)
+                setErrors([]);
+                setResolving(false);
+            }
+            else{
+                const serverResponse = [];
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                    returnData[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                    });
+                    } 
+                    else {
+                        serverResponse.push(`${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        }
+        catch(err){
+            console.error('Failed to apply changes to flag:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setSaving(false);
+        }
+    }
+
+    return(
+        <div className={flag.resolved ? styles.resolved : styles.flag}>
+            <p>{flag.reason} ({flag.auto_flagged ? `Auto Flagged` : `Flagged by ${flag.created_by.first_name} ${flag.created_by.last_name}`} at {prettyDates(flag.created_at)})</p>
+            {flag.resolved && <p>Resolved by {flag.resolved_by.first_name} {flag.resolved_by.last_name}: {flag.resolved_reason}</p>}
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {resolving && <div>
+                <label htmlFor="resolved">Enter a Reason</label>
+                <input type='text' id='resolved' value={reason} onChange={(e)=> setReason(e.target.value)} />
+                {!saving && <button onClick={() => handleResolve()}>Submit</button>}
+                {saving && <ButtonLoading />}
+            </div>}
+            {!flag.resolved && <button onClick={() => setResolving(!resolving)}>{resolving ? 'Cancel' : 'Resolve'}</button>}
+        </div>
+    )
+}
+
+function CountDetail({ event, count, onClose }){
+    const [errors, setErrors] = useState([])
+    const [saving, setSaving] = useState(false);
+    const [flags, setFlags] = useState(count.count_flags)
+    const [flagging, setFlagging] = useState(false);
+    const [reason, setReason] = useState('');
+
+    const handleFlag = async() => {
+        setErrors([]);
+        if(reason === ''){
+            setErrors(['You must give a reason for flagging this count.']);
+            return;
+        }
+        try{
+            setSaving(true);
+            console.log('submitting flag...')
+            const url = `/api/activities/events/${event.id}/flag-count/${count.id}/`
+            const response = await fetchWithAuth(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify({'reason': reason})
+            });
+            const returnData = await response.json();
+            if(response.ok){
+                setErrors([]);
+                console.log(returnData)
+                setFlags(prev => [...prev, returnData.flag])
+                setFlagging(false);
+            }
+            else{
+                const serverResponse = [];
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                    returnData[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                    });
+                    } 
+                    else {
+                        serverResponse.push(`${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        }
+        catch(err){
+            console.error('Failed to apply changes to flag:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setSaving(false);
+        }
+    }
+
+    const onUpdate = (flag) => {
+        let updated = flags.filter(f => f.id!=flag.id)
+        updated.push(flag)
+        setFlags(updated)
+    }
+
+    if(!event || !count) return(
+        <div className={modalStyles.modal}>
+            <ComponentLoading />
+        </div>
+    )
+    return(
+        <div className={modalStyles.modal}>
+            <p>Details</p>
+            {flags.map((f) => (
+                <Flag key={f.id} event={event} flag={f} onUpdate={(flag) => onUpdate(flag)}/>
+            ))}
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {flagging && <div style={{ display: 'flex', flexDirection: 'row'}}>
+                <label htmlFor="resolved">Enter a Reason</label>
+                <input type='text' id='resolved' value={reason} onChange={(e)=> setReason(e.target.value)} />
+                {!saving && <button onClick={() => handleFlag()}>Submit</button>}
+                {saving && <ButtonLoading />}
+            </div>}
+            <button onClick={() => setFlagging(!flagging)} className={errorStyles.warningButton}>{flagging ? 'Cancel' : 'Add New Flag'}</button>
+            <button onClick={() => onClose()}>Close</button>
         </div>
     )
 }
@@ -47,20 +203,26 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         pregnancy: {values: [true, false], labels: ['Pregnant', 'Not Pregnant'], col: 8},
         subcategory_id: {values: [], labels: [], col: 3}
     })
-    console.log(existing)
     const [editing, setEditing] = useState(existing ? false: true);
     const [active, setActive] = useState([]);
     const [rows, setRows] = useState([]);
     const [counts, setCounts] = useState({});
-    const [errors, setErrors] = useState([])
+    const [errors, setErrors] = useState([]);
     const [existingCounts, setExistingCounts] = useState([]);
+    const [existingIDs, setExistingIDs] = useState([]);
     const [existingFlags, setExistingFlags] = useState([]);
     const [existingMap, setExistingMap] = useState([]);
     const [del, setDel] = useState(false);
     const [warning, setWarning] = useState(null);
-    const [flagged, setFlagged] = useState(false);
+    const [pastFlags, setPastFlags] = useState(false);
+    const [activeFlags, setActiveFlags] = useState(false);
     const [saving, setSaving] = useState(false);
     const [expanded, setExpanded] = useState(existing ? false : true);
+    const [details, setDetails] = useState(null);
+
+    const [resolving, setResolving] = useState(false);
+    const [flagging, setFlagging] = useState(false);
+    const [reason, setReason] = useState('');
     const { user } = useAuth(); 
     const mapExisting = () => {
         let ids = []
@@ -72,18 +234,20 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             Object.keys(existing[group]).forEach((ind) => {
                 if(ind === 'id') ids.push(existing[group][ind])
                 if(ind === 'count') countsArray.push(existing[group][ind]);
-                if(ind === 'flagged'){
-                    const isFlagged = existing[group][ind]
-                    if(isFlagged) setFlagged(true);
-                    flagsArray.push(existing[group][ind] == true)
+                if(ind === 'count_flags'){
+                    const hasFlags = existing[group][ind].length > 0
+                    if(hasFlags) setPastFlags(true);
+                    if(determineFlagged(existing[group][ind])) setActiveFlags(true);
+                    flagsArray.push(existing[group][ind] || [])
                 }
-                if(existing[group][ind] != null && !['created_by', 'created_at', 'updated_by', 'updated_at', 'id', 'event', 'count', 'task', 'task_id', 'flagged'].includes(ind)){
+                if(existing[group][ind] != null && !['created_by', 'created_at', 'updated_by', 'updated_at', 'id', 'event', 'count', 'task', 'task_id', 'count_flags'].includes(ind)){
                     const key = ind === 'subcategory' ? 'subcategory_id' : ind
                     groupMap[key] = existing[group][ind]
                 }
             })
             combos.push(groupMap)
         })
+        setExistingIDs(ids)
         setExistingCounts(countsArray)
         setExistingFlags(flagsArray)
         setExistingMap(combos)
@@ -165,7 +329,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             })
             setCounts(map)
         }
-        console.log(splits)
+
         const splitMap = splits.map((s) => s[0])
         const valuesArrays = splits.map((s) => (s[1].values))
         const valuesMap = cartesianProduct(valuesArrays)
@@ -182,16 +346,17 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                 })
                 if(found !== null){ 
                     map[i].count = existingCounts[found];
-                    map[i].flagged = existingFlags[found] 
+                    map[i].count_flags = existingFlags[found] 
+                    map[i].id = existingIDs[found] 
                 }
                 else{  
                     map[i].count = ''
-                    map[i].flagged = false
+                    map[i].count_flags = []
                 }
             }
             else{
                 map[i].count = ''
-                map[i].flagged = false
+                map[i].count_flags = []
             }
             map[i].task_id = task.id
         }
@@ -322,50 +487,53 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         }
         
     }
-    const flagCount = async() => {
+    const changeFlags = async() => {
         setErrors([]);
-        try {
-            setSaving(true)
-            console.log('changing flag status...');
-            const response = await fetchWithAuth(`/api/activities/events/${event.id}/flag-counts/${task.id}/`, {
+        if(reason === ''){
+            setErrors(['Reason is required'])
+            return
+        }
+        try{
+            setSaving(true);
+            console.log('submitting flag...')
+            const data = resolving ? {'resolved_reason': reason} : {'reason': reason}
+            const url = resolving ? `/api/activities/events/${event.id}/resolve-count-flags/${task.id}/` : `/api/activities/events/${event.id}/flag-counts/${task.id}/`
+            console.log(url, data)
+            const response = await fetchWithAuth(url, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': "application/json",
                 },
-                body: JSON.stringify({'set_flag': !flagged})
+                body: JSON.stringify(data)
             });
-            if (response.ok) {
+            const returnData = await response.json();
+            if(response.ok){
+                setFlagging(false);
+                setResolving(false);
                 onSave();
-                setFlagged(!flagged)
-            } 
-            else {
-                let data = {};
-                try {
-                    data = await response.json();
-                } 
-                catch {
-                    // no JSON body or invalid JSON
-                    data = { detail: 'Unknown error occurred' };
-                }
+                setErrors([]);
+            }
+            else{
                 const serverResponse = [];
-                for (const field in data) {
-                    if (Array.isArray(data[field])) {
-                    data[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                    returnData[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
                     });
-                    } else {
-                    serverResponse.push(`${field}: ${data[field]}`);
+                    } 
+                    else {
+                        serverResponse.push(`${returnData[field]}`);
                     }
                 }
                 setErrors(serverResponse);
             }
-        } 
-        catch (err) {
-            console.error('Failed to delete task:', err);
+        }
+        catch(err){
+            console.error('Failed to apply changes to flag:', err);
             setErrors(['Something went wrong. Please try again later.'])
         }
         finally{
-            setSaving(false)
+            setSaving(false);
         }
     }
     const calcCellIndex = (iter, index) => {
@@ -377,11 +545,20 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         if(existing) mapCurrent(active);
         setEditing(false);
     }
+
+    const determineFlagged = (flags) => {
+        if(!flags || flags.length === 0) return false
+        const active = flags.filter(f => f.resolved === false)
+        if(active.length > 0) return true
+        return false
+    }
+
     if(!task) return <div className={errorStyles.erors}>This count is not associated with any task.</div>
     return(
         <div className={existing ? styles.countSegment : styles.segment}>
             {warning && <Warn onConfirm={() => confirmChange()} onCancel={() => setWarning(null)} />}
             {del && <ConfirmDelete name={`Counts for Task: ${task.indicator.name} for for ${task?.organization.name} Event: ${event.name}`} onConfirm={() => deleteCount()} onCancel={() => setDel(false)} />}
+            {details && <CountDetail event={event} count={details} onClose={() => {setDetails(null); onSave()}}/>}
             <div onClick={() => setExpanded(!expanded)} className={styles.expander}>
                 <h2>Counts for {task?.indicator.name} ({task?.organization.name})</h2>
                 {!editing && 
@@ -390,19 +567,15 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             </div>
             {expanded && <div>
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-                {existing && flagged && 
+                {activeFlags && 
                     <div className={errorStyles.warnings}>
-                        <h3>Flagged</h3>
-                            <p>This interaction has been flagged. This is most likely because:</p>
-                            <ul>
-                                {task.indicator.prerequisite && <li>This task has a prerequisite that has no counts associated with it.</li>}
-                                {task.indicator.prerequisite && <li>This task has a prerequisite that has counts associated wtih it but the counts use a different demographic breakdown and we couldn't verify them.</li>}
-                                {task.indicator.prerequisite && <li>This task has a prerequisite with counts 
-                                    but the counts for this task are not aligned with its prerequisite. Double check 
-                                    that no number in this task is larger than its corresponding number in the prerequisite task.
-                                    Any number that is not aligned with the prerequisite will be marked in yellow.
-                                </li>}
-                            </ul>
+                        <h3>FLAGGED</h3>
+                        <p>This count has unresolved flags. Please review the individual counts below for more information.</p>
+                    </div>
+                }
+                {!activeFlags && pastFlags && 
+                    <div className={errorStyles.success}>
+                        <p>This interaction has had flags in the past. You can view flag history by clicking on a number below.</p>
                     </div>
                 }
                 {editing && <h3>Select your breakdowns here</h3>}
@@ -451,7 +624,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                                 <tr>
                                     {active.map((a, index) => {if(index != 0) return <th>{cleanLabels(a[0])}</th>})}
                                     {active[0][1].labels.map((c) => (<th>{c}</th>))}
-                                </tr>
+                                </tr>   
                             </thead>
                             
                             <tbody> 
@@ -460,14 +633,23 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                                         {row.map((r) => (<td>{r}</td>))}
                                         {active[0][1].labels.map((c, index) => {
                                             const pos = calcCellIndex(iter, index); 
-                                            return <td key={pos} className={counts[pos]?.flagged ? styles.flaggedCount : styles.OK}> {editing ? <input id={pos} min={0} type="number" value={counts[pos]?.count} onChange={(e) => 
-                                                setCounts(prev => ({
-                                                    ...prev,
-                                                    [pos]: {
-                                                    ...prev[pos],
-                                                    count: e.target.value,
-                                                    },
-                                                }))} /> : <p><strong>{counts[pos]?.count == '' ? '-' : counts[pos]?.count}</strong></p>}
+                                            const flagged = determineFlagged(counts[pos]?.count_flags)
+                                            return <td key={pos} className={`${flagged ? styles.flaggedCount : styles.OK} ${styles.tooltipWrapper}`} onClick={() => !editing && counts[pos]?.id && setDetails(counts[pos])}> 
+                                                {flagged > 0 && (
+                                                    <div className={styles.tooltip}>
+                                                    {counts[pos].count_flags.map((flag, i) => (
+                                                        <p key={i}>{flag.reason}</p>
+                                                    ))}
+                                                    </div>
+                                                )}
+                                                {editing ? <input id={pos} min={0} type="number" value={counts[pos]?.count} onChange={(e) => 
+                                                    setCounts(prev => ({
+                                                        ...prev,
+                                                        [pos]: {
+                                                        ...prev[pos],
+                                                        count: e.target.value,
+                                                        },
+                                                    }))} /> : <p><strong>{counts[pos]?.count == '' ? '-' : counts[pos]?.count}</strong></p>}
                                             </td>}
                                         )}
                                     </tr>
@@ -478,7 +660,11 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                     <div>
                         {editing && (saving ? <ButtonLoading /> : <button onClick={() => saveCount()}>Save</button>)}
                         <button onClick={() => editing ? handleCancel() : setEditing(true)}>{editing ? 'Cancel' : 'Edit'}</button>
-                        {existing && !editing && <button className={errorStyles.warningButton} onClick={() => flagCount()}> {flagged ? 'Mark as OK' : 'Mark as Flagged'}</button>}
+                        {(flagging || resolving) && <input type='text' onChange={(e) => setReason(e.target.value)} value={reason} />}
+                        {existing && !editing && !flagging && !resolving && <button className={errorStyles.warningButton} onClick={() => setFlagging(true)}>Add Flag for All Counts</button>}
+                        {(flagging || resolving) && <button className={errorStyles.warningButton} onClick={() => changeFlags()}>Submit Flag</button>}
+                        {existing && !editing && !resolving && !flagging && user.role ==='admin' && <button className={errorStyles.warningButton} onClick={() => setResolving(true)}>Resolve all flags for all counts</button>}
+                        
                         {editing && existing && user.role ==='admin' && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
                         {del && <ButtonLoading forDelete={true} />}
                     </div>

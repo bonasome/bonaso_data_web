@@ -23,7 +23,7 @@ import RespondentsIndex from '../components/respondents/RespondentsIndex';
 import CreateRespondent from '../components/respondents/CreateRespondent';
 import EditRespondent from '../components/respondents/EditRespondent';
 import RespondentDetail from '../components/respondents/RespondentDetail';
-import FlaggedInteractions from '../components/respondents/interactions/FlaggedInteractions';
+import FlaggedInteractions from '../components/respondents/interactions/ManageFlags/FlaggedInteractions';
 
 //projects
 import ProjectLayout from '../layouts/ProjectLayout';
@@ -66,6 +66,7 @@ import EventDetail from '../components/events/EventDetail';
 import CreateEvent from '../components/events/CreateEvent';
 import EditEvent from '../components/events/EditEvent';
 import EventsIndex from '../components/events/EventsIndex';
+import InteractionFlags from '../components/respondents/interactions/ManageFlags/InteractionFlags';
 
 function Router() {
     return (
@@ -94,6 +95,11 @@ function Router() {
             <Route path='new' element={<CreateRespondent />} />
             <Route path=':id/edit' element={<EditRespondent />} />
             <Route path='flagged' element={<FlaggedInteractions />} />
+            <Route path=':id/interaction/:irID' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <InteractionFlags />
+                </RedirectIfNoPerm>
+            } />
         </Route>
         
         <Route 

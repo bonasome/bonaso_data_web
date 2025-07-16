@@ -201,7 +201,7 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
         let dropWarnings = [];
         let addedIDs = added.map((d) => (d.id))
         if(addedIDs.includes(task.id)){
-            dropWarnings.push(`This task is already recorded for this interaction.`);
+            dropWarnings.push(`This task is already included in this interaction.`);
             return;
         }
 
@@ -223,7 +223,6 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                     if (validPastInt && validPastInt.interaction_date <= date) {
                         isValid = true;
                         if (validPastInt?.subcategories) {
-                            //const interSubcats = validPastInt.subcategories.map(t => t.name);
                             setAllowedSubcats(prev=> ({...prev, [task.id]: validPastInt.subcategories}));
                         }
                     }
@@ -231,10 +230,9 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
             }
             if (!isValid) {
                 dropWarnings.push(
-                    `This indicator requires this respondent to have been ${prereq.name}, however, we could not find a prior record of this interaction (HINT: If you haven't already, please set an interaciton date so that we can verify that the prerequisite interaction took place before or on the same date as this one.).`
+                    `This indicator requires this respondent to have been ${prereq.name}, however, we could not find a prior record of this interaction. Make sure you have a date set.`
                 );
                 setWarnings(dropWarnings);
-                return;
             }
         }
         addedIDs.push(task.id)

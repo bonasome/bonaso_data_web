@@ -1,14 +1,15 @@
 import React from 'react';
-import styles from '../../../styles/filters.module.css';
-import errorStyles from '../../../styles/errors.module.css'
+import styles from '../../../../styles/filters.module.css';
+import errorStyles from '../../../../styles/errors.module.css'
 import { useEffect, useState, useRef, useMemo } from 'react';
-import fetchWithAuth from '../../../../services/fetchWithAuth';
-import SimpleSelect from '../../reuseables/SimpleSelect';
+import fetchWithAuth from '../../../../../services/fetchWithAuth';
+import SimpleSelect from '../../../reuseables/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
-import { useProjects } from '../../../contexts/ProjectsContext';
-import {useOrganizations } from '../../../contexts/OrganizationsContext';
-import { useIndicators } from '../../../contexts/IndicatorsContext';
-import ComponentLoading from '../../reuseables/ComponentLoading';
+import { useProjects } from '../../../../contexts/ProjectsContext';
+import {useOrganizations } from '../../../../contexts/OrganizationsContext';
+import { useIndicators } from '../../../../contexts/IndicatorsContext';
+import ComponentLoading from '../../../reuseables/ComponentLoading';
+import Checkbox from '../../../reuseables/Checkbox';
 
 export default function FlaggedInteractionsFilters({ onFilterChange }){
     const { projects, setProjects } = useProjects();
@@ -25,6 +26,8 @@ export default function FlaggedInteractionsFilters({ onFilterChange }){
         indicator: '',
         start: '',
         end: '',
+        resolved: '',
+        auto: '',
     })
     const [showFilters, setShowFilters] = useState(false);
     const [errors, setErrors] = useState([])
@@ -34,7 +37,7 @@ export default function FlaggedInteractionsFilters({ onFilterChange }){
         const getProjects = async() => {
             try{
                 console.log('fetching projects...')
-                const response = await fetchWithAuth(`/api/manage/projects/?${projectSearch}`);
+                const response = await fetchWithAuth(`/api/manage/projects/?search=${projectSearch}`);
                 const data = await response.json();
                 setProjects(data.results)
             }
@@ -49,7 +52,7 @@ export default function FlaggedInteractionsFilters({ onFilterChange }){
         const getOrganizations = async () => {
             try{
                 console.log('fetching organizations...')
-                const response = await fetchWithAuth(`/api/organizations/?${orgSearch}`);
+                const response = await fetchWithAuth(`/api/organizations/?search=${orgSearch}`);
                 const data = await response.json();
                 setOrganizations(data.results)
                 setLoading(false)
@@ -65,14 +68,14 @@ export default function FlaggedInteractionsFilters({ onFilterChange }){
     useEffect(() => {
         const getIndicators = async () => {
             try{
-                console.log('fetching organizations...')
-                const response = await fetchWithAuth(`/api/indicators/?${indicatorSearch}`);
+                console.log('fetching indicators...')
+                const response = await fetchWithAuth(`/api/indicators/?search=${indicatorSearch}`);
                 const data = await response.json();
                 setIndicators(data.results)
                 setLoading(false)
             }
             catch(err){
-                console.error('Failed to fetch projects: ', err);
+                console.error('Failed to fetch indicators: ', err);
                 setLoading(false)
             }
         }
@@ -118,14 +121,25 @@ export default function FlaggedInteractionsFilters({ onFilterChange }){
     }
     const clearFilters = () => {
         onFilterChange({
-        project: '',
-        organization: '',
-        indicator: '',
-        start: '',
-        end: '',
-    })
+            project: '',
+            organization: '',
+            indicator: '',
+            start: '',
+            end: '',
+            resolved: '',
+            auto: '',
+        });
+        setFilters({
+            project: '',
+            organization: '',
+            indicator: '',
+            start: '',
+            end: '',
+            resolved: '',
+            auto: '',
+        })
     }
-
+    console.log(filters)
     if(loading) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
@@ -141,6 +155,19 @@ export default function FlaggedInteractionsFilters({ onFilterChange }){
                         <label htmlFor='highDate'>Ends before:</label>
                         <input id='highDate' type='date' value={filters.end} onChange={(e) => setFilters(prev => ({...prev, end: e.target.value}))} />
                     </div>
+                    
+                    <SimpleSelect
+                        name='auto'
+                        optionValues={['true', 'false']} 
+                        optionLabels={['Auto Generated', 'Manually Generated']} value={filters.auto}
+                        callback={(val) => setFilters(prev => ({...prev, auto: val}))}
+                    />
+                    <SimpleSelect
+                        name='resolved'
+                        optionValues={['true', 'false']} 
+                        optionLabels={['Active', 'Resolved']} value={filters.resolved}
+                        callback={(val) => setFilters(prev => ({...prev, resolved: val}))}
+                    />
 
                     <SimpleSelect
                         name='organizations'
@@ -157,7 +184,7 @@ export default function FlaggedInteractionsFilters({ onFilterChange }){
                     <SimpleSelect
                         name='indicator' search={true}
                         optionValues={selectTools.indicators.ids} searchCallback={(val) => setIndicatorSearch(val)}
-                        optionLabels={selectTools.indicators.name} value={filters.indicator}
+                        optionLabels={selectTools.indicators.names} value={filters.indicator}
                         callback={(val) => setFilters(prev => ({...prev, indicator: val}))}
                     />
                     <button onClick={()=>handleChange()}>Apply</button>

@@ -4,11 +4,12 @@
 }
 .filters {
     padding: 2vh;
-    width: fit-content;
+    width: 30vw;
     height: fit-content;
     background-color: var(--bonaso-uber-dark-accent);
     position: absolute;
     top: 100%;
     left: 0;
     z-index: 10;
+    overflow:hidden;
 }

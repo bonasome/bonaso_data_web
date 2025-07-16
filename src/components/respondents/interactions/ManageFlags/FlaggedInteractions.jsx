@@ -1,16 +1,16 @@
 import React from 'react';
-import styles from '../../../styles/indexView.module.css'
+import styles from '../../../../styles/indexView.module.css'
 import { useEffect, useState, useMemo } from 'react';
-import fetchWithAuth from '../../../../services/fetchWithAuth';
-import { useAuth } from '../../../contexts/UserAuth'
+import fetchWithAuth from '../../../../../services/fetchWithAuth';
+import { useAuth } from '../../../../contexts/UserAuth'
 import FlaggedInteractionsFilters from './FlaggedInteractionsFilters';
-import IndexViewWrapper from '../../reuseables/IndexView';
-import Loading from '../../reuseables/Loading';
+import IndexViewWrapper from '../../../reuseables/IndexView';
+import Loading from '../../../reuseables/Loading';
 import { Link } from 'react-router-dom';
-import { useInteractions } from '../../../contexts/InteractionsContext';
-import { useRespondents } from '../../../contexts/RespondentsContext';
-import ComponentLoading from '../../reuseables/ComponentLoading';
-import prettyDates from '../../../../services/prettyDates';
+import { useInteractions } from '../../../../contexts/InteractionsContext';
+import { useRespondents } from '../../../../contexts/RespondentsContext';
+import ComponentLoading from '../../../reuseables/ComponentLoading';
+import prettyDates from '../../../../../services/prettyDates';
 
 function InteractionCard({ interaction }) {
     const [expanded, setExpanded] = useState(false);
@@ -53,7 +53,7 @@ function InteractionCard({ interaction }) {
 
     return (
         <div className={styles.card}>
-            <Link to={`/respondents/${interaction.respondent}`} style={{display:'flex', width:"fit-content"}}><h2>{interaction.task_detail.indicator.name} with {respondentLine} on {prettyDates(interaction.interaction_date)}</h2></Link>
+            <Link to={`/respondents/${interaction.respondent}/interaction/${interaction.id}`} style={{display:'flex', width:"fit-content"}}><h2>{interaction.task_detail.indicator.code}: {interaction.task_detail.indicator.name} with {respondentLine} on {prettyDates(interaction.interaction_date)}</h2></Link>
         </div>
     );
 }
@@ -70,22 +70,27 @@ export default function FlaggedInteractions({ callback=null, blacklist=[] }){
     const [indicatorFilter, setIndicatorFilter] = useState('');
     const [startFilter, setStartFilter] = useState('');
     const [endFilter, setEndFilter] = useState('');
-
+    const [autoFilter, setAutoFilter] = useState('');
+    const [resolvedFilter, setResolvedFilter] = useState('');
     useEffect(() => {
         const loadFlagged = async () => {
             try {
                 const filterQuery = 
-                    (startFilter ? `&project=${startFilter}` : '') + 
-                    (endFilter ? `&project=${endFilter}` : '') + 
+                    (resolvedFilter ? `&resolved=${resolvedFilter}` : '') + 
+                    (autoFilter ? `&auto_flagged=${autoFilter}` : '') + 
+                    (startFilter ? `&start=${startFilter}` : '') + 
+                    (endFilter ? `&end=${endFilter}` : '') + 
                     (orgFilter ? `&organization=${orgFilter}` : '') +
                     (projectFilter ? `&project=${projectFilter}` : '') + 
-                    (indicatorFilter ? `&status=${indicatorFilter}` : '');
+                    (indicatorFilter ? `&indicator=${indicatorFilter}` : '');
                 
                 const url = `/api/record/interactions/flagged/?search=${search}&page=${page}` + filterQuery;
+                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
                 setInteractions(data.results);
+                console.log(data.results)
                 setLoading(false);
             } 
             catch (err) {
@@ -94,14 +99,16 @@ export default function FlaggedInteractions({ callback=null, blacklist=[] }){
             }
         };
         loadFlagged();
-    }, [page, search, indicatorFilter, projectFilter, orgFilter, startFilter, endFilter]);
+    }, [page, search, indicatorFilter, projectFilter, orgFilter, startFilter, endFilter, autoFilter, resolvedFilter ]);
 
     const setFilters = (filters) => {
-        setIndicatorFilter(filters.prereq);
+        setIndicatorFilter(filters.indicator);
         setProjectFilter(filters.project);
         setOrgFilter(filters.organization);
         setStartFilter(filters.start);
         setEndFilter(filters.end);
+        setResolvedFilter(filters.resolved);
+        setAutoFilter(filters.auto)
     }
 
     if(loading) return <Loading />

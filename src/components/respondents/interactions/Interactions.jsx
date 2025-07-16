@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useState, useEffect } from "react";
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import { useAuth } from '../../../contexts/UserAuth'
@@ -13,6 +13,8 @@ import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import ComponentLoading from '../../reuseables/ComponentLoading';
 import Checkbox from '../../reuseables/Checkbox';
 import ButtonLoading from '../../reuseables/ButtonLoading';
+import modalStyles from '../../../styles/modals.module.css';
+import { Link } from 'react-router-dom';
 
 function InteractionCard({ interaction, onUpdate, onDelete }){
     const { user } = useAuth();
@@ -26,9 +28,10 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     const[subcats, setSubcats] = useState([]);
     const[number, setNumber] = useState('');
     const [del, setDel] = useState(false);
-    const [flagged, setFlagged] = useState(interaction.flagged)
     const {setInteractions} = useInteractions();
     const [saving, setSaving] = useState(false);
+
+
     const checkPrereqs = async() =>{
         const prereq = interaction.task_detail.indicator.prerequisite
         try{
@@ -41,6 +44,9 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                         setAllowedSubcats(validPastInt.subcategories);
                     }
                 }
+                else{
+                    setAllowedSubcats(interaction.task_detail.indicator.subcategories)
+                }
             }
         }
         catch(err){
@@ -48,6 +54,12 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             console.error(err)
         }   
     }
+
+    const activeFlags = useMemo(() => {
+        if(!interaction) return false
+        return interaction?.flags?.filter(f => !f.resolved).length > 0;
+    }, [interaction])
+
     useEffect(() => {
         const permCheck = () => {
             if(user.role == 'admin'){
@@ -78,16 +90,13 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             }
         }
 
-
-
         if(interaction.numeric_component){
             setNumber(interaction.numeric_component);
         }
         permCheck();
     }, [user, interaction])
 
-    
-    const handleSubmit = async(flaggedOverride = flagged) =>{
+    const handleSubmit = async() =>{
         let submissionErrors = []
         if(!interactionLocation || interactionLocation == ''){
             submissionErrors.push('Interaction location is required.');
@@ -103,7 +112,6 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             'interaction_location': interactionLocation,
             'numeric_component': number || null,
             'subcategories_data': subcats,
-            'flagged': flaggedOverride,
         }
 
         try{
@@ -149,11 +157,6 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
         finally{
             setSaving(false);
         }
-    }
-    const flagInteraction = async() => {
-        const newFlag = !flagged
-        setFlagged(!flagged);
-        handleSubmit(newFlag);
     }
 
     const deleteInteraction = async() => {
@@ -214,7 +217,6 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
         )
         
     }
-
     if(edit){
         return(
             <div className={styles.card}>
@@ -261,10 +263,11 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
     }
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
-            
             <h3>{interaction.task_detail.indicator.code + ' '} {interaction.task_detail.indicator.name}</h3>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {flagged && <div className={errorStyles.warnings}><h3>FLAGGED</h3></div>}
+            {interaction?.flags.length > 0 && <div className={activeFlags ? errorStyles.warnings : errorStyles.success}>
+                <Link to={`/respondents/${interaction.respondent}/interaction/${interaction.id}`}><h3>FLAGS</h3></Link>
+            </div>}
             <p>{prettyDates(interaction.interaction_date)}</p>
             <p>{interaction.interaction_location ? interaction.interaction_location : 'No Location on Record'}</p>
             {expanded && 
@@ -281,7 +284,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                 {interaction.numeric_component && <p>{interaction.numeric_component}</p>}
                 {perm && <button onClick={() => setEdit(!edit)}>{edit ? 'Cancel' : 'Edit Interaction'}</button>}
                 {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
-                {perm && <button className={errorStyles.warningButton} onClick={() => flagInteraction()} >{flagged ? 'Mark as OK' :'Flag'} </button>}
+                {perm && <Link to={`/respondents/${interaction.respondent}/interaction/${interaction.id}`}><button className={errorStyles.warningButton}>Raise New Flag </button></Link>}
                 {user.role == 'admin' && !del &&
                     <div>
                         <p><i>Created by: {interaction.created_by?.first_name} {interaction.created_by?.last_name} at {new Date(interaction.created_at).toLocaleString()}</i></p>
@@ -312,6 +315,7 @@ export default function Interactions({ id, tasks, onUpdate, setAddingTask, onAdd
                 console.log('fetching respondent details...');
                 const response = await fetchWithAuth(`/api/record/interactions/?respondent=${id}&search=${search}&page=${page}`);
                 const data = await response.json();
+                console.log(data.results);
                 setEntries(data.count); 
                 setInteractions(data.results);
                 setLoading(false)
