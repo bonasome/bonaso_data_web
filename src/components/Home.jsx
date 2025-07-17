@@ -36,6 +36,9 @@ function Home() {
         };
         getTasks();
     }, [])
+
+    
+
     if(loading) return <Loading />
     return (
         <div className={styles.home}>

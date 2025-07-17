@@ -14,6 +14,7 @@ import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ButtonLoading from '../reuseables/ButtonLoading';
 import { useAuth } from "../../contexts/UserAuth";
 import { IoMdReturnLeft } from "react-icons/io";
+import cleanLabels from "../../../services/cleanLabels";
 
 export default function EventDetail(){
     const { user } = useAuth();
@@ -408,7 +409,7 @@ export default function EventDetail(){
                 </Link>
                 <h1>{event?.name}</h1>
                 <h2>Details</h2>
-                <h3>{prettyDates(event?.event_date)}, {event?.location} </h3>
+                <h3>{prettyDates(event?.event_date)}, {event?.location} ({cleanLabels(event?.status)})</h3>
                 <h3>Host: {event?.host ? event.host.name : 'No host'}</h3>
                 <h3>Description</h3>
                 <p>{event?.description}</p>

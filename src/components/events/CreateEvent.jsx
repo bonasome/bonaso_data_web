@@ -66,8 +66,8 @@ export default function CreateEvent(){
     }, [search]);
 
     const formConfig = useMemo(() => {
-        return eventConfig(orgIDs, orgNames, eventsMeta.event_types, (val) => setSearch(val));
-    }, [orgIDs, orgNames, eventsMeta]);
+        return eventConfig(eventsMeta);
+    }, [eventsMeta]);
 
     const handleCancel = () => {
         navigate('/indicators')

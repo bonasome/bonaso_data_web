@@ -80,10 +80,10 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
             amount = 0
             interaction.subcategories.forEach(s => amount += s.numeric_component)
         }
+
         if (legend==='subcategories' && data?.subcategories?.length > 0) {
             interaction.subcategories.forEach(cat => {
                 amount = (data.require_numeric && cat.numeric_component) ? cat.numeric_component : 1
-                console.log(amount)
                 const name = cat.deprecated ? `${cat.name} (Deprecated)` : cat.name
                 axisGroups[key][name] = (axisGroups[key][name] || 0) + amount;
             });
@@ -178,6 +178,7 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
             else if(axis==='quarter'){
                 key = getQuarter(date);
             }
+            console.log(axisGroups[key])
             if (!axisGroups[key]) {
                 axisGroups[key] = !['', 'targets'].includes(legend) ? {} : 0;
             }
@@ -206,8 +207,7 @@ export default function monthlyCounts(data, filters = null, axis='month', legend
                 const label = meta[metaLabel][labelIndex]
                 axisGroups[key][label] = (axisGroups[key][label] || 0) + amount;
             }
-        
-            if(legend==='citizenship'){
+            else if(legend==='citizenship'){
                 if(!count.citizenship) continue;
                 const cat=count.citizenship;
                 const label = cat ? 'Citizen' : 'Non-Citizen';

@@ -96,8 +96,8 @@ export default function EditEvent(){
     }, [search]);
 
     const formConfig = useMemo(() => {
-        return eventConfig(orgIDs, orgNames, eventsMeta.event_types, (val) => setSearch(val), existing);
-    }, [orgIDs, orgNames, eventsMeta]);
+        return eventConfig(eventsMeta, existing);
+    }, [eventsMeta]);
 
     const handleCancel = () => {
         navigate(`/events/${id}`)

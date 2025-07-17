@@ -161,7 +161,7 @@ export default function Profile(){
                 <ActivityChart profile={profile} />
                 <h3>Activity Feed</h3>
                 <IndexView onPageChange={setPage} page={page} entries={entries} onSearchChange={setSearch}>
-                    {feed.length > 0 ? 
+                    {feed?.length > 0 ? 
                         <div>
                         {feed.map((a) => (
                             <div className={styles.feedItem}>
