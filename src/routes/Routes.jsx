@@ -68,7 +68,7 @@ import EditEvent from '../components/events/EditEvent';
 import EventsIndex from '../components/events/EventsIndex';
 import InteractionFlags from '../components/respondents/interactions/ManageFlags/InteractionFlags';
 
-import Dashboard from '../components/analytics/Dashboard';
+import Dashboards from '../components/analytics/Dashboards';
 
 function Router() {
     return (
@@ -316,7 +316,7 @@ function Router() {
         >
             <Route index element={
                 <RedirectIfNoPerm level={['admin', 'client',  'meofficer', 'manager']}>
-                    <Dashboard />
+                    <Dashboards />
                 </RedirectIfNoPerm>
                 }/>
         </Route>

@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
 import ComponentLoading from '../reuseables/ComponentLoading';
 
-function ProjectCard({ project }) {
+function ProjectCard({ project, callback=null, callbackText }) {
     const [loading, setLoading] = useState(false);
     const { projectDetails, setProjectDetails } = useProjects();
     const [active, setActive] = useState(null);
@@ -45,6 +45,7 @@ function ProjectCard({ project }) {
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             <Link to={`/projects/${project.id}`} style={{display:'flex', width:"fit-content"}}><h2>{project.name}</h2></Link>
+            {callback && <button onClick={() => callback(project)}>{callbackText}</button>}
             {expanded && loading && <ComponentLoading />}
             {expanded && active && (
                 <>
@@ -59,7 +60,7 @@ function ProjectCard({ project }) {
     );
 }
 
-export default function ProjectsIndex(){
+export default function ProjectsIndex({callback=null, callbackText='Select Project'}){
     const { user } = useAuth()
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -110,7 +111,7 @@ export default function ProjectsIndex(){
         setIndicatorFilter(filters.indicator)
     }
 
-    if(loading) return <Loading />
+    if(loading) return callback ? <ComponentLoading /> :  <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Projects' : 'My Projects'}</h1> 
@@ -120,7 +121,7 @@ export default function ProjectsIndex(){
                 {(projects && projects?.length) == 0 ? 
                     <p>No projects match your criteria.</p> :
                     projects?.map(p => (
-                    <ProjectCard key={p.id} project={p} />
+                    <ProjectCard key={p.id} project={p} callback={callback} callbackText={callbackText} />
                     ))
                 }
             </IndexViewWrapper>
