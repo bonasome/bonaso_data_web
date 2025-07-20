@@ -16,6 +16,43 @@
         flex-direction: column;
     }
 }
+
+.board{
+    background-color: var(--bonaso-dark-accent);
+}
+.tabs{
+    display: flex;
+    flex-direction: row;
+}
+.tab{
+    text-align: center;
+    width: 33%;
+    padding: 1vh;
+    background-color: white;
+    color: var(--bonaso-dark-accent);
+}
+.activeTab{
+    text-align: center;
+    width: 33%;
+    padding: 1vh;
+    
+    background-color: var(--bonaso-dark-accent);
+}
+.msgCard{
+    margin: 3vh;
+    padding: 1vh;
+    background-color: var(--bonaso-uber-dark-accent);
+    transition: all .6s;
+}
+.msgCard:hover{
+    transform: scale(1.05);
+}
+
+
+
+
+
+
 .tasksBox{
     padding: 4vh;
     background-color: var(--bonaso-dark-accent);
@@ -55,34 +92,17 @@
 }
 
 .actions {
+    text-align: center;
     background-color: var(--bonaso-dark-accent);
     display: flex;
     flex-direction: column;
-    text-align: center;
-    padding-bottom: 6vh;
-    margin-right: 4vh;
+    margin: 2vh;
+    padding: 2vh;
 }
+
 @media screen and (max-width: 768px){
     .actions{
         padding: 1vh;
         margin: 0;
     }
-}
-.actionLink {
-    margin-left: auto;
-    margin-right: auto;
-    width: 66%;
-    padding: 3vh;
-    background-color: var(--bonaso-uber-dark-accent);
-    transition: transform 0.3s ease;
-}
-
-.actionLink :hover{
-    text-overflow: ellipsis;
-    padding: 3vh;
-    background-color: var(--bonaso-light-accent);
-    transform: scale(1.2);
-}
-.actionLink > a:hover {
-    color: var(--bonaso-uber-dark-accent);
 }

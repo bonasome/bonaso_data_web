@@ -70,6 +70,9 @@ import InteractionFlags from '../components/respondents/interactions/ManageFlags
 
 import Dashboards from '../components/analytics/Dashboards';
 
+import Messages from '../components//messages/Messages';
+import ComposeAnnouncements from '../components/announcements/ComposeAnnouncement';
+
 function Router() {
     return (
         <Routes>
@@ -97,7 +100,7 @@ function Router() {
             <Route path='new' element={<CreateRespondent />} />
             <Route path=':id/edit' element={<EditRespondent />} />
             <Route path='flagged' element={<FlaggedInteractions />} />
-            <Route path=':id/interaction/:irID' element={
+            <Route path='interaction/:id' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
                     <InteractionFlags />
                 </RedirectIfNoPerm>
@@ -256,6 +259,25 @@ function Router() {
         </Route>
 
         <Route 
+            path='/messages' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <ProfileLayout />
+                </RedirectIfNotAuthenticated>
+            }
+        >
+            <Route index element={
+                <Messages />
+            }/>
+            <Route path='announcements/new' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <ComposeAnnouncements />
+                </RedirectIfNoPerm>
+            }/>
+        </Route>
+
+        <Route 
             path='/clients' 
             element = {
                 <RedirectIfNotAuthenticated>
@@ -320,7 +342,7 @@ function Router() {
                 </RedirectIfNoPerm>
                 }/>
         </Route>
-
+        
         <Route 
             path='/help' 
             element = {

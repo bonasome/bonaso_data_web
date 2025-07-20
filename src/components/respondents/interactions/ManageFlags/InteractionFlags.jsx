@@ -103,7 +103,7 @@ function FlagCard({ interaction, flag, onCancel, onSubmit }){
 }
 
 export default function InteractionFlags(){
-    const { id, irID } = useParams();
+    const { id } = useParams();
     const [errors, setErrors] = useState([]);
     const [flagging, setFlagging] = useState(false);
     const [resolving, setResolving] = useState(false);
@@ -114,10 +114,31 @@ export default function InteractionFlags(){
     const { respondentDetails, setRespondentDetails } = useRespondents();
 
     useEffect(() => {
+        const getInteraction = async() => {
+            try{
+                const response = await fetchWithAuth(`/api/record/interactions/${id}`);
+                const data = await response.json();
+                setInteraction(data);
+                //setRefresh(prev => prev += 1)
+                console.log(data);
+            }
+            catch(err){
+                setErrors(['Something went wrong. Please try again later.'])
+                console.error(err)
+            }  
+            finally{
+                setLoading(false);
+            }
+        }
+        getInteraction()
+    }, [id, refresh])
+
+    useEffect(() => {
         const getRespondentDetails = async () => {
+            if(!interaction) return;
             try {
                 console.log('fetching respondent details...');
-                const response = await fetchWithAuth(`/api/record/respondents/${id}/`);
+                const response = await fetchWithAuth(`/api/record/respondents/${interaction.respondent}/`);
                 const data = await response.json();
                 if(response.ok){
                     setRespondentDetails(prev => [...prev, data]);
@@ -136,32 +157,12 @@ export default function InteractionFlags(){
         };
         getRespondentDetails();
 
-    }, [id])
-
-    useEffect(() => {
-        const getInteraction = async() => {
-            try{
-                const response = await fetchWithAuth(`/api/record/interactions/${irID}`);
-                const data = await response.json();
-                setInteraction(data);
-                //setRefresh(prev => prev += 1)
-                console.log(data);
-            }
-            catch(err){
-                setErrors(['Something went wrong. Please try again later.'])
-                console.error(err)
-            }  
-            finally{
-                setLoading(false);
-            }
-        }
-        getInteraction()
-    }, [irID, refresh])
+    }, [interaction])
 
     if(loading ||!interaction) return <Loading />
     return(
         <div className={styles.index}>
-            <Link to={`/respondents/${id}`} className={returnStyles.return}>
+            <Link to={`/respondents/${respondent?.id}`} className={returnStyles.return}>
                 <IoMdReturnLeft className={returnStyles.returnIcon} />
                 <p>Return to respondent page</p>
             </Link>
@@ -171,7 +172,7 @@ export default function InteractionFlags(){
             </Link>
             <h1>
                 Flag History for Interaction "{interaction.task_detail.indicator.name}"  for respondent 
-                {respondent?.is_anonymous ? ` Anonymous Respondent ${respondent.uuid} ` : ` ${respondent.first_name} ${respondent.last_name} `} 
+                {respondent?.is_anonymous ? ` Anonymous Respondent ${respondent?.uuid} ` : ` ${respondent?.first_name} ${respondent?.last_name} `} 
                 on {prettyDates(interaction.interaction_date)}
             </h1>
             {flagging && <ManageFlag interaction={interaction} existing={null} onSubmit={() => {setRefresh(prev => prev+=1); setFlagging(false)}} onCancel={() => setFlagging(false)}/>}

@@ -269,7 +269,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             <h3>{interaction.task_detail.indicator.code + ' '} {interaction.task_detail.indicator.name}</h3>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {interaction?.flags.length > 0 && <div className={activeFlags ? errorStyles.warnings : errorStyles.success}>
-                <Link to={`/respondents/${interaction.respondent}/interaction/${interaction.id}`}><h3>FLAGS</h3></Link>
+                <Link to={`/respondents/interaction/${interaction.id}`}><h3>FLAGS</h3></Link>
             </div>}
             <p>{prettyDates(interaction.interaction_date)}</p>
             <p>{interaction.interaction_location ? interaction.interaction_location : 'No Location on Record'}</p>
@@ -287,7 +287,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                 {interaction.numeric_component && <p>{interaction.numeric_component}</p>}
                 {perm && <button onClick={() => setEdit(!edit)}>{edit ? 'Cancel' : 'Edit Interaction'}</button>}
                 {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
-                {perm && <Link to={`/respondents/${interaction.respondent}/interaction/${interaction.id}`}><button className={errorStyles.warningButton}>Raise New Flag </button></Link>}
+                {perm && <Link to={`/respondents/interaction/${interaction.id}`}><button className={errorStyles.warningButton}>Raise New Flag </button></Link>}
                 {user.role == 'admin' && !del &&
                     <div>
                         <p><i>Created by: {interaction.created_by?.first_name} {interaction.created_by?.last_name} at {new Date(interaction.created_at).toLocaleString()}</i></p>

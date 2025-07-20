@@ -199,8 +199,8 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         status: {values: breakdownOptions?.status, labels: breakdownOptions?.status_labels, col: 4},
         kp_type: {values: breakdownOptions?.kp_type, labels: breakdownOptions?.kp_type_labels, col: 1},
         disability_type: {values: breakdownOptions?.disability_type, labels: breakdownOptions?.disability_type_labels, col: 2},
-        hiv_status: {values: [true, false], labels: ['HIV Positive', 'HIV Negative'], col: 7},
-        pregnancy: {values: [true, false], labels: ['Pregnant', 'Not Pregnant'], col: 8},
+        pregnancy: {values: breakdownOptions?.pregnancy, labels: breakdownOptions?.pregnancy_labels, col: 7},
+        hiv_status: {values: breakdownOptions?.hiv_status, labels: breakdownOptions?.hiv_status_labels, col: 8},
         subcategory_id: {values: [], labels: [], col: 3}
     })
     const [editing, setEditing] = useState(existing ? false: true);
@@ -282,7 +282,6 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         } else {
             setExistingCounts([]);
             setExistingMap([]);
-            setFlagged(false);
         }
     }, [existing, task]);
 
@@ -314,18 +313,39 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         if(!task) return
         if(splits.length == 0) {
             let count = '';
+            let count_flags = []
+            let id = null;
             if(existing){
                 count = existing[Object.keys(existing)[0]].count
+                count_flags = existing[Object.keys(existing)[0]].count_flags
+                id = existing[Object.keys(existing)[0]].id
             }
-            setCounts({0: {count: count, task_id: task.id}}); 
+            setCounts({0: {count: count, task_id: task.id, count_flags: count_flags, id: id}}); 
             return;
         }
         if(splits.length === 1){
             const map = {}
             const split = splits[0][0]
             const valuesArray = splits.map((s) => (s[1].values))
+            console.log(valuesArray)
             valuesArray[0].forEach((v, index) => {
-                map[index] = {[split]: v, count: '', task_id: task.id}
+                let count = ''
+                let flags = []
+                let id = null
+                let found = null
+                if(existing){
+                    existingMap.forEach((m, index) => {
+                        if(m[split] === v){
+                            count = m.count,
+                            id = m.id
+                            flags = m.count_flags
+                        }
+                    })
+                }
+                else{
+                    map[index] = {[split]: v, count: count, task_id: task.id, count_flags: flags, id: id}
+                }
+                
             })
             setCounts(map)
         }
@@ -552,7 +572,6 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         if(active.length > 0) return true
         return false
     }
-
     if(!task) return <div className={errorStyles.erors}>This count is not associated with any task.</div>
     return(
         <div className={existing ? styles.countSegment : styles.segment}>
@@ -592,20 +611,28 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                 </div>}
                 <div>
                     {active.length === 0 && 
-                        <div>
+                        <div className={`${determineFlagged(counts[0]?.count_flags) ? styles.flaggedCount : styles.OK} ${styles.tooltipWrapper}`} onClick={() => !editing && counts[0]?.id && setDetails(counts[0])}>
                             <label htmlFor="count">Count</label>
                             {editing ? <input id="count" type="number" min={0}  value={counts[0]?.count} onChange={(e) => setCounts(prev => ({
-                                        ...prev,
-                                        0: {
-                                        ...prev[0],
-                                        count: e.target.value,
-                                        },
-                                    }))} /> : <p>{counts[0]?.count}</p>}
+                                ...prev,
+                                0: {
+                                ...prev[0],
+                                count: e.target.value,
+                                },
+                            }))} /> : <p>{counts[0]?.count}</p>}
+                            {determineFlagged(counts[0]?.count_flags) > 0 && (
+                                <div className={styles.tooltip}>
+                                {counts[0].count_flags.map((flag, i) => (
+                                    <p key={i}>{flag.reason}</p>
+                                ))}
+                                </div>
+                            )}
                         </div>
                     }
                     {active.length === 1 &&
-                        active[0][1].labels.map((b, index) => (
-                            <div>
+                        active[0][1].labels.map((b, index) => {
+                            const flagged = determineFlagged(counts[index]?.count_flags)
+                            return (<div className={`${flagged ? styles.flaggedCount : styles.OK} ${styles.tooltipWrapper}`} onClick={() => !editing && counts[index]?.id && setDetails(counts[index])}>
                                 <label htmlFor={b}>{b}</label>
                                 {editing ? <input id={b} type="number" min={0} value={counts[index]?.count} onChange={(e) => setCounts(prev => ({
                                         ...prev,
@@ -614,8 +641,15 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                                         count: e.target.value,
                                         },
                                     }))} /> : <p>{counts[index]?.count}</p>}
-                            </div>
-                        ))
+                                    {flagged > 0 && (
+                                        <div className={styles.tooltip}>
+                                        {counts[index].count_flags.map((flag, i) => (
+                                            <p key={i}>{flag.reason}</p>
+                                        ))}
+                                        </div>
+                                    )}
+                            </div>)
+                        })
                     }
                     {
                         active.length > 1 &&

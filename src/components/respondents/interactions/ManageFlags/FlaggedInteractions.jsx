@@ -53,7 +53,7 @@ function InteractionCard({ interaction }) {
 
     return (
         <div className={styles.card}>
-            <Link to={`/respondents/${interaction.respondent}/interaction/${interaction.id}`} style={{display:'flex', width:"fit-content"}}><h2>{interaction.task_detail.indicator.code}: {interaction.task_detail.indicator.name} with {respondentLine} on {prettyDates(interaction.interaction_date)}</h2></Link>
+            <Link to={`/respondents/interaction/${interaction.id}`} style={{display:'flex', width:"fit-content"}}><h2>{interaction.task_detail.indicator.code}: {interaction.task_detail.indicator.name} with {respondentLine} on {prettyDates(interaction.interaction_date)}</h2></Link>
         </div>
     );
 }

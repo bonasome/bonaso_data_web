@@ -122,7 +122,7 @@ export default function OrganizationFilters({ onFilterChange }){
             project: '',
         });
     }
-    console.log(selectTools)
+
     if(loading) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>

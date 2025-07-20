@@ -16,11 +16,22 @@ import { IoMdReturnLeft } from "react-icons/io";
 import useWindowWidth from '../../../../services/useWindowWidth';
 import prettyDates from '../../../../services/prettyDates';
 import ButtonLoading from '../../reuseables/ButtonLoading';
+import { favorite, checkFavorited } from '../../../../services/favorite';
 
 function ProjectInfo({ project }){
     const navigate = useNavigate();
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
+    const [favorited, setFavorited] = useState(false)
+
+    useEffect(() => {
+        const checkFavStatus = async() => {
+            if(!project?.id) return;
+            const isFavorited = await checkFavorited('project', project.id)
+            setFavorited(isFavorited)
+        }
+        checkFavStatus()
+    }, [project])
 
     const deleteProject = async() => {
         try {
@@ -79,6 +90,9 @@ function ProjectInfo({ project }){
             <p>{project.description}</p>
             {user.role == 'admin' && <Link to={`/projects/${project.id}/edit`}><button>Edit Details</button></Link>}
             {user.role == 'admin' && !del && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)} >Delete</button>}
+            
+            <button onClick={() => {favorite('project', project.id, favorited); setFavorited(!favorited)}}>{favorited ? 'Unfavorite Project' : 'Favorite Project'}</button>
+            
             {del && <ButtonLoading forDelete={true} />}
             {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/narrative-reports/upload`} ><button>Upload a Narrative Report for this Project</button></Link>}
         </div>
@@ -96,7 +110,6 @@ function ProjectViewSwitch({ project, type, onRemove, indicator=null, organizati
 export default function ProjectDetail(){
     const { id } = useParams();
     const navigate = useNavigate();
-
     const { projectDetails, setProjectDetails } = useProjects();
     const[activeProject, setActiveProject] = useState(null);
     const [loading, setLoading] = useState(true);

@@ -114,6 +114,7 @@ export default function EditIndicator(){
         if(data.prerequisite_id.length > 0) {
             data.prerequisite_id = data.prerequisite_id.map(pre => (pre.id))
         }
+        if(data.governs_attribute === '') data.governs_attribute = null
         if(data.match_subcategories) data.subcategory_names = []
         const names = data.subcategory_names
         let commas = []

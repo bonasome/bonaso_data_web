@@ -15,6 +15,7 @@ import ButtonLoading from '../reuseables/ButtonLoading';
 import { useAuth } from "../../contexts/UserAuth";
 import { IoMdReturnLeft } from "react-icons/io";
 import cleanLabels from "../../../services/cleanLabels";
+import { favorite, checkFavorited } from "../../../services/favorite";
 
 export default function EventDetail(){
     const { user } = useAuth();
@@ -37,7 +38,17 @@ export default function EventDetail(){
     const [del, setDel] = useState(false);
     const [countsSearch, setCountsSearch] = useState('');
     const [_, forceUpdate] = useState(0);
-    
+    const [favorited, setFavorited] = useState(false)
+
+    useEffect(() => {
+        const checkFavStatus = async() => {
+            if(!event?.id) return;
+            const isFavorited = await checkFavorited('event', event.id)
+            setFavorited(isFavorited)
+        }
+        checkFavStatus()
+    }, [event])
+
 
     const alertRef = useRef(null);
     useEffect(() => {
@@ -414,6 +425,7 @@ export default function EventDetail(){
                 <h3>Description</h3>
                 <p>{event?.description}</p>
                 <Link to={`/events/${id}/edit`}><button>Edit Details</button></Link>
+                <button onClick={() => {favorite('event', event.id, favorited); setFavorited(!favorited)}}>{favorited ? 'Unfavorite Event' : 'Favorite Event'}</button>
                 {user.role == 'admin' && !del && <button className={errorStyles.deleteButton} onClick= {() => setDel(true)}>Delete Event</button>}
                 {del && <ButtonLoading forDelete={true} />}
             </div>

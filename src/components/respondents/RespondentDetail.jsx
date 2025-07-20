@@ -19,6 +19,7 @@ import { BiSolidHide } from "react-icons/bi";
 import useWindowWidth from '../../../services/useWindowWidth';
 import Checkbox from '../reuseables/Checkbox';
 import ButtonLoading from '../reuseables/ButtonLoading';
+import { favorite, checkFavorited } from '../../../services/favorite';
 
 
 function HIVStatus({ respondent, onUpdate }){
@@ -28,6 +29,7 @@ function HIVStatus({ respondent, onUpdate }){
     const [date, setDate] = useState(respondent?.hiv_status?.date_positive || '')
     const [success, setSuccess] = useState('');
     const [errors, setErrors] = useState([]);
+    
     const handleSubmit = async() => {
         setSuccess('')
         setErrors([])
@@ -218,7 +220,19 @@ export default function RespondentDetail(){
     const [errors, setErrors] = useState([]);
     const[sbVisible, setSBVisible] = useState(true);
     const [addingTask, setAddingTask] = useState(() => () => {});
+    const [favorited, setFavorited] = useState(false)
 
+    useEffect(() => {
+        const checkFavStatus = async() => {
+            if(!activeRespondent?.id) return;
+            const isFavorited = await checkFavorited('respondent', activeRespondent.id)
+            setFavorited(isFavorited)
+        }
+        checkFavStatus()
+    }, [activeRespondent])
+
+    
+    console.log(favorited)
     const handleButtonAdd = (task) => {
         addingTask(task);
     };
@@ -360,8 +374,9 @@ export default function RespondentDetail(){
                     <p>{labels.sex}, Age {labels.age_range}{activeRespondent?.special_attribute.length > 0 && labels.special_attr && labels.special_attr.map((s) => `, ${s}`)}</p>
                     <p>{activeRespondent.ward && activeRespondent.ward + ', '}{activeRespondent.village}, {labels.district}</p>
                     <p>{activeRespondent.citizenship}</p>
-
+                    
                     {!['client'].includes(user.role) && <Link to={`/respondents/${activeRespondent.id}/edit`}><button>Edit Details</button></Link>}
+                    <button onClick={() => {favorite('respondent', activeRespondent.id, favorited); setFavorited(!favorited)}}>{favorited ? 'Unfavorite Respondent' : 'Favorite Respondent'}</button>
                     {user.role == 'admin' && !del && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)}>Delete</button>}
                     {del && <ButtonLoading forDelete={true} />}
                     {user.role == 'admin' && 

@@ -19,6 +19,10 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
     const [stack, setStack] = useState('');
     const [axis, setAxis] = useState('');
     const [useTarget, setUseTarget] = useState(false);
+    const [filters, setFilters] = useState({});
+    const [fields, setFields] = useState(['age_range', 'sex', 'kp_type', 'disability_type', 'citizenship', 'hiv_status', 'pregnancy'])
+    const [options, setOptions] = useState({});
+    const [subcategories, setSubcategories] = useState([]);
 
     useEffect(() => {
         if (chartData?.chart) {
@@ -36,11 +40,54 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
             if (chartData.chart.use_target != null) {
                 setUseTarget(chartData.chart.use_target);
             }
+            if(chartData.chart.filters){
+                setFilters(chartData.chart.filters)
+            }
         }
     }, [chartData])
 
-    const handleUpdate = useCallback(async (ind, ct, ax, leg, stk, ut) => {
-        if(ind.id == indicator.id && ct == chartType && ax == axis && leg ==legend && stk==stack && ut == useTarget) return;
+    useEffect(() => {
+        const getEventBreakdowns = async () => {
+            try {
+                console.log('fetching event details...');
+                const response = await fetchWithAuth(`/api/activities/events/breakdowns-meta/`);
+                const data = await response.json();
+                if(response.ok){
+                    setOptions(data)
+                }
+            } 
+            catch (err) {
+                console.error('Failed to fetch event: ', err);
+            } 
+            finally{
+                setLoading(false);
+            }
+        }
+        getEventBreakdowns();
+    }, [])
+
+    useEffect(() => {
+        const getIndicatorDetails = async () => {
+            if(!indicator || indicator.subcategories === 0) return;
+            try {
+                console.log('fetching indicator details...');
+                const response = await fetchWithAuth(`/api/indicators/${indicator.id}/`);
+                const data = await response.json();
+                if(response.ok){
+                    setSubcategories(data.subcategories)
+                }
+                else{
+                    navigate(`/not-found`);
+                }
+            } 
+            catch (err) {
+                console.error('Failed to fetch indicator: ', err);
+            } 
+        };
+        getIndicatorDetails();
+    }, [indicator]);
+
+    const handleUpdate = useCallback(async (ind, ct, ax, leg, stk, ut, fil) => {
         setUpdating(true);
         let l = leg
         let s = stk
@@ -57,12 +104,13 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
             stack: s,
             indicator: ind.id,
             chart_id: chartData?.id ?? null,
-            use_target: ut
+            use_target: ut,
+            filters: fil
         };
         console.log(data)
         await onUpdate(data, data.chart_id);
         setUpdating(false);
-    }, [chartType, axis, legend, stack, useTarget, chartData, onUpdate]);
+    }, [chartType, axis, legend, stack, useTarget, filters, chartData, onUpdate]);
 
     const handleRemove = () => {
         const id = chartData?.chart?.id || null
@@ -104,14 +152,15 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
         return null;
     };
 
+    console.log(chartData)
     return(
         <div>
             <ModelSelect IndexComponent={IndicatorsIndex} title={'Select an Indicator'} callback={(ind) => setIndicator(ind)} existing={indicator}/>
-            {indicator && <SimpleSelect label={'Select Chart Type'} name={'chart_type'} optionValues={meta.chart_types} optionLabels={meta.chart_type_labels} callback={(val) => handleUpdate(indicator, val, axis, legend, stack, useTarget)} value={chartType}/>}
-            {indicator && <SimpleSelect label={'Select Axis'} name={'axis'} optionValues={meta.axes} optionLabels={meta.axis_labels} callback={(val) => handleUpdate(indicator, chartType, val, legend, stack, useTarget)} value={axis}/>}
-            {indicator && !useTarget && <SimpleSelect label={'Select Legend'} name={'legend'} optionValues={meta.fields} optionLabels={meta.field_labels} callback={(val) => handleUpdate(indicator, chartType, axis, val, stack, useTarget)} value={legend}/>}
-            {indicator && legend && !useTarget && <SimpleSelect label={'Select Stack'} name={'stack'} optionValues={meta.fields} optionLabels={meta.field_labels} callback={(val) => handleUpdate(indicator, chartType, axis, legend, val, useTarget)} value={stack}/>}
-            {indicator && chartData.chart.allow_targets && <Checkbox label={'Show Targets?'} name={'use_targets'} checked={useTarget} callback={(c) => handleUpdate(indicator, chartType, axis, legend, stack, c)} />}
+            {indicator && <SimpleSelect label={'Select Chart Type'} name={'chart_type'} optionValues={meta.chart_types} optionLabels={meta.chart_type_labels} callback={(val) => handleUpdate(indicator, val, axis, legend, stack, useTarget, filters)} value={chartType}/>}
+            {indicator && <SimpleSelect label={'Select Axis'} name={'axis'} optionValues={meta.axes} optionLabels={meta.axis_labels} callback={(val) => handleUpdate(indicator, chartType, val, legend, stack, useTarget, filters)} value={axis}/>}
+            {indicator && !useTarget && <SimpleSelect label={'Select Legend'} name={'legend'} optionValues={meta.fields} optionLabels={meta.field_labels} callback={(val) => handleUpdate(indicator, chartType, axis, val, stack, useTarget, filters)} value={legend}/>}
+            {indicator && legend && !useTarget && <SimpleSelect label={'Select Stack'} name={'stack'} optionValues={meta.fields} optionLabels={meta.field_labels} callback={(val) => handleUpdate(indicator, chartType, axis, legend, val, useTarget, filters)} value={stack}/>}
+            {indicator && chartData.chart.allow_targets && <Checkbox label={'Show Targets?'} name={'use_targets'} checked={useTarget} callback={(c) => handleUpdate(indicator, chartType, axis, legend, stack, c, filters)} />}
             {chartData && chartType && <div>
                 {chartType ==='Bar' && <ResponsiveContainer width="100%" height={300}>
                         <BarChart width={600} height={300} data={dataArray}>
@@ -165,6 +214,28 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
                     Please note that if a targets start/end date does not align with the given {axis} it may not 
                     reflect perfectly on the graph. Please consult the actual targets for more accurate information.
                 </i></p>}
+            </div>}
+            {indicator && <div>
+                {options && fields.map((o) => (
+                    <SimpleSelect name={o} optionValues={options[o]} 
+                        optionLabels={options[`${o}_labels`]} 
+                        callback={(val) => {
+                            const updatedFilters = { ...filters, [o]: val };
+                            setFilters(updatedFilters);
+                            handleUpdate(indicator, chartType, axis, legend, stack, useTarget, updatedFilters);
+                        }}
+                        multiple={true} value={filters[o]}
+                    />
+                ))}
+                {subcategories.length > 0 && <SimpleSelect name={'subcategory'} 
+                    optionValues={subcategories.map((cat) => (cat.id))} optionLabels={subcategories.map((cat) => (cat.name))} 
+                    callback={(val) => {
+                        const updatedFilters = { ...filters, subcategory: val };
+                        setFilters(updatedFilters);
+                        handleUpdate(indicator, chartType, axis, legend, stack, useTarget, updatedFilters);
+                    }}
+                    multiple={true} value={filters.subcategory} 
+                />}
             </div>}
             <button onClick={() => handleRemove()}>Delete Chart</button>
         </div>
