@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import ComponentLoading from '../reuseables/ComponentLoading';
 import IndicatorChart from './IndicatorChart';
+import styles from './dashboard.module.css';
 
 export default function Dashboard({ id, meta }){ 
     const [loading, setLoading] = useState(true);
@@ -131,7 +132,7 @@ export default function Dashboard({ id, meta }){
             <button onClick={() => setAdding(!adding)}>{adding ? 'Cancel' : 'Add Chart'}</button>
             {adding && <IndicatorChart chartData={null} dashboard={dashboard} meta={meta} onUpdate={(data) => handleUpdate(data)} onRemove={() => handleRemove()}/>}
             {dashboard.indicator_charts.length === 0 && <p><i>No charts yet. Add one!</i></p>}
-            {charts.length > 0 && <div>
+            {charts.length > 0 && <div className={styles.charts}>
                 {charts.map((ic) => (
                     <IndicatorChart chartData={ic} dashboard={dashboard} meta={meta}  onUpdate={(data, id) => handleUpdate(data, id)} onRemove={(id) => handleRemove(id)}/>
                 ))}

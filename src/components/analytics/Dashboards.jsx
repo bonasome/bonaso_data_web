@@ -8,7 +8,9 @@ import ModelSelect from '../reuseables/ModelSelect';
 import ProjectsIndex from '../projects/ProjectsIndex';
 import Dashboard from './Dashboard';
 import styles from './dashboard.module.css';
- function NewDashboard({ onCreate }){
+import { BiSolidShow, BiSolidHide } from "react-icons/bi";
+
+ function NewDashboard({ onCreate, onCancel }){
     const [name, setName] = useState('');
     const [desc, setDesc] = useState('');
     const [project, setProject] = useState(null);
@@ -75,30 +77,49 @@ import styles from './dashboard.module.css';
 
     return(
         <div>
-            <h2>Creating New Dashboard</h2>
+            <div className={styles.field}>
+                <h2>Creating New Dashboard</h2>
+            </div>
             {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <label htmlFor='name'>Dashboard Name</label>
-            <input id='name' type='text' onChange={(e) => setName(e.target.value)} value={name}/>
-            <label htmlFor='desc'>Dashboard Description</label>
-            <input id='desc' type='textarea' onChange={(e) => setDesc(e.target.value)} value={desc} />
-            <ModelSelect IndexComponent={ProjectsIndex} title={'Select a Project Scope (Optional)'} callback={(p) => setProject(p)} />
-            <button onClick={() => handleSubmit()}>Create</button>
+            <div className={styles.field}>
+                <label htmlFor='name'>Dashboard Name</label>
+                <input id='name' type='text' onChange={(e) => setName(e.target.value)} value={name}/>
+            </div>
+            <div className={styles.field}>
+                <label htmlFor='desc'>Dashboard Description</label>
+                <textarea id='desc' onChange={(e) => setDesc(e.target.value)} value={desc} />
+            </div>
+            <div className={styles.field}>
+                <ModelSelect IndexComponent={ProjectsIndex} title={'Select a Project Scope (Optional)'} callback={(p) => setProject(p)} />
+            </div>
+            <div className={styles.field}>
+                <button onClick={() => handleSubmit()}>Create</button>
+                <button onClick={() => onCancel()}>Cancel</button>
+            </div>
         </div>
     )
 }
 
 
-function DashboardSB({ dashboards, viewCallback, createCallback }){
+function DashboardSB({ dashboards, viewCallback, createCallback, visChange}){
+    const [hidden, setHidden] = useState(false);
+
     return(
-        <div>
-            <div onClick={() => createCallback()}>
-                <h3>Create New Dashboard</h3>
+        <div className={hidden ? styles.hiddenSB : styles.SB}>
+            <div className={styles.toggle} onClick={() => {setHidden(!hidden); visChange(!hidden)}}>
+                {hidden ? <BiSolidHide /> : <BiSolidShow />}
             </div>
-            {dashboards.length > 0 && dashboards.map((db) => (
-                <div onClick={() => viewCallback(db.id)}>
-                    <h3>{db.name}</h3>
+            {!hidden && <div>
+                <h2>Your Dashboards</h2>
+                <div className={styles.dbCard} onClick={() => createCallback()}>
+                    <h3>Create New Dashboard</h3>
                 </div>
-            ))}
+                {dashboards.length > 0 && dashboards.map((db) => (
+                    <div onClick={() => viewCallback(db.id)} className={styles.dbCard}>
+                        <h3>{db.name}</h3>
+                    </div>
+                ))}
+            </div>}
         </div>
     )
 }
@@ -114,6 +135,8 @@ export default function Dashboards() {
     const [creating, setCreating] = useState(false);
     const [refresh, setRefresh] = useState(0);
     const [viewing, setViewing] = useState(null);
+
+    const [sbHidden, setSBHidden] = useState(false);
 
     useEffect(() => {
         const getMeta = async() => {
@@ -171,13 +194,13 @@ export default function Dashboards() {
 
     if(loading || !meta) return <Loading />
     return(
-        <div className={styles.container}>
-            <div>
-                {creating && <NewDashboard onCreate={() => setRefresh(prev => prev+=1)} />}
-                {viewing && <Dashboard id={viewing} meta={meta} />}
+        <div className={sbHidden ? styles.fullContainer : styles.container}>
+            <div className={styles.mainPanel}>
+                {creating && <NewDashboard onCreate={() => setRefresh(prev => prev+=1)} onCancel={() => setCreating(false)}/>}
+                {viewing && !creating && <Dashboard id={viewing} meta={meta} />}
                 {!creating && !viewing && <p>Select a Dasbhoard to begin.</p>}
             </div>
-            <DashboardSB dashboards={dashboards} createCallback={() => setCreating(true)} viewCallback={(id) => {setViewing(id); setCreating(false)}}/>
+            <DashboardSB dashboards={dashboards} createCallback={() => setCreating(true)} viewCallback={(id) => {setViewing(id); setCreating(false)}} visChange={(vis) => setSBHidden(vis)}/>
         </div>
     )
 }

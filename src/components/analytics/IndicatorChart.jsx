@@ -8,10 +8,18 @@ import getColor from '../../../services/getColor';
 import splitToChart from './splitToChart'
 import Checkbox from '../reuseables/Checkbox';
 import theme from '../../../theme/theme';
+import styles from './dashboard.module.css';
+import { IoIosArrowDropdownCircle } from "react-icons/io";
+import { IoIosArrowDropup } from "react-icons/io";
+import { FaChartPie } from "react-icons/fa6";
+import { FaChartBar } from "react-icons/fa";
+import { FaChartLine } from "react-icons/fa6";
 
 export default function IndicatorChart({ chartData=null, dashboard, meta, onUpdate, onRemove, pos=0 }) {
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
+    const [showDeets, setShowDeets] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
     const [indicator, setIndicator] = useState(chartData?.chart?.indicator || null)
     const [chartType, setChartType] = useState(chartData?.chart?.chart_type || '')
     const [updating, setUpdating] = useState(false)
@@ -24,6 +32,7 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
     const [options, setOptions] = useState({});
     const [subcategories, setSubcategories] = useState([]);
 
+    console.log(chartData)
     useEffect(() => {
         if (chartData?.chart) {
             if (chartData.chart.indicator != null) {
@@ -44,6 +53,7 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
                 setFilters(chartData.chart.filters)
             }
         }
+        if(!chartData) setShowDeets(true);
     }, [chartData])
 
     useEffect(() => {
@@ -89,17 +99,32 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
 
     const handleUpdate = useCallback(async (ind, ct, ax, leg, stk, ut, fil) => {
         setUpdating(true);
-        let l = leg
-        let s = stk
-        const tar = ut || useTarget
-        if (l && tar) l = null;
-        if (s && tar) s = null;
-        if(l==='') l=null;
-        if(s==='') s=null;
-        console.log(s)
+        let l = leg;
+        let s = stk;
+        let a = ax;
+        let tar = ut ?? useTarget;
+        // Clear legend/stack if target is used
+        if (tar) {
+            if (l) l = null;
+            if (s) s = null;
+        }
+        // Normalize empty strings to null
+        if (l === '') l = null;
+        if (s === '') s = null;
+        // For certain chart types, stack is irrelevant
+        if (ct === 'Line' || ct === 'Pie') {
+            s = null;
+            setStack('');
+        }
+        if(ct==='Pie'){
+            a = null;
+            tar = false;
+            setAxis('');
+            setUseTarget(false);
+        }
         const data = {
             chart_type: ct,
-            axis: ax,
+            axis: a,
             legend: l,
             stack: s,
             indicator: ind.id,
@@ -107,10 +132,11 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
             use_target: ut,
             filters: fil
         };
-        console.log(data)
+        //console.log('Sending update:', data);
         await onUpdate(data, data.chart_id);
         setUpdating(false);
-    }, [chartType, axis, legend, stack, useTarget, filters, chartData, onUpdate]);
+    }, [chartData, onUpdate, useTarget]);
+
 
     const handleRemove = () => {
         const id = chartData?.chart?.id || null
@@ -132,6 +158,11 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
 
     const { dataArray, keys } = memoizedChart;
 
+    const pieData = useMemo(() => {
+        if(!dataArray || chartType !== 'Pie') return;
+        return Object.entries(dataArray[0]).filter(([key]) => key !== 'period').map(([key, value]) => ({ name: key, value }))
+    }, [dataArray]);
+
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload?.length) {
             return (
@@ -152,18 +183,12 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
         return null;
     };
 
-    console.log(chartData)
     return(
-        <div>
-            <ModelSelect IndexComponent={IndicatorsIndex} title={'Select an Indicator'} callback={(ind) => setIndicator(ind)} existing={indicator}/>
-            {indicator && <SimpleSelect label={'Select Chart Type'} name={'chart_type'} optionValues={meta.chart_types} optionLabels={meta.chart_type_labels} callback={(val) => handleUpdate(indicator, val, axis, legend, stack, useTarget, filters)} value={chartType}/>}
-            {indicator && <SimpleSelect label={'Select Axis'} name={'axis'} optionValues={meta.axes} optionLabels={meta.axis_labels} callback={(val) => handleUpdate(indicator, chartType, val, legend, stack, useTarget, filters)} value={axis}/>}
-            {indicator && !useTarget && <SimpleSelect label={'Select Legend'} name={'legend'} optionValues={meta.fields} optionLabels={meta.field_labels} callback={(val) => handleUpdate(indicator, chartType, axis, val, stack, useTarget, filters)} value={legend}/>}
-            {indicator && legend && !useTarget && <SimpleSelect label={'Select Stack'} name={'stack'} optionValues={meta.fields} optionLabels={meta.field_labels} callback={(val) => handleUpdate(indicator, chartType, axis, legend, val, useTarget, filters)} value={stack}/>}
-            {indicator && chartData.chart.allow_targets && <Checkbox label={'Show Targets?'} name={'use_targets'} checked={useTarget} callback={(c) => handleUpdate(indicator, chartType, axis, legend, stack, c, filters)} />}
+        <div className={styles.chart}>
+            {indicator && <h3>{indicator.name}</h3>}
             {chartData && chartType && <div>
                 {chartType ==='Bar' && <ResponsiveContainer width="100%" height={300}>
-                        <BarChart width={600} height={300} data={dataArray}>
+                        <BarChart width={300} height={300} data={dataArray}>
                             <XAxis dataKey="period" tick={{fill: '#fff'}} />
                             <YAxis tick={{fill: '#fff'}}/>
                             <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
@@ -181,29 +206,25 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
                             <YAxis tick={{fill: '#fff'}}/>
                             <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
                             <Legend />
-                            {keys.map(({ key, stackId, label }, index) => (
-                                <Line key={key} stackId={stackId} dataKey={key} fill={getColor(index)} stroke={getColor(index)}/>
+                            {keys.map(({ key, label }, index) => (
+                                <Line key={key} dataKey={key} fill={getColor(index)} stroke={getColor(index)}/>
                             ))}
                         </LineChart>
                     </ResponsiveContainer>}
                 {chartType === 'Pie' && legend=='' && <p><i>Select a legend item to view pie charts.</i></p> }
-                {chartType === 'Pie' && legend=='targets' && <p><i>Targets don't really work with a pie chart... try another view!</i></p> }
-                {chartType === 'Pie' && chartData.length > 0 && (<ResponsiveContainer width="100%" height={300}>
+                {chartType === 'Pie' && pieData  && (<ResponsiveContainer width="100%" height={300}>
                         <PieChart width={400} height={300}>
                             <Pie
-                            data={keys.map((key) => ({
-                                name: key,
-                                value: chartData[0][key] || 0,
-                            }))}
-                            dataKey="value"
-                            nameKey="name"
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={100}
-                            label
+                                data={pieData}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={100}
+                                label
                             >
-                            {subcategories.map((key, index) => (
-                                <Cell key={key} fill={getColor(index)} />
+                            {pieData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={getColor(index)} stroke={getColor(index)} />
                             ))}
                             </Pie>
                             <Tooltip />
@@ -215,29 +236,64 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
                     reflect perfectly on the graph. Please consult the actual targets for more accurate information.
                 </i></p>}
             </div>}
-            {indicator && <div>
-                {options && fields.map((o) => (
-                    <SimpleSelect name={o} optionValues={options[o]} 
-                        optionLabels={options[`${o}_labels`]} 
+            <div className={styles.chartSettings}>
+                <div className={styles.toggleDropdown} onClick={() => setShowDeets(!showDeets)}>
+                    <h3 style={{ textAlign: 'start'}}>Show Chart Settings</h3>
+                    {showDeets ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
+                    <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
+                </div>
+                {showDeets && <div className={styles.chartDeets}>
+                    <ModelSelect IndexComponent={IndicatorsIndex} title={'Select an Indicator'} callback={(ind) => setIndicator(ind)} existing={indicator}/>
+                    {indicator && <div>
+                        <h3>Select a Chart</h3>
+                        <div className={styles.chartSelector}>
+                        <div className={chartType =='Bar' ? styles.selectedChart : styles.selectChart} onClick={() => {handleUpdate(indicator, 'Bar', axis, legend, stack, useTarget, filters); setChartType('Bar')}}>
+                            <FaChartBar style={{ fontSize: '30px' }}/>
+                        </div>
+                        <div className={chartType =='Line' ? styles.selectedChart : styles.selectChart} onClick={() => {handleUpdate(indicator, 'Line', axis, legend, stack, useTarget, filters); setChartType('Line')}}>
+                            <FaChartLine style={{ fontSize: '30px' }}/>
+                        </div>
+                        <div className={chartType =='Pie' ? styles.selectedChart : styles.selectChart} onClick={() => {handleUpdate(indicator, 'Pie', axis, legend, stack, useTarget, filters); setChartType('Pie')}}>
+                            <FaChartPie style={{ fontSize: '30px' }}/>
+                        </div>
+                        </div>
+                    </div>}
+                    {indicator && chartType !== 'Pie' && <SimpleSelect label={'Select Axis'} name={'axis'} optionValues={meta.axes} optionLabels={meta.axis_labels} callback={(val) => handleUpdate(indicator, chartType, val, legend, stack, useTarget, filters)} value={axis}/>}
+                    {indicator  && !useTarget && <SimpleSelect label={'Select Legend'} name={'legend'} optionValues={meta.fields} optionLabels={meta.field_labels} callback={(val) => handleUpdate(indicator, chartType, axis, val, stack, useTarget, filters)} value={legend}/>}
+                    {indicator && legend && chartType=='Bar' && !useTarget && <SimpleSelect label={'Select Stack'} name={'stack'} optionValues={meta.fields} optionLabels={meta.field_labels} callback={(val) => handleUpdate(indicator, chartType, axis, legend, val, useTarget, filters)} value={stack}/>}
+                    {indicator && chartType !== 'Pie' && chartData?.chart?.allow_targets && <Checkbox label={'Show Targets?'} name={'use_targets'} checked={useTarget} callback={(c) => handleUpdate(indicator, chartType, axis, legend, stack, c, filters)} />}
+                    <button onClick={() => handleRemove()}>Delete Chart</button>
+                </div>}
+            </div>
+            <div className={styles.chartSettings}>
+                <div className={styles.toggleDropdown} onClick={() => setShowFilters(!showFilters)}>
+                    <h3 style={{ textAlign: 'start'}}>Show Filters</h3>
+                    {showFilters ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }}/> : 
+                    <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
+                </div>
+                {indicator && showFilters && <div className={styles.chartFilters}>
+                    {options && fields.map((o) => (
+                        <SimpleSelect name={o} optionValues={options[o]} 
+                            optionLabels={options[`${o}_labels`]} 
+                            callback={(val) => {
+                                const updatedFilters = { ...filters, [o]: val };
+                                setFilters(updatedFilters);
+                                handleUpdate(indicator, chartType, axis, legend, stack, useTarget, updatedFilters);
+                            }}
+                            multiple={true} value={filters[o]}
+                        />
+                    ))}
+                    {subcategories.length > 0 && <SimpleSelect name={'subcategory'} 
+                        optionValues={subcategories.map((cat) => (cat.id))} optionLabels={subcategories.map((cat) => (cat.name))} 
                         callback={(val) => {
-                            const updatedFilters = { ...filters, [o]: val };
+                            const updatedFilters = { ...filters, subcategory: val };
                             setFilters(updatedFilters);
                             handleUpdate(indicator, chartType, axis, legend, stack, useTarget, updatedFilters);
                         }}
-                        multiple={true} value={filters[o]}
-                    />
-                ))}
-                {subcategories.length > 0 && <SimpleSelect name={'subcategory'} 
-                    optionValues={subcategories.map((cat) => (cat.id))} optionLabels={subcategories.map((cat) => (cat.name))} 
-                    callback={(val) => {
-                        const updatedFilters = { ...filters, subcategory: val };
-                        setFilters(updatedFilters);
-                        handleUpdate(indicator, chartType, axis, legend, stack, useTarget, updatedFilters);
-                    }}
-                    multiple={true} value={filters.subcategory} 
-                />}
-            </div>}
-            <button onClick={() => handleRemove()}>Delete Chart</button>
+                        multiple={true} value={filters.subcategory} 
+                    />}
+                </div>}
+            </div>
         </div>
     )
 }
