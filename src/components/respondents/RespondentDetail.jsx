@@ -13,14 +13,18 @@ import { useAuth } from '../../contexts/UserAuth';
 import { useNavigate } from 'react-router-dom';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
 import errorStyles from '../../styles/errors.module.css';
-import { IoMdReturnLeft } from "react-icons/io";
-import { BiSolidShow } from "react-icons/bi";
-import { BiSolidHide } from "react-icons/bi";
+import { IoMdAdd, IoMdReturnLeft } from "react-icons/io";
+import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 import useWindowWidth from '../../../services/useWindowWidth';
 import Checkbox from '../reuseables/Checkbox';
 import ButtonLoading from '../reuseables/ButtonLoading';
 import { favorite, checkFavorited } from '../../../services/favorite';
-
+import { ImPencil } from "react-icons/im";
+import { FaTrashAlt } from "react-icons/fa";
+import { IoIosStar, IoIosStarOutline, IoIosSave } from "react-icons/io";
+import { MdLibraryAdd } from "react-icons/md";
+import ButtonHover from '../reuseables/ButtonHover';
+import { FcCancel } from "react-icons/fc";
 
 function HIVStatus({ respondent, onUpdate }){
     console.log(respondent)
@@ -73,7 +77,7 @@ function HIVStatus({ respondent, onUpdate }){
         <div>
             {!editing && <div>
                 <p>HIV {pos ? `Positive since ${date}`: 'Negative'}</p>
-                <button onClick={() => setEditing(true)}>Edit</button>
+                <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit HIV Status'} />
             </div>}
             {editing && <div>
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
@@ -83,13 +87,15 @@ function HIVStatus({ respondent, onUpdate }){
                     <label htmlFor='date_positive'>When did this person become HIV Positve? (leave blank if unsure).</label>
                     <input type='date' id='date_positive' name='date_positive' value={date} onChange={(e)=> setDate(e.target.value)}/>
                 </div>}
-                <button onClick={() => handleSubmit()}>Save</button>
-                <button onClick={() => setEditing(false)}>Cancel</button>
+                <div style ={{ display: 'flex', flexDirection: 'row'}}>
+                    <ButtonHover callback={() => handleSubmit()} noHover={<IoIosSave />} hover={'Save'} />
+                    <ButtonHover callback={() => setEditing(false)} noHover={<FcCancel />} hover={'Cancel'} />
+                </div>
             </div>}
         </div>
     )
 }
-function PregnancyRow({ respondent, onError, existing=null, onUpdate }){
+function PregnancyRow({ respondent, onError, existing=null, onUpdate, onCancel }){
     const [errors, setErrors] = useState([]);
     const [term_began, setTermBegan] = useState(existing?.term_began || '');
     const [term_ended, setTermEnded] = useState(existing?.term_ended || '');
@@ -155,17 +161,18 @@ function PregnancyRow({ respondent, onError, existing=null, onUpdate }){
     return(
         <div style={{display: 'flex', flexDirection: 'row'}}>
             {!editing && <p>Pregnancy started on {term_began} {term_ended && `ended on ${term_ended}`}</p>}
-            {editing && 
-                <div>
-                    <label htmlFor={'term_began'}>Term Began</label>
-                    <input type='date' id='term_began' name='term_began' value={term_began} onChange={(e)=> setTermBegan(e.target.value)}/>
-                    <label htmlFor={'term_ended'}>Term Began</label>
-                    <input type='date' id='term_ended' name='term_ended' value={term_ended} onChange={(e)=> setTermEnded(e.target.value)}/>
-                    <button onClick={() => handleSubmit()}>Save</button>
+            {editing && <div>
+                <label htmlFor={'term_began'}>Term Began</label>
+                <input type='date' id='term_began' name='term_began' value={term_began} onChange={(e)=> setTermBegan(e.target.value)}/>
+                <label htmlFor={'term_ended'}>Term Began</label>
+                <input type='date' id='term_ended' name='term_ended' value={term_ended} onChange={(e)=> setTermEnded(e.target.value)}/>
+                <div style ={{ display: 'flex', flexDirection: 'row'}}>
+                <ButtonHover callback={() => handleSubmit()} noHover={<IoIosSave />} hover={'Save'} />
+                <ButtonHover callback={() => onCancel()} noHover={<FcCancel />} hover={'Cancel'} />
                 </div>
-            }
-            {existing && <button onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit'}</button>}
-            {existing && <button className={errorStyles.deleteButton} onClick={() => {handleDelete()}}>Remove</button>}
+            </div>}
+            {existing && !editing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} /> }
+            {existing && !editing && <ButtonHover callback={() => handleDelete()} noHover={<FaTrashAlt />} hover={'Delete Pregnancy'} forDelete={true}/>}
         </div>
     )
 }
@@ -194,8 +201,8 @@ function Pregnancies({ respondent, onUpdate }){
     return(
         <div>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <button onClick = {() => setAdding(!adding)}>{adding ? 'Cancel' : 'Add New Pregnancy'}</button>
-            {adding && <PregnancyRow respondent={respondent} onError={(e) => setErrors(e)} onUpdate={()=>update()}/>}
+            {!adding && <ButtonHover callback={() => setAdding(true)} noHover={<MdLibraryAdd />} hover={'Record New Pregnancy'} />}
+            {adding && <PregnancyRow respondent={respondent} onError={(e) => setErrors(e)} onUpdate={()=>update()} onCancel={() => {setAdding(false); setErrors([])}}/>}
             {pregnancies.length > 0 && pregnancies.map((p) => (<PregnancyRow respondent={respondent} onError={(e) => setErrors(e)} existing={p} onUpdate={()=>update()} />))}
         </div>
     )
@@ -213,6 +220,8 @@ export default function RespondentDetail(){
     const [loading, setLoading] = useState(true);
     const[viewHIV, setViewHIV] = useState(false);
     const [viewPreg, setViewPreg] = useState(false);
+    const [viewKP, setViewKP] = useState(false);
+    const [viewDis, setViewDis] = useState(false);
     const [labels, setLabels] = useState({});
     const [added, setAdded] = useState([]);
     const[tasks, setTasks] = useState([]);
@@ -375,16 +384,28 @@ export default function RespondentDetail(){
                     <p>{activeRespondent.ward && activeRespondent.ward + ', '}{activeRespondent.village}, {labels.district}</p>
                     <p>{activeRespondent.citizenship}</p>
                     
-                    {!['client'].includes(user.role) && <Link to={`/respondents/${activeRespondent.id}/edit`}><button>Edit Details</button></Link>}
-                    <button onClick={() => {favorite('respondent', activeRespondent.id, favorited); setFavorited(!favorited)}}>{favorited ? 'Unfavorite Respondent' : 'Favorite Respondent'}</button>
-                    {user.role == 'admin' && !del && <button className={errorStyles.deleteButton} onClick={()=> setDel(true)}>Delete</button>}
-                    {del && <ButtonLoading forDelete={true} />}
+                    
+                    <div style={{ display: 'flex', flexDirection: 'row',}}>
+                        {favorited && <ButtonHover callback={() => {setFavorited(false); favorite('respondent', activeRespondent.id, true)}} noHover={<IoIosStar />} hover={'Unfavorite'} /> }
+                        {!favorited && <ButtonHover callback={() => {setFavorited(true); favorite('respondent', activeRespondent.id)}} noHover={<IoIosStarOutline />} hover={'Favorite'} /> }
+                        {!['client'].includes(user.role) && <Link to={`/respondents/${activeRespondent.id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Respondent'} /></Link>}
+                        {user.role == 'admin' && !del && <ButtonHover  callback={() => setDel(true)} forDelete={true} noHover={<FaTrashAlt />} hover={'Delete Respondent'}/>}
+                        {del && <ButtonLoading forDelete={true} />}
+                    </div>
                     {user.role == 'admin' && 
                         <div>
                             <p><i>Created by: {activeRespondent.created_by?.first_name} {activeRespondent.created_by?.last_name} at {new Date(activeRespondent.created_at).toLocaleString()}</i></p>
                             {activeRespondent.updated_by && activeRespondent.updated_by && <p><i>Updated by: {activeRespondent.updated_by?.first_name} {activeRespondent.updated_by?.last_name} at {new Date(activeRespondent.updated_at).toLocaleString()}</i></p>}
                         </div>
                     } 
+                    {activeRespondent.kp_status.length > 0 && <button onClick={() => setViewKP(!viewKP)}>{viewKP ? 'Hide KP Info' : 'Show KP Info'}</button>}
+                    {viewKP && <div><ul>{activeRespondent.kp_status.map((kp) => (
+                        <li key={kp.id}>{kp.name}</li>
+                    ))}</ul></div>}
+                    {activeRespondent.disability_status.length > 0 && <button onClick={() => setViewDis(!viewDis)}>{viewDis ? 'Hide Disability Info' : 'Show Disability Info'}</button>}
+                    {viewDis && <div><ul>{activeRespondent.disability_status.map((d) => (
+                        <li key={d.id}>{d.name}</li>
+                    ))}</ul></div>}
                     <button onClick={() => setViewHIV(!viewHIV)} disabled={viewPreg}>{viewHIV ? 'Hide HIV Status' : 'View/Edit HIV Status'}</button>
                     <button onClick={() => setViewPreg(!viewPreg)} disabled={viewHIV}>{viewPreg ? 'Hide Pregnancies' : 'View/Edit Pregnancies'}</button>
                     {viewHIV && <HIVStatus respondent={activeRespondent} onUpdate={(data) => miniHIVUpdate(data)}/>}

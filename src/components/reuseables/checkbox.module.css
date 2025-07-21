@@ -1,6 +1,7 @@
 .checkbox {
     display: flex;
     flex-direction: row;
+    padding: 2vh;
 }
 .checkbox > * {
     margin-top: auto;

@@ -48,20 +48,17 @@ export default function respondentsConfig(respondentsMeta, existing=null){
             }},
             {name: 'citizenship', label: 'Citizenship', type: 'text', value: existing?.citizenship ? existing.citizenship : 'Motswana', required: true, },
             
-            {name: 'special_attribute_names', label: 'Special Attributes', type: 'select', required: false, value: existing?.special_attribute ? special : [], constructors: {
+            {name: 'special_attribute_names', label: 'Special Attributes', type: 'multi-select', required: false, value: existing?.special_attribute ? special : [], constructors: {
                 values: respondentsMeta?.special_attributes,
-                multiple: true,
                 labels: respondentsMeta?.special_attribute_labels
             }},
 
-            {name: 'kp_status_names', label: 'Key Population Status', type: 'select', required: false, value: existing?.kp_status ? kps : [], constructors: {
+            {name: 'kp_status_names', label: 'Key Population Status', type: 'multi-select', required: false, value: existing?.kp_status ? kps : [], constructors: {
                 values: respondentsMeta?.kp_types,
-                multiple: true,
                 labels: respondentsMeta?.kp_type_labels
             }},
-            {name: 'disability_status_names', label: 'Disability Status', type: 'select', required: false, value: existing?.disability_status ? dis: [], constructors: {
+            {name: 'disability_status_names', label: 'Disability Status', type: 'multi-select', required: false, value: existing?.disability_status ? dis: [], constructors: {
                 values: respondentsMeta?.disability_types,
-                multiple: true,
                 labels: respondentsMeta?.disability_type_labels
             }},
 

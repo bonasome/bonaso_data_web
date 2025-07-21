@@ -12,6 +12,22 @@
     background-color: var(--error-bg);
     color: white;
 }
+.warning {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--warning);
+    color: var(--warning-text);
+}
+.warning:hover {
+    background-color: var(--warning-bg);
+    color: var(--warning);
+}
 .default {
+    margin-top: auto;
+    margin-bottom: auto;
     margin-right: 1vh;
+}
+.noHoverDefault {
+    margin-top: auto;
+    margin-bottom: auto;
 }

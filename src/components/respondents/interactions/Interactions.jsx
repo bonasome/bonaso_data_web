@@ -15,6 +15,12 @@ import Checkbox from '../../reuseables/Checkbox';
 import ButtonLoading from '../../reuseables/ButtonLoading';
 import modalStyles from '../../../styles/modals.module.css';
 import { Link } from 'react-router-dom';
+import { ImPencil } from "react-icons/im";
+import { FaTrashAlt } from "react-icons/fa";
+import { IoIosSave } from "react-icons/io";
+import { MdFlag } from "react-icons/md";
+import ButtonHover from '../../reuseables/ButtonHover';
+import { FcCancel } from "react-icons/fc";
 
 function InteractionCard({ interaction, onUpdate, onDelete }){
     const { user } = useAuth();
@@ -236,7 +242,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                     </div>
                 }
                 {interaction.subcategories.length > 0 &&
-                    interaction.subcategories.map((cat) => (
+                    interaction.task_detail.indicator.subcategories.map((cat) => (
                         <div style={{ display: 'flex', flexDirection: 'row', marginTop: 'auto', marginBottom: 'auto' }}>
                             <Checkbox key={cat.id}
                                 label={cat.name}
@@ -258,9 +264,10 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                         </div>
                     ))
                 }
-                {saving ? <ButtonLoading /> : <button onClick={() => handleSubmit()}>Save Changes</button>}
-                <button onClick={() => setEdit(!edit)}>Cancel</button>
-                
+                <div style={{ display: 'flex', flexDirection: 'row'}}>
+                    {saving ? <ButtonLoading /> : <ButtonHover callback={() => handleSubmit()} noHover={<IoIosSave />} hover={'Save Changes'} />}
+                    {!saving && <ButtonHover callback={() => setEdit(false)} noHover={<FcCancel />} hover={'Cancel'} />}
+                </div>
             </div>
         )
     }
@@ -274,7 +281,7 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
             <p>{prettyDates(interaction.interaction_date)}</p>
             <p>{interaction.interaction_location ? interaction.interaction_location : 'No Location on Record'}</p>
             {expanded && 
-                <div>
+                <div onClick={(e) => e.stopPropagation()}>
                 <p>By {interaction.task_detail.organization.name}</p>
                 {interaction.subcategories && interaction?.subcategories.length >0 &&
                     <div>
@@ -285,16 +292,23 @@ function InteractionCard({ interaction, onUpdate, onDelete }){
                     </div>
                 }
                 {interaction.numeric_component && <p>{interaction.numeric_component}</p>}
-                {perm && <button onClick={() => setEdit(!edit)}>{edit ? 'Cancel' : 'Edit Interaction'}</button>}
-                {user.role == 'admin' && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
-                {perm && <Link to={`/respondents/interaction/${interaction.id}`}><button className={errorStyles.warningButton}>Raise New Flag </button></Link>}
+                {interaction.comments && <div>
+                    <h3>Comments:</h3>
+                    <p>{interaction.comments}</p>
+                </div>}
+                <div style={{ display: 'flex', flexDirection: 'row'}}>
+                    {perm && <ButtonHover callback={() => setEdit(true)} noHover={<ImPencil />} hover={'Edit Details'} />}
+                    {perm && <Link to={`/respondents/interaction/${interaction.id}`}><ButtonHover noHover={<MdFlag />} hover={'Raise New Flag'} forWarning={true} /></Link>}
+                    {user.role == 'admin' && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Record'} forDelete={true} />}
+                    {del && <ButtonLoading forDelete={true} /> }
+                </div>
                 {user.role == 'admin' && !del &&
                     <div>
                         <p><i>Created by: {interaction.created_by?.first_name} {interaction.created_by?.last_name} at {new Date(interaction.created_at).toLocaleString()}</i></p>
                         {interaction.updated_by && interaction.updated_by && <p><i>Updated by: {interaction.updated_by?.first_name} {interaction.updated_by?.last_name} at {new Date(interaction.updated_at).toLocaleString()}</i></p>}
                     </div>
                 } 
-                {del && <ButtonLoading forDelete={true} /> }
+                
                 </div>
             }
         </div>

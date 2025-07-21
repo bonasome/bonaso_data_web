@@ -6,7 +6,14 @@ import modalStyles from '../../../styles/modals.module.css';
 import { useInteractions} from '../../../contexts/InteractionsContext';
 import styles from '../respondentDetail.module.css';
 import useWindowWidth from '../../../../services/useWindowWidth';
-import ButtonLoading from '../../reuseables/ButtonLoading'
+import ButtonLoading from '../../reuseables/ButtonLoading';
+import { ImPencil } from "react-icons/im";
+import { FaTrashAlt } from "react-icons/fa";
+import { IoIosSave } from "react-icons/io";
+import { BiSolidCommentAdd } from "react-icons/bi";
+import ButtonHover from '../../reuseables/ButtonHover';
+import { FcCancel } from "react-icons/fc";
+
 export default function AddInteractions({ id, tasks, interactions, onUpdate, onFinish, setAddingTask }) {
     const { setInteractions } = useInteractions();
     const [interactionDate, setInteractionDate] = useState('');
@@ -393,13 +400,16 @@ export default function AddInteractions({ id, tasks, interactions, onUpdate, onF
                             </ul>
                             {comments[task.id] && <p>{comments[task.id]}</p>}
                         </div>
-                        <button onClick={() => {setCommentsModalActive(true); setModalTask(task)}}>Add a comment</button>
-                        <button onClick={() => {removeItem(task)}}>Remove From List</button>
+                        <ButtonHover callback={() => {setCommentsModalActive(true); setModalTask(task)}} noHover={<BiSolidCommentAdd />} hover={'Add a Comment'} />
+                        <ButtonHover callback={() => removeItem(task)} noHover={<FaTrashAlt />} hover={'Remove From Interaction'} forDelete={true} />
                     </div>
                 ))}
             </div>
-            {active && added.length >0 && !saving && <button disabled={saving} onClick={() => handleSubmit()} >Save</button>}
+            <div style ={{ display: 'flex', flexDirection: 'row'}}>
+            {active && added.length >0 && !saving && <ButtonHover callback={() => handleSubmit()} noHover={<IoIosSave />} hover={'Save'} />}
+            {active && added.length >0 && !saving && <ButtonHover callback={() => setAdded([])} noHover={<FcCancel />} hover={'Cancel'} />}
             {saving && <ButtonLoading />}
+            </div>
         </div>
     )
 }

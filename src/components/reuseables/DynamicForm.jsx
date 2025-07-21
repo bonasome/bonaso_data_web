@@ -11,7 +11,8 @@ import IndicatorSelect from '../indicators/IndicatorSelect';
 import OrganizationSelect from '../organizations/OrganizationSelect';
 import ClientSelect from '../projects/clients/ClientSelect';
 import IndicatorMultiSelect from '../indicators/IndicatorMultiSelect';
-
+import Checkbox from './Checkbox';
+import MultiCheckbox from './MultiCheckbox';
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]
 export default function DynamicForm({ config, onSubmit, onCancel, onError, saving }){
     const { user } = useAuth();
@@ -164,17 +165,25 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                             </div>
                         )
                     }
+                    else if(field.type == 'multi-select'){
+                        if(!field.constructors.values) return <div key={field.name}></div>
+                        return(
+                            <div key={field.name} className={styles.field}>
+                                <MultiCheckbox callback={(val) => {setFormData(prev => ({...prev,[field.name]: val}));}}
+                                    optionLabels={field.constructors.labels} optionValues={field.constructors.values}
+                                    name={field.name} label={label} existing={field.value} />
+                            </div>
+                        )
+                    }
                     else if(field.type == 'checkbox'){
                         return(
                             <div key={field.name} className={styles.checkboxField}>
-                                <input type="checkbox" id={field.name} name={field.name} checked={!!formData[field.name]}  
-                                    onChange={(e) => {setFormData(prev=>({...prev, [field.name]: e.target.checked })); 
-                                        field.switchpath && setSwitchpath(e.target.checked); 
-                                        field.switchpath2 && setSwitchpath2(e.target.checked); 
-                                        field.switchpath3 && setSwitchpath3(e.target.checked)
-                                    }} 
-                                />
-                                <label htmlFor={field.name}>{label}</label>
+                                <Checkbox name={field.name} label={field.label} checked={!!formData[field.name]} callback={(c) => {
+                                    setFormData(prev=>({...prev, [field.name]: c })); 
+                                        field.switchpath && setSwitchpath(c); 
+                                        field.switchpath2 && setSwitchpath2(c); 
+                                        field.switchpath3 && setSwitchpath3(c);
+                                }} />
                             </div>
                         )
                     }
