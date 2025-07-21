@@ -15,6 +15,8 @@ import { FaChartPie } from "react-icons/fa6";
 import { FaChartBar } from "react-icons/fa";
 import { FaChartLine } from "react-icons/fa6";
 import DataTable from './DataTable';
+import MultiCheckbox from '../reuseables/MultiCheckbox';
+import cleanLabels from '../../../services/cleanLabels';
 
 export default function IndicatorChart({ chartData=null, dashboard, meta, onUpdate, onRemove, pos=0 }) {
     const [loading, setLoading] = useState(true);
@@ -189,7 +191,7 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
         }
         return null;
     };
-
+    console.log(filters)
     return(
         <div className={styles.chart}>
             {indicator && <h3>{indicator.name}</h3>}
@@ -282,24 +284,24 @@ export default function IndicatorChart({ chartData=null, dashboard, meta, onUpda
                 </div>
                 {indicator && showFilters && <div className={styles.chartFilters}>
                     {options && fields.map((o) => (
-                        <SimpleSelect name={o} optionValues={options[o]} 
-                            optionLabels={options[`${o}_labels`]} 
-                            callback={(val) => {
-                                const updatedFilters = { ...filters, [o]: val };
+                        <MultiCheckbox label={cleanLabels(o)} optionValues={Object.keys(options[o]).map((c) => (c))} 
+                            optionLabels={Object.keys(options[o]).map((c) => (options[o][c]))} 
+                            callback={(vals) => {
+                                const updatedFilters = { ...filters, [o]: vals };
                                 setFilters(updatedFilters);
-                                handleUpdate(indicator, chartType, axis, legend, stack, useTarget, updatedFilters);
+                                handleUpdate(indicator, chartType, axis, legend, stack, useTarget, tabular, updatedFilters);
                             }}
-                            multiple={true} value={filters[o]}
+                            existing={filters[o]}
                         />
                     ))}
-                    {subcategories.length > 0 && <SimpleSelect name={'subcategory'} 
+                    {subcategories.length > 0 && <MultiCheckbox label={'Subcategory'}
                         optionValues={subcategories.map((cat) => (cat.id))} optionLabels={subcategories.map((cat) => (cat.name))} 
-                        callback={(val) => {
-                            const updatedFilters = { ...filters, subcategory: val };
+                        callback={(vals) => {
+                            const updatedFilters = { ...filters, subcategory: vals };
                             setFilters(updatedFilters);
-                            handleUpdate(indicator, chartType, axis, legend, stack, useTarget, updatedFilters);
+                            handleUpdate(indicator, chartType, axis, legend, stack, useTarget, tabular, updatedFilters);
                         }}
-                        multiple={true} value={filters.subcategory} 
+                        existing={filters.subcategory} 
                     />}
                 </div>}
             </div>
