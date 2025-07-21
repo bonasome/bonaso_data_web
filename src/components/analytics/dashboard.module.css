@@ -10,6 +10,14 @@
     display: grid;
     grid-template-columns: 95% 5%;
 }
+.placeholder {
+    margin: 2vh;
+    height: 65%;
+    width: 90%;
+    padding-top: 20%;
+    text-align: center;
+}
+
 .toggle > *{
     position: absolute;
     margin-top: 43vh;
@@ -72,7 +80,7 @@
 }
 
 .toggleDropdown {
-    padding: 2vh;
+    padding: 1.5vh;
     display: flex;
     flex-direction: row;
 }
@@ -82,17 +90,14 @@
 }
 .chartSelector {
     display: flex;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
 }
 .selectChart {
-    padding: 2vh;
-    margin-left: 3vh;
-    margin-right: 3vh;
+    padding: 3vh;
     transition: all .6s;
 }
 .selectedChart {
     padding: 3vh;
-    margin-left: 5vh;
-    margin-right: 5vh;
     background-color: var(--bonaso-main);
     transition: all .6s;
 }

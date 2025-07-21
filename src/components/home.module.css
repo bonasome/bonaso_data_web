@@ -28,16 +28,23 @@
     text-align: center;
     width: 33%;
     padding: 1vh;
-    background-color: white;
-    color: var(--bonaso-dark-accent);
+    background-color: var(--bonaso-main);
+    transition: all .6s;
 }
 .activeTab{
     text-align: center;
     width: 33%;
     padding: 1vh;
-    
     background-color: var(--bonaso-dark-accent);
+    transition: all .6s;
 }
+
+.msgPane{
+    padding: 3vh;
+    overflow-y: scroll;
+    height: 50vh;
+}
+
 .msgCard{
     margin: 3vh;
     padding: 1vh;
@@ -48,10 +55,22 @@
     transform: scale(1.05);
 }
 
+.faves {
+    padding: 4vh;
+    background-color: var(--bonaso-dark-accent);
+    text-align: center;
+    overflow-y: scroll;
+}
 
-
-
-
+.favesCard {
+    margin: 2vh;
+    padding: 1vh;
+    background-color: var(--bonaso-uber-dark-accent);
+    transition: all .6s;
+}
+.favesCard:hover{
+    transform: scale(1.1);
+}
 
 .tasksBox{
     padding: 4vh;
@@ -89,20 +108,4 @@
     padding: 3vh;
     cursor: pointer;
     transform: scale(1.15);
-}
-
-.actions {
-    text-align: center;
-    background-color: var(--bonaso-dark-accent);
-    display: flex;
-    flex-direction: column;
-    margin: 2vh;
-    padding: 2vh;
-}
-
-@media screen and (max-width: 768px){
-    .actions{
-        padding: 1vh;
-        margin: 0;
-    }
 }

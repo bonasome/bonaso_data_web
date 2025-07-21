@@ -270,6 +270,9 @@ function Router() {
             <Route index element={
                 <Messages />
             }/>
+            <Route path=':id' element={
+                <Messages />
+            }/>
             <Route path='announcements/new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
                     <ComposeAnnouncements />

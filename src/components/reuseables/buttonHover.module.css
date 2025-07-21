@@ -1,0 +1,17 @@
+.dynamicButton {
+    display: flex;
+    flex-direction: row;
+}
+.delete {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--error);
+    color: white;
+}
+.delete:hover {
+    background-color: var(--error-bg);
+    color: white;
+}
+.default {
+    margin-right: 1vh;
+}

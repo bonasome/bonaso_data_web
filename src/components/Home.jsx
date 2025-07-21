@@ -9,10 +9,19 @@ import fetchWithAuth from '../../services/fetchWithAuth';
 import IndicatorChart from './reuseables/charts/IndicatorChart';
 import ButtonLoading from './reuseables/ButtonLoading';
 import Loading from './reuseables/Loading';
+import errorStyles from '../styles/errors.module.css';
+import ConfirmDelete from './reuseables/ConfirmDelete';
 
-function MsgCard({ msg, type }){
+function MsgCard({ msg, type, onDelete=null }){
     const { user } = useAuth();
+    const [errors, setErrors] = useState([]);
     const [expanded, setExpanded] = useState(false);
+    const [editing, setEditing] = useState(false);
+    const [del, setDel] = useState(false);
+    const [subject, setSubject] = useState(msg.subject);
+    const [body, setBody] = useState(msg.body);
+    const [saving, setSaving] = useState(false);
+
     const unread = useMemo(() => {
         if (type !== 'message') return false;
         const hasUnread = msg.recipients.some(r => r.recipient.id === user.id && !r.read);
@@ -30,22 +39,124 @@ function MsgCard({ msg, type }){
         if(msg.content_object.toLowerCase().includes('event')) return `/events/${msg.object_id}`
     }, [msg, user.id, type]);
 
-
-
+    const handleSubmit = async() => {
+        setErrors([]);
+        let sbWarnings = []
+        if(user.role !== 'admin' && !organization) sbWarnings.push('You must select an organization to send this announcement to.')
+        if(subject === '') sbWarnings.push('Please enter a subject.');
+        if(body === '') sbWarnings.push('Please enter something in the body.');
+        if(sbWarnings.length > 0){
+            setErrors(sbWarnings);
+            return;
+        }
+        try{
+            const url = `/api/messages/announcements/${msg.id}/`
+            const response = await fetchWithAuth(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify({
+                    subject: subject,
+                    body: body,
+                })
+            });
+            const returnData = await response.json();
+            if(response.ok){
+                setEditing(false);
+            }
+            else{
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${field}: ${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse)
+            }
+        }
+        catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
+            console.error('Could not record organization: ', err)
+        }
+        finally{
+            setSaving(false);
+        }
+    }
+    const handleDelete = async() => {
+        try{
+            const url = `/api/messages/announcements/${msg.id}/`
+            const response = await fetchWithAuth(url, {
+                method: 'DELETE',
+            });
+            if(response.ok){
+                setDel(false);
+            }
+            else{
+                const returnData = await response.json();
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${field}: ${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse)
+            }
+        }
+        catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
+            console.error('Could not record organization: ', err)
+        }
+        finally{
+            setDel(false);
+        }
+    }
+    
+    if(del){
+        return(
+            <div>
+                <ConfirmDelete name={'announcement'} onConfirm={() => handleDelete()} onCancel={() => setDel(false)} allowEasy={true} />
+            </div>
+        )
+    }
     return(
         <div className={styles.msgCard} onClick={() => setExpanded(!expanded)}>
-            <h4>{msg?.subject} {!expanded && type=='message' && `- ${msg.sender.first_name}`} {type=='message' && unread && 'NEW'}</h4>
-            {expanded && <div>
-                <p>{msg?.body}</p>
-                {type == 'message' && <p><i>From {msg.sender.first_name}</i></p>}
-                {type == 'message' && <p><i></i></p>}
-                {type == 'message' && msg?.replies?.length > 0 && msg.replies.map((r) => (
-                    <div>
-                        <p>{r.body}</p>
-                        <p><i>from {r.sender.first_name}</i></p>
-                    </div>
-                ))}
-                {type == 'alert' && objectLink && <Link to={objectLink}>View</Link>}
+            {type==='message' && <Link to={`/messages/${msg.id}`}><h4>{subject} {!expanded && `- ${msg.sender.first_name}`} {unread && 'NEW'} </h4></Link> }
+            {!editing && type !== 'message' && <h4>{subject} </h4>}
+            {expanded && <div onClick={(e) => e.stopPropagation()}>
+                {!editing && <div>
+                    <p>{body}</p>
+                    {type == 'message' && <p><i>From {msg.sender.first_name}</i></p>}
+                    {type == 'message' && <p><i></i></p>}
+                    {type == 'message' && msg?.replies?.length > 0 && msg.replies.map((r) => (
+                        <div>
+                            <p>{r.body}</p>
+                            <p><i>from {r.sender.first_name}</i></p>
+                        </div>
+                    ))}
+                    {type == 'alert' && objectLink && <Link to={objectLink}>View</Link>}
+                    {type == 'announcement' && user.id == msg.sent_by && !editing && <button onClick={() => setEditing(true)}>Edit</button>}
+                </div>}
+                {type == 'announcement' && editing && <div>
+                    <label htmlFor='subject'>Subject</label>
+                    <input id='subject' type='text' onChange={(e) => setSubject(e.target.value)} value={subject} />
+                    <label htmlFor='body'>Body</label>
+                    <textarea id='body' type='textarea' onChange={(e) => setBody(e.target.value)} value={body} />
+                    {!saving && <button onClick={() => handleSubmit()}>Save</button>}
+                    {saving && <ButtonLoading/>}
+                    <button onClick={() => setEditing(false)}>Cancel</button>
+                    <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>
+                </div>}
             </div>}
             
         </div>
@@ -169,15 +280,6 @@ function Home() {
     return (
         <div className={styles.home}>
             <h1 className={styles.header}>Welcome, {user.username}!</h1>
-            <div className={styles.actions}>
-                <h2>Where should we start today?</h2>
-                <div>
-                    <Link to={'/help'}><button>First time? Check out the tutorial!</button></Link> 
-                    {!['client'].includes(user.role) && <Link to={'/respondents'}><button>Start Recording Data!</button></Link> }
-                    {['meofficer', 'admin', 'manager'].includes(user.role) && <Link to={'/batch-record'}><button>Upload a file</button></Link> }
-                    {['meofficer', 'admin', 'manager', 'client'].includes(user.role) && <Link to={'/projects'}><button>See My Projects</button></Link> }
-                </div>
-            </div>
             <div className={styles.content}>
                 <div className={styles.board}>
                     <div className={styles.tabs}>
@@ -191,23 +293,27 @@ function Home() {
                             <h4>Alerts</h4>
                         </div>
                     </div>
-                    {msgPane == 'announcements' && <div>
-                        {announcements.map((a) => (<MsgCard type={'announcement'} msg={a} />))}
+                    {msgPane == 'announcements' && <div className={styles.msgPane}>
+                        {<Link to={'/messages/announcements/new'}><button>New Announcement</button></Link>}
+                        {announcements.length == 0 && <p>No announcements yet.</p>}
+                        {announcements.map((a) => (<MsgCard key={a.id} type={'announcement'} msg={a} onDelete={() => setAnnouncements(prev => prev.filter(a => (a.id != id)))}/>))}
                     </div>}
-                    {msgPane == 'messages' && <div>
-                        {messages.map((msg) => (<MsgCard type={'message'} msg={msg} />))}
+                    {msgPane == 'messages' && <div className={styles.msgPane}>
+                        {messages.length == 0 && <p>It's lonely here!</p>}
+                        {messages.map((msg) => (<MsgCard key={msg.id} type={'message'} msg={msg} />))}
                     </div>}
-                    {msgPane == 'alerts' && <div>
-                        {alerts.map((alr) => (<MsgCard type={'alert'} msg={alr} />))}
+                    {msgPane == 'alerts' && <div className={styles.msgPane}>
+                        {messages.length == 0 && <p>Phew! No alerts.</p>}
+                        {alerts.map((alr) => (<MsgCard key={alr.id} type={'alert'} msg={alr} />))}
                     </div>}
                 </div>
-                <div>
+                <div className={styles.faves}>
                     <h2>Favorites</h2>
                     {['client', 'meofficer', 'manager', 'admin'].includes(user.role) && <div> 
                         <h3>Projects</h3>
                         {!favorites?.projects || favorites?.projects?.length ===0 && <p><i>No favorited projects.</i></p>}
                         {favorites?.projects?.length > 0 && favorites.projects.map((proj) => (
-                            <div key={proj.id}>
+                            <div key={proj.id} className={styles.favesCard}>
                                 <Link to={`/projects/${proj.project.id}`}><h4>{proj.project.name}</h4></Link>
                             </div>
                         ))}
@@ -216,7 +322,7 @@ function Home() {
                         <h3>Events</h3>
                         {!favorites?.events || favorites?.events?.length ===0 && <p><i>No favorited events.</i></p>}
                         {favorites?.events?.length > 0 && favorites.events.map((e) => (
-                            <div key={e.id}>
+                            <div key={e.id} className={styles.favesCard}>
                                 <Link to={`/events/${e.event.id}`}><h4>{e.event.name}</h4></Link>
                             </div>
                         ))}
@@ -225,7 +331,7 @@ function Home() {
                         <h3>Respondents</h3>
                         {!favorites?.respondents || favorites?.respondents?.length ===0 && <p><i>No favorited respondents.</i></p>}
                         {favorites?.respondents?.length > 0 && favorites.respondents.map((r) => (
-                            <div key={r.id}>
+                            <div key={r.id} className={styles.favesCard}>
                                 <Link to={`/respondents/${r.respondent.id}`}><h4>{r.respondent.is_anonymous ? `Anonymous Respondent ${r.respondent.uuid}` : 
                                     `${r.respondent.first_name} ${r.respondent.last_name}`}</h4></Link>
                             </div>

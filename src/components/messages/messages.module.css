@@ -1,4 +1,60 @@
 .container{
+    height: 84vh;
     display: grid;
-    grid-template-columns: 25% 75%;
+    grid-template-columns: 30% 70%;
+    overflow-y: hidden;
+}
+
+.sidebar {
+    padding: 3vh;
+    overflow-y: scroll;
+    height: 84vh;
+    background-color: var(--bonaso-dark-accent);
+}
+.actions {
+    display: flex;
+    flex-direction: row;
+}
+
+.sbCard {
+    background-color: var(--bonaso-uber-dark-accent);
+    padding: 2vh;
+    transition: all .6s;
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+}
+
+.sbCard:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+.mainPanel {
+    height: 84vh;
+    overflow-y: scroll;
+    margin-top: 4vh;
+    margin-left: 4vh;
+}
+.message {
+    background-color: var(--bonaso-dark-accent);
+    padding: 3vh;
+    margin-right: 4vh;
+    margin-bottom: 6vh;
+}
+.msgContent {
+    padding: 2vh;
+    background-color: var(--bonaso-uber-dark-accent);
+    margin-bottom: 2vh;
+}
+
+.compose {
+    margin: 4vh;
+    padding: 4vh;
+    background-color: var(--bonaso-dark-accent);
+}
+.field > input {
+    width: 50vw;
+}
+.field > textarea {
+    width: 50vw;
+    height: 20vh;
 }

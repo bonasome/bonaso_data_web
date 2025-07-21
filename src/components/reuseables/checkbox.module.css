@@ -2,3 +2,10 @@
     display: flex;
     flex-direction: row;
 }
+.checkbox > * {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+.checkbox > label {
+    margin-left: 1vh;
+}

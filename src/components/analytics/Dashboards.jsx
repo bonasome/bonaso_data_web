@@ -9,6 +9,9 @@ import ProjectsIndex from '../projects/ProjectsIndex';
 import Dashboard from './Dashboard';
 import styles from './dashboard.module.css';
 import { BiSolidShow, BiSolidHide } from "react-icons/bi";
+import { MdInsertChart } from "react-icons/md";
+import { FaChartPie } from "react-icons/fa6";
+import { FaChartGantt } from "react-icons/fa6";
 
  function NewDashboard({ onCreate, onCancel }){
     const [name, setName] = useState('');
@@ -198,7 +201,14 @@ export default function Dashboards() {
             <div className={styles.mainPanel}>
                 {creating && <NewDashboard onCreate={() => setRefresh(prev => prev+=1)} onCancel={() => setCreating(false)}/>}
                 {viewing && !creating && <Dashboard id={viewing} meta={meta} />}
-                {!creating && !viewing && <p>Select a Dasbhoard to begin.</p>}
+                {!creating && !viewing && <div className={styles.placeholder}>
+                    <div>
+                        <FaChartPie style={{ fontSize: '150px', margin: 30, opacity: '75%' }} />
+                        <MdInsertChart style={{ fontSize: '150px', margin: 30, opacity: '75%'}}/>
+                        <FaChartGantt style={{ fontSize: '150px', margin: 30, opacity: '75%'}}/>
+                    </div>
+                    <h1>Select or Create a Dashboard From the Sidebar to Begin.</h1>
+                </div>}
             </div>
             <DashboardSB dashboards={dashboards} createCallback={() => setCreating(true)} viewCallback={(id) => {setViewing(id); setCreating(false)}} visChange={(vis) => setSBHidden(vis)}/>
         </div>

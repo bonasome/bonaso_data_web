@@ -39,8 +39,8 @@ function Dropdown({ name }){
             setLabels(labels)
         }
         if(name ==`${user.username}`){
-            setUrls([`/profiles/${user.id}`,'/help', '/users/logout'])
-            setLabels(['My Profile','Help', 'Logout'])
+            setUrls([`/profiles/${user.id}`, '/messages', '/help', '/users/logout'])
+            setLabels(['My Profile', 'Messages', 'Help', 'Logout'])
         }
         if(name=='Team'){
             setUrls(['/profiles', '/profiles/new'])
@@ -65,6 +65,9 @@ function MenuLink({ name, url }) {
     if(name == 'Projects' && !['meofficer', 'manager', 'admin', 'client'].includes(user.role)){
         return <></>
     }
+    if(name == 'Dataviewer' && !['meofficer', 'manager', 'admin', 'client'].includes(user.role)){
+        return <></>
+    }
     if(name == 'Team' && !['meofficer', 'manager', 'admin'].includes(user.role)){
         return <></>
     }
@@ -78,8 +81,8 @@ function MenuLink({ name, url }) {
 
 function ExpandedMenu() {
     const { user } = useAuth();
-    const links = ['Projects', 'Events', 'Respondents', 'Team', `${user.username}`]
-    const urls = ['/projects', '/events', '/respondents', '/profiles', `/profiles/${user.id}`]
+    const links = ['Dataviewer', 'Projects', 'Events', 'Respondents', 'Team', `${user.username}`]
+    const urls = ['/analytics', '/projects', '/events', '/respondents', '/profiles', `/profiles/${user.id}`]
 
     return(
         <div className={styles.expandedMenu}>
@@ -97,17 +100,25 @@ function ThinMenu() {
             <div className={styles.menuBar}><Link to='/respondents'>Respondents</Link></div>
             {!['clients'].includes(user.role) && <div className={styles.menuBar}><Link to='/respondents/flagged'>Flagged Interactions</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/batch-record'}>Batch Record</Link></div>}
+            
+            {['admin', 'meofficer', 'manager'].includes(user.role) && <h3>Data</h3>}
+            {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics'}>Dashboards</Link></div>} 
+            
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h3>Projects</h3>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/organizations'}>Organizations</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/indicators'}>Indicators</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/clients'}>Clients</Link></div>}
+
             {['admin', 'meofficer', 'manager'].includes(user.role) && <h3>Team</h3>}
             {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>My Team</Link></div>} 
+
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h3>Events</h3>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/events'}>Events</Link></div>}
+            
             <h3>Profile</h3>
             <div className={styles.menuBar}><Link to={`/profiles/${user.id}`}>Profile</Link></div>
+            <div className={styles.menuBar}><Link to={`/messages`}>Messages</Link></div>
             <div className={styles.menuBar}><Link to={'/users/logout'}>Logout</Link></div>
             <div className={styles.menuBar}><Link to={`/help`}>Help</Link></div>
         </div>
@@ -138,14 +149,14 @@ export default function Navbar() {
 
     return(
         <div className={styles.navbar}>
-            <div className={width > 1100 ? styles.header : styles.wideHeader}>
+            <div className={width > 1400 ? styles.header : styles.wideHeader}>
                 <Link to='/'><img src={bonasoWhite} className={styles.headerLogo} /></Link>
                 <Link to='/'><div className={styles.headerText}>
                     <h2>BONASO Data Portal</h2>
                     {width > 500 && <h5 className={styles.subheader}>Empowering Botswana's HIV/AIDS Response since 1997</h5>}
                 </div></Link>
             </div>
-                {width > 1100 ?
+                {width >= 1400 ?
                     <ExpandedMenu /> :
                 <div className={styles.slimMenu} ref={containerRef}>
                     <TfiMenu className={styles.hamburger} onClick={() => setMenuExpanded(!menuExpanded)}/>

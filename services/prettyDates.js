@@ -1,12 +1,21 @@
-export default function prettyDates(uglyDate, style='basic'){
+export default function prettyDates(uglyDate, time=false, long=false, ){
     try{
         const dateObject = new Date(uglyDate)
-        if(style=='long'){
+        if(long){
             return dateObject.toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
+            });
+        }
+        else if(time){
+            return dateObject.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
         }
         else{
