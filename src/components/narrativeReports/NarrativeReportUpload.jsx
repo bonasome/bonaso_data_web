@@ -1,44 +1,25 @@
 import { useAuth } from '../../contexts/UserAuth';
 import { useState, useEffect, useMemo } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import SimpleSelect from '../reuseables/SimpleSelect';
 import Loading from '../reuseables/Loading';
 import errorStyles from '../../styles/errors.module.css';
 import styles from './narrative.module.css';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import ButtonLoading from '../reuseables/ButtonLoading';
+import { IoMdReturnLeft } from "react-icons/io";
+import { MdCloudUpload } from "react-icons/md";
+import ButtonHover from '../reuseables/ButtonHover';
 
 export default function NarrativeReportUpload() {
-    const { id } = useParams();
+    const { id, orgID } = useParams();
     const { user } = useAuth();
-    const [organizations, setOrganizations] = useState([]);
     const [file, setFile] = useState(null);
-    const [targetOrg, setTargetOrg] = useState(user.organization_id || '');
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState([]);
     const [success, setSuccess] = useState('');
     const [title, setTitle] = useState('');
     const [desc, setDesc] = useState('');
     const [uploading, setUploading] = useState(false);
-
-    useEffect(() => {
-        const getOrganizations = async () => {
-            try {
-                const response = await fetchWithAuth(`/api/organizations/`);
-                const data = await response.json();
-                setOrganizations(data.results || []);
-            } catch (err) {
-                setErrors(['Failed to fetch organizations.']);
-                console.error('Error:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        getOrganizations();
-    }, []);
-
-    const organizationIDs = useMemo(() => organizations.map(org => org.id), [organizations]);
-    const organizationNames = useMemo(() => organizations.map(org => org.name), [organizations]);
 
     const handleChange = (event) => setFile(event.target.files[0]);
 
@@ -61,7 +42,7 @@ export default function NarrativeReportUpload() {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('organization', targetOrg);
+        formData.append('organization', orgID);
         formData.append('project', id);
         formData.append('title', title);
         formData.append('description', desc);
@@ -93,9 +74,12 @@ export default function NarrativeReportUpload() {
     };
 
     if (loading) return <Loading />;
-
     return (
         <div className={styles.fileUpload}>
+            <Link to={`/projects/${id}/organizations/${orgID}`} className={styles.return}>
+                <IoMdReturnLeft className={styles.returnIcon} />
+                <p>Return to projects overview</p>   
+            </Link>
             <h1>Upload a Narrative Report</h1>
 
             {errors.length > 0 && (
@@ -106,15 +90,6 @@ export default function NarrativeReportUpload() {
             {success && <div className={errorStyles.success}><p>{success}</p></div>}
 
             <div className={styles.template}>
-                <h3>1. Select your organization and project, then upload your report.</h3>
-                <SimpleSelect
-                    name="organization"
-                    label="Select an Organization"
-                    defaultOption={targetOrg}
-                    optionValues={organizationIDs}
-                    optionLabels={organizationNames}
-                    callback={setTargetOrg}
-                />
                 <form onSubmit={handleSubmit}  noValidate={true}>
                     <div className={styles.form}>
                     <label htmlFor="title">Upload Title</label>
@@ -138,7 +113,9 @@ export default function NarrativeReportUpload() {
 
                     <input type="file" accept=".pdf,.doc,.docx" onChange={handleChange} />
                     <div className={styles.buttons}>
-                        {uploading ? <ButtonLoading /> : <button type="submit">Upload</button>}
+                        {uploading ? 
+                            <ButtonLoading /> : 
+                            <ButtonHover noHover={<MdCloudUpload />} hover={'Upload Report'} />}
                         <button type="button" onClick={() => setFile(null)}>Clear</button>
                     </div>
                     </div>

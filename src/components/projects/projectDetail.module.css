@@ -1,0 +1,173 @@
+.container{
+    margin: 4vh;
+}
+.projectDetails{
+    height: 84vh;
+    display: grid;
+}
+.toggleDropdown{
+    padding: 1.5vh;
+    display: flex;
+    flex-direction: row;
+}
+.projectHeader{
+    padding-left: 5vh;
+    padding-right: 5vh;
+    padding-top: 5vh;
+    padding-bottom: 1vh;
+    background-color: var(--bonaso-dark-accent);
+}
+.segment{
+    padding: 2vh;
+    background-color: var(--bonaso-dark-accent);
+}
+
+.taskContainer {
+    margin: 3vh;
+}
+
+.taskHeader{
+    padding-top: 3vh;
+    padding-left: 3vh;
+    background-color: var(--bonaso-dark-accent);
+    padding-bottom: .2vh;
+    margin-bottom: 0;
+}
+
+
+.return{
+    display: flex;
+    flex-direction: row;
+    margin-top: auto;
+    margin-bottom: auto;
+    border-bottom: 2px solid white;
+    background-color: var(--bonaso-dark-accent);
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+    padding-left: 5vh;
+}
+.returnIcon{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 3vh;
+}
+.panel{
+    overflow-x: hidden;
+    overflow-y: scroll;
+    margin: 4vh;
+}
+
+.viewbox {
+    background-color: var(--bonaso-dark-accent);
+    padding-left: 5vh;
+    padding-right: 5vh;
+    padding-top: 5vh;
+    padding-bottom: 1vh;
+    margin-bottom: 2vh;
+}
+.sidebarRight{
+    display: grid;
+    grid-template-columns: 6% 94%;
+    background-color: var(--bonaso-dark-accent);
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    padding-left: 4vh;
+    padding-right: 4vh;
+    overflow-y:scroll;
+    overflow-x: hidden;
+}
+.sidebarLeft{
+    display: grid;
+    grid-template-columns: 94% 6%;
+    background-color: var(--bonaso-dark-accent);
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    padding-left: 4vh;
+    padding-right: 4vh;
+    overflow-y:scroll;
+    overflow-x: hidden;
+}
+@media screen and (max-width: 768px){
+    .panel, .projectDetails, .sidebarLeft, .sidebarRight{
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        margin: 2vh;
+        overflow-y: auto;
+    }
+}
+.toggle > *{
+    position: absolute;
+    margin-top: 43vh;
+}
+.card{
+    margin: 2vh;
+    padding: 1vh;
+    background-color: var(--bonaso-dark-accent);
+    height: fit-content;
+    transition: transform 0.3s ease;
+}
+.card:hover{ 
+    cursor: pointer;
+    transform: scale(1.05);
+    background-color: white;
+    color: var(--bonaso-dark-accent);
+}
+.card:hover > button {
+    background-color: var(--bonaso-light-accent);
+}
+.activeCard {
+    margin: 2vh;
+    padding: 1vh;
+    height: fit-content;
+    cursor: pointer;
+    background-color: white;
+    color: var(--bonaso-dark-accent);
+    transition: transform 0.3s ease;
+}
+
+.activeCard:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    background-color: white;
+    color: var(--bonaso-dark-accent);
+}
+.activeCard > button{
+    background-color: var(--bonaso-light-accent);
+}
+.activeCard:hover > button {
+    background-color: var(--bonaso-light-accent);
+}
+
+
+.addTask{
+    background-color: var(--bonaso-dark-accent);
+    padding: 4vh;
+    margin-bottom: 4vh;
+}
+.dropZone{
+    background-color: var(--bonaso-dark-accent);
+}
+
+.tasksContainer {
+    padding: 3vh;
+    background-color: var(--bonaso-dark-accent);
+}
+
+.tasks > *{
+    padding: 1vh;
+    background-color: var(--bonaso-dark-accent);
+    height: fit-content;
+    transition: transform 0.3s ease;
+}
+
+.tasks:hover >*{
+    cursor: pointer;
+    transform: scale(1.05);
+    background-color: white;
+    color: var(--bonaso-dark-accent);
+}
+
+button {
+    max-height: 6vh;
+}

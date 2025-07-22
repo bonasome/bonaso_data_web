@@ -28,7 +28,9 @@ import FlaggedInteractions from '../components/respondents/interactions/ManageFl
 //projects
 import ProjectLayout from '../layouts/ProjectLayout';
 import ProjectsIndex from '../components/projects/ProjectsIndex';
-import ProjectDetail from '../components/projects/projectDetail/ProjectDetail';
+import ProjectDetail from '../components/projects/ProjectDetail';
+import ProjectOrganization from '../components/projects/ProjectOrganization';
+
 import CreateProject from '../components/projects/CreateProject';
 import EditProject from '../components/projects/EditProject';
 import NarrativeReportUpload from '../components/narrativeReports/NarrativeReportUpload';
@@ -72,6 +74,8 @@ import Dashboards from '../components/analytics/Dashboards';
 
 import Messages from '../components//messages/Messages';
 import ComposeAnnouncements from '../components/announcements/ComposeAnnouncement';
+import CreateProjectActivity from '../components/projects/activities/CreateProjectActivity';
+import EditProjectActivity from '../components/projects/activities/EditProjectActivity';
 
 function Router() {
     return (
@@ -138,6 +142,26 @@ function Router() {
                     <ProjectDetail />
                 </RedirectIfNoPerm>
             } />
+            <Route path=':id/organizations/:orgID' element = {
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
+                    <ProjectOrganization />
+                </RedirectIfNoPerm>
+            } />
+            <Route path=':id/organizations/:orgID/upload' element = {
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <NarrativeReportUpload />
+                </RedirectIfNoPerm>
+            } />
+            <Route path=':id/activities/new' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <CreateProjectActivity />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path=':id/activities/:activityID/edit' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <EditProjectActivity />
+                </RedirectIfNoPerm>
+            }/>
             <Route path='new' element={
                 <RedirectIfNoPerm level={['admin']}>
                     <CreateProject />
@@ -146,11 +170,6 @@ function Router() {
             <Route path=':id/edit' element={
                 <RedirectIfNoPerm level={['admin']}>
                     <EditProject />
-                </RedirectIfNoPerm>
-            }/>
-            <Route path=':id/narrative-reports/upload' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <NarrativeReportUpload />
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id/narrative-reports/download' element={

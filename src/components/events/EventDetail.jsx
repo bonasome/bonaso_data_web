@@ -450,7 +450,7 @@ export default function EventDetail(){
                     <h2>Tasks</h2>
                     <button onClick={() => {setAddingTask(!addingTask); setAddingOrg(false)}}>{addingTask ? 'Done' : 'Add a Task'}</button>
                     {addingTask && <div>
-                        <Tasks addCallback={(t) => addTask(t)} event={id} eventTrigger={eventTasks} onError={taskErrors}/>
+                        <Tasks addCallback={(t) => addTask(t)} event={id} updateTrigger={eventTasks} onError={taskErrors}/>
                     </div>}
                     {eventTasks.length > 0 ? 
                         eventTasks.map((task) =>  (

@@ -74,7 +74,7 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
     );
 }
 
-export default function IndicatorsIndex({ callback=null, callbackText='Add Indicator', excludeProject=null, projectTrigger=null }){
+export default function IndicatorsIndex({ callback=null, callbackText='Add Indicator', excludeProject=null, excludeOrg=null, updateTrigger=null }){
     const { user } = useAuth()
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -92,7 +92,8 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
                     (orgFilter ? `&organization=${orgFilter}` : '') +
                     (projectFilter ? `&project=${projectFilter}` : '') + 
                     (statusFilter ? `&status=${statusFilter}` : '') +
-                    (excludeProject ? `&exclude_project=${excludeProject}` : '');
+                    (excludeProject ? `&exclude_project=${excludeProject}` : '') +
+                    (excludeOrg ? `&exclude_organization=${excludeOrg}` : '');
                 const url = `/api/indicators/?search=${search}&page=${page}` + filterQuery;
                 console.log(url)
                 const response = await fetchWithAuth(url);
@@ -107,7 +108,7 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
             }
         };
         loadIndicators();
-    }, [page, search, orgFilter, projectFilter, statusFilter, projectTrigger]);
+    }, [page, search, orgFilter, projectFilter, statusFilter, updateTrigger]);
 
     const setFilters = (filters) => {
         setOrgFilter(filters.organization);

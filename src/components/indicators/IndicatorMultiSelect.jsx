@@ -4,7 +4,7 @@ import styles from '../../styles/indexSelect.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import SimpleSelect from '../reuseables/SimpleSelect';
 
-export default function IndicatorMultiSelect({ title, callbackText, onChange, subcats, existing=null }){
+export default function IndicatorMultiSelect({ title, callbackText, callback, subcats, existing=null }){
     const [warnings, setWarnings] = useState([]);
     const [selecting, setSelecting] = useState(false);
     const [selected, setSelected] = useState([]);
@@ -24,7 +24,7 @@ export default function IndicatorMultiSelect({ title, callbackText, onChange, su
 
     useEffect(() => {
         const path = followUpVal !== '';
-        onChange(selected, path, followUpVal);
+        callback(selected, path, followUpVal);
     }, [selected, followUpVal]);
 
     const handleAdd = (ind) => {

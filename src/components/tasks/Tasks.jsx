@@ -2,19 +2,16 @@ import React, { useState, useEffect, useRef } from "react";
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import IndexViewWrapper from "../reuseables/IndexView";
 import { useAuth } from '../../contexts/UserAuth'
-import { Target, TargetEdit } from './Targets';
 import styles from './tasks.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ComponentLoading from '../reuseables/ComponentLoading';
 import ButtonLoading from "../reuseables/ButtonLoading";
 
-function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelete=false, onDelete=null, addCallbackText }) {
+function TaskCard({ task, isDraggable = false, addCallback=null, canDelete=false, onDelete=null, addCallbackText, onError }) {
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
     const [expanded, setExpanded] = useState(false);
-    const [targets, setTargets] = useState([]);
-    const [addingTarget, setAddingTarget] = useState(false);
     const { user } = useAuth();
 
     const handleDragStart = (e) => {
@@ -22,25 +19,10 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
     };
 
     useEffect(() => {
-        setTargets(task.targets)
-    }, [task])
-
-    const onUpdate = (data) => {
-        const index = targets.findIndex(item => item.id === data.id);
-        if (index !== -1) {
-            const updated = [...targets];
-            updated[index] = data;
-            setTargets(updated);
+        if(errors.length > 0){
+            onError(errors);
         } 
-        else {
-            setTargets([...targets, data]);
-        }
-        setAddingTarget(false);
-    }
-    const checkTargets = (id) => {
-        const updated = targets.filter((t) => t.id != id);
-        setTargets(updated)
-    }
+    }, [errors]);
 
     const removeTask = async() => {
         setErrors([]);
@@ -51,7 +33,6 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
             });
             if (response.ok) {
                 onDelete(task.id)
-                setErrors([]);
             } 
             else {
                 let data = {};
@@ -102,7 +83,6 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
     }
     return (
         <div className={styles.card} onClick={() => setExpanded(!expanded)} draggable={isDraggable} onDragStart={isDraggable ? handleDragStart : undefined}>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <h3>{task.indicator.code}: {task.indicator.name}</h3>
             {addCallback && <button onClick={() => addCallback(task)}>{addCallbackText}</button>}
             {expanded && (
@@ -127,43 +107,43 @@ function TaskCard({ task, tasks, isDraggable = false, addCallback=null, canDelet
                         </div>
                     )}
                     {task.indicator.require_numeric && <p>Requires Number</p>}
-                    {targets && targets.length > 0 && <h3>Targets:</h3>}
-                    {targets && targets.length > 0 && targets.map((t) => (
-                        <Target key={t.id} target={t} task={task} tasks={tasks} onUpdate={(data) => onUpdate(data)} onDelete={(id) => checkTargets(id)}/>
-                        ))
-                    }
+                    {canDelete && <button onClick={() => setDel(true)}>Remove Task</button>}
                 </div>
             )}
         </div>
     );
 }
 
-export default function Tasks({ callback, update=null, target=false, organizationID=null, projectID=null, isDraggable=false, blacklist=[], canDelete=false, addCallback=null, addCallbackText='Add Task', type=null, event=null, eventTrigger=null, onError=[], onSuccess=null }) {
+export default function Tasks({ callback, update=null, organizationID=null, projectID=null, isDraggable=false, blacklist=[], canDelete=false, updateTrigger=null, addCallback=null, addCallbackText='Add Task', type=null, event=null, onError=[], onSuccess=null }) {
     const [loading, setLoading] = useState(true);
     const [ tasks, setTasks ] = useState([]);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
     const [success, setSuccess] = useState('')
-    const alertRef = useRef(null);
-    
+    const [errors, setErrors] = useState([]);
+
     useEffect(() => {
-        if (onError.length > 0 && alertRef.current) {
+        if(onError.length > 0) setErrors(onError);
+    }, [onError])
+
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
         alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         alertRef.current.focus({ preventScroll: true });
         }
-    }, [onError]);
+    }, [errors]);
 
     useEffect(() => {
         const getTasks = async () => {
             try {
                 console.log('fetching tasks...');
                 const includeOrg = organizationID ? `&organization=${organizationID}` : ''
-                const includeTargets = target ? `&include_targets=true` : ''
                 const includeProject = projectID ? `&project=${projectID}` : ''
                 const includeType = type ? `&indicator_type=${type}` : ''
                 const includeEvent = event ? `&event=${event}` : '';
-                const url = `/api/manage/tasks/?search=${search}&page=${page}` + includeTargets + includeOrg + includeProject + includeType + includeEvent
+                const url = `/api/manage/tasks/?search=${search}&page=${page}` + includeOrg + includeProject + includeType + includeEvent
                 console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
@@ -183,25 +163,25 @@ export default function Tasks({ callback, update=null, target=false, organizatio
         };
         getTasks();
 
-    }, [search, page, update, organizationID, projectID, eventTrigger]);
+    }, [search, page, update, organizationID, projectID, updateTrigger]);
 
     const updateTasks = (id) => {
         const updated = tasks.filter(t => t.id !=id)
         setTasks(updated);
-        setSuccess('Task removed.')
+        updateTrigger();
+        setSuccess('Task removed.');
     }
     const filteredTasks = tasks.filter(t => !blacklist.includes(t.id))
     if(loading) return <ComponentLoading />
     return (
         <div className={styles.tasks}>
-            <h2>Tasks</h2>
             {onSuccess && <div className={errorStyles.success}>{onSuccess}</div>}
-            {success !== '' && <div className={errorStyles.success}>{onSuccess}</div>}
-            {onError.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{onError.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            {success !== '' && <div className={errorStyles.success}>{success}</div>}
+            {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <p><i>Search your tasks by name, organization, or project.</i></p>
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
             {tasks.length > 0 ? filteredTasks.map((task) => (
-                <TaskCard task={task} key={task.id} target={target} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} addCallback={addCallback} addCallbackText={addCallbackText} />
+                <TaskCard task={task} key={task.id} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} addCallback={addCallback} addCallbackText={addCallbackText} onError={(e) => (setErrors(e))} />
             )) : <p>No tasks yet.</p>}
             </IndexViewWrapper>
         </div>

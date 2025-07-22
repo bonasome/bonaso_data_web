@@ -22,7 +22,6 @@ export default function ProjectFilters({ onFilterChange }){
         end: '',
         client: '',
         status: '',
-        indicator: '',
         organization: '',
     });
     const [orgSearch, setOrgSearch] = useState('');
@@ -143,7 +142,6 @@ export default function ProjectFilters({ onFilterChange }){
             end: '',
             client: '',
             status: '',
-            indicator: '',
             organization: '',
         });
         onFilterChange({
@@ -151,7 +149,6 @@ export default function ProjectFilters({ onFilterChange }){
             end: '',
             client: '',
             status: '',
-            indicator: '',
             organization: '',
         })
     }
@@ -189,13 +186,6 @@ export default function ProjectFilters({ onFilterChange }){
                         optionValues={selectTools.orgs.ids} value={filters.organization}
                         optionLabels={selectTools.orgs.names} search={true}
                         callback={(val) => setFilters(prev => ({...prev, organization: val}))}
-                    />
-                    <SimpleSelect
-                        name='indicator'
-                        label='Indicator' searchCallback={(val) => setIndicatorSearch(val)}
-                        optionValues={selectTools.indicators.ids} value={filters.indicator}
-                        optionLabels={selectTools.indicators.names} search={true}
-                        callback={(val) => setFilters(prev => ({...prev, indicator: val}))}
                     />
                     <button onClick={()=>handleChange()}>Apply</button>
                     <button onClick={()=>clearFilters()}>Clear</button>

@@ -7,8 +7,10 @@ import styles from './dynamicForm.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import { useAuth } from '../../contexts/UserAuth';
 import ButtonLoading from '../reuseables/ButtonLoading';
-import IndicatorSelect from '../indicators/IndicatorSelect';
-import OrganizationSelect from '../organizations/OrganizationSelect';
+import ModelSelect from './ModelSelect';
+import OrganizationsIndex from '../organizations/OrganizationsIndex';
+import IndicatorsIndex from '../indicators/IndicatorsIndex';
+import ClientsIndex from '../projects/clients/ClientsIndex';
 import ClientSelect from '../projects/clients/ClientSelect';
 import IndicatorMultiSelect from '../indicators/IndicatorMultiSelect';
 import Checkbox from './Checkbox';
@@ -198,8 +200,8 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                     else if(field.type == 'indicator'){
                         return(
                             <div className={styles.field}>
-                                <IndicatorSelect title={field.label} existing={field.value} 
-                                    onChange={(ind) => setFormData(prev=>({...prev, [field.name]: ind?.id || null }))}
+                                <ModelSelect IndexComponent={IndicatorsIndex} title={field.label} existing={field.value} callbackText={field?.callbackText || 'Select Indicator'}
+                                    callback={(ind) => setFormData(prev=>({...prev, [field.name]: ind?.id || null }))}
                                 /> 
                             </div>
                         )
@@ -209,7 +211,7 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                             <div className={styles.field}>
                                 <IndicatorMultiSelect title={field.label} existing={field.value} callbackText={field.callbackText}
                                     subcats={true} exisitingFollowUp={field.followUpValue}
-                                    onChange={(sel, setPath, fuv) => {setFormData(prev=>({...prev, [field.name]: sel || null, [field.followUp]: fuv || null })); 
+                                    callback={(sel, setPath, fuv) => {setFormData(prev=>({...prev, [field.name]: sel || null, [field.followUp]: fuv || null })); 
                                         setPath ? setSwitchpath3(setPath) : setSwitchpath3(false)
                                     }} 
                                 /> 
@@ -219,14 +221,14 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                     else if(field.type == 'organization'){
                         return(
                             <div className={styles.field}>
-                                <OrganizationSelect title={field.label} callbackText={field?.callbackText || 'Select'} existing={field.value} onChange={(org) => setFormData(prev=>({...prev, [field.name]: org?.id || null }))} /> 
+                                <ModelSelect IndexComponent={OrganizationsIndex} title={field.label} callbackText={field?.callbackText || 'Select Organization'} existing={field.value} callback={(org) => setFormData(prev=>({...prev, [field.name]: org?.id || null }))} /> 
                             </div>
                         )
                     }
                     else if(field.type == 'client'){
                         return(
                             <div className={styles.field}>
-                                <ClientSelect title={field.label} existing={field.value} onChange={(cl) => setFormData(prev=>({...prev, [field.name]: cl?.id || null }))} /> 
+                                <ModelSelect IndexComponent={ClientsIndex} title={field.label} existing={field.value} callbackText={field?.callbackText || 'Select Client'} callback={(cl) => setFormData(prev=>({...prev, [field.name]: cl?.id || null }))} /> 
                             </div>
                         )
                     }
