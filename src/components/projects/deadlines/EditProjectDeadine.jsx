@@ -5,17 +5,16 @@ import errorStyles from '../../../styles/errors.module.css'
 import Loading from '../../reuseables/Loading';
 import DynamicForm from '../../reuseables/DynamicForm';
 import fetchWithAuth from "../../../../services/fetchWithAuth";
-import { useProjects } from '../../../contexts/ProjectsContext';
 import styles from '../../reuseables/dynamicForm.module.css';
-import activitiesConfig from './activitiesConfig';
+import deadlinesConfig from './deadlinesConfig';
 
-export default function CreateProjectActivity(){
+export default function EditProjectDeadline() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const { projectsMeta, setProjectsMeta } = useProjects();
     const [saving, setSaving] = useState(false);
-    const { id } = useParams();
+    const [existing, setExisting] = useState(null);
+    const { id, deadlineID } = useParams();
 
     const alertRef = useRef(null);
     useEffect(() => {
@@ -26,32 +25,32 @@ export default function CreateProjectActivity(){
     }, [errors]);
 
     useEffect(() => {
-        const getProjectMeta = async () => {
-            if(Object.keys(projectsMeta).length != 0){
+        const fetchProjectDeadlines = async () => {
+            try {
+                console.log('fetching project deadlines...');
+                const response = await fetchWithAuth(`/api/manage/deadlines/${deadlineID}/`);
+                const data = await response.json();
+                if(response.ok){
+                    setExisting(data);
+                }
+                else{
+                    navigate(`/not-found`);
+                }
+                
+            } 
+            catch (err) {
+                console.error('Failed to fetch project: ', err);
+            } 
+            finally{
                 setLoading(false);
-                return;
-            }
-            else{
-                try{
-                    console.log('fetching model info...')
-                    const response = await fetchWithAuth(`/api/manage/projects/meta/`);
-                    const data = await response.json();
-                    setProjectsMeta(data);
-                    setLoading(false);
-                }
-                catch(err){
-                    console.error('Failed to fetch projects: ', err)
-                    setLoading(false)
-                }
-
             }
         }
-        getProjectMeta();
-    }, [projectsMeta])
+        fetchProjectDeadlines();
+    }, [deadlineID])
 
     const formConfig = useMemo(() => {
-        return activitiesConfig(projectsMeta);
-    }, [projectsMeta]);
+        return deadlinesConfig(existing);
+    }, [existing]);
 
     const handleCancel = () => {
         navigate(`/projects/${id}`)
@@ -66,8 +65,8 @@ export default function CreateProjectActivity(){
         console.log('submitting data...', data)
         try{
             setSaving(true);
-            const response = await fetchWithAuth('/api/manage/activities/', {
-                method: 'POST',
+            const response = await fetchWithAuth(`/api/manage/deadlines/${deadlineID}/`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': "application/json",
                 },
@@ -102,10 +101,9 @@ export default function CreateProjectActivity(){
     }
 
     if(loading) return <Loading />
-
     return(
         <div className={styles.container}>
-            <h1>Creating a New Activity</h1>
+            <h1>Editing Deadline {existing?.name}</h1>
             {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving}/>
         </div>

@@ -19,6 +19,9 @@ import { IoMdReturnLeft, IoIosStar, IoIosStarOutline, IoIosSave, IoIosArrowDropu
 import ButtonLoading from '../reuseables/ButtonLoading';
 import { FaCirclePlus } from "react-icons/fa6";
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
+import ProjectActivityCard from './activities/ProjectActivityCard';
+import ProjectDeadlineCard from './deadlines/ProjectDeadlineCard';
+import ProjectActivityFAGantt from './activities/ProjectActivityFAGantt';
 
 function ProjectOrgCard({ org, project }){
     const [expanded, setExpanded] = useState(false);
@@ -49,11 +52,13 @@ export default function ProjectDetail(){
     const [errors, setErrors] = useState([]);
     const { projectDetails, setProjectDetails } = useProjects();
     const [project, setProject] = useState();
-    const [activities, setActivities] = useState();
+    const [activities, setActivities] = useState([]);
+    const [deadlines, setDeadlines] = useState([])
     const [favorited, setFavorited] = useState(false);
 
     const [showDetails, setShowDetails] = useState(true);
     const [showActivities, setShowActivities] = useState(false);
+    const [showDeadlines, setShowDeadlines] = useState(false);
     const [showOrgs, setShowOrgs] = useState(false);
     const [addingOrgs, setAddingOrgs] = useState(false);
 
@@ -86,19 +91,18 @@ export default function ProjectDetail(){
             setLoading(false)
         } 
     }
-    const fetchProjectActivities = async () => {
+    const fetchRelated = async () => {
         try {
-            console.log('fetching project activities...');
-            const response = await fetchWithAuth(`/api/manage/activities/?project=${id}`);
+            console.log('fetching related activities...');
+            const response = await fetchWithAuth(`/api/manage/projects/${id}/get-related/`);
             const data = await response.json();
             if(response.ok){
-                setActivities(data.results);
-                console.log(data.results)
+                setActivities(data.activities);
+                setDeadlines(data.deadlines)
             }
             else{
                 navigate(`/not-found`);
             }
-            
         } 
         catch (err) {
             console.error('Failed to fetch project: ', err);
@@ -121,10 +125,10 @@ export default function ProjectDetail(){
     }, [id]);
     
     useEffect(() => {
-        const loadActivities = async () => {
-            await fetchProjectActivities();
+        const loadRelated = async () => {
+            await fetchRelated();
         }
-        loadActivities()
+        loadRelated()
     }, [id]);
 
     const addOrg = async (org) => {
@@ -205,7 +209,6 @@ export default function ProjectDetail(){
             setDel(false);
         }
     } 
-    console.log(project)
     if(loading || !project) return <Loading />
     return(
         <div className={styles.container}>
@@ -223,10 +226,10 @@ export default function ProjectDetail(){
             <div className={styles.projectHeader}>
                 <h1>{project.name}</h1>
             </div>
-
+            {activities && activities.length > 0 && <ProjectActivityFAGantt project={project} activities={activities} deadlines={deadlines}/> }
             <div className={styles.segment}>
                 <div className={styles.toggleDropdown} onClick={() => setShowDetails(!showDetails)}>
-                    <h3 style={{ textAlign: 'start'}}>Show Project Details</h3>
+                    <h3 style={{ textAlign: 'start'}}>Project Details</h3>
                     {showDetails ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                     <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                 </div>
@@ -249,7 +252,7 @@ export default function ProjectDetail(){
 
             <div className={styles.segment}>
                 <div className={styles.toggleDropdown} onClick={() => setShowActivities(!showActivities)}>
-                    <h3 style={{ textAlign: 'start'}}>Show Activities</h3>
+                    <h3 style={{ textAlign: 'start'}}>Activities</h3>
                     {showActivities ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                     <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                 </div>
@@ -258,17 +261,30 @@ export default function ProjectDetail(){
                     <Link to={`/projects/${project.id}/activities/new`}><ButtonHover  noHover={<FaCirclePlus />} hover={'New Activity'} /></Link>
                     {!activities || activities.length === 0 && <p>No activities yet. Be the first to make one!</p>}
                     {activities && activities.length > 0 && 
-                        activities.map((act) => (<div>
-                            <h3>{act.name}</h3>
-                            <Link to={`/projects/${project.id}/activities/${act.id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Event'} /></Link>
-                        </div>))
+                        activities.map((act) => (<ProjectActivityCard key={act.id} activity={act} project={project} onDelete={() => fetchRelated()} /> ))
+                    }
+                </div>}
+            </div>
+            
+            <div className={styles.segment}>
+                <div className={styles.toggleDropdown} onClick={() => setShowDeadlines(!showDeadlines)}>
+                    <h3 style={{ textAlign: 'start'}}>Deadlines</h3>
+                    {showDeadlines ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
+                    <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
+                </div>
+                    
+                {showDeadlines && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
+                    <Link to={`/projects/${project.id}/deadlines/new`}><ButtonHover  noHover={<FaCirclePlus />} hover={'New Deadline'} /></Link>
+                    {deadlines.length === 0 && <p>No deadlines yet. Be the first to make one!</p>}
+                    {deadlines && deadlines.length > 0 && 
+                        deadlines.map((dl) => (<ProjectDeadlineCard key={dl.id} deadline={dl} project={project} onDelete={() => fetchRelated()} /> ))
                     }
                 </div>}
             </div>
 
             <div className={styles.segment}>
                 <div className={styles.toggleDropdown} onClick={() => setShowOrgs(!showOrgs)}>
-                    <h3 style={{ textAlign: 'start'}}>Show Organizations</h3>
+                    <h3 style={{ textAlign: 'start'}}>Organizations</h3>
                     {showOrgs ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                     <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                 </div>

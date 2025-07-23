@@ -35,6 +35,9 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
             else if(field.type == 'dynamic'){
                 struct[field.name] = field.value || [];
             }
+            else if(field.type == 'checkbox'){
+                struct[field.name] = field.value || false;
+            }
             else{
                 struct[field.name] = field.value || '';
             }
@@ -180,7 +183,7 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                     else if(field.type == 'checkbox'){
                         return(
                             <div key={field.name} className={styles.checkboxField}>
-                                <Checkbox name={field.name} label={field.label} checked={!!formData[field.name]} callback={(c) => {
+                                <Checkbox name={field.name} label={field.label} checked={field.value} callback={(c) => {
                                     setFormData(prev=>({...prev, [field.name]: c })); 
                                         field.switchpath && setSwitchpath(c); 
                                         field.switchpath2 && setSwitchpath2(c); 

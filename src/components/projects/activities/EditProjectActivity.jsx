@@ -56,7 +56,6 @@ export default function EditProjectActivity() {
                 const data = await response.json();
                 if(response.ok){
                     setExisting(data);
-                    console.log(data.results)
                 }
                 else{
                     navigate(`/not-found`);

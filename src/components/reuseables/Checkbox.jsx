@@ -1,15 +1,23 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './checkbox.module.css';
 import { GrCheckbox } from "react-icons/gr";
 import { IoCheckboxSharp } from "react-icons/io5";
 
 export default function Checkbox({ label, name, checked=false, callback = null, disabled=false }){
-    const [isChecked, setIsChecked] = useState(checked)
+    const [isChecked, setIsChecked] = useState(false)
+
+    useEffect(() => {
+        console.log(checked)
+        if(checked == true) setIsChecked(true);
+        else if(checked == false) setIsChecked(false);
+        else setIsChecked(false);
+    }, [checked]);
+    console.log(isChecked)
     return(
         <div className={styles.checkbox}>
-            {checked ? <IoCheckboxSharp onClick={() => {setIsChecked(false); callback(!isChecked)}}/> : 
-            <GrCheckbox onClick={() => {setIsChecked(true); callback(!isChecked)}}/>}
+            {isChecked ? <IoCheckboxSharp onClick={() => {setIsChecked(false); callback(false)}}/> : 
+            <GrCheckbox onClick={() => {setIsChecked(true); callback(true)}}/>}
             <label htmlFor={name}>{label}</label>
         </div>
     )

@@ -76,6 +76,8 @@ import Messages from '../components//messages/Messages';
 import ComposeAnnouncements from '../components/announcements/ComposeAnnouncement';
 import CreateProjectActivity from '../components/projects/activities/CreateProjectActivity';
 import EditProjectActivity from '../components/projects/activities/EditProjectActivity';
+import EditProjectDeadline from '../components/projects/deadlines/EditProjectDeadine';
+import CreateProjectDeadline from '../components/projects/deadlines/CreateProjectDeadline';
 
 function Router() {
     return (
@@ -160,6 +162,16 @@ function Router() {
             <Route path=':id/activities/:activityID/edit' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
                     <EditProjectActivity />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path=':id/deadlines/new' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <CreateProjectDeadline />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path=':id/deadlines/:deadlineID/edit' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <EditProjectDeadline />
                 </RedirectIfNoPerm>
             }/>
             <Route path='new' element={
