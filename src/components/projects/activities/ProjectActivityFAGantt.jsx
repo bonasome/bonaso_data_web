@@ -49,7 +49,7 @@ export default function ProjectActivityFAGantt({ project, activities, deadlines 
                 onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
                 onMouseMove={(e) => {setCursorY(e.nativeEvent.offsetY); setCursorX(e.nativeEvent.offsetX)}}
             >
-                <line x1={estimatedWidth / 2} x2={estimatedWidth / 2} y1={20} y2={280} strokeWidth={deadline ? 10 : 4} stroke={deadline ? "red" : "white"} strokeDasharray={deadline ? '' : '9,3'}/>
+                <line x1={estimatedWidth / 2} x2={estimatedWidth / 2} y1={20} y2={280} strokeWidth={deadline ? 6 : 3} stroke={deadline ? theme.colors.errorBg : "white"} strokeDasharray={deadline ? '' : '7,3'}/>
                 {hovered && <rect x={isLeft ? estimatedWidth/2 + 20 : -estimatedWidth/2 - 30}  y={cursorY -20} width={estimatedWidth + 20} height={40} fill={theme.colors.bonasoDarkAccent} stroke="white" strokewith={10} />}
                 {hovered && <text x={isLeft ? estimatedWidth + 30 : -20} 
                     y={cursorY+5} textAnchor="middle" fontSize={15} fill="white">
@@ -88,15 +88,15 @@ export default function ProjectActivityFAGantt({ project, activities, deadlines 
         <div style={{ backgroundColor: theme.colors.bonasoDarkAccent}} ref={ref}>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart width={700} height={300} data={data} layout="vertical">
-                    <CartesianGrid />
                     <XAxis
                         type="number"
+                        tick={{ fill: 'white'}}
                         tickFormatter={(val) => {
                             const dt = new Date(new Date(project.start).getTime() + val * 24 * 60 * 60 * 1000);
                             return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                         }}
                     />
-                    <YAxis type="category" dataKey="name" />
+                    <YAxis type="category" dataKey="name" tick={null} />
                     {/* Offset bar - invisible, pushes duration to start */}
                     <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
                     <Bar dataKey="start" stackId="gantt" fill="transparent" style={{ pointerEvents: 'none' }} />

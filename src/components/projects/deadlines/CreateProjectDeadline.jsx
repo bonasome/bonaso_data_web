@@ -35,6 +35,12 @@ export default function CreateProjectDeadline(){
     const handleSubmit = async(data) => {
         data.project_id = id
         if(!data.organization_ids) data.organization_ids = [];
+        if(!Array.isArray(data.organization_ids)){
+            data.organization_ids = [data.organization_ids];
+        }
+        if(data.organization_ids?.length > 0 && typeof data.organization_ids[0] == 'object'){
+            data.organization_ids = data.organization_ids.map((org) => (org.id))
+        }
         console.log('submitting data...', data)
         try{
             setSaving(true);

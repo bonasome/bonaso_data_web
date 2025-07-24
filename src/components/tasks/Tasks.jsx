@@ -7,6 +7,8 @@ import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ComponentLoading from '../reuseables/ComponentLoading';
 import ButtonLoading from "../reuseables/ButtonLoading";
+import ButtonHover from "../reuseables/ButtonHover";
+import { FaTrashAlt } from "react-icons/fa";
 
 function TaskCard({ task, isDraggable = false, addCallback=null, canDelete=false, onDelete=null, addCallbackText, onError }) {
     const [errors, setErrors] = useState([]);
@@ -107,7 +109,7 @@ function TaskCard({ task, isDraggable = false, addCallback=null, canDelete=false
                         </div>
                     )}
                     {task.indicator.require_numeric && <p>Requires Number</p>}
-                    {canDelete && <button onClick={() => setDel(true)}>Remove Task</button>}
+                    {canDelete && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Remove Task'} forDelete={true} />}
                 </div>
             )}
         </div>

@@ -149,14 +149,14 @@ export default function Navbar() {
 
     return(
         <div className={styles.navbar}>
-            <div className={width > 1400 ? styles.header : styles.wideHeader}>
+            <div className={width > 1100 ? styles.header : styles.wideHeader}>
                 <Link to='/'><img src={bonasoWhite} className={styles.headerLogo} /></Link>
                 <Link to='/'><div className={styles.headerText}>
                     <h2>BONASO Data Portal</h2>
                     {width > 500 && <h5 className={styles.subheader}>Empowering Botswana's HIV/AIDS Response since 1997</h5>}
                 </div></Link>
             </div>
-                {width >= 1400 ?
+                {width >= 1100 ?
                     <ExpandedMenu /> :
                 <div className={styles.slimMenu} ref={containerRef}>
                     <TfiMenu className={styles.hamburger} onClick={() => setMenuExpanded(!menuExpanded)}/>

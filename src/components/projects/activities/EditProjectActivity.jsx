@@ -82,7 +82,11 @@ export default function EditProjectActivity() {
             return;
         }
         data.project_id = id
+        console.log(data)
         if(!data.organization_ids) data.organization_ids = [];
+        if(data.organization_ids?.length > 0 && typeof data.organization_ids[0] == 'object'){
+            data.organization_ids = data.organization_ids.map((org) => (org.id))
+        }
         console.log('submitting data...', data)
         try{
             setSaving(true);

@@ -21,6 +21,54 @@
     padding: 2vh;
     background-color: var(--bonaso-dark-accent);
 }
+.dropdownSegment {
+    padding: 1vh;
+    margin: 2vh;
+    background-color: var(--bonaso-uber-dark-accent);
+}
+
+.infoCard {
+    padding: 1vh;
+    background-color: var(--bonaso-dark-accent);
+    transition: all .6s;
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+    margin-left: 4vh;
+    margin-right: 4vh;
+}
+.infoCard:hover {
+    transform: scale(1.04);
+    cursor: pointer;
+}
+
+.orgCard {
+    padding: 1vh;
+    background-color: var(--bonaso-dark-accent);
+    transition: all .6s;
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+    margin-left: 4vh;
+    margin-right: 4vh;
+}
+.orgCard:hover {
+    transform: scale(1.04);
+}
+
+.orgCard2 {
+    padding: 1vh;
+    background-color: var(--bonaso-uber-dark-accent);
+    transition: all .6s;
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+    margin-left: 4vh;
+    margin-right: 4vh;
+}
+.orgCard2:hover {
+    transform: scale(1.04);
+}
+
+
+
 
 .taskContainer {
     margin: 3vh;
@@ -34,6 +82,9 @@
     margin-bottom: 0;
 }
 
+.toggleDropdown:hover {
+    cursor: pointer;
+}
 
 .return{
     display: flex;

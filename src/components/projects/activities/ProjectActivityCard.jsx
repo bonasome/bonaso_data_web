@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import ButtonHover from '../../reuseables/ButtonHover';
@@ -6,11 +6,18 @@ import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import prettyDates from '../../../../services/prettyDates';
-
+import styles from '../projectDetail.module.css';
+import { useAuth } from '../../../contexts/UserAuth';
 export default function ProjectActivityCard({ activity, project, onDelete }) {
     const [expanded, setExpanded] = useState(false);
     const [del, setDel] = useState(false);
-
+    const { user } = useAuth();
+    const hasPerm = useMemo(() => {
+        if(!user || !activity) return false
+        if(user.role === 'admin') return true;
+        if(user.organization_id == activity?.created_by_organization) return true
+        return false
+    }, [user, activity]);
     const deleteActivity = async () => {
         try {
             console.log('deleting organization...');
@@ -51,15 +58,16 @@ export default function ProjectActivityCard({ activity, project, onDelete }) {
             setDel(false);
         }
     }
+    
     if(del){
         return(
             <ConfirmDelete name='Activity' onConfirm={() => deleteActivity()} onCancel={() => setDel(false)} />
         )
     }
     return(
-        <div>
-            <div onClick={() => setExpanded(!expanded)}>
-                <h2>{activity.name}</h2>
+        <div className={styles.infoCard} onClick={() => setExpanded(!expanded)}>
+            <div>
+                <h3>{activity.name}</h3>
             </div>
             {expanded && <div>
                 {activity.start === activity.end ? 
@@ -67,10 +75,10 @@ export default function ProjectActivityCard({ activity, project, onDelete }) {
                 {activity.description && <p>{activity.description}</p>}
                 {activity.organizations.length > 0 && <p>From: {activity.organizations.map((org) => (`${org.name}`)).join(', ')}</p>}
                 {activity.visible_to_all && <p>Project Wide</p>}
-                <div style={{ display: 'flex', flexDirection: 'row'}}>
+                {hasPerm && <div style={{ display: 'flex', flexDirection: 'row'}}>
                     <Link to={`/projects/${project.id}/activities/${activity.id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
                     <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Activity'} forDelete={true} />
-                </div>
+                </div>}
             </div>}
         </div>
     )

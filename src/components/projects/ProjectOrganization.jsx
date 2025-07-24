@@ -20,6 +20,8 @@ import ModelSelect from '../reuseables/ModelSelect';
 import OrganizationsIndex from "../organizations/OrganizationsIndex";
 import { FaAngleDoubleUp } from "react-icons/fa";
 import NarrativeReportDownload from '../narrativeReports/NarrativeReportDownload';
+import { FaCloudUploadAlt } from "react-icons/fa";
+import Targets from "./targets/Targets";
 export default function ProjectOrganization(){
     const { id, orgID } = useParams();
     const navigate = useNavigate();
@@ -32,6 +34,7 @@ export default function ProjectOrganization(){
     const [adding, setAdding] = useState(false);
     const [showTasks, setShowTasks] = useState(false);
     const [showChildOrgs, setShowChildOrgs] = useState(false);
+    const [showTargets, setShowTargets] = useState(false);
     const [showFiles,setShowFiles] = useState(false);
     const [updateTasks, setUpdateTasks] = useState(0);
     const [del, setDel] = useState(false);
@@ -46,11 +49,7 @@ export default function ProjectOrganization(){
             }
         }, [errors]);
 
-    const hasPerm = useMemo(() => {
-        if(user.role === 'admin') return true;
-        if(user.organization_id === orgID) return false;
-        return true;
-    }, [user, project]);
+    
     
     const fetchProject = async () => {
         try {
@@ -104,6 +103,14 @@ export default function ProjectOrganization(){
         return null;
     }, [project, orgID]);
 
+    const hasPerm = useMemo(() => {
+        if(!user || !organization) return false
+        if(user.role === 'admin') return true;
+        if(user.organization_id == organization?.parent?.id) return true
+        return false
+    }, [user, organization]);
+
+    console.log(organization)
     const promoteChild = async () => {
         setErrors([]);
         try {
@@ -285,7 +292,7 @@ export default function ProjectOrganization(){
     if(loading || !project || !organization) return <Loading />
     return(
         <div className={styles.container}>
-            {del && <ConfirmDelete name={'organization'} onConfirm={() => removeOrg()} onCancel={() => setDel(false)} />}
+            {del && <ConfirmDelete name={'this organization from this project'} onConfirm={() => removeOrg()} onCancel={() => setDel(false)} />}
             <Link to={`/projects/${id}`} className={styles.return}>
                 <IoMdReturnLeft className={styles.returnIcon} />
                 <p>Return to projects overview</p>   
@@ -294,59 +301,70 @@ export default function ProjectOrganization(){
                 <IoMdReturnLeft className={styles.returnIcon} />
                 <p>Return to parent organization</p>   
             </Link>}
+
             <div className={styles.segment}>
                 <h1>Viewing Page for {organization.name} for {project.name}</h1>
                 {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    {!addingChildOrg &&(user.organization_id == organization.id || user.role == 'admin') && <ButtonHover noHover={<FaCirclePlus />} hover={'Add Subgrantee'} callback={() => setAddingChildOrg(true)}/>}
-                    {addingChildOrg && <ButtonHover noHover={<IoCheckboxSharp />} hover={'Done'} callback={() => setAddingChildOrg(false)}/>}
-                    {hasPerm && <ButtonHover callback={() => setDel(true)} noHover={<IoIosRemoveCircle />} hover={'Remove Organization from Project'} forDelete={true} />}
-                    {user.role == 'admin' && organization.parent && <ButtonHover callback={() => promoteChild()} noHover={<FaAngleDoubleUp />} hover={'Promote to Coordinator'} />}
-                </div>
-                {addingChildOrg && <OrganizationsIndex callback={(org) => assignChild(org)} callbackText="Assign as Subgrantee" /> }
             </div>
-
             <div className={styles.segment}>
-                <div className={styles.toggleDropdown} onClick={() => setShowFiles(!showFiles)}>
-                    <h2 style={{ textAlign: 'start'}}>File Uploads</h2>
-                    {showFiles ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
-                    <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
-                </div>
-                {showFiles && <div>
-                    <h1>Viewing Page for {organization.name} for {project.name}</h1>
-                    <NarrativeReportDownload project={project} organization={organization} />
-                </div>}
-            </div>
-
-            
-
-            {organization.children.length > 0 && <div className={styles.segment}>
-                <div className={styles.toggleDropdown} onClick={() => setShowChildOrgs(!showChildOrgs)}>
-                    <h2 style={{ textAlign: 'start'}}>Subgrantees</h2>
-                    {showChildOrgs ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
-                    <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
-                </div>
-                {showChildOrgs && <div>
-                    {organization.children.map((org) => (<div>
-                        <Link to={`/projects/${id}/organizations/${org.id}`}>{org.name}</Link>
-                    </div>))}
-                </div>}
-            </div>}
-
-            <div className={styles.segment}>
-                <div className={styles.toggleDropdown} onClick={() => setShowTasks(!showTasks)}>
-                    <h2 style={{ textAlign: 'start'}}>Tasks for {organization.name}</h2>
-                    {showTasks ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
-                    <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
-                </div>
-                {showTasks && <div>
-                    {hasPerm && <div >
-                        {!adding && <ButtonHover callback={() => setAdding(true)} noHover={<MdAssignmentAdd />} hover={'Assign a New Task'} />}
-                        {adding && <ButtonHover callback={() => setAdding(false)} noHover={<IoCheckboxSharp />} hover={'Done'} />}
-                        {adding && <IndicatorsIndex callback={(ind) => addTask(ind)} callbackText={'Assign as Task'} excludeOrg={orgID} excludeProject={id} updateTrigger={updateTasks} />}
+                <div className={styles.dropdownSegment}>
+                    <div className={styles.toggleDropdown} onClick={() => setShowFiles(!showFiles)}>
+                        <h2 style={{ textAlign: 'start'}}>File Uploads</h2>
+                        {showFiles ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
+                        <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
+                    </div>
+                    {showFiles && <div>
+                        <NarrativeReportDownload project={project} organization={organization} />
                     </div>}
-                    <Tasks organizationID={orgID} projectID={id} canDelete={hasPerm} updateTrigger={() => setUpdateTasks(prev => prev += 1)} onRemove={() => setUpdateTasks(prev => prev+=1)}/>
-                </div>}
+                </div>
+
+                <div className={styles.dropdownSegment}>
+                    <div className={styles.toggleDropdown} onClick={() => setShowChildOrgs(!showChildOrgs)}>
+                        <h2 style={{ textAlign: 'start'}}>Subgrantees</h2>
+                        {showChildOrgs ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
+                        <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
+                    </div>
+                    {showChildOrgs && <div style={{ margin: 20}}>
+                        {!addingChildOrg && ((user.organization_id == organization.id && !organization.parent) || user.role == 'admin') && <ButtonHover noHover={<FaCirclePlus />} hover={'Add Subgrantee'} callback={() => setAddingChildOrg(true)}/>}
+                        {addingChildOrg && <ButtonHover noHover={<IoCheckboxSharp />} hover={'Done'} callback={() => setAddingChildOrg(false)}/>}
+                        {addingChildOrg && <OrganizationsIndex callback={(org) => assignChild(org)} callbackText="Assign as Subgrantee" projAdd={project.id} /> }
+                        {organization.children.map((org) => (<div className={styles.orgCard}>
+                            <Link to={`/projects/${id}/organizations/${org.id}`}><h3>{org.name}</h3></Link>
+                        </div>))}
+                        {organization.children.length === 0 && <p>No subgrantees yet.</p>}
+                    </div>}
+                </div>
+
+                <div className={styles.dropdownSegment}>
+                    <div className={styles.toggleDropdown} onClick={() => setShowTasks(!showTasks)}>
+                        <h2 style={{ textAlign: 'start'}}>Tasks for {organization.name}</h2>
+                        {showTasks ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
+                        <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
+                    </div>
+                    {showTasks && <div style={{ margin: 40}}>
+                        {hasPerm && <div >
+                            {!adding && <ButtonHover callback={() => setAdding(true)} noHover={<MdAssignmentAdd />} hover={'Assign a New Task'} />}
+                            {adding && <ButtonHover callback={() => setAdding(false)} noHover={<IoCheckboxSharp />} hover={'Done'} />}
+                        </div>}
+                        {adding && <IndicatorsIndex callback={(ind) => addTask(ind)} callbackText={'Assign as Task'} excludeOrg={orgID} excludeProject={id} updateTrigger={updateTasks} />}
+                        <Tasks organizationID={orgID} projectID={id} canDelete={hasPerm} updateTrigger={() => setUpdateTasks(prev => prev += 1)} onRemove={() => setUpdateTasks(prev => prev+=1)}/>
+                    </div>}
+                </div>
+
+                <div className={styles.dropdownSegment}>
+                    <div className={styles.toggleDropdown} onClick={() => setShowTargets(!showTargets)}>
+                        <h2 style={{ textAlign: 'start'}}>Targets for {organization.name}</h2>
+                        {showTargets ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
+                        <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
+                    </div>
+                    {showTargets && <div style={{ margin: 40}}>
+                        <Targets organization={organization} project={project} />
+                    </div>}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    {user.role == 'admin' && organization.parent && <ButtonHover callback={() => promoteChild()} noHover={<FaAngleDoubleUp />} hover={'Promote to Coordinator'} />}
+                    {hasPerm && <ButtonHover callback={() => setDel(true)} noHover={<IoIosRemoveCircle />} hover={'Remove Organization from Project'} forDelete={true} />}
+                </div>
             </div>
         </div>
     )

@@ -63,10 +63,6 @@ export default function CreateOrganization(){
     const handleSubmit = async(data) => {
         console.log('submitting data...')
         setErrors([]);
-        if(user.role !== 'admin' && data.parent_organization_id == ''){
-            setErrors(['This organization must a child of you or one of your parent organizations.'])
-            return;
-        }
         try{
             setSaving(true);
             const response = await fetchWithAuth('/api/organizations/', {

@@ -130,14 +130,6 @@ export default function OrganizationDetail(){
                 <h1>{activeOrganization?.name}</h1>
                 {activeOrganization.full_name && <i>Full Name: {activeOrganization.full_name}</i>}
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-                {activeOrganization.parent_organization && <h2>Parent</h2>}
-                {activeOrganization.parent_organization && <Link to={`/organizations/${activeOrganization.parent_organization.id}`}>{activeOrganization.parent_organization.name}</Link>}
-                {activeOrganization?.child_organizations.length > 0 && 
-                    <div><h3>Child Organizations</h3>
-                        <ul>
-                            {activeOrganization.child_organizations.map((o) => (<li key={o.id}> <Link to={`/organizations/${o.id}`}>  {o.name} </Link></li>))} 
-                        </ul>
-                    </div>}
                     {user.role == 'admin' && 
                         <div>
                             <p><i>Created by: {activeOrganization.created_by?.first_name} {activeOrganization.created_by?.last_name} at {new Date(activeOrganization.created_at).toLocaleString()}</i></p>

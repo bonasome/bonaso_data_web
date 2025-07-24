@@ -26,19 +26,22 @@ import ProjectActivityFAGantt from './activities/ProjectActivityFAGantt';
 function ProjectOrgCard({ org, project }){
     const [expanded, setExpanded] = useState(false);
     if(org.children.length === 0){ return(
-        <div>
+        <div className={styles.orgCard}>
             <Link to={`/projects/${project.id}/organizations/${org.id}`}><h3>{org.name}</h3></Link>
         </div>
     )}
     return(
-        <div>
-            <div className={styles.toggleDropdown} onClick={() => setExpanded(!expanded)}>
-                <h3 style={{ textAlign: 'start'}}><Link to={`/projects/${project.id}/organizations/${org.id}`}><h3>{org.name}</h3></Link></h3>
+        <div className={styles.infoCard}>
+            <div onClick={() => setExpanded(!expanded)} style={{ display: 'flex', flexDirection: 'row'}}>
+                <Link to={`/projects/${project.id}/organizations/${org.id}`}><h3>{org.name}</h3></Link>
                 {expanded ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                 <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
             </div>
+
             {expanded && <div>
-                {org.children.map((co) => (<ProjectOrgCard key={co.id} org={co} project={project} />))}
+                {org.children.map((co) => (<div key={co.id} className={styles.orgCard2} > 
+                    <Link to={`/projects/${project.id}/organizations/${co.id}`}><h4>{co.name}</h4></Link>
+                </div>))}
             </div>}
         </div>
     )
@@ -111,15 +114,7 @@ export default function ProjectDetail(){
 
     useEffect(() => {
         const getProjectDetails = async () => {
-        const found = projectDetails.find(p => p.id.toString() === id.toString());
-            if (found) {
-                setProject(found);
-                setLoading(false);
-                return;
-            }
-            else{
-                await fetchProject()
-            }
+            await fetchProject()
         };
         getProjectDetails();
     }, [id]);
@@ -209,6 +204,7 @@ export default function ProjectDetail(){
             setDel(false);
         }
     } 
+    
     if(loading || !project) return <Loading />
     return(
         <div className={styles.container}>
@@ -226,8 +222,12 @@ export default function ProjectDetail(){
             <div className={styles.projectHeader}>
                 <h1>{project.name}</h1>
             </div>
-            {activities && activities.length > 0 && <ProjectActivityFAGantt project={project} activities={activities} deadlines={deadlines}/> }
+            {activities && activities.length > 0 && <div className={styles.segment}>
+                <h2>Project Roadmap</h2>
+                <ProjectActivityFAGantt project={project} activities={activities} deadlines={deadlines}/> 
+            </div>}
             <div className={styles.segment}>
+            <div className={styles.dropdownSegment}>
                 <div className={styles.toggleDropdown} onClick={() => setShowDetails(!showDetails)}>
                     <h3 style={{ textAlign: 'start'}}>Project Details</h3>
                     {showDetails ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
@@ -250,7 +250,7 @@ export default function ProjectDetail(){
                 </div>}
             </div>
 
-            <div className={styles.segment}>
+            <div className={styles.dropdownSegment}>
                 <div className={styles.toggleDropdown} onClick={() => setShowActivities(!showActivities)}>
                     <h3 style={{ textAlign: 'start'}}>Activities</h3>
                     {showActivities ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
@@ -258,15 +258,15 @@ export default function ProjectDetail(){
                 </div>
                     
                 {showActivities && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
-                    <Link to={`/projects/${project.id}/activities/new`}><ButtonHover  noHover={<FaCirclePlus />} hover={'New Activity'} /></Link>
                     {!activities || activities.length === 0 && <p>No activities yet. Be the first to make one!</p>}
                     {activities && activities.length > 0 && 
                         activities.map((act) => (<ProjectActivityCard key={act.id} activity={act} project={project} onDelete={() => fetchRelated()} /> ))
                     }
+                    <Link to={`/projects/${project.id}/activities/new`}><ButtonHover  noHover={<FaCirclePlus />} hover={'New Activity'} /></Link>
                 </div>}
             </div>
             
-            <div className={styles.segment}>
+            <div className={styles.dropdownSegment}>
                 <div className={styles.toggleDropdown} onClick={() => setShowDeadlines(!showDeadlines)}>
                     <h3 style={{ textAlign: 'start'}}>Deadlines</h3>
                     {showDeadlines ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
@@ -274,15 +274,15 @@ export default function ProjectDetail(){
                 </div>
                     
                 {showDeadlines && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
-                    <Link to={`/projects/${project.id}/deadlines/new`}><ButtonHover  noHover={<FaCirclePlus />} hover={'New Deadline'} /></Link>
                     {deadlines.length === 0 && <p>No deadlines yet. Be the first to make one!</p>}
                     {deadlines && deadlines.length > 0 && 
                         deadlines.map((dl) => (<ProjectDeadlineCard key={dl.id} deadline={dl} project={project} onDelete={() => fetchRelated()} /> ))
                     }
+                    <Link to={`/projects/${project.id}/deadlines/new`}><ButtonHover  noHover={<FaCirclePlus />} hover={'New Deadline'} /></Link>
                 </div>}
             </div>
 
-            <div className={styles.segment}>
+            <div className={styles.dropdownSegment}>
                 <div className={styles.toggleDropdown} onClick={() => setShowOrgs(!showOrgs)}>
                     <h3 style={{ textAlign: 'start'}}>Organizations</h3>
                     {showOrgs ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
@@ -290,7 +290,7 @@ export default function ProjectDetail(){
                 </div>
                     
                 {showOrgs && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
-                    {!addingOrgs && <ButtonHover callback={() => setAddingOrgs(true)} noHover={<FaCirclePlus />} hover={'Add an Organization'} />}
+                    {!addingOrgs && user.role == 'admin' && <ButtonHover callback={() => setAddingOrgs(true)} noHover={<FaCirclePlus />} hover={'Add an Organization'} />}
                     {addingOrgs && <ButtonHover callback={() => setAddingOrgs(false)} noHover={<FaCirclePlus />} hover={'Done'} />}
                     {addingOrgs && <OrganizationsIndex callback={(org) => addOrg(org)} callbackText='Add to Project' />}
                     {project.organizations.map((org) => (
@@ -298,8 +298,7 @@ export default function ProjectDetail(){
                     ))}
                 </div>}
             </div>
-            
-            {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/narrative-reports/upload`} ><button>Upload a Narrative Report for this Project</button></Link>}
+            </div>
         </div>
     )
 }

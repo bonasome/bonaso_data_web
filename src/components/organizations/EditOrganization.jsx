@@ -102,7 +102,6 @@ export default function EditOrganization(){
         console.log('submitting data...')
         try{
             setSaving(true);
-            if(typeof data?.parent_organization_id === 'object' && data?.parent_organization_id?.id) data.parent_organization_id = data.parent_organization_id.id;
             const response = await fetchWithAuth(`/api/organizations/${id}/`, {
                 method: 'PATCH',
                 headers: {

@@ -123,7 +123,8 @@ export default function EditUser(){
     }
     
     const handleSubmit = async(data) => {
-        console.log('submitting data...', data)
+        console.log('submitting data...', data);
+        if(typeof data?.organization === 'object' && data?.organization?.id) data.organization = data.organization.id;
         try{
             const response = await fetchWithAuth(`/api/profiles/users/${id}/`, {
                 method: 'PATCH',

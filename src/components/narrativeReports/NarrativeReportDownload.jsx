@@ -7,6 +7,8 @@ import errorStyles from '../../styles/errors.module.css';
 import styles from './narrative.module.css';
 import { Link } from 'react-router-dom';
 import ButtonLoading from '../reuseables/ButtonLoading';
+import { FaCloudDownloadAlt, FaCloudUploadAlt } from "react-icons/fa";
+import ButtonHover from '../reuseables/ButtonHover';
 
 function NarrativeReportCard({ report }){
     const [expanded, setExpanded] = useState(false);
@@ -45,12 +47,12 @@ function NarrativeReportCard({ report }){
             )}
             <div className={styles.downloadRow}>
                 <h3>{report.title}</h3>
-                {!expanded && downloading ? <ButtonLoading />  : <button onClick={() => handleDownload(report)}>Download</button>}
+                {!expanded &&  <div onClick={(e) => e.stopPropagation()}><ButtonHover callback={() => handleDownload(report)} noHover={<FaCloudDownloadAlt />} hover={'Download File'}/></div>}
             </div>
             {expanded && 
                 <div>
                     <p>{report.description}</p>
-                    {downloading ? <ButtonLoading /> : <button onClick={() => handleDownload(report)}>Download</button>}
+                    {downloading ? <ButtonLoading /> : <div onClick={(e) => e.stopPropagation()}><ButtonHover callback={() => handleDownload(report)} noHover={<FaCloudDownloadAlt />} hover={'Download File'}/></div>}
                 </div>
             }
         </div>
@@ -84,19 +86,18 @@ export default function NarrativeReportDownload({ organization, project }) {
 
     return (
         <div className={styles.files}>
-            <h2>Narrative Reports for {organization.name} during {project.name}</h2>
+            <h3>Narrative Reports for {organization.name} during {project.name}</h3>
 
             {errors.length > 0 && (
                 <div className={errorStyles.errors}>
                     <ul>{errors.map((msg) => <li key={msg}>{msg}</li>)}</ul>
                 </div>
             )}
-
+            {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/organizations/${organization.id}/upload`} ><ButtonHover noHover={<FaCloudUploadAlt />} hover={'Upload New Document'} /></Link>}
             {files.length > 0 ? files.map((report) => (
                 <NarrativeReportCard report={report} />
             )) : <p>No reports found.</p>}
             {files.length == 0 && <p>No narrative reports have been uploaded yet.</p>}
-            {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/organizations/${organization.id}/upload`} ><button>Upload a Narrative Report for this Project</button></Link>}
         </div>
     )
 }

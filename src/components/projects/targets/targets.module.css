@@ -2,4 +2,9 @@
     margin: 4vh;
     padding: 3vh;
     background-color: var(--bonaso-dark-accent);
+    transition: all .6s;
+}
+.card:hover {
+    transform: scale(1.06);
+    cursor: pointer;
 }

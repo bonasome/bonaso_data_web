@@ -1,9 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import Loading from '../../reuseables/Loading';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useProjects } from '../../../contexts/ProjectsContext';
-import { useOrganizations } from '../../../contexts/OrganizationsContext';
-import { useTasks } from '../../../contexts/TasksContext';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import IndexViewWrapper from '../../reuseables/IndexView';
 import styles from './targets.module.css';
@@ -17,6 +13,12 @@ import SimpleSelect from '../../reuseables/SimpleSelect';
 import { tryMatchDates, getMonthDatesStr, getQuarterDatesStr, getWindowsBetween } from '../../../../services/dateHelpers';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import ComponentLoading from '../../reuseables/ComponentLoading';
+import ButtonHover from '../../reuseables/ButtonHover';
+import { PiTargetBold } from "react-icons/pi";
+import { ImPencil } from "react-icons/im";
+import { FaTrashAlt } from "react-icons/fa";
+import { IoIosStar, IoIosStarOutline, IoIosSave } from "react-icons/io";
+import { FcCancel } from "react-icons/fc";
 
 export function TargetCard({ existing=null, project, organization, handleChange, onCancel }){
     const { user } = useAuth();
@@ -30,6 +32,7 @@ export function TargetCard({ existing=null, project, organization, handleChange,
     const [relatedTo, setRelatedTo] = useState(existing?.related_to);
     const [dateType, setDateType] = useState(existing ? tryMatchDates(existing.start, existing.end, project) : {type: '', value: ''});
     const [dates, setDates] = useState(getWindowsBetween(project?.start, project?.end));
+    const [expanded, setExpanded] = useState(false);
     const [formData, setFormData] = useState({
         task_id: task || null,
         amount: existing?.amount || '',
@@ -115,6 +118,11 @@ export function TargetCard({ existing=null, project, organization, handleChange,
             setSaving(false);
         }
     }
+    const hasPerm = useMemo(() => {
+        if(user.organization_id == organization?.parent?.id || user.role == 'admin') return true
+        return false
+    }, [organization, user]);
+
 
     const deleteTarget = async() => {
         try {
@@ -160,163 +168,96 @@ export function TargetCard({ existing=null, project, organization, handleChange,
 
     if(!project || !organization) return <ComponentLoading />
     return(
-        <div className={styles.card} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             {del && <ConfirmDelete name='Target' onConfirm={() => deleteTarget()} onCancel={() => setDel(false)} />}
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {task && <h2>Target for {task?.indicator.code}: {task.indicator.name}</h2>}
             {!task && <h2>New Target</h2>}
             {editing &&
-                <div>
-                <TaskSelect existing={task} title={'Target for Task'} onChange={(task) => {setFormData(prev => ({...prev, task_id: task?.id})); setTask(task)}} callbackText={'Select Task'} projectID={project.id} organizationID={organization.id}/>
-                
-                <SimpleSelect name={'date_type'} label={'Select a Date Form'} optionValues={['months', 'quarters', 'custom']} 
-                    optionLabels={['By Month', 'By Quarter', 'Custom']} callback={(val) => setDateType(prev => ({...prev, type: val}))} 
-                    value={dateType.type} 
-                />
-                
-                {dateType.type ==='quarters' && 
-                    <SimpleSelect name={'date_type_value'} label={`Select a ${dateType.type}`} 
-                        optionLabels={dates[dateType.type]} optionValues={dates[dateType.type]}
-                        callback={(val) => {setFormData(prev => ({...prev, 
-                             start: getQuarterDatesStr(val, project).start, end: getQuarterDatesStr(val, project).end
-                        })); setDateType(prev => ({...prev, value: val}))}} value={dateType.value}
+                <div onClick={(e) => e.stopPropagation()}>
+                    <TaskSelect existing={task} title={'Target for Task'} onChange={(task) => {setFormData(prev => ({...prev, task_id: task?.id})); setTask(task)}} callbackText={'Select Task'} projectID={project.id} organizationID={organization.id}/>
+                    
+                    <SimpleSelect name={'date_type'} label={'Select a Date Form'} optionValues={['months', 'quarters', 'custom']} 
+                        optionLabels={['By Month', 'By Quarter', 'Custom']} callback={(val) => setDateType(prev => ({...prev, type: val}))} 
+                        value={dateType.type} 
                     />
-                }
-                {dateType.type ==='months' && 
-                    <SimpleSelect name={'date_type_value'} label={`Select a ${dateType.type}`} 
-                        optionLabels={dates[dateType.type]} optionValues={dates[dateType.type]}
-                        callback={(val) => {setFormData(prev => ({...prev, 
-                             start: getMonthDatesStr(val, project).start, end: getMonthDatesStr(val, project).end
-                        })); setDateType(prev => ({...prev, value: val}))}} value={dateType.value}
-                    />
-                }
-                {dateType.type === 'custom' && <div>
-                    <label htmlFor='start'>Start</label>
-                    <input id='start' name='start' type='date' value={formData.start} onChange={(e) => setFormData(prev => ({...prev, start: e.target.value}))}/>
-                    <label htmlFor='end'>End</label>
-                    <input id='end' name='end' type='date' value={formData.end} onChange={(e) => setFormData(prev => ({...prev, end: e.target.value}))}/>
-                </div>}
-                
-                
-                <Checkbox checked={asP} callback={(checked) => setAsP(checked)} name='as_percentage' label='Measure as a Percentage of Achievement for Another Task?' />
-                {!asP && 
-                    <div>
-                        <label htmlFor='amount'>Amount</label>
-                        <input id='amount' name='amount' type='number' value={formData.amount} onChange={(e) => setFormData(prev => ({...prev, amount: e.target.value}))} required={true}/>
+                    
+                    {dateType.type ==='quarters' && 
+                        <SimpleSelect name={'date_type_value'} label={`Select a ${dateType.type}`} 
+                            optionLabels={dates[dateType.type]} optionValues={dates[dateType.type]}
+                            callback={(val) => {setFormData(prev => ({...prev, 
+                                start: getQuarterDatesStr(val, project).start, end: getQuarterDatesStr(val, project).end
+                            })); setDateType(prev => ({...prev, value: val}))}} value={dateType.value}
+                        />
+                    }
+                    {dateType.type ==='months' && 
+                        <SimpleSelect name={'date_type_value'} label={`Select a ${dateType.type}`} 
+                            optionLabels={dates[dateType.type]} optionValues={dates[dateType.type]}
+                            callback={(val) => {setFormData(prev => ({...prev, 
+                                start: getMonthDatesStr(val, project).start, end: getMonthDatesStr(val, project).end
+                            })); setDateType(prev => ({...prev, value: val}))}} value={dateType.value}
+                        />
+                    }
+                    {dateType.type === 'custom' && <div>
+                        <label htmlFor='start'>Start</label>
+                        <input id='start' name='start' type='date' value={formData.start} onChange={(e) => setFormData(prev => ({...prev, start: e.target.value}))}/>
+                        <label htmlFor='end'>End</label>
+                        <input id='end' name='end' type='date' value={formData.end} onChange={(e) => setFormData(prev => ({...prev, end: e.target.value}))}/>
+                    </div>}
+                    
+                    
+                    <Checkbox checked={asP} callback={(checked) => setAsP(checked)} name='as_percentage' label='Measure as a Percentage of Achievement for Another Task?' />
+                    {!asP && 
+                        <div>
+                            <label htmlFor='amount'>Amount</label>
+                            <input id='amount' name='amount' type='number' value={formData.amount} onChange={(e) => setFormData(prev => ({...prev, amount: e.target.value}))} required={true}/>
+                            </div>
+                    }
+                    {asP && 
+                        <div>
+                            <TaskSelect existing={relatedTo} title={'As a Percentage of Task'} onChange={(task) => {setFormData(prev => ({...prev, related_to_id: task?.id})); setRelatedTo(task)}} callbackText={'Select Task'} projectID={project?.id} organizationID={organization?.id}/>
+                            {relatedTo && <div>
+                                <label htmlFor='percentage'>Percentage of {relatedTo.indicator.name}</label>
+                                <input id='percentage' name='percentage' type='number' min='0' max='100' value={formData.percentage_of_related || ''} onChange={(e) => setFormData(prev => ({...prev, percentage_of_related: e.target.value}))} required={true}/>
+                            </div>}
                         </div>
-                }
-                {asP && 
-                    <div>
-                        <TaskSelect existing={relatedTo} title={'As a Percentage of Task'} onChange={(task) => {setFormData(prev => ({...prev, related_to_id: task?.id})); setRelatedTo(task)}} callbackText={'Select Task'} projectID={project?.id} organizationID={organization?.id}/>
-                        {relatedTo && <div>
-                            <label htmlFor='percentage'>Percentage of {relatedTo.indicator.name}</label>
-                            <input id='percentage' name='percentage' type='number' min='0' max='100' value={formData.percentage_of_related || ''} onChange={(e) => setFormData(prev => ({...prev, percentage_of_related: e.target.value}))} required={true}/>
-                        </div>}
+                    }
+                    <div style={{ display: 'flex', flexDirection: 'row'}}>
+                        {!saving && <ButtonHover callback={() => saveTarget()} noHover={<IoIosSave />} hover={'Save'} /> }
+                        {saving && <ButtonLoading />}
+                        <ButtonHover callback={() => {existing ? setEditing(false) : onCancel()}} noHover={<FcCancel />} hover={'Cancel'} />
                     </div>
-                }
                 </div>
             }
-            {!editing && <div>
-                <p>{dateType?.value} ({(prettyDates(formData?.start))} to {prettyDates(formData?.end)})</p>
-                {formData.amount && <p>Achievement: {existing.achievement || 0} of {formData.amount} ({formData.amount != 0 ? Math.round((existing.achievement/formData.amount)*100) : '0'}%)</p>}
-                {relatedTo && <p>{formData.percentage_of_related}% of {relatedTo?.indicator.name} ({existing.achievement} of {existing.related_as_number}, {existing.related_as_number !== 0 ? Math.round((existing.achievement/existing.related_as_number)*100) : '0'}%)</p>}
-            </div>}
-            <div>
-                {editing && (saving ? <ButtonLoading /> : <button onClick={() => saveTarget()}>Save</button>)}
-                {user.role == 'admin' && <button className={styles.cancel} onClick={existing ? () => setEditing(!editing) : () => onCancel() }>{editing ? 'Cancel' : 'Edit Target'}</button>}
-                {user.role == 'admin' && !editing && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete Target</button>}
-                {del && <ButtonLoading forDelete={true} />}
-            </div>
-        </div>
+            {!editing && <div onClick={() => setExpanded(!expanded)}>
+                {expanded && <div>
+                    <p>{dateType?.value} ({(prettyDates(formData?.start))} to {prettyDates(formData?.end)})</p>
+                    {formData.amount && <p>Achievement: {existing.achievement || 0} of {formData.amount} ({formData.amount != 0 ? Math.round((existing.achievement/formData.amount)*100) : '0'}%)</p>}
+                    {relatedTo && <p>{formData.percentage_of_related}% of {relatedTo?.indicator.name} ({existing.achievement} of {existing.related_as_number}, {existing.related_as_number !== 0 ? Math.round((existing.achievement/existing.related_as_number)*100) : '0'}%)</p>}
+                    <div style={{ display: 'flex', flexDirection: 'row'}}>
+                        {hasPerm && !editing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit'} />}
+                        {hasPerm && !editing && !del && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Target'} forDelete={true} />}
+                    </div>
+                </div>}
+        </div>}
+    </div>
     )
 }
 
 
 
-export default function Targets() {
+export default function Targets({ project, organization}) {
     const { id, orgID } = useParams();
     const { user } = useAuth();
-    const { organizationDetails, setOrganizationDetails} = useOrganizations();
-    const { projectDetails, setProjectDetails} = useProjects();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState([]);
     const [adding, setAdding] =useState(false);
-    const [project, setProject] = useState(null);
-    const [org, setOrg] = useState(null);
     const [targets, setTargets] = useState([]);
 
     const [page, setPage] = useState(1)
     const [search, setSearch] = useState('');
     const [entries, setEntries] = useState(0);
-
-    useEffect(() => {
-        const getOrganizationDetails = async () => {
-            setLoading(true);
-            const found = organizationDetails.find(p => p.id.toString() === id.toString());
-            if (found) {
-                setOrg(found);
-                setLoading(false);
-                return;
-            }
-            else{
-                try {
-                    console.log('fetching organization details...');
-                    const response = await fetchWithAuth(`/api/organizations/${orgID}/`);
-                    const data = await response.json();
-                    if(response.ok){
-                        setOrganizationDetails(prev => [...prev, data]);
-                        setOrg(data);
-                        setLoading(false);
-                    }
-                    else{
-                        navigate(`/not-found`);
-                    }
-                    
-                } 
-                catch (err) {
-                    setErrors(['Failed to fetch targets. Please try again later.'])
-                    console.error('Failed to fetch organization: ', err);
-                    setLoading(false)
-                } 
-            }
-        };
-        getOrganizationDetails();
-    }, [orgID])
-
-    useEffect(() => {
-        const getProject = async () => {
-            setLoading(true);
-            const found = projectDetails.find(p => p.id.toString() === id.toString());
-            if (found) {
-                setProject(found);
-                setLoading(false);
-                return;
-            }
-            else{
-                try {
-                    console.log('fetching project details...');
-                    const response = await fetchWithAuth(`/api/manage/projects/${id}/`);
-                    const data = await response.json();
-                    if(response.ok){
-                        setProjectDetails(prev => [...prev, data]);
-                        setProject(data);
-                        setLoading(false);
-                    }
-                    else{
-                        navigate(`/not-found`);
-                    }
-                    
-                } 
-                catch (err) {
-                    setErrors(['Failed to fetch targets. Please try again later.'])
-                    console.error('Failed to fetch organization: ', err);
-                    setLoading(false)
-                }
-            }
-        };
-        getProject();
-    }, [id])
 
     useEffect(() => {
         const getTargets = async () => {
@@ -369,23 +310,27 @@ export default function Targets() {
         }
         getTargets();
     }
+    const hasPerm = useMemo(() => {
+        if(!user || !organization) return false;
+        if(user.organization_id == organization?.parent?.id || user.role == 'admin') return true
+        return false
+    }, [organization, user]);
+
     console.log(targets)
-    if (loading) return <Loading />
+    if (loading) return <ComponentLoading />
     return (
         <div>
-            <h1>Targets for {org?.name} for {project?.name}</h1>
+            {hasPerm && 
+                <ButtonHover callback={() => setAdding(true)} noHover={<PiTargetBold />} hover={'New Target'} />}
             <IndexViewWrapper entries={entries} onSearchChange={setSearch} page={page} onPageChange={setPage}>
-                {user.role == 'admin' && <button onClick={() => setAdding(true)}>Add Target for {org?.name}</button>}
-                {adding && <TargetCard organization={org} project={project} handleChange={handleChange} onCancel={() => setAdding(false)} /> }
-                {(targets && project && org && targets?.length) == 0 ? 
+                {adding && <TargetCard organization={organization} project={project} handleChange={handleChange} onCancel={() => setAdding(false)} /> }
+                {(targets && project && organization && targets?.length) == 0 ? 
                     <p>No targets yet. Make one!</p> :
                     targets?.map(tar => (
-                    <TargetCard key={tar.id} existing={tar} organization={org} project={project} handleChange={handleChange} />
+                    <TargetCard key={tar.id} existing={tar} organization={organization} project={project} handleChange={handleChange} />
                     ))
                 }
             </IndexViewWrapper>
-
-            <p>My ass</p>
         </div>
     )
 }

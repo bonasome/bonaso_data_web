@@ -8,9 +8,7 @@
     margin-bottom: 4vh;
 }
 .files{
-    margin-top: 4vh;
-    margin-bottom: 4vh;
-    background-color: var(--bonaso-dark-accent);
+    background-color: var(--bonaso-uber-dark-accent);
     padding: 4vh;
 }
 .form{
@@ -30,17 +28,17 @@
 }
 
 .card {
-    background-color: var(--bonaso-uber-dark-accent);
+    background-color: var(--bonaso-dark-accent);
     padding: 2vh;
-    margin: 2vh;
+    margin-bottom: 2vh;
+    margin-left: 4vh;
+    margin-right: 4vh;
     transition: transform .6s;
 }
 
 .card:hover{
+    cursor: pointer;
     transform: scale(1.05);
-    margin: 0;
-    background-color: var(--bonaso-light-accent);
-    color: var(--bonaso-uber-dark-accent);
 }
 
 .downloadRow {

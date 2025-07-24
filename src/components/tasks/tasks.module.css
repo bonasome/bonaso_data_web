@@ -1,7 +1,7 @@
 .card{
     margin: 3vh;
     padding: 3vh;
-    background-color: var(--bonaso-uber-dark-accent);
+    background-color: var(--bonaso-dark-accent);
     height: fit-content;
     transition: all 0.3s ease;
 }
@@ -21,7 +21,7 @@
     padding-left: 4vh;
     padding-right: 4vh;
     padding-bottom: 4vh;
-    background-color: var(--bonaso-dark-accent);
+    background-color: var(--bonaso-uber-dark-accent);
 }
 
 .cancel {

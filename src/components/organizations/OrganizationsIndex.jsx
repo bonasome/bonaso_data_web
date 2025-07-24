@@ -62,7 +62,7 @@ function OrganizationCard({ org, callback = null, callbackText }) {
     );
 }
 
-export default function OrganizationsIndex( { callback=null, callbackText='Add Organization', excludeProject=null, excludeProjectTrigger=null, excludeEvent=null, excludeEventTrigger=null }){
+export default function OrganizationsIndex( { callback=null, callbackText='Add Organization', excludeProject=null, excludeProjectTrigger=null, excludeEvent=null, excludeEventTrigger=null, projAdd=null }){
     const { user } = useAuth()
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -82,7 +82,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Add O
                     (projectFilter ? `&project=${projectFilter}` : '') +
                     (excludeProject ? `&exclude_project=${excludeProject}` : '') +
                     (excludeEvent ? `&exclude_event=${excludeEvent}` : '');
-                const url = `/api/organizations/?search=${search}&page=${page}` + filterQuery;
+                const url = projAdd ? (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}` + filterQuery : `/api/manage/projects/${projAdd}/get-orgs/`) :  `/api/organizations/?search=${search}&page=${page}` + filterQuery;
                 console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
