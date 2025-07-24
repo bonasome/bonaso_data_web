@@ -1,6 +1,6 @@
 import Tasks from "../tasks/Tasks";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useProjects } from "../../contexts/ProjectsContext";
 import { useOrganizations } from "../../contexts/OrganizationsContext";
 import fetchWithAuth from "../../../services/fetchWithAuth";
@@ -22,6 +22,8 @@ import { FaAngleDoubleUp } from "react-icons/fa";
 import NarrativeReportDownload from '../narrativeReports/NarrativeReportDownload';
 import { FaCloudUploadAlt } from "react-icons/fa";
 import Targets from "./targets/Targets";
+
+
 export default function ProjectOrganization(){
     const { id, orgID } = useParams();
     const navigate = useNavigate();
@@ -41,14 +43,24 @@ export default function ProjectOrganization(){
     
     const [addingChildOrg, setAddingChildOrg] = useState(false);
 
-    const alertRef = useRef(null);
-        useEffect(() => {
-            if (errors.length > 0 && alertRef.current) {
-            alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            alertRef.current.focus({ preventScroll: true });
-            }
-        }, [errors]);
+    const [searchParams] = useSearchParams();
+    const startAdding = searchParams.get('adding');
 
+    useEffect(() => {
+        if(startAdding && startAdding.toString() == 'true'){
+            setAddingChildOrg(true);
+            setShowChildOrgs(true);
+        }
+    }, [startAdding]);
+    console.log(startAdding)
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
+    
     
     
     const fetchProject = async () => {
@@ -306,6 +318,7 @@ export default function ProjectOrganization(){
                 <h1>Viewing Page for {organization.name} for {project.name}</h1>
                 {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             </div>
+
             <div className={styles.segment}>
                 <div className={styles.dropdownSegment}>
                     <div className={styles.toggleDropdown} onClick={() => setShowFiles(!showFiles)}>
@@ -327,7 +340,12 @@ export default function ProjectOrganization(){
                     {showChildOrgs && <div style={{ margin: 20}}>
                         {!addingChildOrg && ((user.organization_id == organization.id && !organization.parent) || user.role == 'admin') && <ButtonHover noHover={<FaCirclePlus />} hover={'Add Subgrantee'} callback={() => setAddingChildOrg(true)}/>}
                         {addingChildOrg && <ButtonHover noHover={<IoCheckboxSharp />} hover={'Done'} callback={() => setAddingChildOrg(false)}/>}
-                        {addingChildOrg && <OrganizationsIndex callback={(org) => assignChild(org)} callbackText="Assign as Subgrantee" projAdd={project.id} /> }
+                        
+                        {addingChildOrg && <OrganizationsIndex 
+                            callback={(org) => assignChild(org)} callbackText="Assign as Subgrantee" 
+                            projAdd={project.id} addRedirect={{to: 'projects', projectID: project.id, orgID: organization.id }}
+                        />}
+                        
                         {organization.children.map((org) => (<div className={styles.orgCard}>
                             <Link to={`/projects/${id}/organizations/${org.id}`}><h3>{org.name}</h3></Link>
                         </div>))}

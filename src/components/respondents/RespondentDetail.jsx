@@ -73,6 +73,7 @@ function HIVStatus({ respondent, onUpdate }){
             console.error('Could not record respondent: ', err)
         }
     }
+    
     return(
         <div>
             {!editing && <div>

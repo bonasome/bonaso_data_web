@@ -10,6 +10,7 @@ import { ProfilesProvider } from './contexts/ProfilesContext';
 import Router from './routes/Routes';
 import Navbar from './components/Navbar';
 import { EventsProvider } from './contexts/EventsContext';
+import { SocialPostsProvider } from './contexts/SocialPostsContext';
 function App() {
     return (
         <ProjectProvider>
@@ -20,9 +21,11 @@ function App() {
         <TasksProvider>
         <ProfilesProvider>
         <EventsProvider >
+        <SocialPostsProvider>
             <BrowserRouter>
                 <Router />
             </BrowserRouter>
+        </SocialPostsProvider>
         </EventsProvider>
         </ProfilesProvider>
         </TasksProvider>

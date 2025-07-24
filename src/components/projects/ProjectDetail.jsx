@@ -241,6 +241,7 @@ export default function ProjectDetail(){
                     <p>{project.description}</p>
                     {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                     <div style={{ display: 'flex', flexDirection: 'row'}}>
+                        <Link to={`/projects/${project.id}/announcements/new`}><ButtonHover noHover={<FaTrashAlt />} hover={'New Announcement'} /></Link>
                         {favorited && <ButtonHover callback={() => {setFavorited(false); favorite('project', project.id, true)}} noHover={<IoIosStar />} hover={'Unfavorite'} /> }
                         {!favorited && <ButtonHover callback={() => {setFavorited(true); favorite('project', project.id)}} noHover={<IoIosStarOutline />} hover={'Favorite'} /> }
                         {user.role == 'admin' && <Link to={`/projects/${project.id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Project'} /></Link>}

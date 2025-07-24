@@ -15,14 +15,17 @@ import ClientSelect from '../projects/clients/ClientSelect';
 import IndicatorMultiSelect from '../indicators/IndicatorMultiSelect';
 import Checkbox from './Checkbox';
 import MultiCheckbox from './MultiCheckbox';
+import ModelMultiSelect from './ModelMultiSelect';
+import Tasks from '../tasks/Tasks';
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]
-export default function DynamicForm({ config, onSubmit, onCancel, onError, saving }){
+export default function DynamicForm({ config, onSubmit, onCancel, onError, saving, createAnother=false }){
     const { user } = useAuth();
     const [formData, setFormData] = useState({})
     const [errors, setErrors] = useState([])
     const [switchpath, setSwitchpath] = useState(false);
     const [switchpath2, setSwitchpath2] = useState(false);
     const [switchpath3, setSwitchpath3] = useState(false);
+    const [retrigger, setRetrigger] = useState(0);
     const rowRefs = useRef({});
     
     useEffect(() => {
@@ -52,7 +55,7 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
             }
         });
         setFormData(struct);
-    }, [config]);
+    }, [config, retrigger]);
     
     const handleSubmit = (e) => {
         let newErrors = []
@@ -82,7 +85,21 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
             onError(newErrors);
             return;
         }
-        onSubmit(newFormData);
+
+        const button = e.nativeEvent.submitter;
+        const action = button?.value;
+
+        if (action === "normal") {
+            onSubmit(newFormData);
+        } 
+        else if (action === "create") {
+            onSubmit(newFormData, true);
+            setRetrigger(prev => prev+=1)
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        else{
+            onSubmit(newFormData)
+        }
     }
     return(
         <div className={styles.formElement}>
@@ -221,6 +238,13 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                             </div>
                         )
                     }
+                    else if(field.type === 'multi-tasks'){
+                        return(
+                            <div className={styles.field}>
+                                <ModelMultiSelect title={field.label} IndexComponent={Tasks} callbackText={field.callbackText} callback={(sel) => setFormData(prev => ({ ...prev, [field.name]: sel || []}))} task={true} existing={field.value} />
+                            </div>
+                        )
+                    }
                     else if(field.type == 'organization'){
                         return(
                             <div className={styles.field}>
@@ -236,7 +260,10 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                         )
                     }
                 })}
-                {saving ? <ButtonLoading /> : <button type="submit">Save</button>}
+                {saving && <ButtonLoading />} 
+                
+                {!saving && <button type="submit" value="normal">Save</button>}
+                {!saving && createAnother && <button type="submit" value="create">Save & Create Another</button>}
                 <button type="button" onClick={onCancel}>Cancel</button>
             </form>
         </div>

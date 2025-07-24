@@ -11,6 +11,25 @@ import ButtonLoading from './reuseables/ButtonLoading';
 import Loading from './reuseables/Loading';
 import errorStyles from '../styles/errors.module.css';
 import ConfirmDelete from './reuseables/ConfirmDelete';
+import modalStyles from '../styles/modals.module.css';
+
+function PopUp({ onClose }){
+    return(
+        <div className={modalStyles.modal}>
+            <h1>Welcome!</h1>
+            <p>
+                Welcome to the BONASO data portal. Please note that any information you see in this portal
+                is confidential, and may not be shared or distributed to anyone outside of your organization.
+                <strong>Any violations of patient confidentiality is against the law and is punishable by fines
+                and/or jail time.</strong> By entering this portal, you agree to maintain confidentiality of
+                all data you see here and agree that you will not misuse any information here.
+            </p>
+            <p>Thank you for all the important work you do in the fight for a healthier Botswana!</p>
+            <button onClick={() => onClose()}>I understand, and will not misuse any data I access on this portal.</button>
+        </div>
+    )
+}
+
 
 function MsgCard({ msg, type, onDelete=null }){
     const { user } = useAuth();
@@ -174,6 +193,7 @@ function Home() {
     const [alerts, setAlerts] = useState([]);
     const [favorites, setFavorites] = useState({})
     const [msgPane, setMsgPane] = useState('announcements')
+    const [showWarning, setShowWarning] = useState(true);
 
     useEffect(() => {
         const getTasks = async () => {
@@ -279,6 +299,7 @@ function Home() {
     if(loading) return <Loading />
     return (
         <div className={styles.home}>
+            {showWarning && <PopUp onClose={() => setShowWarning(false)}/>}
             <h1 className={styles.header}>Welcome, {user.username}!</h1>
             <div className={styles.content}>
                 <div className={styles.board}>

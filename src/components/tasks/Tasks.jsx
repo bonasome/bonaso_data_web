@@ -10,7 +10,7 @@ import ButtonLoading from "../reuseables/ButtonLoading";
 import ButtonHover from "../reuseables/ButtonHover";
 import { FaTrashAlt } from "react-icons/fa";
 
-function TaskCard({ task, isDraggable = false, addCallback=null, canDelete=false, onDelete=null, addCallbackText, onError }) {
+function TaskCard({ task, isDraggable = false, callback=null, canDelete=false, onDelete=null, callbackText, onError }) {
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -86,7 +86,7 @@ function TaskCard({ task, isDraggable = false, addCallback=null, canDelete=false
     return (
         <div className={styles.card} onClick={() => setExpanded(!expanded)} draggable={isDraggable} onDragStart={isDraggable ? handleDragStart : undefined}>
             <h3>{task.indicator.code}: {task.indicator.name}</h3>
-            {addCallback && <button onClick={() => addCallback(task)}>{addCallbackText}</button>}
+            {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button">{callbackText}</button>}
             {expanded && (
                 <div>
                     <p><i>{task.organization.name}</i></p>
@@ -116,7 +116,7 @@ function TaskCard({ task, isDraggable = false, addCallback=null, canDelete=false
     );
 }
 
-export default function Tasks({ callback, update=null, organizationID=null, projectID=null, isDraggable=false, blacklist=[], canDelete=false, updateTrigger=null, addCallback=null, addCallbackText='Add Task', type=null, event=null, onError=[], onSuccess=null }) {
+export default function Tasks({ sendData, update=null, organizationID=null, projectID=null, isDraggable=false, blacklist=[], canDelete=false, updateTrigger=null, callback=null, callbackText='Add Task', type=null, event=null, onError=[], onSuccess=null }) {
     const [loading, setLoading] = useState(true);
     const [ tasks, setTasks ] = useState([]);
     const [search, setSearch] = useState('');
@@ -151,8 +151,8 @@ export default function Tasks({ callback, update=null, organizationID=null, proj
                 const data = await response.json();
                 setTasks(data.results);
                 setEntries(data.count); 
-                if(callback){
-                    callback(data.results)
+                if(sendData){
+                    sendData(data.results)
                 }
             } 
             catch (err) {
@@ -183,7 +183,7 @@ export default function Tasks({ callback, update=null, organizationID=null, proj
             <p><i>Search your tasks by name, organization, or project.</i></p>
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
             {tasks.length > 0 ? filteredTasks.map((task) => (
-                <TaskCard task={task} key={task.id} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} addCallback={addCallback} addCallbackText={addCallbackText} onError={(e) => (setErrors(e))} />
+                <TaskCard task={task} key={task.id} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} callback={callback} callbackText={callbackText} onError={(e) => (setErrors(e))} />
             )) : <p>No tasks yet.</p>}
             </IndexViewWrapper>
         </div>

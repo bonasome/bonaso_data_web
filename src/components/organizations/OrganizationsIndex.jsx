@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from '../../styles/indexView.module.css'
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useAuth } from '../../contexts/UserAuth'
 import OrganizationFilters from './OrganizationFilters';
@@ -62,7 +62,7 @@ function OrganizationCard({ org, callback = null, callbackText }) {
     );
 }
 
-export default function OrganizationsIndex( { callback=null, callbackText='Add Organization', excludeProject=null, excludeProjectTrigger=null, excludeEvent=null, excludeEventTrigger=null, projAdd=null }){
+export default function OrganizationsIndex( { callback=null, callbackText='Add Organization', excludeProject=null, excludeProjectTrigger=null, excludeEvent=null, excludeEventTrigger=null, projAdd=null, addRedirect=null }){
     const { user } = useAuth()
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -103,14 +103,17 @@ export default function OrganizationsIndex( { callback=null, callbackText='Add O
         setProjectFilter(filters.project);
         setIndicatorFilter(filters.indicator);
     }
-
+    const redirect = useMemo(() => {
+        if(!addRedirect) return '/organizations/new'
+        return `/organizations/new?to=${addRedirect?.to}&projectID=${addRedirect.projectID}&orgID=${addRedirect.orgID}`
+    }, [addRedirect])
     if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Organizations' : 'My Organizations'}</h1> 
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<OrganizationFilters organizations={organizations} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
-                <Link to='/organizations/new'><button>Add an Organiation</button></Link>}
+                <Link to={redirect || '/organizations/new'}><button>Add an Organiation</button></Link>}
                 {organizations?.length == 0 ? 
                     <p>No organizations match your criteria.</p> :
                     organizations.map(org => (

@@ -40,7 +40,7 @@ export default function respondentsConfig(respondentsMeta, existing=null){
             {name: 'ward', label: 'Ward', type: 'text', required: false, hideonpath: true, value: existing?.ward ? existing.ward : ''},
 
             //always show
-            {name: 'village', label: 'Village', type: 'text', required: true, value: existing?.village ? existing.village : ''},
+            {name: 'village', label: 'Village/Town/City', type: 'text', required: true, value: existing?.village ? existing.village : ''},
             {name: 'district', label: 'District', type: 'select', required: true, value: existing?.district ? existing.district : '', constructors: {
                 values: respondentsMeta?.districts,
                 multiple: false,

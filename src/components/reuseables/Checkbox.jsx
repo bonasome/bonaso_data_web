@@ -8,12 +8,11 @@ export default function Checkbox({ label, name, checked=false, callback = null, 
     const [isChecked, setIsChecked] = useState(false)
 
     useEffect(() => {
-        console.log(checked)
         if(checked == true) setIsChecked(true);
         else if(checked == false) setIsChecked(false);
         else setIsChecked(false);
     }, [checked]);
-    console.log(isChecked)
+
     return(
         <div className={styles.checkbox}>
             {isChecked ? <IoCheckboxSharp onClick={() => {setIsChecked(false); callback(false)}}/> : 

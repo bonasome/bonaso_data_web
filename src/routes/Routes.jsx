@@ -79,6 +79,10 @@ import EditProjectActivity from '../components/projects/activities/EditProjectAc
 import EditProjectDeadline from '../components/projects/deadlines/EditProjectDeadine';
 import CreateProjectDeadline from '../components/projects/deadlines/CreateProjectDeadline';
 
+import CreateSocialPost from '../components/social/CreateSocialPost';
+import SocialPostsIndex from '../components/social/SocialPostsIndex';
+import SocialPostDetail from '../components/social/SocialPostDetail';
+import EditSocialPost from '../components/social/EditSocialPost';
 function Router() {
     return (
         <Routes>
@@ -174,6 +178,11 @@ function Router() {
                     <EditProjectDeadline />
                 </RedirectIfNoPerm>
             }/>
+            <Route path=':id/announcements/new' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <CreateProjectDeadline />
+                </RedirectIfNoPerm>
+            }/>
             <Route path='new' element={
                 <RedirectIfNoPerm level={['admin']}>
                     <CreateProject />
@@ -187,11 +196,6 @@ function Router() {
             <Route path=':id/narrative-reports/download' element={
                 <RedirectIfNoPerm level={['admin', 'client']}>
                     <NarrativeReportDownload />
-                </RedirectIfNoPerm>
-            }/>
-            <Route path=':id/targets/:orgID' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
-                    <Targets />
                 </RedirectIfNoPerm>
             }/>
 
@@ -288,6 +292,39 @@ function Router() {
                     <EditUser />
                 }/>
         </Route>
+        
+        <Route 
+            path='/social' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <RespondentsLayout />
+                </RedirectIfNotAuthenticated>
+            }
+        >
+            <Route index element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <SocialPostsIndex />
+                </RedirectIfNoPerm>
+                }/>
+            <Route path=':id' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <SocialPostDetail />
+                </RedirectIfNoPerm>
+                }/>
+            
+            <Route path='new' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <CreateSocialPost/>
+                </RedirectIfNoPerm>
+                }/>
+            <Route path=':id/edit' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']} org={true}>
+                    <EditSocialPost />
+                </RedirectIfNoPerm>
+                }/>
+        </Route>
+
 
         <Route 
             path='/messages' 

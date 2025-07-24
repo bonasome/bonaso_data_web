@@ -3,18 +3,19 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
 import Loading from '../reuseables/Loading';
 import fetchWithAuth from "../../../services/fetchWithAuth";
-import { useIndicators } from '../../contexts/IndicatorsContext';
 import DynamicForm from '../reuseables/DynamicForm';
-import indicatorConfig from './indicatorConfig';
+import postConfig from './postConfig';
 import styles from '../reuseables/dynamicForm.module.css';
 import errorStyles from '../../styles/errors.module.css';
-export default function CreateIndicator(){
+import { useSocialPosts } from '../../contexts/SocialPostsContext';
+
+
+
+export default function CreateSocialPost(){
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const { indicators, setIndicators, setIndicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
-    const [indicatorIDs, setIndicatorIDs] = useState([]);
-    const [indicatorNames, setIndicatorNames] = useState([]);
+    const { setSocialPosts, socialPostsMeta, setSocialPostsMeta } = useSocialPosts();
     const [search, setSearch] = useState('')
     const [saving, setSaving] = useState(false);
 
@@ -28,68 +29,46 @@ export default function CreateIndicator(){
 
     useEffect(() => {
         const getMeta = async() => {
-            if(Object.keys(indicatorsMeta).length != 0){
+            if(Object.keys(socialPostsMeta).length != 0){
+                setLoading(false);
                 return;
             }
             else{
                 try{
                     console.log('fetching model info...')
-                    const response = await fetchWithAuth(`/api/indicators/meta/`);
+                    const response = await fetchWithAuth(`/api/social/posts/get-meta/`);
                     const data = await response.json();
-                    setIndicatorsMeta(data);
+                    setSocialPostsMeta(data);
                 }
                 catch(err){
-                    console.error('Failed to fetch indicators meta: ', err)
+                    console.error('Failed to fetch posts meta: ', err)
+                }
+                finally{
+                    setLoading(false);
                 }
             }
         }
-        getMeta()
-
-        const getIndicators = async () => {
-            try {
-                console.log('fetching indicators info...');
-                const response = await fetchWithAuth(`/api/indicators/?search=${search}`);
-                const data = await response.json();
-                setIndicators(data.results);
-                const ids = data.results.map(o => o.id);
-                const names = data.results.map(o => o.name);
-                setIndicatorIDs(ids);
-                setIndicatorNames(names);
-                setLoading(false);
-            } 
-            catch (err) {
-                console.error('Failed to fetch indicators: ', err);
-                setLoading(false);
-            }
-        };
-        getIndicators();
-    }, [search]);
+        getMeta();
+    }, []);
 
     const formConfig = useMemo(() => {
-        return indicatorConfig(indicatorIDs, indicatorNames, indicatorsMeta, (val) => setSearch(val));
-    }, [indicatorIDs, indicatorNames, indicatorsMeta]);
+        return postConfig(socialPostsMeta, (val) => setSearch(val));
+    }, [socialPostsMeta]);
 
     const handleCancel = () => {
-        navigate('/indicators')
+        navigate('/social')
     }
 
-    const handleSubmit = async(data, createAnother) => {
-        const names = data.subcategory_data || []
+    const handleSubmit = async(data) => {
+        const names = data.subcategory_data
         let commas = []
-        names.forEach(n => {
-            if(n.name.includes(',') || n.name.includes(':')) commas.push(`Subcategory names cannot include commas or colons. Please fix ${n.value}`);
-        })
-        if(commas.length > 0){
-            setErrors(commas);
-            return;
-        }
-        if(data.prerequisite_id.length > 0) {
-            data.prerequisite_id = data.prerequisite_id.map(pre => (pre.id))
+        if(data.task_ids.length > 0) {
+            data.task_ids = data.task_ids.map(task => (task.id))
         }
         console.log('submitting data...')
         try{
             setSaving(true);
-            const response = await fetchWithAuth('/api/indicators/', {
+            const response = await fetchWithAuth('/api/social/posts/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': "application/json",
@@ -98,14 +77,8 @@ export default function CreateIndicator(){
             });
             const returnData = await response.json();
             if(response.ok){
-                setIndicatorDetails(prev => [...prev, returnData])
-                if(createAnother){
-                    navigate('/indicators/new')
-                }
-                else{
-                    navigate(`/indicators/${returnData.id}`);
-                }
-                
+                setSocialPosts(prev => [...prev, returnData])
+                navigate(`/social/${returnData.id}`);
             }
             else{
                 const serverResponse = []
@@ -135,14 +108,14 @@ export default function CreateIndicator(){
 
     return(
         <div className={styles.container}>
-            <h1>New Indicator</h1>
+            <h1>New Social Media Post</h1>
             {errors.length != 0 &&
                 <div className={errorStyles.errors} ref={alertRef}>
                     <ul>{errors.map((msg)=>
                         <li key={msg}>{msg}</li>)}
                     </ul>
                 </div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} createAnother={true} />
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
         </div>
     )
 }

@@ -3,17 +3,17 @@ import OrganizationsIndex from '../organizations/OrganizationsIndex';
 import ProjectsIndex from '../projects/ProjectsIndex';
 import ModelSelect from '../reuseables/ModelSelect';
 import Checkbox from '../reuseables/Checkbox';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/UserAuth';
 import errorStyles from '../../styles/errors.module.css';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 
 export default function ComposeAnnouncements(){
+    const { id } = useParams();
     const [body, setBody] = useState('');
     const [subject, setSubject] = useState('')
     const [organization, setOrganization] = useState(null);
     const [cascade, setCascade] = useState(false)
-    const [project, setProject] = useState(null)
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState([]);
     const { user } = useAuth();
@@ -32,19 +32,20 @@ export default function ComposeAnnouncements(){
         }
         try{
             setSaving(true);
+            const data = {
+                subject: subject,
+                body: body,
+                organization: organization?.id ||null,
+                cascade_to_children: cascade,
+            }
+            if(project) data.project = id;
             const url = `/api/messages/announcements/`
             const response = await fetchWithAuth(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': "application/json",
                 },
-                body: JSON.stringify({
-                    subject: subject,
-                    body: body,
-                    project: project?.id || null,
-                    organization: organization?.id ||null,
-                    cascade_to_children: cascade,
-                })
+                body: JSON.stringify(data)
             });
             const returnData = await response.json();
             if(response.ok){
@@ -81,7 +82,6 @@ export default function ComposeAnnouncements(){
             <input id='subject' type='text' onChange={(e) => setSubject(e.target.value)} value={subject} />
             <label htmlFor='body'>Body</label>
             <textarea id='body' type='textarea' onChange={(e) => setBody(e.target.value)} value={body} />
-            {!project && <ModelSelect IndexComponent={OrganizationsIndex} title={'To Organization'} callback={(org) => setOrganization(org)} />}
             {!organization && user.role === 'admin' && <ModelSelect IndexComponent={ProjectsIndex} title={'To Project'} callback={(p) => setProject(p)} />}
             {organization && organization.child_organizations.length > 0 && <Checkbox name='cascade' label='Cascade to Children?' checked={cascade} callback={(c) => setCascade(c)} /> }
             <button onClick={() => handleSubmit()}>Send!</button>

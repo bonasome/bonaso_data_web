@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/UserAuth';
 import Loading from '../reuseables/Loading';
 import DynamicForm from '../reuseables/DynamicForm';
@@ -13,6 +13,13 @@ import errorStyles from '../../styles/errors.module.css';
 export default function CreateOrganization(){
     const navigate = useNavigate();
     const { user } = useAuth();
+
+    const [searchParams] = useSearchParams();
+
+    const jumpTo = searchParams.get('to');
+    const projectID = searchParams.get('projectID');
+    const orgID = searchParams.get('orgID');
+
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const { organizations, setOrganizations, setOrganizationDetails } = useOrganizations();
@@ -60,7 +67,7 @@ export default function CreateOrganization(){
         navigate(`/organizations`)
     }
 
-    const handleSubmit = async(data) => {
+    const handleSubmit = async(data, createAnother) => {
         console.log('submitting data...')
         setErrors([]);
         try{
@@ -74,8 +81,17 @@ export default function CreateOrganization(){
             });
             const returnData = await response.json();
             if(response.ok){
-                setOrganizationDetails(prev => [...prev, returnData])
-                navigate(`/organizations/${returnData.id}`);
+                setOrganizationDetails(prev => [...prev, returnData]);
+                if(createAnother){
+                    navigate('/organizations/new')
+                }
+                else if(jumpTo == 'projects' && projectID && orgID){
+                    navigate(`/projects/${projectID}/organizations/${orgID}?adding=true`)
+                }
+                else{
+                    navigate(`/organizations/${returnData.id}`);
+                }
+                
             }
             else{
                 const serverResponse = []
@@ -112,7 +128,7 @@ export default function CreateOrganization(){
                     <li key={msg}>{msg}</li>)}
                 </ul>
             </div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} createAnother={true} />
         </div>
     )
 }
