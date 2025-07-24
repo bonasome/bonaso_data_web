@@ -14,7 +14,80 @@ import { useAuth } from '../../contexts/UserAuth';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
 import prettyDates from '../../../services/prettyDates';
 import styles from './postDetail.module.css';
-import { IoMdReturnLeft } from "react-icons/io";
+import { IoMdReturnLeft, IoIosSave, IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
+import { MdFlag } from 'react-icons/md';
+
+function PostFlag({ flag, post }){
+    const [resolving, setResolving] = useState(false);
+    const [resolveReason, setResolveReason] = useState('');
+    const [errors, setErrors] = useState([])
+    const [flagDetail, setFlagDetail] = useState(flag);
+
+    const resolveFlag = async() => {
+        setErrors([]);
+        if(resolveReason === ''){
+            setErrors(['You must enter a reason for flagging this post.']);
+            return
+        }
+        try {
+            console.log('flagging post...');
+            const response = await fetchWithAuth(`/api/social/posts/${post.id}/resolve-flag/${flag.id}/`, {
+                method: 'PATCH',
+                headers: {
+                        'Content-Type': "application/json",
+                    },
+                body: JSON.stringify({'resolved_reason': resolveReason})
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setFlagDetail(data.flag)
+            } 
+            else {
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setResolving(false);
+        }
+    }
+    
+    if(!flagDetail) return <></>
+    return(
+        <div>
+            <h2>{flagDetail.reason}</h2>
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <p><i>{flagDetail.auto_flagged ? 'Automatically Flagged' : `Flagged by ${flagDetail.created_by.first_name} ${flagDetail.created_by.last_name}`} at {prettyDates(flagDetail.created_at)}</i></p>
+            
+            {resolving && <div>
+                <label for='reason'>Reason Resolved</label>
+                <textarea id='reason' type='text' onChange={(e) => setResolveReason(e.target.value)} value={resolveReason} />
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <ButtonHover callback={() => resolveFlag()} noHover={<IoIosSave />} hover={'Save Flag'} />
+                    <ButtonHover callback={() => setResolving(false)} noHover={<FcCancel />} hover={'Cancel'} />
+                </div>
+            </div>}
+            {flagDetail.resolved && <div>
+                <p><i>Resolved by {flagDetail.auto_resolved ? 'System' : `${flagDetail.resolved_by.first_name} ${flagDetail.resolved_by.last_name}`} at {prettyDates(flagDetail.resolved_at)} </i></p>
+                {flagDetail.resolved_reason && <p>{flagDetail.resolved_reason}</p>}
+            </div>}
+            {!flagDetail.resolved && <ButtonHover callback={() => setResolving(true)} noHover={<IoIosSave />} hover={'Resolve Flag'} />}
+        </div>
+    )
+}
 
 export default function SocialPostDetail(){
     const { user } = useAuth();
@@ -26,6 +99,9 @@ export default function SocialPostDetail(){
     const [post, setPost] = useState(null)
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState([]);
+    const [showFlags, setShowFlags] = useState(false);
+    const [flagging, setFlagging] = useState(false);
+    const [flagReason, setFlagReason] = useState('');
     const [formData, setFormData] = useState({
         likes: '',
         views: '',
@@ -125,6 +201,51 @@ export default function SocialPostDetail(){
         }
     }
 
+    const flagPost = async() => {
+        setErrors([]);
+        if(flagReason === ''){
+            setErrors(['You must enter a reason for flagging this post.']);
+            return
+        }
+        try {
+            console.log('flagging post...');
+            const response = await fetchWithAuth(`/api/social/posts/${id}/raise-flag/`, {
+                method: 'PATCH',
+                headers: {
+                        'Content-Type': "application/json",
+                    },
+                body: JSON.stringify({'reason': flagReason})
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setPost(prev => ({
+                    ...prev,
+                    flags: [...(prev.flags || []), data.flag]
+                }));
+            } 
+            else {
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setFlagging(false);
+        }
+    }
+
     const handleDelete = async() => {
         try {
             console.log('deleting post...');
@@ -189,10 +310,36 @@ export default function SocialPostDetail(){
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <Link to={`/social/${id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Post Information'} /> </Link>
+                    <ButtonHover callback={() => setFlagging(true)} noHover={<MdFlag />} hover={'Flag Respondent'} forWarning={true} />
                     <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Post'} forDelete={true}/>
                 </div>
+                {flagging && <div>
+                    <label for='reason'>Flag Reason</label>
+                    <textarea id='reason' type='text' onChange={(e) => setFlagReason(e.target.value)} value={flagReason} />
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <ButtonHover callback={() => flagPost()} noHover={<IoIosSave />} hover={'Save Flag'} />
+                        <ButtonHover callback={() => setFlagging(false)} noHover={<FcCancel />} hover={'Cancel'} />
+                    </div>
+                </div>}
+
+                {post.flags.length > 0 && <div className={styles.dropdownSegment}>
+                    <div className={styles.toggleDropdown} onClick={() => setShowFlags(!showFlags)}>
+                        <h3 style={{ textAlign: 'start'}}>Post Flags</h3>
+                        {showFlags ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
+                        <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
+                    </div>
+                        
+                    {showFlags && <div>
+                        {post.flags.map((flag) => (
+                            <PostFlag flag={flag} post={post} />))}
+                    </div>}
+                </div>}
+
             </div>
             
+
+
+
             <div className={styles.segment}>
                 <h2>Metrics</h2>
                 {!editing && <div className={styles.metricsTable}>

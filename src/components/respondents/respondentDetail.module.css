@@ -46,6 +46,18 @@
     background-color: var(--bonaso-dark-accent);
 }
 
+.toggleDropdown{
+    padding: 1.5vh;
+    display: flex;
+    flex-direction: row;
+}
+.toggleDropdown:hover {
+    cursor: pointer;
+}
+
+
+
+
 .checkbox{
     display: flex;
     flex-direction: row;

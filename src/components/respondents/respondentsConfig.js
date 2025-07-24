@@ -11,14 +11,13 @@ export default function respondentsConfig(respondentsMeta, existing=null){
     if(existing && existing.disability_status){
         dis = existing.disability_status.map((d) => (d.name))
     }
-    console.log(respondentsMeta)
+
         return [
             //always show
             {name: 'is_anonymous', label: 'Does this respondent want to remain anonymous', type: 'checkbox', required: true, switchpath: true, value: existing?.is_anonymous ? existing.is_anonymous : false},
             
-            !existing && {name: 'id_no', label:'ID/Passport Number', type: 'text', required: true, hideonpath: true},
-            //this is a little odd, but we need a way to switch from anon to not anon, but if the id already exists, that should not be editable (we don't want to send that to the front-end), so we check if they have a non anon required field and if not, assume they have no id and render it
-            existing && !existing?.first_name && {name: 'id_no', label:'ID/Passport Number', type: 'text', required: true, hideonpath: true},
+            {name: 'id_no', label:'ID/Passport Number', type: 'text', required: true, hideonpath: true, value: existing?.id_no ? existing.id_no : ''},
+
             //show if not anonymous
             {name: 'first_name', label: 'First Name', type: 'text', required: true, hideonpath: true, value: existing?.first_name ? existing.first_name : ''},
             {name: 'last_name', label: 'Surname', type: 'text', required: true, hideonpath: true, value: existing?.last_name ? existing.last_name : ''},

@@ -21,10 +21,11 @@ import ButtonLoading from '../reuseables/ButtonLoading';
 import { favorite, checkFavorited } from '../../../services/favorite';
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
-import { IoIosStar, IoIosStarOutline, IoIosSave } from "react-icons/io";
-import { MdLibraryAdd } from "react-icons/md";
+import { IoIosStar, IoIosStarOutline, IoIosSave,  IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
+import { MdFlag, MdLibraryAdd } from "react-icons/md";
 import ButtonHover from '../reuseables/ButtonHover';
 import { FcCancel } from "react-icons/fc";
+import prettyDates from '../../../services/prettyDates';
 
 function HIVStatus({ respondent, onUpdate }){
     console.log(respondent)
@@ -73,7 +74,7 @@ function HIVStatus({ respondent, onUpdate }){
             console.error('Could not record respondent: ', err)
         }
     }
-    
+
     return(
         <div>
             {!editing && <div>
@@ -209,6 +210,77 @@ function Pregnancies({ respondent, onUpdate }){
     )
 }
 
+function RespondentFlag({ flag, respondent }){
+    const [resolving, setResolving] = useState(false);
+    const [resolveReason, setResolveReason] = useState('');
+    const [errors, setErrors] = useState([])
+    const [flagDetail, setFlagDetail] = useState(flag);
+
+    const resolveFlag = async() => {
+        setErrors([]);
+        if(resolveReason === ''){
+            setErrors(['You must enter a reason for flagging this respondent.']);
+            return
+        }
+        try {
+            console.log('flagging respondent...');
+            const response = await fetchWithAuth(`/api/record/respondents/${respondent.id}/resolve-flag/${flag.id}/`, {
+                method: 'PATCH',
+                headers: {
+                        'Content-Type': "application/json",
+                    },
+                body: JSON.stringify({'resolved_reason': resolveReason})
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setFlagDetail(data.flag)
+            } 
+            else {
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setResolving(false);
+        }
+    }
+    if(!flagDetail) return <></>
+    return(
+        <div>
+            <h2>{flagDetail.reason}</h2>
+            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <p><i>{flagDetail.auto_flagged ? 'Automatically Flagged' : `Flagged by ${flagDetail.created_by.first_name} ${flagDetail.created_by.last_name}`} at {prettyDates(flagDetail.created_at)}</i></p>
+            
+            {resolving && <div>
+                <label for='reason'>Reason Resolved</label>
+                <textarea id='reason' type='text' onChange={(e) => setResolveReason(e.target.value)} value={resolveReason} />
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <ButtonHover callback={() => resolveFlag()} noHover={<IoIosSave />} hover={'Save Flag'} />
+                    <ButtonHover callback={() => setResolving(false)} noHover={<FcCancel />} hover={'Cancel'} />
+                </div>
+            </div>}
+            {flagDetail.resolved && <div>
+                <p><i>Resolved by {flagDetail.auto_resolved ? 'System' : `${flagDetail.resolved_by.first_name} ${flagDetail.resolved_by.last_name}`} at {prettyDates(flagDetail.resolved_at)} </i></p>
+                {flagDetail.resolved_reason && <p>{flagDetail.resolved_reason}</p>}
+            </div>}
+            {!flagDetail.resolved && <ButtonHover callback={() => setResolving(true)} noHover={<IoIosSave />} hover={'Resolve Flag'} />}
+        </div>
+    )
+}
+
 
 export default function RespondentDetail(){
     const width = useWindowWidth();
@@ -219,10 +291,6 @@ export default function RespondentDetail(){
     const { respondentDetails, setRespondentDetails, respondentsMeta, setRespondentsMeta } = useRespondents();
     const[activeRespondent, setActiveRespondent] = useState(null);
     const [loading, setLoading] = useState(true);
-    const[viewHIV, setViewHIV] = useState(false);
-    const [viewPreg, setViewPreg] = useState(false);
-    const [viewKP, setViewKP] = useState(false);
-    const [viewDis, setViewDis] = useState(false);
     const [labels, setLabels] = useState({});
     const [added, setAdded] = useState([]);
     const[tasks, setTasks] = useState([]);
@@ -231,6 +299,25 @@ export default function RespondentDetail(){
     const[sbVisible, setSBVisible] = useState(true);
     const [addingTask, setAddingTask] = useState(() => () => {});
     const [favorited, setFavorited] = useState(false)
+
+    const [showDetails, setShowDetails] = useState(true);
+    const [showFlags, setShowFlags] = useState(false);
+    const[viewHIV, setViewHIV] = useState(false);
+    const [viewPreg, setViewPreg] = useState(false);
+    const [viewKP, setViewKP] = useState(false);
+    const [viewDis, setViewDis] = useState(false);
+
+    const [flagging, setFlagging] = useState(false);
+    const [flagReason, setFlagReason] = useState('');
+
+
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
 
     useEffect(() => {
         const checkFavStatus = async() => {
@@ -316,6 +403,50 @@ export default function RespondentDetail(){
     const onUpdate = (data) => {
         setAdded(data)
     }
+    const flagRespondent = async() => {
+        setErrors([]);
+        if(flagReason === ''){
+            setErrors(['You must enter a reason for flagging this respondent.']);
+            return
+        }
+        try {
+            console.log('flagging respondent...');
+            const response = await fetchWithAuth(`/api/record/respondents/${id}/raise-flag/`, {
+                method: 'PATCH',
+                headers: {
+                        'Content-Type': "application/json",
+                    },
+                body: JSON.stringify({'reason': flagReason})
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setActiveRespondent(prev => ({
+                    ...prev,
+                    flags: [...(prev.flags || []), data.flag]
+                }));
+            } 
+            else {
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${data[field]}`);
+                    }
+                }
+                setErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setFlagging(false);
+        }
+    }
 
     const deleteRespondent = async() => {
         setErrors([]);
@@ -372,7 +503,7 @@ export default function RespondentDetail(){
                             <IoMdReturnLeft className={styles.returnIcon} />
                             <p>Return to respondents overview</p>
                         </Link>
-                    {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                    {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                     {del && 
                         <ConfirmDelete 
                             name={activeRespondent.is_anonymous ? activeRespondent.uuid : (activeRespondent.first_name + activeRespondent.last_name)} 
@@ -381,24 +512,62 @@ export default function RespondentDetail(){
                     />}
                     {activeRespondent.is_anonymous && <h1>Anonymous Respondent {activeRespondent.uuid}</h1>}
                     {!activeRespondent.is_anonymous && <h1>{activeRespondent.first_name} {activeRespondent.last_name}</h1>}
-                    <p>{labels.sex}, Age {labels.age_range}{activeRespondent?.special_attribute.length > 0 && labels.special_attr && labels.special_attr.map((s) => `, ${s}`)}</p>
-                    <p>{activeRespondent.ward && activeRespondent.ward + ', '}{activeRespondent.village}, {labels.district}</p>
-                    <p>{activeRespondent.citizenship}</p>
-                    
-                    
-                    <div style={{ display: 'flex', flexDirection: 'row',}}>
-                        {favorited && <ButtonHover callback={() => {setFavorited(false); favorite('respondent', activeRespondent.id, true)}} noHover={<IoIosStar />} hover={'Unfavorite'} /> }
-                        {!favorited && <ButtonHover callback={() => {setFavorited(true); favorite('respondent', activeRespondent.id)}} noHover={<IoIosStarOutline />} hover={'Favorite'} /> }
-                        {!['client'].includes(user.role) && <Link to={`/respondents/${activeRespondent.id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Respondent'} /></Link>}
-                        {user.role == 'admin' && !del && <ButtonHover  callback={() => setDel(true)} forDelete={true} noHover={<FaTrashAlt />} hover={'Delete Respondent'}/>}
-                        {del && <ButtonLoading forDelete={true} />}
-                    </div>
-                    {user.role == 'admin' && 
-                        <div>
-                            <p><i>Created by: {activeRespondent.created_by?.first_name} {activeRespondent.created_by?.last_name} at {new Date(activeRespondent.created_at).toLocaleString()}</i></p>
-                            {activeRespondent.updated_by && activeRespondent.updated_by && <p><i>Updated by: {activeRespondent.updated_by?.first_name} {activeRespondent.updated_by?.last_name} at {new Date(activeRespondent.updated_at).toLocaleString()}</i></p>}
+                     <div className={styles.dropdownSegment}>
+                        <div className={styles.toggleDropdown} onClick={() => setShowDetails(!showDetails)}>
+                            <h3 style={{ textAlign: 'start'}}>Project Details</h3>
+                            {showDetails ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
+                            <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                         </div>
-                    } 
+                            
+                        {showDetails && <div>
+                            <p>{labels.sex}, Age {labels.age_range}{activeRespondent?.special_attribute.length > 0 && labels.special_attr && labels.special_attr.map((s) => `, ${s}`)}</p>
+                            <p>{activeRespondent.ward && activeRespondent.ward + ', '}{activeRespondent.village}, {labels.district}</p>
+                            <p>{activeRespondent.citizenship}</p>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'row',}}>
+                                {favorited && <ButtonHover callback={() => {setFavorited(false); favorite('respondent', activeRespondent.id, true)}} noHover={<IoIosStar />} hover={'Unfavorite'} /> }
+                                {!favorited && <ButtonHover callback={() => {setFavorited(true); favorite('respondent', activeRespondent.id)}} noHover={<IoIosStarOutline />} hover={'Favorite'} /> }
+                                {!['client'].includes(user.role) && <Link to={`/respondents/${activeRespondent.id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Respondent'} /></Link>}
+                                {['meofficer', 'admin', 'manager'].includes(user.role) && <ButtonHover callback={() => setFlagging(true)} noHover={<MdFlag />} hover={'Flag Respondent'} forWarning={true} />}
+                                {user.role == 'admin' && !del && <ButtonHover  callback={() => setDel(true)} forDelete={true} noHover={<FaTrashAlt />} hover={'Delete Respondent'}/>}
+                                {del && <ButtonLoading forDelete={true} />}
+                            </div>
+
+                            {flagging && <div>
+                                <label for='reason'>Flag Reason</label>
+                                <textarea id='reason' type='text' onChange={(e) => setFlagReason(e.target.value)} value={flagReason} />
+                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <ButtonHover callback={() => flagRespondent()} noHover={<IoIosSave />} hover={'Save Flag'} />
+                                    <ButtonHover callback={() => setFlagging(false)} noHover={<FcCancel />} hover={'Cancel'} />
+                                </div>
+                            </div>}
+                            {user.role == 'admin' && <div>
+                                <p><i>Created by: {activeRespondent.created_by?.first_name} {activeRespondent.created_by?.last_name} at {new Date(activeRespondent.created_at).toLocaleString()}</i></p>
+                                {activeRespondent.updated_by && activeRespondent.updated_by && <p><i>Updated by: {activeRespondent.updated_by?.first_name} {activeRespondent.updated_by?.last_name} at {new Date(activeRespondent.updated_at).toLocaleString()}</i></p>}
+                            </div>} 
+                        </div>}
+                    </div>
+                    
+
+                    {activeRespondent?.flags.length > 0 && <div className={styles.dropdownSegment}>
+                        <div className={styles.toggleDropdown} onClick={() => setShowFlags(!showFlags)}>
+                            <h3 style={{ textAlign: 'start'}}>RespondentFlags</h3>
+                            {showFlags ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
+                            <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
+                        </div>
+
+                        {showFlags && <div>
+                            {activeRespondent.flags.map((flag) => (
+                                <RespondentFlag flag={flag} respondent={activeRespondent} 
+                                     onRemove={(fid) => setActiveRespondent(prev => ({
+                                        ...prev,
+                                        flags: [...(prev.flags || []).filter(f => (f.id != fid))]
+                                    }))} 
+                                />))}
+                        </div>}
+                    </div>}
+
+
                     {activeRespondent.kp_status.length > 0 && <button onClick={() => setViewKP(!viewKP)}>{viewKP ? 'Hide KP Info' : 'Show KP Info'}</button>}
                     {viewKP && <div><ul>{activeRespondent.kp_status.map((kp) => (
                         <li key={kp.id}>{kp.name}</li>
@@ -421,7 +590,7 @@ export default function RespondentDetail(){
                 {width > 768 && <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
                     {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
                 </div>}
-                {sbVisible && <Tasks callback={loadTasks} isDraggable={true} addCallback={(t) => handleButtonAdd(t)} blacklist={added} type={'Respondent'} />}
+                {sbVisible && <Tasks sendData={loadTasks} isDraggable={true} callback={(t) => handleButtonAdd(t)} blacklist={added} type={'Respondent'} />}
             </div>}
         </div>
     )

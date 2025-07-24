@@ -26,7 +26,9 @@
     margin: 2vh;
     background-color: var(--bonaso-uber-dark-accent);
 }
-
+.toggleDropdown:hover {
+    cursor: pointer;
+}
 .infoCard {
     padding: 1vh;
     background-color: var(--bonaso-dark-accent);
@@ -36,6 +38,7 @@
     margin-left: 4vh;
     margin-right: 4vh;
 }
+
 .infoCard:hover {
     transform: scale(1.04);
     cursor: pointer;
@@ -82,9 +85,7 @@
     margin-bottom: 0;
 }
 
-.toggleDropdown:hover {
-    cursor: pointer;
-}
+
 
 .return{
     display: flex;
