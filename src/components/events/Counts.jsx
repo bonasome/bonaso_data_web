@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import errorStyles from '../../styles/errors.module.css';
-import Checkbox from "../reuseables/Checkbox";
+import Checkbox from "../reuseables/inputs/Checkbox";
 import styles from './eventDetail.module.css';
 import modalStyles from '../../styles/modals.module.css'
-import ComponentLoading from '../reuseables/ComponentLoading';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
-import ButtonLoading from "../reuseables/ButtonLoading";
+import ButtonLoading from "../reuseables/loading/ButtonLoading";
 import cleanLabels from '../../../services/cleanLabels';
 import { useAuth } from "../../contexts/UserAuth";
 import theme from '../../../theme/theme'

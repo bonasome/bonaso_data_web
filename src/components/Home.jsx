@@ -6,9 +6,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link, redirectDocument } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import fetchWithAuth from '../../services/fetchWithAuth';
-import IndicatorChart from './reuseables/charts/IndicatorChart';
-import ButtonLoading from './reuseables/ButtonLoading';
-import Loading from './reuseables/Loading';
+import ButtonLoading from './reuseables/loading/ButtonLoading';
+import Loading from './reuseables/loading/Loading';
 import errorStyles from '../styles/errors.module.css';
 import ConfirmDelete from './reuseables/ConfirmDelete';
 import modalStyles from '../styles/modals.module.css';
@@ -278,10 +277,11 @@ function Home() {
         const getFavorites = async () => {
             try {
                 console.log('fetching alerts...');
-                const url = `/api/profiles/users/${user.id}/favorites/`
+                const url = `/api/profiles/users/get-favorites/`
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setFavorites(data);
+                console.log('faves', data)
             } 
             catch (err) {
                 console.error('Failed to get alerts:', err);

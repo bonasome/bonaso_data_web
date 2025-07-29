@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 import { useOrganizations } from '../../contexts/OrganizationsContext';
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import Loading from '../reuseables/Loading';
+import Loading from '../reuseables/loading/Loading';
 import { useAuth } from '../../contexts/UserAuth';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +11,7 @@ import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
 import styles from './organizationDetail.module.css';
 import { IoMdReturnLeft } from "react-icons/io";
-import ButtonLoading from '../reuseables/ButtonLoading';
+import ButtonLoading from '../reuseables/loading/ButtonLoading';
 
 export default function OrganizationDetail(){
     const { user } = useAuth();

@@ -7,17 +7,17 @@ import errorStyles from '../../../styles/errors.module.css';
 import { useAuth } from '../../../contexts/UserAuth';
 import TaskSelect from '../../tasks/TaskSelect';
 import prettyDates from '../../../../services/prettyDates';
-import Checkbox from '../../reuseables/Checkbox';
-import ButtonLoading from '../../reuseables/ButtonLoading';
-import SimpleSelect from '../../reuseables/SimpleSelect';
+import Checkbox from '../../reuseables/inputs/Checkbox';
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+import SimpleSelect from '../../reuseables/inputs/SimpleSelect';
 import { tryMatchDates, getMonthDatesStr, getQuarterDatesStr, getWindowsBetween } from '../../../../services/dateHelpers';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
-import ComponentLoading from '../../reuseables/ComponentLoading';
-import ButtonHover from '../../reuseables/ButtonHover';
+import ComponentLoading from '../../reuseables/loading/ComponentLoading';
+import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import { PiTargetBold } from "react-icons/pi";
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
-import { IoIosStar, IoIosStarOutline, IoIosSave } from "react-icons/io";
+import { IoIosSave } from "react-icons/io";
 import { FcCancel } from "react-icons/fc";
 
 export function TargetCard({ existing=null, project, organization, handleChange, onCancel }){

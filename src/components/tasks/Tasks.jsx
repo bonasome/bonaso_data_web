@@ -5,9 +5,8 @@ import { useAuth } from '../../contexts/UserAuth'
 import styles from './tasks.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
-import ComponentLoading from '../reuseables/ComponentLoading';
-import ButtonLoading from "../reuseables/ButtonLoading";
-import ButtonHover from "../reuseables/ButtonHover";
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
+import ButtonHover from "../reuseables/inputs/ButtonHover";
 import { FaTrashAlt } from "react-icons/fa";
 
 function TaskCard({ task, isDraggable = false, callback=null, canDelete=false, onDelete=null, callbackText, onError }) {

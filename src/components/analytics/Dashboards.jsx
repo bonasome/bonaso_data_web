@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useParams } from 'react-router-dom';
-import Loading from '../reuseables/Loading';
+import Loading from '../reuseables/loading/Loading';
 import errorStyles from '../../styles/errors.module.css'
-import SimpleSelect from '../reuseables/SimpleSelect';
 import ModelSelect from '../reuseables/ModelSelect';
 import ProjectsIndex from '../projects/ProjectsIndex';
 import Dashboard from './Dashboard';

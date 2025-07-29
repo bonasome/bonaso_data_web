@@ -24,18 +24,6 @@
     overflow-x: hidden;
     overflow-y: scroll;
 }
-.return{
-    display: flex;
-    flex-direction: row;
-    margin-top: auto;
-    margin-bottom: auto;
-    border-bottom: 2px solid white;
-}
-.returnIcon{
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-right: 3vh;
-}
 
 .respondentDetails{
     margin: 5vh;
@@ -54,19 +42,16 @@
 .toggleDropdown:hover {
     cursor: pointer;
 }
-
-
-
-
-.checkbox{
-    display: flex;
-    flex-direction: row;
+.dropdownSegment {
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+}
+.dropdownContent {
+    padding-left: 4vh;
+    padding-right: 4vh;
+    padding-bottom: 2vh;
 }
 
-.pregnancyDates{
-    display: flex;
-    flex-direction: row;
-}
 .interactions{
     margin: 5vh;
     padding-top: 2vh;
@@ -76,20 +61,12 @@
     background-color: var(--bonaso-dark-accent);
 }
 
-.tasks{
-    background-color: var(--bonaso-dark-accent);
-    margin: 5vh;
-    padding-top: 2vh;
-    padding-bottom: 2vh;
-    padding-left: 4vh;
-    padding-right: 4vh;
-}
-
 .dropBox{
     margin-top: 4vh;
     margin-bottom: 4vh;
     padding: 2vh;
 }
+
 .row{
     margin-top: 1vh;
     margin-bottom: 1vh;
@@ -126,6 +103,7 @@
         margin: 3vh;
     }
 }
+
 .toggle > *{
     position: absolute;
     margin-top: 43vh;
@@ -135,13 +113,12 @@
 .card{
     margin: 2vh;
     padding: 4vh;
-    background-color: var(--bonaso-dark-accent);
-    transition: transform 0.3s ease;
-    border-bottom: 4px solid white;
+    background-color: var(--bonaso-uber-dark-accent);
+    transition: transform 0.6s ease;
 }
+
 .card:hover{ 
     cursor: pointer;
-    transform: scale(1.05);
-    background-color: var(--bonaso-uber-dark-accent);
+    transform: scale(1.06);
     color: white;
 }

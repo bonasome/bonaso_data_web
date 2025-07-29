@@ -1,0 +1,17 @@
+.cardActive, .cardResolved {
+    padding: 3vh;
+    width: 85%;
+    transition: all .6s ease;
+}
+
+.cardActive {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+    
+}
+.cardResolved {
+    background-color: var(--success);
+}
+.cardActive:hover, .cardResolved:hover {
+    transform: scale(1.06);
+}

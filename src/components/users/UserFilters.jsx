@@ -1,16 +1,16 @@
 import React from 'react';
 import styles from '../../styles/filters.module.css';
-import errorStyles from '../../styles/errors.module.css'
 import { useEffect, useState, useRef, useMemo } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import SimpleSelect from '../reuseables/SimpleSelect';
+import SimpleSelect from '../reuseables/inputs/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
-import Checkbox from '../reuseables/Checkbox';
-import ComponentLoading from '../reuseables/ComponentLoading';
+import Checkbox from '../reuseables/inputs/Checkbox';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import { useProfiles } from '../../contexts/ProfilesContext';
 import { useOrganizations } from '../../contexts/OrganizationsContext';
 import { useProjects } from '../../contexts/ProjectsContext';
 import { useAuth } from '../../contexts/UserAuth';
+
 export default function ProfileFilters({ onFilterChange }){
     const [loading, setLoading] = useState(true);
     const {organizations, setOrganizations } = useOrganizations();

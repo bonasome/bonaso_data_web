@@ -2,12 +2,12 @@ import IndexViewWrapper from "../../reuseables/IndexView"
 import { useProjects } from "../../../contexts/ProjectsContext";
 import styles from '../../../styles/indexView.module.css';
 import fetchWithAuth from "../../../../services/fetchWithAuth";
-import Loading from "../../reuseables/Loading";
-import ComponentLoading from "../../reuseables/ComponentLoading";
+import Loading from "../../reuseables/loading/Loading";
+import ComponentLoading from "../../reuseables/loading/ComponentLoading";
 import { useState, useEffect } from 'react';
 import CreateClient from "./CreateClientModal";
 import { Link } from "react-router-dom";
-import { ca } from "date-fns/locale";
+
 function ClientCard({ client, callback=null, callbackText }){
     const [expanded, setExpanded] = useState(false);
     return(

@@ -4,12 +4,11 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import DynamicForm from '../../reuseables/DynamicForm';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import styles from './clientDetail.module.css';
-import Loading from '../../reuseables/Loading';
+import Loading from '../../reuseables/loading/Loading';
 import errorStyles from '../../../styles/errors.module.css';
-import { useProfiles } from '../../../contexts/ProfilesContext';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import { useAuth } from '../../../contexts/UserAuth';
-import ButtonLoading from '../../reuseables/ButtonLoading';
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
 
 export default function ClientDetail(){
     const {clients, setClients } = useProjects();

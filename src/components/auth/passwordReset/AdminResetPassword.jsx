@@ -1,37 +1,56 @@
 import { useState } from "react";
-import errorStyles from '../../../styles/errors.module.css';
-import { Link } from "react-router-dom";
+
 import fetchWithAuth from "../../../../services/fetchWithAuth";
 
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+
+import errorStyles from '../../../styles/errors.module.css';
+
 export default function AdminResetPassword({ id }){
+    //page meta
     const [errors, setErrors] = useState([]);
+    const [submitted, setSubmitted] = useState(false);
+    const [saving, setSaving] = useState(false);
+
+    //pasword controls
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [submitted, setSubmitted] = useState(false);
-
+    
+    //handle submission
     const handleSubmit = async () => {
-        setSubmitted(false);
+        setErrors([]);
+        //require pass
         if(password === ''){
             setErrors(['This field is required.']);
             return;
         }
+        //pass must match
         if(password !== confirmPassword){
             setErrors(['Passwords must match']);
             return;
         }
-        setSubmitted(true);
-        setErrors([])
-        console.log('resetting password...')
-        fetchWithAuth(`/api/users/admin-reset-password/`, {
-            method: 'POST',
-            body: JSON.stringify({
-                user_id: id,
-                new_password: password,
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        try{
+            console.log('resetting password...')
+            response = await fetchWithAuth(`/api/users/admin-reset-password/`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    user_id: id,
+                    new_password: password,
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if(response.ok){
+                setSubmitted(true);
+            }
+        }
+        catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setSaving(false)
+        }
     }
     return(
         <div>
@@ -50,7 +69,8 @@ export default function AdminResetPassword({ id }){
                         <p>Password Reset!</p>
                     </div>
                 }   
-                <button onClick={() => handleSubmit()}>Reset Password</button>
+                {!submitted && !saving && <button onClick={() => handleSubmit()}>Reset Password</button>}
+                {saving && <ButtonLoading />}
             </div>
         </div>
     )

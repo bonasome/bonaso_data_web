@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/UserAuth';
-import Loading from '../reuseables/Loading';
+import Loading from '../reuseables/loading/Loading';
 import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useOrganizations } from '../../contexts/OrganizationsContext';

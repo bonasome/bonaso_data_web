@@ -2,11 +2,11 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import IndicatorsIndex from '../indicators/IndicatorsIndex';
 import ModelSelect from '../reuseables/ModelSelect';
-import SimpleSelect from '../reuseables/SimpleSelect';
+import SimpleSelect from '../reuseables/inputs/SimpleSelect';
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
 import getColor from '../../../services/getColor';
 import splitToChart from './splitToChart'
-import Checkbox from '../reuseables/Checkbox';
+import Checkbox from '../reuseables/inputs/Checkbox';
 import theme from '../../../theme/theme';
 import styles from './dashboard.module.css';
 import { IoIosArrowDropdownCircle } from "react-icons/io";
@@ -15,7 +15,7 @@ import { FaChartPie } from "react-icons/fa6";
 import { FaChartBar } from "react-icons/fa";
 import { FaChartLine } from "react-icons/fa6";
 import DataTable from './DataTable';
-import MultiCheckbox from '../reuseables/MultiCheckbox';
+import MultiCheckbox from '../reuseables/inputs/MultiCheckbox';
 import cleanLabels from '../../../services/cleanLabels';
 
 export default function IndicatorChart({ chartData=null, dashboard, meta, onUpdate, onRemove, pos=0 }) {

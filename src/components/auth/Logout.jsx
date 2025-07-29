@@ -1,15 +1,22 @@
 import React from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../../contexts/UserAuth';
+
 import fetchWithAuth from '../../../services/fetchWithAuth';
+
 import bonasoWhite from '../../assets/bonasoWhite.png'
 import styles from './login.module.css';
-export default function Logout() {
-    const dns = import.meta.env.VITE_DNS;
-    const { refreshAuth } = useAuth();
-    const navigate = useNavigate();
 
+export default function Logout() {
+    const navigate = useNavigate();
+    const { refreshAuth } = useAuth();
+
+    //get domain from env
+    const dns = import.meta.env.VITE_DNS;
+
+    //call logout link and delete cookies
     useEffect(() => {
         const logout = async () => {
             try{
@@ -34,14 +41,15 @@ export default function Logout() {
         logout();
     }, [dns, refreshAuth, navigate]);
 
-  return(
-    <div>
-        <div className={styles.login}>
-                <div className={styles.header}>
-                    <img src={bonasoWhite} className={styles.headerImage} />
-                    <h2>Until next time!</h2>
-                </div>
+    //page display in case logout takes a second to register and redirect
+    return(
+            <div>
+                <div className={styles.login}>
+                        <div className={styles.header}>
+                            <img src={bonasoWhite} className={styles.headerImage} />
+                            <h2>Until next time!</h2>
+                        </div>
+                    </div>
             </div>
-    </div>
-  )
+        )
 }

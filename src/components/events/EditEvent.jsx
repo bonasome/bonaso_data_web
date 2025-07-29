@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
-import Loading from '../reuseables/Loading';
+import Loading from '../reuseables/loading/Loading';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useEvents } from '../../contexts/EventsContext';
 import eventConfig from './eventConfig';

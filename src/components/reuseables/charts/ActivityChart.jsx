@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
 import monthlyCounts from './monthlyCounts'
-import ComponentLoading from '../ComponentLoading';
+import ComponentLoading from '../loading/ComponentLoading';
 
 export default function ActivityChart({ profile, showTargets=false }) {
     const [data, setData] = useState(null);

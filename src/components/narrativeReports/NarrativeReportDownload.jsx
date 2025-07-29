@@ -1,14 +1,13 @@
 import { useAuth } from '../../contexts/UserAuth';
 import { useState, useEffect } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import SimpleSelect from '../reuseables/SimpleSelect';
-import ComponentLoading from '../reuseables/ComponentLoading';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import errorStyles from '../../styles/errors.module.css';
 import styles from './narrative.module.css';
 import { Link } from 'react-router-dom';
-import ButtonLoading from '../reuseables/ButtonLoading';
+import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import { FaCloudDownloadAlt, FaCloudUploadAlt } from "react-icons/fa";
-import ButtonHover from '../reuseables/ButtonHover';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
 
 function NarrativeReportCard({ report }){
     const [expanded, setExpanded] = useState(false);

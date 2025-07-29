@@ -1,17 +1,17 @@
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useEvents } from "../../contexts/EventsContext";
 import { useState, useEffect, useMemo, useRef } from "react";
-import Loading from "../reuseables/Loading";
+import Loading from "../reuseables/loading/Loading";
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import prettyDates from "../../../services/prettyDates";
 import Tasks from "../tasks/Tasks";
 import OrganizationsIndex from "../organizations/OrganizationsIndex";
 import errorStyles from '../../styles/errors.module.css';
 import styles from './eventDetail.module.css'
-import SimpleSelect from "../reuseables/SimpleSelect";
+import SimpleSelect from "../reuseables/inputs/SimpleSelect";
 import Counts from "./Counts";
 import ConfirmDelete from "../reuseables/ConfirmDelete";
-import ButtonLoading from '../reuseables/ButtonLoading';
+import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import { useAuth } from "../../contexts/UserAuth";
 import { IoMdReturnLeft } from "react-icons/io";
 import cleanLabels from "../../../services/cleanLabels";

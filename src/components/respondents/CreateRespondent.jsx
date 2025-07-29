@@ -1,26 +1,35 @@
 import React from 'react';
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from 'react-router-dom';
-import errorStyles from '../../styles/errors.module.css'
-import Loading from '../reuseables/Loading';
-import DynamicForm from '../reuseables/DynamicForm';
-import fetchWithAuth from "../../../services/fetchWithAuth";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useNavigate, Link } from 'react-router-dom';
+
 import { useRespondents } from '../../contexts/RespondentsContext';
+
+import fetchWithAuth from "../../../services/fetchWithAuth";
 import respondentsConfig from './respondentsConfig';
-import { Link } from 'react-router-dom';
+
+import Loading from '../reuseables/loading/Loading';
+import DynamicForm from '../reuseables/DynamicForm';
+import ReturnLink from '../reuseables/ReturnLink';
+
 import styles from '../reuseables/dynamicForm.module.css';
 import modalStyles from '../../styles/modals.module.css';
+import errorStyles from '../../styles/errors.module.css';
 
 export default function CreateRespondent(){
     const navigate = useNavigate();
-    const [formConfig, setFormConfig] = useState([]);
+    //contexts
+    const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
+
+    //page meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
-    const [existing, setExisting] = useState(null)
-    const [showModal, setShowModal] = useState(true)
+    const [showModal, setShowModal] = useState(true); //shows data policy modal on load
     const [saving, setSaving] = useState(false);
-        
+
+    //helper field to return an existing ID if there is a db conflict
+    const [existing, setExisting] = useState(null)
+    
+    //ref to scroll to alerts
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
@@ -29,6 +38,7 @@ export default function CreateRespondent(){
         }
     }, [errors]);
     
+    //fetch the meta for building the form (preload from context if possible)
     useEffect(() => {
         const getRespondentMeta = async () => {
             console.log(respondentsMeta)
@@ -45,27 +55,33 @@ export default function CreateRespondent(){
                     setLoading(false);
                 }
                 catch(err){
-                    console.error('Failed to fetch respondent model information: ', err)
+                    console.error('Failed to fetch respondent model information: ', err);
+                    setErrors(['Something went wrong. Please try again later.']);
                     setLoading(false)
                 }
             }
         }
         getRespondentMeta();
     }, [respondentsMeta, setRespondentsMeta])
-
-    useEffect(() => {
-        setFormConfig(respondentsConfig(respondentsMeta))
+    
+    //set up the form config
+    const formConfig = useMemo(() => {
+        return respondentsConfig(respondentsMeta);
     }, [respondentsMeta])
 
+    //navigate back to index on cancel
     const handleCancel = () => {
         navigate('/respondents')
     }
+
+    //handle submission
     const handleSubmit = async(data) => {
-        console.log('submitting data...')
         const submissionErrors = []
+        //to handle situations where someone may have switched partway through, clear hidden values
         if(data.is_anonymous == ''){
             data.is_anonymous = false
         }
+        //clear PII fields if anon
         if(data.is_anonymous){
             data.first_name = null,
             data.last_name = null,
@@ -75,17 +91,18 @@ export default function CreateRespondent(){
             data.phone = null,
             data.id_no = null
         }
+        //clear age range if not anon, since DOB should be present
         else if(!data.is_anonymous){
             data.age_range = null;
             if(data.dob && isNaN(Date.parse(data.dob)) || new Date(data.dob) > new Date()){
                 submissionErrors.push('Date of birth must be a valid date and may not be in the future.');
             }
         }
+
         if(submissionErrors.length > 0){
             setErrors(submissionErrors);
             return;
         }
-
         try{
             setSaving(true)
             const url = '/api/record/respondents/'; 
@@ -104,6 +121,7 @@ export default function CreateRespondent(){
             else{
                 const serverResponse = []
                 for (const field in returnData) {
+                    //see if the respondent exists and build a link to their profile
                     if(field == 'existing_id'){
                         setExisting(returnData[field])
                         continue
@@ -118,7 +136,6 @@ export default function CreateRespondent(){
                     }
                 }
                 setErrors(serverResponse)
-    
             }
         }
         catch(err){
@@ -129,7 +146,7 @@ export default function CreateRespondent(){
             setSaving(false)
         }
     }
-
+    //simple data privacy alert
     function DataModal(){
         return(
             <div className={modalStyles.modal} >
@@ -152,23 +169,26 @@ export default function CreateRespondent(){
         )
     }
 
-
-
     if(loading) return <Loading />
-
     return(
         <div className={styles.container}>
             {showModal && <DataModal />}
+            <ReturnLink url={'/respondents'} display={'Return to respondents overview'} />
             <h1>Creating a New Respondent</h1>
             {errors.length != 0 &&
                 <div className={errorStyles.errors} ref={alertRef}>
                     <ul>{errors.map((msg)=>
                         <li key={msg}>{msg}</li>)}
                     </ul>
-                    {existing && <Link to={`/respondents/${existing}`}> <p>Click here to view their profile.</p></Link>}
+                    {existing && <Link to={`/respondents/${existing}`}> <strong>Click here to view their profile.</strong></Link>}
                 </div>}
-            
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
+            <DynamicForm 
+                config={formConfig} 
+                onSubmit={handleSubmit} 
+                onCancel={handleCancel} 
+                onError={(e) => setErrors(e)} 
+                saving={saving} 
+            />
         </div>
     )
 }

@@ -3,12 +3,12 @@ import styles from '../../styles/filters.module.css';
 import errorStyles from '../../styles/errors.module.css'
 import { useEffect, useState, useRef, useMemo } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import SimpleSelect from '../reuseables/SimpleSelect';
+import SimpleSelect from '../reuseables/inputs/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
 import { useProjects } from '../../contexts/ProjectsContext';
 import {useOrganizations } from '../../contexts/OrganizationsContext';
 import { useIndicators } from '../../contexts/IndicatorsContext';
-import ComponentLoading from '../reuseables/ComponentLoading';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 
 export default function IndicatorFilters({ onFilterChange }){
     const { projects, setProjects } = useProjects();

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
-import ButtonHover from '../../reuseables/ButtonHover';
+import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 import { Link } from 'react-router-dom';

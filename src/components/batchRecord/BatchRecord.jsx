@@ -1,12 +1,12 @@
 import { useAuth } from '../../contexts/UserAuth';
 import { useState, useEffect, useRef } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import SimpleSelect from '../reuseables/SimpleSelect';
-import Loading from '../reuseables/Loading';
+import SimpleSelect from '../reuseables/inputs/SimpleSelect';
+import Loading from '../reuseables/loading/Loading';
 import errorStyles from '../../styles/errors.module.css';
 import styles from './batchRecord.module.css';
 import ConflictManagerModal from './ConflictManagerModal'
-import ButtonLoading from '../reuseables/ButtonLoading';
+import ButtonLoading from '../reuseables/loading/ButtonLoading';
 
 export default function BatchRecord(){
     const { user } = useAuth();

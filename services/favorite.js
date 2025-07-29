@@ -3,16 +3,25 @@ import fetchWithAuth from "./fetchWithAuth";
 export async function checkFavorited(model, id){
     try {
         console.log('checking favorite status...')
-        const url = `/api/profiles/favorite-${model}s/is-favorited/?id=${id}`;
+        const url = `/api/profiles/users/is-favorited/`;
+        
+        const data = {
+            model: model,
+            id: id,
+        }
 
-        const method = 'POST';
-
-        const response = await fetchWithAuth(url);
+        const response = await fetchWithAuth(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': "application/json",
+            },
+            body: JSON.stringify(data)
+        });
 
         const returnData = await response.json();
 
         if (response.ok) {
-            return returnData.is_favorited
+            return returnData.favorited
         } 
         else {
             const serverResponse = [];
@@ -39,10 +48,10 @@ export async function favorite(model, id, unfavorite = false) {
     try {
         console.log('favoriting object...')
         const url = unfavorite
-        ? `/api/profiles/favorite-${model}s/unfavorite/`
-        : `/api/profiles/favorite-${model}s/`;
+        ? `/api/profiles/users/unfavorite/`
+        : `/api/profiles/users/favorite/`;
 
-        const method = 'POST';
+        const method = unfavorite ? 'DELETE' : 'POST';
 
         const response = await fetchWithAuth(url, {
         method,
@@ -50,30 +59,32 @@ export async function favorite(model, id, unfavorite = false) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            [`${model}_id`]: id,
+            model: model,
+            id: id,
         }),
         });
 
         const returnData = await response.json();
 
         if (response.ok) {
-        return []; // Success, return empty error array
-        } else {
-        const serverResponse = [];
+            return []; // Success, return empty error array
+        } 
+        else {
+            const serverResponse = [];
 
-        for (const field in returnData) {
-            if (Array.isArray(returnData[field])) {
-            returnData[field].forEach((msg) => {
-                serverResponse.push(`${field}: ${msg}`);
-            });
-            } else {
-            serverResponse.push(`${field}: ${returnData[field]}`);
+            for (const field in returnData) {
+                if (Array.isArray(returnData[field])) {
+                returnData[field].forEach((msg) => {
+                    serverResponse.push(`${field}: ${msg}`);
+                });
+                } else {
+                serverResponse.push(`${field}: ${returnData[field]}`);
+                }
             }
+            return serverResponse;
         }
-
-        return serverResponse;
-        }
-    } catch (err) {
+    } 
+    catch (err) {
         console.error('Could not record favorite:', err);
         return ['Something went wrong, please try again later'];
     }

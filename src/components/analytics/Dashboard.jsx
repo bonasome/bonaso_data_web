@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import ComponentLoading from '../reuseables/ComponentLoading';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import IndicatorChart from './IndicatorChart';
 import styles from './dashboard.module.css';
 import { LuPencilLine } from "react-icons/lu";

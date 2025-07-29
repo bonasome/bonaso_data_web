@@ -2,7 +2,6 @@ import Tasks from "../tasks/Tasks";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useProjects } from "../../contexts/ProjectsContext";
-import { useOrganizations } from "../../contexts/OrganizationsContext";
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useAuth } from "../../contexts/UserAuth";
 import IndicatorsIndex from "../indicators/IndicatorsIndex";
@@ -10,17 +9,15 @@ import { MdAssignmentAdd } from "react-icons/md";
 import { IoMdReturnLeft, IoIosArrowDropup, IoIosArrowDropdownCircle, IoIosRemoveCircle } from "react-icons/io";
 import { IoCheckboxSharp } from "react-icons/io5";
 import { FaCirclePlus } from "react-icons/fa6";
-import ButtonHover from '../reuseables/ButtonHover';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
 import styles from './projectDetail.module.css';
-import Loading from "../reuseables/Loading";
+import Loading from "../reuseables/loading/Loading";
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import errorStyles from '../../styles/errors.module.css';
 import { useNavigate, Link } from "react-router-dom";
-import ModelSelect from '../reuseables/ModelSelect';
 import OrganizationsIndex from "../organizations/OrganizationsIndex";
 import { FaAngleDoubleUp } from "react-icons/fa";
 import NarrativeReportDownload from '../narrativeReports/NarrativeReportDownload';
-import { FaCloudUploadAlt } from "react-icons/fa";
 import Targets from "./targets/Targets";
 
 

@@ -7,8 +7,8 @@ import ProjectFilters from './ProjectFilters';
 import IndexViewWrapper from '../reuseables/IndexView';
 import { useProjects } from '../../contexts/ProjectsContext';
 import { Link } from 'react-router-dom';
-import Loading from '../reuseables/Loading';
-import ComponentLoading from '../reuseables/ComponentLoading';
+import Loading from '../reuseables/loading/Loading';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 
 function ProjectCard({ project, callback=null, callbackText }) {
     const [loading, setLoading] = useState(false);

@@ -1,13 +1,14 @@
 import React from 'react';
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
-import Loading from '../reuseables/Loading';
+import Loading from '../reuseables/loading/Loading';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useIndicators } from '../../contexts/IndicatorsContext';
 import DynamicForm from '../reuseables/DynamicForm';
 import indicatorConfig from './indicatorConfig';
 import styles from '../reuseables/dynamicForm.module.css';
 import errorStyles from '../../styles/errors.module.css';
+
 export default function CreateIndicator(){
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);

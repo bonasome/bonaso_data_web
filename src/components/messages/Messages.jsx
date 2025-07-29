@@ -1,17 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
-import Loading from '../reuseables/Loading';
+import Loading from '../reuseables/loading/Loading';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useAuth } from '../../contexts/UserAuth';
 import styles from './messages.module.css';
 import errorStyles from '../../styles/errors.module.css';
-import Checkbox from '../reuseables/Checkbox';
 import { IoIosChatboxes } from "react-icons/io";
 import { MdSupportAgent } from "react-icons/md";
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 import { IoSendSharp, IoPersonAdd, IoPersonRemove } from "react-icons/io5";
-import MultiCheckbox from '../reuseables/MultiCheckbox';
-import ButtonHover from '../reuseables/ButtonHover';
+import MultiCheckbox from '../reuseables/inputs/MultiCheckbox';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
 import prettyDates from '../../../services/prettyDates';
 import { useParams } from 'react-router-dom';
 

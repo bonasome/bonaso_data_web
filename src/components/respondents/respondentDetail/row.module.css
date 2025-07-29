@@ -1,0 +1,10 @@
+.row{
+    background-color: var(--bonaso-uber-dark-accent);
+    padding: 2vh;
+    margin: 2vh;
+    transition: all .6s;
+}
+
+.row:hover{
+    transform: scale(1.06);
+}

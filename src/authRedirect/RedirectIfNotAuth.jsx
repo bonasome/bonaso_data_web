@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/UserAuth';
-import Loading from '../components/reuseables/Loading';
+import Loading from '../components/reuseables/loading/Loading';
 
 const RedirectIfNotAuthenticated = ({ children }) => {
     const { user, loading, loggedIn } = useAuth();

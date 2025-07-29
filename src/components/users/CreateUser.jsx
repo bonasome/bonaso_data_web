@@ -2,8 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useAuth } from '../../contexts/UserAuth';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import userConfig from "./userConfig";
-import UserForm from './UserForm'
-import Loading from '../reuseables/Loading'
+import Loading from '../reuseables/loading/Loading'
 import { useNavigate } from "react-router-dom";
 import styles from '../reuseables/dynamicForm.module.css';
 import { useProfiles } from "../../contexts/ProfilesContext";
@@ -140,7 +139,7 @@ export default function CreateUser(){
         return(
             <div className={styles.container}>
                 <h1>New User</h1>
-                <UserForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
+                <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
             </div>
         )
 }

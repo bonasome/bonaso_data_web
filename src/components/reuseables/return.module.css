@@ -1,0 +1,12 @@
+.return{
+    display: flex;
+    flex-direction: row;
+    margin-top: auto;
+    margin-bottom: auto;
+    border-bottom: 2px solid white;
+}
+.returnIcon{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 3vh;
+}

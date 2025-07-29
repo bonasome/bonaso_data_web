@@ -1,14 +1,14 @@
 import { useAuth } from '../../contexts/UserAuth';
 import { useState, useEffect, useMemo } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import Loading from '../reuseables/Loading';
+import Loading from '../reuseables/loading/Loading';
 import errorStyles from '../../styles/errors.module.css';
 import styles from './narrative.module.css';
 import { useParams, Link } from 'react-router-dom';
-import ButtonLoading from '../reuseables/ButtonLoading';
+import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import { IoMdReturnLeft } from "react-icons/io";
 import { MdCloudUpload } from "react-icons/md";
-import ButtonHover from '../reuseables/ButtonHover';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
 
 export default function NarrativeReportUpload() {
     const { id, orgID } = useParams();

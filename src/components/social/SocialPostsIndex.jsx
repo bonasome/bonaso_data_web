@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useAuth } from '../../contexts/UserAuth'
 import IndexViewWrapper from '../reuseables/IndexView';
-import Loading from '../reuseables/Loading';
-import ComponentLoading from '../reuseables/ComponentLoading';
+import Loading from '../reuseables/loading/Loading';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import { useSocialPosts } from '../../contexts/SocialPostsContext';
 import { Link } from 'react-router-dom';
 

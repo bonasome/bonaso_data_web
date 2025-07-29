@@ -2,7 +2,7 @@ import styles from '../../../styles/modals.module.css';
 import errorStyles from '../../../styles/errors.module.css';
 import { useState } from 'react';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
-import ButtonLoading from '../../reuseables/ButtonLoading';
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
 
 export default function CreateClient({ onCreate, onCancel }){
     const[name, setName] = useState('');

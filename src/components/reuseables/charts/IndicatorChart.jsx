@@ -3,11 +3,11 @@ import fetchWithAuth from '../../../../services/fetchWithAuth';
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
 import monthlyCounts from './monthlyCounts'
 import { useRespondents } from '../../../contexts/RespondentsContext';
-import SimpleSelect from '../SimpleSelect';
-import Checkbox from '../Checkbox';
+import SimpleSelect from '../inputs/SimpleSelect';
+import Checkbox from '../inputs/Checkbox';
 import styles from './chart.module.css';
 import theme from '../../../../theme/theme';
-import ComponentLoading from '../ComponentLoading';
+import ComponentLoading from '../loading/ComponentLoading';
 import autoCounts from './autoCounts';
 
 export default function IndicatorChart({ indicatorID, organizationID=null, projectID=null }) {

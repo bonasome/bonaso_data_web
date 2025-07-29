@@ -1,15 +1,13 @@
 import React from 'react';
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
-import Loading from '../reuseables/Loading';
+import Loading from '../reuseables/loading/Loading';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import DynamicForm from '../reuseables/DynamicForm';
 import postConfig from './postConfig';
 import styles from '../reuseables/dynamicForm.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import { useSocialPosts } from '../../contexts/SocialPostsContext';
-
-
 
 export default function CreateSocialPost(){
     const navigate = useNavigate();

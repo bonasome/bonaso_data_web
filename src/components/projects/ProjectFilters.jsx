@@ -4,10 +4,10 @@ import errorStyles from '../../styles/errors.module.css'
 import { useEffect, useState, useRef } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useAuth } from '../../contexts/UserAuth'
-import SimpleSelect from '../reuseables/SimpleSelect';
+import SimpleSelect from '../reuseables/inputs/SimpleSelect';
 import { FaFilter } from "react-icons/fa6";
 import { useProjects } from '../../contexts/ProjectsContext';
-import ComponentLoading from '../reuseables/ComponentLoading';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import { useIndicators } from '../../contexts/IndicatorsContext';
 import { useOrganizations } from '../../contexts/OrganizationsContext';
 

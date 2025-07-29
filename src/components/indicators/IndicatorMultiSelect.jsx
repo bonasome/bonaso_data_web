@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import IndicatorsIndex from './IndicatorsIndex';
 import styles from '../../styles/indexSelect.module.css';
 import errorStyles from '../../styles/errors.module.css';
-import SimpleSelect from '../reuseables/SimpleSelect';
+import SimpleSelect from '../reuseables/inputs/SimpleSelect';
 
 export default function IndicatorMultiSelect({ title, callbackText, callback, subcats, existing=null }){
     const [warnings, setWarnings] = useState([]);

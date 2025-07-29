@@ -1,21 +1,30 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+
 import { useAuth } from '../../contexts/UserAuth'
+
+import Loading from '../reuseables/loading/Loading'
+
 import styles from './login.module.css';
-import bonasoWhite from '../../assets/bonasoWhite.png'
-import Loading from '../reuseables/Loading'
-import { Link } from 'react-router-dom';
+import bonasoWhite from '../../assets/bonasoWhite.png';
+
+//pull the domain name form env (need this for login since fetchWithAuth may not work)
 const baseUrl = import.meta.env.VITE_API_URL;
+
 export default function Login() {
-    const { refreshAuth } = useAuth();
+    const navigate = useNavigate();
+
+    const { refreshAuth } = useAuth(); //context
+    //page meta
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
+
+    //login states
     const[username, setUsername] = useState('');
     const[password, setPassword] = useState('');
 
-    const navigate = useNavigate();
-
+    //login function to request a token
     const login = async () => {
         setLoading(true);
         try {
@@ -51,7 +60,6 @@ export default function Login() {
     if(loading){
         return <Loading />
     }
-    
     return (
         <div>
             <div className={styles.login}>
@@ -70,7 +78,6 @@ export default function Login() {
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
-                <Link style={{ textAlign: "center", margin: 10 }} to={'/users/reset-password-get'}>Forgot your password?</Link>
                 <div>
                     {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
                 </div>
@@ -78,3 +85,8 @@ export default function Login() {
         </div>
     );
 }
+
+//We don't have a mailing system, but once we do we can insert this link
+/*
+<Link style={{ textAlign: "center", margin: 10 }} to={'/users/reset-password-get'}>Forgot your password?</Link>
+*/

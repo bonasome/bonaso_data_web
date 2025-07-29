@@ -5,7 +5,7 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useAuth } from '../../contexts/UserAuth'
 import UserFilters from './UserFilters';
 import IndexViewWrapper from '../reuseables/IndexView';
-import Loading from '../reuseables/Loading';
+import Loading from '../reuseables/loading/Loading';
 import { Link } from 'react-router-dom';
 import { useProfiles } from "../../contexts/ProfilesContext";
 

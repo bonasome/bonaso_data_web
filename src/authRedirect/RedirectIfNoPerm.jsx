@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/UserAuth';
-import Loading from '../components/reuseables/ComponentLoading';
+import Loading from '../components/reuseables/loading/ComponentLoading';
 
 const RedirectIfNoPerm = ({ children, level=['admin'] }) => {
     const { loading, loggedIn, user } = useAuth();

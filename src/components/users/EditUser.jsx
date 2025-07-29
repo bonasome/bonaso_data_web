@@ -3,10 +3,9 @@ import { useAuth } from '../../contexts/UserAuth';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import userConfig from "./userConfig";
 import DynamicForm from "../reuseables/DynamicForm";
-import Loading from '../reuseables/Loading'
+import Loading from '../reuseables/loading/Loading'
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import UserForm from './UserForm';
 import styles from '../reuseables/dynamicForm.module.css';
 import { useProfiles } from "../../contexts/ProfilesContext";
 import { useProjects } from '../../contexts/ProjectsContext';
@@ -165,7 +164,7 @@ export default function EditUser(){
         return(
             <div className={styles.container}>
                 {existing?.username && <h1>Editing {existing.username}</h1>}
-                <UserForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
+                <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} errors={errors} />
             </div>
         )
 }

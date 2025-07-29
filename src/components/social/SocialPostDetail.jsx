@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useParams } from "react-router-dom";
 import { useSocialPosts } from "../../contexts/SocialPostsContext";
-import ButtonHover from '../reuseables/ButtonHover';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
 import { IoSaveSharp } from 'react-icons/io5';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import errorStyles from '../../styles/errors.module.css';
 import { ImPencil } from 'react-icons/im';
 import { FcCancel } from 'react-icons/fc';
-import ButtonLoading from '../reuseables/ButtonLoading';
-import Loading from '../reuseables/Loading';
+import ButtonLoading from '../reuseables/loading/ButtonLoading';
+import Loading from '../reuseables/loading/Loading';
 import { FaTrashAlt } from 'react-icons/fa';
 import { useAuth } from '../../contexts/UserAuth';
 import ConfirmDelete from '../reuseables/ConfirmDelete';

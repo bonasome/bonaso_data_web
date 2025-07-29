@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
-import Loading from '../reuseables/Loading';
+import Loading from '../reuseables/loading/Loading';
 import DynamicForm from '../reuseables/DynamicForm';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import { useProjects } from '../../contexts/ProjectsContext';

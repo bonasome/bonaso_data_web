@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useAuth } from '../../contexts/UserAuth';
 import fetchWithAuth from "../../../services/fetchWithAuth";
-import Loading from '../reuseables/Loading'
+import Loading from '../reuseables/loading/Loading'
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import styles from './profile.module.css';
 import errorStyles from '../../styles/errors.module.css';
 import { IoMdReturnLeft } from "react-icons/io";
 import AdminResetPassword from '../auth/passwordReset/AdminResetPassword'
-import ProfileChart from '../reuseables/charts/ActivityChart';
 import ActivityChart from "../reuseables/charts/ActivityChart";
 import IndexView from '../reuseables/IndexView';
 import { useProfiles } from '../../contexts/ProfilesContext';

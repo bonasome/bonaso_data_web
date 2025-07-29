@@ -16,14 +16,13 @@ import RedirectIfAuthenticated from '../authRedirect/RedirectIfAuth';
 import RedirectIfNotAuthenticated from '../authRedirect/RedirectIfNotAuth';
 import RedirectIfNoPerm from '../authRedirect/RedirectIfNoPerm';
 
-import ViewOnly from '../components/ViewOnly';
+import ViewOnly from '../components/redirects/ViewOnly';
 //respondents
 import RespondentsLayout from '../layouts/RespondentLayout';
 import RespondentsIndex from '../components/respondents/RespondentsIndex';
 import CreateRespondent from '../components/respondents/CreateRespondent';
 import EditRespondent from '../components/respondents/EditRespondent';
 import RespondentDetail from '../components/respondents/RespondentDetail';
-import FlaggedInteractions from '../components/respondents/interactions/ManageFlags/FlaggedInteractions';
 
 //projects
 import ProjectLayout from '../layouts/ProjectLayout';
@@ -35,7 +34,6 @@ import CreateProject from '../components/projects/CreateProject';
 import EditProject from '../components/projects/EditProject';
 import NarrativeReportUpload from '../components/narrativeReports/NarrativeReportUpload';
 import NarrativeReportDownload from '../components/narrativeReports/NarrativeReportDownload';
-import Targets from '../components/projects/targets/Targets';
 
 import ClientsIndex from '../components/projects/clients/ClientsIndex';
 import ClientDetail from '../components/projects/clients/ClientsDetail';
@@ -56,7 +54,7 @@ import EditIndicator from '../components/indicators/EditIndicator';
 import IndicatorDetail from '../components/indicators/IndicatorDetail';
 
 import Tutorial from '../components/tutorial/Tutorial';
-import NotFound from '../components/NotFound';
+import NotFound from '../components/redirects/NotFound';
 
 import ProfileLayout from '../layouts/ProfileLayout';
 import Profile from '../components/users/Profile';
@@ -68,12 +66,11 @@ import EventDetail from '../components/events/EventDetail';
 import CreateEvent from '../components/events/CreateEvent';
 import EditEvent from '../components/events/EditEvent';
 import EventsIndex from '../components/events/EventsIndex';
-import InteractionFlags from '../components/respondents/interactions/ManageFlags/InteractionFlags';
 
 import Dashboards from '../components/analytics/Dashboards';
 
 import Messages from '../components//messages/Messages';
-import ComposeAnnouncements from '../components/announcements/ComposeAnnouncement';
+import ComposeAnnouncements from '../components/messages/announcements/ComposeAnnouncement';
 import CreateProjectActivity from '../components/projects/activities/CreateProjectActivity';
 import EditProjectActivity from '../components/projects/activities/EditProjectActivity';
 import EditProjectDeadline from '../components/projects/deadlines/EditProjectDeadine';
@@ -109,12 +106,6 @@ function Router() {
             <Route path=':id' element={<RespondentDetail />} />
             <Route path='new' element={<CreateRespondent />} />
             <Route path=':id/edit' element={<EditRespondent />} />
-            <Route path='flagged' element={<FlaggedInteractions />} />
-            <Route path='interaction/:id' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <InteractionFlags />
-                </RedirectIfNoPerm>
-            } />
         </Route>
         
         <Route 

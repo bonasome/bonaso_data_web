@@ -5,10 +5,13 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useAuth } from '../../contexts/UserAuth'
 import IndicatorFilters from './IndicatorFilters';
 import IndexViewWrapper from '../reuseables/IndexView';
-import Loading from '../reuseables/Loading';
-import ComponentLoading from '../reuseables/ComponentLoading';
+import Loading from '../reuseables/loading/Loading';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import { useIndicators } from '../../contexts/IndicatorsContext';
 import { Link } from 'react-router-dom';
+import { initial, filterConfig } from './filterConfig';
+import Filter from '../reuseables/Filter';
+import errorStyles from '../../styles/errors.module.css';
 
 function IndicatorCard({ indicator, callback = null, callbackText }) {
     const [loading, setLoading] = useState(false);
@@ -27,7 +30,6 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
             setActive(found);
             return;
         }
-
         try {
             setLoading(true);
             const response = await fetchWithAuth(`/api/indicators/${indicator.id}/`);
@@ -75,15 +77,35 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
 }
 
 export default function IndicatorsIndex({ callback=null, callbackText='Add Indicator', excludeProject=null, excludeOrg=null, updateTrigger=null }){
-    const { user } = useAuth()
+    const { user } = useAuth();
+    const [errors, setErrors] = useState([]);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-    const { indicators, setIndicators } = useIndicators();
+    const { indicators, setIndicators, indicatorsMeta, setIndicatorsMeta } = useIndicators();
     const [loading, setLoading] = useState(true);
     const [orgFilter, setOrgFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+
+    useEffect(() => {
+        const getMeta = async() => {
+            try {
+                const url = `/api/indicators/meta/`;
+                console.log(url)
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setIndicatorsMeta(data);
+                setLoading(false);
+            } 
+            catch (err) {
+                setErrors(['Something went wrong. Plese try again later.'])
+                console.error('Failed to fetch projects: ', err)
+                setLoading(false)
+            }
+        }
+        getMeta();
+    }, [])
 
     useEffect(() => {
         const loadIndicators = async () => {
@@ -94,8 +116,8 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
                     (statusFilter ? `&status=${statusFilter}` : '') +
                     (excludeProject ? `&exclude_project=${excludeProject}` : '') +
                     (excludeOrg ? `&exclude_organization=${excludeOrg}` : '');
+
                 const url = `/api/indicators/?search=${search}&page=${page}` + filterQuery;
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
@@ -103,7 +125,8 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
                 setLoading(false);
             } 
             catch (err) {
-                console.error('Failed to fetch projects: ', err)
+                console.error('Failed to fetch projects: ', err);
+                setErrors(['Something went wrong. Please try again later.']);
                 setLoading(false)
             }
         };
@@ -121,7 +144,7 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Indicators' : 'My Indicators'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<IndicatorFilters indicators={indicators} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} initial={initial} schema={filterConfig(indicatorsMeta)} />}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <Link to='/indicators/new'><button>Create a New Indicator</button></Link>} 
                 {indicators?.length === 0 ? 

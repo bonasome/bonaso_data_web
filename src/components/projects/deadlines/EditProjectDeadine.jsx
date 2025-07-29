@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import errorStyles from '../../../styles/errors.module.css'
-import Loading from '../../reuseables/Loading';
+import Loading from '../../reuseables/loading/Loading';
 import DynamicForm from '../../reuseables/DynamicForm';
 import fetchWithAuth from "../../../../services/fetchWithAuth";
 import styles from '../../reuseables/dynamicForm.module.css';

@@ -1,20 +1,18 @@
 import React from 'react';
 import { useEffect, useState, useRef } from "react";
-import SimpleSelect from "./SimpleSelect";
-import SimpleDynamicRows from './SimpleDynamicRows';
+import SimpleSelect from "./inputs/SimpleSelect";
+import SimpleDynamicRows from './inputs/SimpleDynamicRows';
 import validate from '../../../services/validate';
 import styles from './dynamicForm.module.css';
-import errorStyles from '../../styles/errors.module.css';
 import { useAuth } from '../../contexts/UserAuth';
-import ButtonLoading from '../reuseables/ButtonLoading';
+import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import ModelSelect from './ModelSelect';
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
 import IndicatorsIndex from '../indicators/IndicatorsIndex';
 import ClientsIndex from '../projects/clients/ClientsIndex';
-import ClientSelect from '../projects/clients/ClientSelect';
 import IndicatorMultiSelect from '../indicators/IndicatorMultiSelect';
-import Checkbox from './Checkbox';
-import MultiCheckbox from './MultiCheckbox';
+import Checkbox from './inputs/Checkbox';
+import MultiCheckbox from './inputs/MultiCheckbox';
 import ModelMultiSelect from './ModelMultiSelect';
 import Tasks from '../tasks/Tasks';
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]

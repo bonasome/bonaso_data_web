@@ -1,26 +1,37 @@
 import React from 'react';
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
-import Loading from '../reuseables/Loading';
-import DynamicForm from '../reuseables/DynamicForm';
-import fetchWithAuth from "../../../services/fetchWithAuth";
-import { useRespondents } from '../../contexts/RespondentsContext';
 import { useParams } from 'react-router-dom';
+
+import { useRespondents } from '../../contexts/RespondentsContext';
+
+import fetchWithAuth from "../../../services/fetchWithAuth";
 import respondentsConfig from './respondentsConfig';
+
+import Loading from '../reuseables/loading/Loading';
+import DynamicForm from '../reuseables/DynamicForm';
+import ReturnLink from '../reuseables/ReturnLink';
+
 import styles from '../reuseables/dynamicForm.module.css';
 import errorStyles from '../../styles/errors.module.css';
 
 
 export default function EditRespondent(){
-    const { id } = useParams();
     const navigate = useNavigate();
-    const [formConfig, setFormConfig] = useState([]);
+    //id param from url
+    const { id } = useParams();
+    //context
+    const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
+
+    //get existing information
+    const [existing, setExisting] = useState(null)
+
+    //page meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const { respondentsMeta, setRespondentsMeta, setRespondentDetails } = useRespondents();
-    const [active, setActive] = useState({});
     const [saving, setSaving] = useState(false);
 
+    //scroll to alerts
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
@@ -29,6 +40,7 @@ export default function EditRespondent(){
         }
     }, [errors]);
 
+    //fetch the meta and the existing details first
     useEffect(() => {
         const getRespondentMeta = async () => {
             if(Object.keys(respondentsMeta).length !== 0){
@@ -42,7 +54,8 @@ export default function EditRespondent(){
                     setRespondentsMeta(data);
                 }
                 catch(err){
-                    console.error('Failed to fetch respondent model information: ', err)
+                    setErrors(['Something went wrong. Please try again later.']);
+                    console.error('Failed to fetch respondent model information: ', err);
                 }
             }
         }
@@ -53,16 +66,15 @@ export default function EditRespondent(){
                 const data = await response.json();
                 if(response.ok){
                     setRespondentDetails(prev => [...prev, data]);
-                    console.log(data)
-                    setActive(data);
+                    setExisting(data);
                     setLoading(false);
                 }
                 else{
                     navigate(`/not-found`);
                 }
-                
             } 
             catch (err) {
+                setErrors(['Something went wrong. Please try again later.'])
                 console.error('Failed to fetch respondent: ', err);
                 setLoading(false);
             } 
@@ -72,17 +84,22 @@ export default function EditRespondent(){
 
     }, [id])
 
-    useEffect(() => {
-        setFormConfig(respondentsConfig(respondentsMeta, active))
-    }, [respondentsMeta, active])
+    //set up form with existing data
+    const formConfig = useMemo(() => {
+        return respondentsConfig(respondentsMeta, existing);
+    }, [respondentsMeta, existing])
 
+    //navigate to detail page on cancel
     const handleCancel = () => {
         navigate(`/respondents/${id}`)
     }
 
+    //handle submission of edits
     const handleSubmit = async(data) => {
             console.log('submitting data...')
-            const submissionErrors = []
+            const submissionErrors = [];
+
+            //clear any hidden fields that may have been entered if switched from anon to not anon or vice versa
             if(data.is_anonymous == ''){
                 data.is_anonymous = false
             }
@@ -108,7 +125,7 @@ export default function EditRespondent(){
             }
             try{
                 setSaving(true);
-                const url = `/api/record/respondents/${active.id}/`; 
+                const url = `/api/record/respondents/${id}/`; 
                 const response = await fetchWithAuth(url, {
                     method: 'PATCH',
                     headers: {
@@ -122,7 +139,7 @@ export default function EditRespondent(){
                         const others = prev.filter(r => r.id !== returnData.id);
                         return [...others, returnData];
                     });
-                    navigate(`/respondents/${returnData.id}`);
+                    navigate(`/respondents/${id}`); //on success, return to detail page
                 }
                 else{
                     const serverResponse = []
@@ -151,7 +168,8 @@ export default function EditRespondent(){
     if(loading) return <Loading />
     return(
         <div className={styles.container}>
-            <h1>Editing Respondent {active.is_anonymous ? active.uuid : (active.first_name + ' ' + active.last_name) }</h1>
+            <ReturnLink url={`/respondents/${id}`} display={'Return to respondent page'} />
+            <h1>Editing Respondent {existing.display_name}</h1>
             {errors.length != 0 &&
                 <div className={errorStyles.errors} ref={alertRef}>
                     <ul>{errors.map((msg)=>
