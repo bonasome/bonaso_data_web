@@ -1,113 +1,59 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useParams } from "react-router-dom";
+
 import { useSocialPosts } from "../../contexts/SocialPostsContext";
-import ButtonHover from '../reuseables/inputs/ButtonHover';
-import { IoSaveSharp } from 'react-icons/io5';
+
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import errorStyles from '../../styles/errors.module.css';
-import { ImPencil } from 'react-icons/im';
-import { FcCancel } from 'react-icons/fc';
+import prettyDates from '../../../services/prettyDates';
+import cleanLabels from '../../../services/cleanLabels';
+
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import Loading from '../reuseables/loading/Loading';
-import { FaTrashAlt } from 'react-icons/fa';
-import { useAuth } from '../../contexts/UserAuth';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
-import prettyDates from '../../../services/prettyDates';
+import FlagModal from '../flags/FlagModal';
+import FlagCard from '../flags/FlagCard';
+import ReturnLink from '../reuseables/ReturnLink';
+import UpdateRecord from '../reuseables/meta/UpdateRecord';
+
 import styles from './postDetail.module.css';
-import { IoMdReturnLeft, IoIosSave, IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
+import errorStyles from '../../styles/errors.module.css';
+
+import { ImPencil } from 'react-icons/im';
+import { FcCancel } from 'react-icons/fc';
+import { IoSaveSharp } from 'react-icons/io5';
+import { FaTrashAlt } from 'react-icons/fa';
+import { IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 import { MdFlag } from 'react-icons/md';
 
-function PostFlag({ flag, post }){
-    const [resolving, setResolving] = useState(false);
-    const [resolveReason, setResolveReason] = useState('');
-    const [errors, setErrors] = useState([])
-    const [flagDetail, setFlagDetail] = useState(flag);
-
-    const resolveFlag = async() => {
-        setErrors([]);
-        if(resolveReason === ''){
-            setErrors(['You must enter a reason for flagging this post.']);
-            return
-        }
-        try {
-            console.log('flagging post...');
-            const response = await fetchWithAuth(`/api/social/posts/${post.id}/resolve-flag/${flag.id}/`, {
-                method: 'PATCH',
-                headers: {
-                        'Content-Type': "application/json",
-                    },
-                body: JSON.stringify({'resolved_reason': resolveReason})
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setFlagDetail(data.flag)
-            } 
-            else {
-                const serverResponse = [];
-                for (const field in data) {
-                    if (Array.isArray(data[field])) {
-                    data[field].forEach(msg => {
-                        serverResponse.push(`${msg}`);
-                    });
-                    } else {
-                    serverResponse.push(`${data[field]}`);
-                    }
-                }
-                setErrors(serverResponse);
-            }
-        } 
-        catch (err) {
-            console.error('Failed to delete organization:', err);
-            setErrors(['Something went wrong. Please try again later.'])
-        }
-        finally{
-            setResolving(false);
-        }
-    }
-    
-    if(!flagDetail) return <></>
-    return(
-        <div>
-            <h2>{flagDetail.reason}</h2>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <p><i>{flagDetail.auto_flagged ? 'Automatically Flagged' : `Flagged by ${flagDetail.created_by.first_name} ${flagDetail.created_by.last_name}`} at {prettyDates(flagDetail.created_at)}</i></p>
-            
-            {resolving && <div>
-                <label for='reason'>Reason Resolved</label>
-                <textarea id='reason' type='text' onChange={(e) => setResolveReason(e.target.value)} value={resolveReason} />
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <ButtonHover callback={() => resolveFlag()} noHover={<IoIosSave />} hover={'Save Flag'} />
-                    <ButtonHover callback={() => setResolving(false)} noHover={<FcCancel />} hover={'Cancel'} />
-                </div>
-            </div>}
-            {flagDetail.resolved && <div>
-                <p><i>Resolved by {flagDetail.auto_resolved ? 'System' : `${flagDetail.resolved_by.first_name} ${flagDetail.resolved_by.last_name}`} at {prettyDates(flagDetail.resolved_at)} </i></p>
-                {flagDetail.resolved_reason && <p>{flagDetail.resolved_reason}</p>}
-            </div>}
-            {!flagDetail.resolved && <ButtonHover callback={() => setResolving(true)} noHover={<IoIosSave />} hover={'Resolve Flag'} />}
-        </div>
-    )
-}
-
 export default function SocialPostDetail(){
-    const { user } = useAuth();
+    //existing post id param
     const { id } = useParams();
-    const [loading, setLoading] = useState(true);
+
+    //context
     const { socialPosts, setSocialPosts } = useSocialPosts();
-    const [editing, setEditing] = useState(false);
-    const [del, setDel] = useState(false);
-    const [post, setPost] = useState(null)
-    const [saving, setSaving] = useState(false);
-    const [errors, setErrors] = useState([]);
+    //current active post
+    const [post, setPost] = useState(null);
+
+    //control flag modals
     const [showFlags, setShowFlags] = useState(false);
     const [flagging, setFlagging] = useState(false);
-    const [flagReason, setFlagReason] = useState('');
+
+    //page meta
+    const [loading, setLoading] = useState(true);
+    const [editing, setEditing] = useState(false);
+    const [del, setDel] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [errors, setErrors] = useState([]);
+    
+    //mini form that can update engagement metrics
     const [formData, setFormData] = useState({
         likes: '',
         views: '',
         comments: '',
     })
 
+    //ref to scroll to errors automatically
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
@@ -116,17 +62,19 @@ export default function SocialPostDetail(){
         }
     }, [errors]);
 
+    //set engagement metric form if any data exists
     useEffect(() => {
         setFormData({
             likes: post?.likes || '',
             views: post?.views || '',
             comments: post?.comments || '',
         })
-    }, [post])
-    console.log(post)
+    }, [post]);
+
+    //get post details
     useEffect(() => {
         const getPostDetails = async () => {
-            const found = socialPosts.find(o => o.id.toString() === id.toString());
+            const found = socialPosts.find(o => o.id.toString() === id.toString()); //try context first
             if (found) {
                 setPost(found);
                 setLoading(false);
@@ -148,6 +96,7 @@ export default function SocialPostDetail(){
                     
                 } 
                 catch (err) {
+                    setErrors(['Something went wrong. Please try again later.'])
                     console.error('Failed to fetch post: ', err);
                 } 
                 finally{
@@ -158,6 +107,7 @@ export default function SocialPostDetail(){
         getPostDetails();
     }, [id]);
 
+    //handle a mini submission of engagement metrics
     const handleUpdate = async() => {
         try{
             console.log('submitting changes...', formData)
@@ -201,51 +151,7 @@ export default function SocialPostDetail(){
         }
     }
 
-    const flagPost = async() => {
-        setErrors([]);
-        if(flagReason === ''){
-            setErrors(['You must enter a reason for flagging this post.']);
-            return
-        }
-        try {
-            console.log('flagging post...');
-            const response = await fetchWithAuth(`/api/social/posts/${id}/raise-flag/`, {
-                method: 'PATCH',
-                headers: {
-                        'Content-Type': "application/json",
-                    },
-                body: JSON.stringify({'reason': flagReason})
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setPost(prev => ({
-                    ...prev,
-                    flags: [...(prev.flags || []), data.flag]
-                }));
-            } 
-            else {
-                const serverResponse = [];
-                for (const field in data) {
-                    if (Array.isArray(data[field])) {
-                    data[field].forEach(msg => {
-                        serverResponse.push(`${msg}`);
-                    });
-                    } else {
-                    serverResponse.push(`${data[field]}`);
-                    }
-                }
-                setErrors(serverResponse);
-            }
-        } 
-        catch (err) {
-            console.error('Failed to delete organization:', err);
-            setErrors(['Something went wrong. Please try again later.'])
-        }
-        finally{
-            setFlagging(false);
-        }
-    }
-
+    //handle deleting a post
     const handleDelete = async() => {
         try {
             console.log('deleting post...');
@@ -287,15 +193,35 @@ export default function SocialPostDetail(){
         }
     } 
 
+    //update when a flag is created
+    const miniFlagUpdate = (data) => {
+        setPost(prev => ({ ...prev, flags: [...(prev.flags || []), data] }));
+        setFlagging(false);
+    }
+
+    //update when a flag is resolved
+    const updateFlag = (data) => {
+        const others = post.flags.filter(f => (f.id != data.id));
+        setPost(prev => ({ ...prev, flags: [...others, data]}));
+    }
+    //helper function that safely adds all metrics to give total engagement (for what its worth)
+    const getEngagement = () => {
+        let likes = isNaN(parseInt(formData.likes)) ? 0 : parseInt(formData.likes)
+        let views = isNaN(parseInt(formData.views)) ? 0 : parseInt(formData.views)
+        let comments = isNaN(parseInt(formData.comments)) ? 0 : parseInt(formData.comments)
+        return likes + views + comments;
+    }
     if(loading) return <Loading />
     return(
         <div>
             {del && <ConfirmDelete name={post.name} onConfirm={() => handleDelete()} onCancel={() => setDel(false)} /> }
+            
+            {flagging && <FlagModal model={'social.socialmediapost'} id={id} 
+                onConfirm={(flag) => miniFlagUpdate(flag)} onCancel={() => setFlagging(false)} 
+            />}
+
             <div className={styles.segment}>
-                <Link to={'/social'} className={styles.return}>
-                    <IoMdReturnLeft className={styles.returnIcon} />
-                    <p>Return to posts overview</p>   
-                </Link>
+                <ReturnLink url={'/social'} display={'Return to social overview'} />
                 <h1>{post.name}</h1>
                 {errors.length != 0 &&
                 <div className={errorStyles.errors} ref={alertRef}>
@@ -305,22 +231,18 @@ export default function SocialPostDetail(){
                 </div>}
                 
                 <div>
-                    <p>On Platform: {post.platform==='other' ? post.other_platform : post.platform}</p>
+                    <p>On Platform: {post.platform==='other' ? post.other_platform : cleanLabels(post.platform)}</p>
                     <p>Published: {post.published_at ? prettyDates(post.published_at) : prettyDates(post.created_at)} </p>
+                    <UpdateRecord created_by={post.created_by} created_at={post.created_at} updated_by={post.updated_by}
+                        updated_at={post.updated_at} 
+                    />
                 </div>
+
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <Link to={`/social/${id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Post Information'} /> </Link>
-                    <ButtonHover callback={() => setFlagging(true)} noHover={<MdFlag />} hover={'Flag Respondent'} forWarning={true} />
+                    <ButtonHover callback={() => setFlagging(true)} noHover={<MdFlag />} hover={'Flag Post'} forWarning={true} />
                     <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Post'} forDelete={true}/>
                 </div>
-                {flagging && <div>
-                    <label for='reason'>Flag Reason</label>
-                    <textarea id='reason' type='text' onChange={(e) => setFlagReason(e.target.value)} value={flagReason} />
-                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <ButtonHover callback={() => flagPost()} noHover={<IoIosSave />} hover={'Save Flag'} />
-                        <ButtonHover callback={() => setFlagging(false)} noHover={<FcCancel />} hover={'Cancel'} />
-                    </div>
-                </div>}
 
                 {post.flags.length > 0 && <div className={styles.dropdownSegment}>
                     <div className={styles.toggleDropdown} onClick={() => setShowFlags(!showFlags)}>
@@ -328,18 +250,14 @@ export default function SocialPostDetail(){
                         {showFlags ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
-                        
+        
                     {showFlags && <div>
                         {post.flags.map((flag) => (
-                            <PostFlag flag={flag} post={post} />))}
+                            <FlagCard flag={flag} onUpdate={(flag) => updateFlag(flag)} />))}
                     </div>}
                 </div>}
-
             </div>
             
-
-
-
             <div className={styles.segment}>
                 <h2>Metrics</h2>
                 {!editing && <div className={styles.metricsTable}>
@@ -353,31 +271,43 @@ export default function SocialPostDetail(){
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{formData.likes}</td>
-                                <td>{formData.views}</td>
-                                <td>{formData.comments}</td>
+                                <td>{formData.likes ==='' ? '-' : formData.likes}</td>
+                                <td>{formData.views === '' ? '-' : formData.views}</td>
+                                <td>{formData.comments === '' ? '-' : formData.comments}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Engagement:</td>
+                                <td>-</td>
+                                <td>{getEngagement()}</td>
                             </tr>
                         </tbody>
                     </table>
-                    <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Metrics'} />
-                </div>}
-                {editing && <div>
 
+                    <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Metrics'} />
+                
+                </div>}
+                
+                {editing && <div>
                     <div>
                         <label>Likes</label>
                         <input type='number' min='0' value={formData.likes} onChange={(e) => setFormData(prev => ({...prev, likes: e.target.value}))} />
                     </div>
+
                     <div>
                         <label>Views</label>
                         <input type='number' min='0' value={formData.views} onChange={(e) => setFormData(prev => ({...prev, views: e.target.value}))} />
                     </div>
+
                     <div>
                         <label>Comments</label>
                         <input type='number' min='0' value={formData.comments} onChange={(e) => setFormData(prev => ({...prev, comments: e.target.value}))} />
                     </div>
-                    {!saving && <ButtonHover callback={() => handleUpdate()} noHover={<IoSaveSharp />} hover={'Save Changes'} />}
-                    <ButtonHover callback={() => setEditing(false)} noHover={<FcCancel />} hover={'Cancel'} />
-                    {saving && <ButtonLoading />}
+
+                    <div style={{ display: 'flex', flexDirection: 'row' }} >
+                        {!saving && <ButtonHover callback={() => handleUpdate()} noHover={<IoSaveSharp />} hover={'Save Changes'} />}
+                        <ButtonHover callback={() => setEditing(false)} noHover={<FcCancel />} hover={'Cancel'} />
+                        {saving && <ButtonLoading />}
+                    </div>
                 </div>}
             </div>
         </div>

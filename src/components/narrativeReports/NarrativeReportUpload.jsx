@@ -1,27 +1,43 @@
-import { useAuth } from '../../contexts/UserAuth';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import Loading from '../reuseables/loading/Loading';
+
+import ReturnLink from '../reuseables/ReturnLink';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
+import ButtonLoading from '../reuseables/loading/ButtonLoading';
+
 import errorStyles from '../../styles/errors.module.css';
 import styles from './narrative.module.css';
-import { useParams, Link } from 'react-router-dom';
-import ButtonLoading from '../reuseables/loading/ButtonLoading';
-import { IoMdReturnLeft } from "react-icons/io";
+
+import { FaFolderOpen } from "react-icons/fa6";
 import { MdCloudUpload } from "react-icons/md";
-import ButtonHover from '../reuseables/inputs/ButtonHover';
+import { IoDocumentTextSharp } from "react-icons/io5";
 
 export default function NarrativeReportUpload() {
+    //params, uses project as root so id is project id and orgID is the specific org.
+    //using parmas lets us avoid forcing the user to manually select
     const { id, orgID } = useParams();
-    const { user } = useAuth();
+
+    //uploaded file object
     const [file, setFile] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState([]);
-    const [success, setSuccess] = useState('');
+    //aditional file info
     const [title, setTitle] = useState('');
     const [desc, setDesc] = useState('');
+
+    //page meta
+    const [errors, setErrors] = useState([]);
+    const [success, setSuccess] = useState('');
     const [uploading, setUploading] = useState(false);
 
+    //helper to upload the file
     const handleChange = (event) => setFile(event.target.files[0]);
+
+    const fileInputRef = useRef();
+
+    const handleFileSelection = () => {
+        fileInputRef.current.click(); // trigger hidden file input
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,17 +45,20 @@ export default function NarrativeReportUpload() {
         setErrors([]);
         setSuccess('');
 
+        //user should upload an actual file
         if (!file){
             setErrors(['Please select a file.']);
             setUploading(false);
             return 
         } 
+        //should also have a title (description is optional)
         if (!title.trim()){
             setErrors(['Please enter a title for this upload.']);
             setUploading(false);
             return 
         } 
 
+        //create and append object to a data mat
         const formData = new FormData();
         formData.append('file', file);
         formData.append('organization', orgID);
@@ -48,6 +67,7 @@ export default function NarrativeReportUpload() {
         formData.append('description', desc);
 
         try {
+            console.log('uploading file...')
             const response = await fetchWithAuth(`/api/uploads/narrative-report/`, {
                 method: 'POST',
                 body: formData,
@@ -73,45 +93,55 @@ export default function NarrativeReportUpload() {
         
     };
 
-    if (loading) return <Loading />;
     return (
         <div className={styles.fileUpload}>
-            <Link to={`/projects/${id}/organizations/${orgID}`} className={styles.return}>
-                <IoMdReturnLeft className={styles.returnIcon} />
-                <p>Return to projects overview</p>   
-            </Link>
+            <ReturnLink url={`/projects/${id}/organizations/${orgID}`} display={'Return to organization page'} />
+            
             <h1>Upload a Narrative Report</h1>
 
-            {errors.length > 0 && (
-                <div className={errorStyles.errors}>
-                    <ul>{errors.map((msg) => <li key={msg}>{msg}</li>)}</ul>
-                </div>
-            )}
+            {errors.length > 0 && <div className={errorStyles.errors}>
+                <ul>{errors.map((msg) => <li key={msg}>{msg}</li>)}</ul>
+            </div>}
+
             {success && <div className={errorStyles.success}><p>{success}</p></div>}
 
             <div className={styles.template}>
                 <form onSubmit={handleSubmit}  noValidate={true}>
                     <div className={styles.form}>
-                    <label htmlFor="title">Upload Title</label>
-                    <input
-                        type="text"
-                        name="title"
-                        id="title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                    />
+                        <label htmlFor="title">Upload Title</label>
+                        <input
+                            type="text"
+                            name="title"
+                            id="title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            required
+                        />
 
-                    <label htmlFor="description">Upload Description</label>
-                    <textarea
-                        className={styles.desc}
-                        name="description"
-                        id="description"
-                        value={desc}
-                        onChange={(e) => setDesc(e.target.value)}
-                    />
+                        <label htmlFor="description">Upload Description</label>
+                        <textarea
+                            className={styles.desc}
+                            name="description"
+                            id="description"
+                            value={desc}
+                            onChange={(e) => setDesc(e.target.value)}
+                        />
+                        {!file && <button onClick={handleFileSelection}  type="button" style={{ maxWidth: 140}}>
+                            <FaFolderOpen />
+                            Upload File
+                        </button>}
 
-                    <input type="file" accept=".pdf,.doc,.docx" onChange={handleChange} />
+                        {file && <button className={styles.selectedFile} type="button">
+                            <div className={styles.selectedFileText}> <IoDocumentTextSharp /> {file.name}</div>
+                        </button>}
+                        
+                        <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            style={{ display: 'none' }} 
+                            accept=".pdf,.doc,.docx"
+                            onChange={handleChange}
+                        />
                     <div className={styles.buttons}>
                         {uploading ? 
                             <ButtonLoading /> : 

@@ -6,13 +6,12 @@ import Checkbox from './inputs/Checkbox';
 import { FaFilter } from "react-icons/fa6";
 import ButtonHover from '../reuseables/inputs/ButtonHover';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
-
+import cleanLabels from '../../../services/cleanLabels';
 
 export default function Filter({ onFilterChange, initial, schema }){
-    const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState(initial || {})
     const [showFilters, setShowFilters] = useState(false);
-    const [errors, setErrors] = useState([])
+
     const containerRef = useRef(null);
 
     useEffect(() => {
@@ -36,6 +35,8 @@ export default function Filter({ onFilterChange, initial, schema }){
         setFilters(initial);
         onFilterChange(initial);
     }
+
+    
     if(!initial || !schema ) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
@@ -43,18 +44,24 @@ export default function Filter({ onFilterChange, initial, schema }){
             {showFilters && (
                 <div className={styles.filters}>
                         {schema.map((field) => {
+                            //get label or default to name (name is required)
+                            const label = field?.label ?? cleanLabels(field.name);
                             if(field.type === 'select'){
-                                return <SimpleSelect key={field.name} name={field.name} label={field.label} 
+                                return <SimpleSelect key={field.name} name={field.name} label={label} 
                                     optionValues={field.constructors.values} optionLabels={field.constructors.labels}
                                     callback={(val) => setFilters(prev => ({...prev, [field.name]: val}))}
+                                    search={field.constructors.search} searchCallback={field.constructors.searchCallback}
                                     value={filters[field.name]}
                                 />
                             } 
                             if(field.type === 'date'){
                                 return(
                                     <div key={field.name}>
-                                        <label htmlFor={field.name}></label>
-                                        <input type='date' id={field.name} callback={(e) => setFilters(prev => ({...prev, [field.name]: e.target.value}))} value={filters[field.name]} />
+                                        <label htmlFor={field.name}>{label}</label>
+                                        <input type='date' id={field.name} 
+                                            onChange={(e) => setFilters(prev => ({...prev, [field.name]: e.target.value}))} 
+                                            value={filters[field.name]} 
+                                        />
                                     </div>
                                 )
                             }

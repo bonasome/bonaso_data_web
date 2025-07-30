@@ -7,7 +7,7 @@ function Row({ row, onCollect, onRemove, index, count }) {
     const [value, setValue] = useState(row.value);
     const [id, setID] = useState(row?.id || null);
     const [deprecated, setDeprecated] = useState(false)
-    console.log(deprecated)
+
   // Register a collector function with the parent
     useEffect(() => {
         onCollect(() => {

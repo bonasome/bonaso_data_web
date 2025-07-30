@@ -3,7 +3,7 @@ import styles from '../../styles/indexView.module.css'
 import { useEffect, useState } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useAuth } from '../../contexts/UserAuth'
-import ProjectFilters from './ProjectFilters';
+import Filter from '../reuseables/Filter';
 import IndexViewWrapper from '../reuseables/IndexView';
 import { useProjects } from '../../contexts/ProjectsContext';
 import { Link } from 'react-router-dom';
@@ -65,22 +65,18 @@ export default function ProjectsIndex({callback=null, callbackText='Select Proje
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-    const { projects, setProjects } = useProjects();
+    const { projects, setProjects, setProjectsMeta, projectsMeta } = useProjects();
     const [loading, setLoading] = useState(true);
-    const [startFilter, setStartFilter] = useState('');
-    const [endFilter, setEndFilter] = useState('');
-    const [clientFilter, setClientFilter] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
-    const [orgFilter, setOrgFilter] = useState('')
+    const [filters, setFilters] = useState(initial);
+
     useEffect(() => {
         const loadProjects = async () => {
             try {
                 const filterQuery = 
-                    (startFilter ? `&start=${startFilter}` : '') + 
-                    (endFilter ? `&end=${endFilter}` : '') + 
-                    (clientFilter ? `&client=${clientFilter}` : '') + 
-                    (statusFilter ? `&status=${statusFilter}` : '') +
-                    (orgFilter ? `&organizations=${orgFilter}` : '');
+                    (filters.start ? `&start=${filters.start}` : '') + 
+                    (filters.end ? `&end=${filters.end}` : '') + 
+                    (filters.status ? `&status=${filters.status}` : '');
+
                 const url = `/api/manage/projects/?search=${search}&page=${page}` + filterQuery;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
@@ -98,21 +94,37 @@ export default function ProjectsIndex({callback=null, callbackText='Select Proje
             }
         };
         loadProjects();
-    }, [page, search, endFilter, startFilter, clientFilter, statusFilter, orgFilter]);
+    }, [page, search, filters]);
 
-    const setFilters = (filters) => {
-        setStartFilter(filters.filter);
-        setEndFilter(filters.end);
-        setClientFilter(filters.client)
-        setStatusFilter(filters.status)
-        setOrgFilter(filters.organization)
-    }
-
+    useEffect(() => {
+            const getProjectMeta = async () => {
+                if(Object.keys(projectsMeta).length !== 0){
+                    setLoading(false)
+                    return;
+                }
+                else{
+                    try{
+                        console.log('fetching model info...')
+                        const response = await fetchWithAuth(`/api/manage/projects/meta/`);
+                        const data = await response.json();
+                        setProjectsMeta(data);
+                        setLoading(false);
+                    }
+                    catch(err){
+                        console.error('Failed to fetch projects: ', err)
+                        setLoading(false)
+                    }
+    
+                }
+            }
+            getProjectMeta();
+        }, []);
+        
     if(loading) return callback ? <ComponentLoading /> :  <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Projects' : 'My Projects'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<ProjectFilters onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter onFilterChange={setFilters} schema={filterConfig(projectsMeta)} />}>
                 {user.role == 'admin' && <Link to='/projects/new'><button>Create New Project</button></Link>}
                 
                 {(projects && projects?.length) == 0 ? 

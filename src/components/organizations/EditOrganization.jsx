@@ -10,22 +10,21 @@ import styles from '../reuseables/dynamicForm.module.css';
 import organizationConfig from './organizationConfig';
 import { useAuth } from '../../contexts/UserAuth';
 import errorStyles from '../../styles/errors.module.css';
+import ReturnLink from '../reuseables/ReturnLink';
 
 export default function EditOrganization(){
-    const { user } = useAuth();
     const navigate = useNavigate();
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const { organizations, setOrganizations, organizationDetails, setOrganizationDetails } = useOrganizations();
+    const { organizationDetails, setOrganizationDetails } = useOrganizations();
     const [existing, setExisting] = useState({})
     const [orgIDs, setOrgIDs] = useState([]);
     const [orgNames, setOrgNames] = useState([]);
-    const [search, setSearch] = useState('');
     const [saving, setSaving] = useState(false);
 
+    //scroll to errors
     const alertRef = useRef(null);
-
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
         alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -33,33 +32,10 @@ export default function EditOrganization(){
         }
     }, [errors]);
 
+    //fetch existing details
     useEffect(() => {
-        const getOrganizations = async () => {
-            try{
-                console.log('fetching organizations...')
-                const response = await fetchWithAuth(`/api/organizations/?search=${search}`);
-                const data = await response.json();
-                if(organizations.length > 0){
-                    const ids = organizations.filter(o => o.id.toString() != id.toString()).map((o) => o.id);
-                    const names= organizations.filter(o => o.id.toString() != id.toString()).map((o)=> o.name);
-                    setOrgIDs(ids);
-                    setOrgNames(names);
-                }
-                setOrganizations(data.results);
-                setLoading(false)
-            }
-            catch(err){
-                console.error('Failed to fetch organizations: ', err)
-                setLoading(false)
-            }
-        }
-        getOrganizations();
-        
         const getOrganizationDetails = async () => {
-            setLoading(true);
-            const found = organizationDetails.find(
-                (o) => o?.id?.toString?.() === id?.toString?.()
-            );
+            const found = organizationDetails.find((o) => o?.id?.toString?.() === id?.toString?.());
             if (found) {
                 setExisting(found);
                 setLoading(false);
@@ -82,26 +58,29 @@ export default function EditOrganization(){
                 } 
                 catch (err) {
                     console.error('Failed to fetch organization: ', err);
+                    setErrors(['Something went wrong. Please try again later']);
                     setLoading(false);
                 } 
             }
         };
         getOrganizationDetails();
+    }, [id])
 
-    }, [id, search])
-
+    //setup form config with existing data
     const formConfig = useMemo(() => {
-            return organizationConfig(orgIDs, orgNames, (val) => setSearch(val), user.role, existing);
-        }, [orgIDs, orgNames, existing]);
-
+        return organizationConfig(existing);
+    }, [orgIDs, orgNames, existing]);
+    
+    //redirect to detail page
     const handleCancel = () => {
         navigate(`/organizations/${id}`)
     }
 
+    //handle submission
     const handleSubmit = async(data) => {
-        console.log('submitting data...')
         try{
             setSaving(true);
+            console.log('submitting data...');
             const response = await fetchWithAuth(`/api/organizations/${id}/`, {
                 method: 'PATCH',
                 headers: {
@@ -133,6 +112,7 @@ export default function EditOrganization(){
             }
         }
         catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
             console.error('Could not record organization: ', err)
         }
         finally{
@@ -141,10 +121,10 @@ export default function EditOrganization(){
     }
 
     if(loading) return <Loading />
-
     return(
         <div className={styles.container}>
             <h1>Editing Details for Organization {organizationDetails.name}</h1>
+            <ReturnLink url={`/organizations/${id}`} display={'Return to organization page'} />
             {errors.length != 0 &&
             <div className={errorStyles.errors} ref={alertRef}>
                 <ul>{errors.map((msg)=>

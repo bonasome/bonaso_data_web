@@ -2,11 +2,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { setupServer } from 'msw/node';
-import { handlers } from '../../mocks/handlers';
-import { OrganizationsProvider } from '../../contexts/OrganizationsContext';
-import { UserAuth } from '../../contexts/UserAuth';
-import EditOrganization from './EditOrganization';
-import OrganizationDetail from './OrganizationDetail';
+import { handlers } from '../../../mocks/handlers';
+import { OrganizationsProvider } from '../../../contexts/OrganizationsContext';
+import { UserAuth } from '../../../contexts/UserAuth';
+import EditOrganization from '../EditOrganization';
+import OrganizationDetail from '../OrganizationDetail';
 import userEvent from '@testing-library/user-event';;
 
 const navigateMock = vi.fn();

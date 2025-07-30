@@ -3,12 +3,12 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest';
 import { MemoryRouter, Routes, Route, useLocation, BrowserRouter } from 'react-router-dom';
 import { setupServer } from 'msw/node';
-import { handlers } from '../../mocks/handlers';
-import { ProjectProvider } from '../../contexts/ProjectsContext';
-import { OrganizationsProvider } from '../../contexts/OrganizationsContext';
-import { UserAuth } from '../../contexts/UserAuth';
-import OrganizationsIndex from './OrganizationsIndex';
-import OrganizationDetail from './OrganizationDetail';
+import { handlers } from '../../../mocks/handlers';
+import { ProjectProvider } from '../../../contexts/ProjectsContext';
+import { OrganizationsProvider } from '../../../contexts/OrganizationsContext';
+import { UserAuth } from '../../../contexts/UserAuth';
+import OrganizationsIndex from '../OrganizationsIndex';
+import OrganizationDetail from '../OrganizationDetail';
 const navigateMock = vi.fn();
 vi.mock('react-router-dom', async () => {
     const mod = await vi.importActual('react-router-dom');

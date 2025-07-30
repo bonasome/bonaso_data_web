@@ -1,22 +1,31 @@
 import React from 'react';
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
-import Loading from '../reuseables/loading/Loading';
+
+import { useSocialPosts } from '../../contexts/SocialPostsContext';
+
 import fetchWithAuth from "../../../services/fetchWithAuth";
-import DynamicForm from '../reuseables/DynamicForm';
 import postConfig from './postConfig';
+
+import Loading from '../reuseables/loading/Loading';
+import DynamicForm from '../reuseables/DynamicForm';
+import ReturnLink from '../reuseables/ReturnLink';
+
 import styles from '../reuseables/dynamicForm.module.css';
 import errorStyles from '../../styles/errors.module.css';
-import { useSocialPosts } from '../../contexts/SocialPostsContext';
+
 
 export default function CreateSocialPost(){
     const navigate = useNavigate();
+    //context
+    const { setSocialPosts, socialPostsMeta, setSocialPostsMeta } = useSocialPosts();
+
+    //page meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const { setSocialPosts, socialPostsMeta, setSocialPostsMeta } = useSocialPosts();
-    const [search, setSearch] = useState('')
     const [saving, setSaving] = useState(false);
 
+    //ref to scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
@@ -25,6 +34,7 @@ export default function CreateSocialPost(){
         }
     }, [errors]);
 
+    //retrieve the meta (for platforms)
     useEffect(() => {
         const getMeta = async() => {
             if(Object.keys(socialPostsMeta).length != 0){
@@ -34,11 +44,12 @@ export default function CreateSocialPost(){
             else{
                 try{
                     console.log('fetching model info...')
-                    const response = await fetchWithAuth(`/api/social/posts/get-meta/`);
+                    const response = await fetchWithAuth(`/api/social/posts/meta/`);
                     const data = await response.json();
                     setSocialPostsMeta(data);
                 }
                 catch(err){
+                    setErrors(['Something went wrong. Please try again later.']);
                     console.error('Failed to fetch posts meta: ', err)
                 }
                 finally{
@@ -49,22 +60,25 @@ export default function CreateSocialPost(){
         getMeta();
     }, []);
 
+    //set up the form
     const formConfig = useMemo(() => {
-        return postConfig(socialPostsMeta, (val) => setSearch(val));
+        return postConfig(socialPostsMeta);
     }, [socialPostsMeta]);
 
+    //redirect on cancel
     const handleCancel = () => {
         navigate('/social')
     }
 
-    const handleSubmit = async(data) => {
-        const names = data.subcategory_data
-        let commas = []
+    //handle form submission
+    const handleSubmit = async(data, createAnother) => {
+        //tasks sends objects by default, so convert to just the id
         if(data.task_ids.length > 0) {
             data.task_ids = data.task_ids.map(task => (task.id))
         }
-        console.log('submitting data...')
+        
         try{
+            console.log('submitting data...');
             setSaving(true);
             const response = await fetchWithAuth('/api/social/posts/', {
                 method: 'POST',
@@ -76,7 +90,13 @@ export default function CreateSocialPost(){
             const returnData = await response.json();
             if(response.ok){
                 setSocialPosts(prev => [...prev, returnData])
-                navigate(`/social/${returnData.id}`);
+                if(createAnother){
+                    navigate(`/social/new`);
+                }
+                else{
+                    navigate(`/social/${returnData.id}`);
+                }
+                
             }
             else{
                 const serverResponse = []
@@ -103,17 +123,18 @@ export default function CreateSocialPost(){
     }
 
     if(loading) return <Loading />
-
     return(
         <div className={styles.container}>
+            <ReturnLink url={'/social'} display={'Return to social overview'} />
             <h1>New Social Media Post</h1>
-            {errors.length != 0 &&
-                <div className={errorStyles.errors} ref={alertRef}>
-                    <ul>{errors.map((msg)=>
-                        <li key={msg}>{msg}</li>)}
-                    </ul>
-                </div>}
-            <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} />
+            {errors.length != 0 && <div className={errorStyles.errors} ref={alertRef}>
+                <ul>{errors.map((msg)=>
+                    <li key={msg}>{msg}</li>)}
+                </ul>
+            </div>}
+            <DynamicForm config={formConfig} onSubmit={handleSubmit} createAnother={true}
+                onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} 
+            />
         </div>
     )
 }

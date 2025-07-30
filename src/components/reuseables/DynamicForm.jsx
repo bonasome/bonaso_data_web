@@ -10,22 +10,23 @@ import ModelSelect from './ModelSelect';
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
 import IndicatorsIndex from '../indicators/IndicatorsIndex';
 import ClientsIndex from '../projects/clients/ClientsIndex';
-import IndicatorMultiSelect from '../indicators/IndicatorMultiSelect';
 import Checkbox from './inputs/Checkbox';
 import MultiCheckbox from './inputs/MultiCheckbox';
 import ModelMultiSelect from './ModelMultiSelect';
+
 import Tasks from '../tasks/Tasks';
+import IndicatorPrereqLogic from '../indicators/IndicatorPrereqLogic';
+import ImgSelect from './inputs/ImgSelect';
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]
 export default function DynamicForm({ config, onSubmit, onCancel, onError, saving, createAnother=false }){
     const { user } = useAuth();
     const [formData, setFormData] = useState({})
-    const [errors, setErrors] = useState([])
     const [switchpath, setSwitchpath] = useState(false);
     const [switchpath2, setSwitchpath2] = useState(false);
     const [switchpath3, setSwitchpath3] = useState(false);
     const [retrigger, setRetrigger] = useState(0);
     const rowRefs = useRef({});
-    
+
     useEffect(() => {
         const struct = {};
         config.forEach(field => {
@@ -54,7 +55,7 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
         });
         setFormData(struct);
     }, [config, retrigger]);
-    
+
     const handleSubmit = (e) => {
         let newErrors = []
         e.preventDefault();
@@ -224,15 +225,13 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                             </div>
                         )
                     }
-                    else if(field.type === 'multi-indicators'){
+                    else if(field.type === 'indicator-prereq'){
                         return(
                             <div className={styles.field}>
-                                <IndicatorMultiSelect title={field.label} existing={field.value} callbackText={field.callbackText}
-                                    subcats={true} exisitingFollowUp={field.followUpValue}
-                                    callback={(sel, setPath, fuv) => {setFormData(prev=>({...prev, [field.name]: sel || null, [field.followUp]: fuv || null })); 
-                                        setPath ? setSwitchpath3(setPath) : setSwitchpath3(false)
-                                    }} 
-                                /> 
+                                <IndicatorPrereqLogic existing={field.value} callback={(inds, match) => {
+                                    setFormData(prev=>({...prev, prerequisite_ids: inds || [], match_subcategories_to: match || null}));
+                                    setSwitchpath3(match ? true : false);}}
+                                />
                             </div>
                         )
                     }
@@ -254,6 +253,16 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
                         return(
                             <div className={styles.field}>
                                 <ModelSelect IndexComponent={ClientsIndex} title={field.label} existing={field.value} callbackText={field?.callbackText || 'Select Client'} callback={(cl) => setFormData(prev=>({...prev, [field.name]: cl?.id || null }))} /> 
+                            </div>
+                        )
+                    }
+                    else if(field.type == 'image'){
+                        return(
+                            <div className={styles.field}>
+                                <ImgSelect title={field.label} config={field.constructors} existing={field.value} multiple={field?.constructors?.multiple ?? false} 
+                                    callback={(val) => {setFormData(prev => ({ ...prev, [field.name]: val || []}));
+                                        setSwitchpath(val===field.switchpath);}}
+                                />
                             </div>
                         )
                     }

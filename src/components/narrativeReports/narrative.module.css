@@ -47,21 +47,13 @@
     justify-content: space-between;
 }
 
-.return{
+.selectedFile {
+    max-width: 20vh;
+}
+.selectedFileText{
     display: flex;
     flex-direction: row;
-    margin-top: auto;
-    margin-bottom: auto;
-    border-bottom: 2px solid white;
-    background-color: var(--bonaso-dark-accent);
-    padding-top: 1vh;
-    padding-bottom: 1vh;
-    padding-left: 5vh;
-}
-.returnIcon{
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-right: 3vh;
+    text-overflow: ellipsis;
 }
 
 

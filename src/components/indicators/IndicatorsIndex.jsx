@@ -1,33 +1,48 @@
 import React from 'react';
-import styles from '../../styles/indexView.module.css'
-import { useEffect, useState } from 'react';
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import { useEffect, useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
+
 import { useAuth } from '../../contexts/UserAuth'
-import IndicatorFilters from './IndicatorFilters';
+import { useIndicators } from '../../contexts/IndicatorsContext';
+
+import { initial, filterConfig } from './filterConfig';
+import fetchWithAuth from '../../../services/fetchWithAuth';
+
 import IndexViewWrapper from '../reuseables/IndexView';
 import Loading from '../reuseables/loading/Loading';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
-import { useIndicators } from '../../contexts/IndicatorsContext';
-import { Link } from 'react-router-dom';
-import { initial, filterConfig } from './filterConfig';
 import Filter from '../reuseables/Filter';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
+
+import styles from '../../styles/indexView.module.css'
 import errorStyles from '../../styles/errors.module.css';
 
+import { MdAddToPhotos } from "react-icons/md";
+import { ImPencil } from 'react-icons/im';
+import { GiJumpAcross } from "react-icons/gi";
+
 function IndicatorCard({ indicator, callback = null, callbackText }) {
-    const [loading, setLoading] = useState(false);
+    //context
     const { indicatorDetails, setIndicatorDetails } = useIndicators();
+    //state that stores the actual full indicator object, not just the highlights passed from the index query
     const [active, setActive] = useState(null);
+
+    //card meta
+    const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
-    
+    const [errors, setErrors] = useState([]);
+
+    //on click, expand the card and fetch the details
     const handleClick = async () => {
         const willExpand = !expanded;
         setExpanded(willExpand);
 
         if (!willExpand) return;
-
+        //try fetching from context
         const found = indicatorDetails.find(ind => ind.id === indicator.id);
         if (found) {
             setActive(found);
+            setLoading(false);
             return;
         }
         try {
@@ -36,19 +51,19 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
             const data = await response.json();
             setIndicatorDetails(prev => [...prev, data]);
             setActive(data);
-            setLoading(false);
-        } catch (err) {
+        } 
+        catch (err) {
             console.error('Failed to fetch indicators: ', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
             setLoading(false);
         }
     };
 
     return (
-        <div
-            className={expanded ? styles.expandedCard : styles.card}
-            onClick={handleClick}
-        >
-            <Link to={`/indicators/${indicator.id}`} style={{display:'flex', width:"fit-content"}}><h2>{indicator.code}: {indicator.name}</h2></Link>
+        <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
+            <Link to={`/indicators/${indicator.id}`} style={{display:'flex', width:"fit-content"}}><h2>{indicator.display_name}</h2></Link>
             {callback && (
                 <button type="button" onClick={(e) => { e.stopPropagation(); callback(indicator); }}>
                     {callbackText}
@@ -56,41 +71,64 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
             )}
             {expanded && loading && <ComponentLoading />}
             {expanded && active && (
-                <>
-                    <p>{active.description}</p>
+                <div>
+                    {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                    {active.description ? <p>{active.description}</p> : <p><i>No description.</i></p>}
                     {active.prerequisites?.length > 0 && <div>
                         <p>Prerequisites: </p>
                         <ul>
-                            {active.prerequisites.map((p) => (<li>{p.code}: {p.name}</li>))}
+                            {active.prerequisites.map((p) => (<li>{p.display_name}</li>))}
                         </ul>
                     </div>}
-                    <Link to={`/indicators/${indicator.id}`}>
-                        <button onClick={(e) => e.stopPropagation()}>View Details</button>
-                    </Link>
-                    <Link to={`/indicators/${indicator.id}/edit`}>
-                        <button onClick={(e) => e.stopPropagation()}>Edit Details</button>
-                    </Link>
-                </>
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <Link to={`/indicators/${indicator.id}`}>
+                            <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} />
+                        </Link>
+                        <Link to={`/indicators/${indicator.id}/edit`}>
+                            <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} />
+                        </Link>
+                    </div>
+                </div>
             )}
         </div>
     );
 }
 
 export default function IndicatorsIndex({ callback=null, callbackText='Add Indicator', excludeProject=null, excludeOrg=null, updateTrigger=null }){
+    /*
+    Callback: A function that can pass the details of a specific entry to another component. Useful for model selects.
+    Callback Text: Text to display on callback button.
+    Update Trigger: Update the query in the event that a param changes (add or remove entries).
+    */
+    
+    //contexts
     const { user } = useAuth();
+    const { indicators, setIndicators, indicatorsMeta, setIndicatorsMeta } = useIndicators();
+
+    //page meta
     const [errors, setErrors] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    //information for indexing
+    const [filters, setFilters] = useState(initial);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
-    const [entries, setEntries] = useState(0);
-    const { indicators, setIndicators, indicatorsMeta, setIndicatorsMeta } = useIndicators();
-    const [loading, setLoading] = useState(true);
-    const [orgFilter, setOrgFilter] = useState('');
-    const [projectFilter, setProjectFilter] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
+    const [entries, setEntries] = useState(0); //total number of entries for calculating number of pages
 
+    //ref to scroll to errors automatically
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
+    
+    //retrieve the meta
     useEffect(() => {
         const getMeta = async() => {
             try {
+                console.log('fetching meta...')
                 const url = `/api/indicators/meta/`;
                 console.log(url)
                 const response = await fetchWithAuth(url);
@@ -105,15 +143,17 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
             }
         }
         getMeta();
-    }, [])
+    }, []);
 
+    //load the list of indicators, refresh on search/filter/page changes
     useEffect(() => {
         const loadIndicators = async () => {
             try {
+                console.log('fetching indicators...');
+                //append any filter query
                 const filterQuery = 
-                    (orgFilter ? `&organization=${orgFilter}` : '') +
-                    (projectFilter ? `&project=${projectFilter}` : '') + 
-                    (statusFilter ? `&status=${statusFilter}` : '') +
+                    (filters.status ? `&status=${filters.status}` : '') +
+                    (filters.indicator_type ? `&indicator_type=${filters.indicator_type}` : '') +
                     (excludeProject ? `&exclude_project=${excludeProject}` : '') +
                     (excludeOrg ? `&exclude_organization=${excludeOrg}` : '');
 
@@ -122,34 +162,31 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
                 const data = await response.json();
                 setEntries(data.count);
                 setIndicators(data.results);
-                setLoading(false);
             } 
             catch (err) {
-                console.error('Failed to fetch projects: ', err);
+                console.error(err);
                 setErrors(['Something went wrong. Please try again later.']);
-                setLoading(false)
             }
         };
         loadIndicators();
-    }, [page, search, orgFilter, projectFilter, statusFilter, updateTrigger]);
+    }, [page, search, filters, updateTrigger]);
 
-    const setFilters = (filters) => {
-        setOrgFilter(filters.organization);
-        setProjectFilter(filters.project);
-        setStatusFilter(filters.status);
-        setPage(1);
-    }
-    //const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
-    if(loading) return callback ? <ComponentLoading /> : <Loading />
+
+    if(loading || !indicators) return callback ? <ComponentLoading /> : <Loading /> //on callback don't show full load
+
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Indicators' : 'My Indicators'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} initial={initial} schema={filterConfig(indicatorsMeta)} />}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
+                filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} 
+                initial={initial} schema={filterConfig(indicatorsMeta)} 
+            />}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
-                <Link to='/indicators/new'><button>Create a New Indicator</button></Link>} 
-                {indicators?.length === 0 ? 
+                <Link to='/indicators/new'><button><MdAddToPhotos />  Create a New Indicator</button></Link>} 
+                {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                {indicators.length === 0 ? 
                     <p>No indicators match your criteria.</p> :
-                    indicators?.map(ind => (
+                    indicators.map(ind => (
                         <IndicatorCard key={ind.id} indicator={ind} callback={callback ? (indicator)=> callback(indicator) : null} callbackText={callbackText} />)
                     )
                 }

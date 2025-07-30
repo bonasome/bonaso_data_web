@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { server } from '../../mocks/server'
-import { parentOrgDetail } from '../../mocks/handlerHelpers/organizationsHandler';
-import { getProjectDetail } from '../../mocks/handlerHelpers/projectHandler';
-import NarrativeReportDownload from './NarrativeReportDownload';
-import { MockUserAuthProvider } from '../../mocks/utils/UserAuth';
+import { server } from '../../../mocks/server'
+import { parentOrgDetail } from '../../../mocks/handlerHelpers/organizationsHandler';
+import { getProjectDetail } from '../../../mocks/handlerHelpers/projectHandler';
+import NarrativeReportDownload from '../NarrativeReportDownload';
+import { MockUserAuthProvider } from '../../../mocks/utils/UserAuth';
 
 const renderWithContext = () =>
   render(

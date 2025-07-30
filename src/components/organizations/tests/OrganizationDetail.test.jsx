@@ -1,8 +1,8 @@
 import { render, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { UserAuth } from '../../contexts/UserAuth';
-import { OrganizationsProvider } from '../../contexts/OrganizationsContext';
-import OrganizationDetail from './OrganizationDetail';
+import { UserAuth } from '../../../contexts/UserAuth';
+import { OrganizationsProvider } from '../../../contexts/OrganizationsContext';
+import OrganizationDetail from '../OrganizationDetail';
 import { screen, waitFor } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 

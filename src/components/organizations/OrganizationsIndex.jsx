@@ -1,21 +1,40 @@
 import React from 'react';
-import styles from '../../styles/indexView.module.css'
-import { useEffect, useState, useMemo } from 'react';
-import fetchWithAuth from '../../../services/fetchWithAuth';
-import { useAuth } from '../../contexts/UserAuth'
-import OrganizationFilters from './OrganizationFilters';
-import IndexViewWrapper from '../reuseables/IndexView';
-import { useOrganizations } from '../../contexts/OrganizationsContext';
+
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
+
+import { useAuth } from '../../contexts/UserAuth'
+import { useOrganizations } from '../../contexts/OrganizationsContext';
+import { useProjects } from '../../contexts/ProjectsContext';
+
+import fetchWithAuth from '../../../services/fetchWithAuth';
+import { initial, filterConfig } from './filterConfig';
+
+import IndexViewWrapper from '../reuseables/IndexView';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import Loading from '../reuseables/loading/Loading';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
+import Filter from '../reuseables/Filter';
 
-function OrganizationCard({ org, callback = null, callbackText }) {
-    const [loading, setLoading] = useState(false);
+import styles from '../../styles/indexView.module.css'
+import errorStyles from '../../styles/errors.module.css';
+import { ImPencil } from 'react-icons/im';
+import { GiJumpAcross } from 'react-icons/gi';
+import { BsBuildingFillAdd } from "react-icons/bs";
+
+function OrganizationCard({ org, callback, callbackText }) {
+    //context
     const { organizationDetails, setOrganizationDetails } = useOrganizations();
-    const [active, setActive] = useState(null);
-    const [expanded, setExpanded] = useState(false);
 
+    //store organization details
+    const [active, setActive] = useState(null);
+
+    //page meta
+    const [loading, setLoading] = useState(false);
+    const [expanded, setExpanded] = useState(false);
+    const [errors, setErrors] = useState([]);
+
+    //expand and load all content on load
     const handleClick = async () => {
         const willExpand = !expanded;
         setExpanded(willExpand);
@@ -34,86 +53,124 @@ function OrganizationCard({ org, callback = null, callbackText }) {
             const data = await response.json();
             setOrganizationDetails(prev => [...prev, data]);
             setActive(data);
-            setLoading(false);
         } 
         catch (err) {
             console.error('Failed to fetch organizatons: ', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
             setLoading(false);
         }
     };
 
-    if(loading) return <ComponentLoading />
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             <Link to={`/organizations/${org.id}`} style={{display:'flex', width:"fit-content"}}><h2>{org.name}</h2></Link>
             {callback && <button onClick={() => callback(org)}>{callbackText}</button>}
-            {expanded && active && (
-                <>
-                    {active && org?.parent_organization && <h4> Parent: {org.parent_organization.name}</h4>}
-                    {active &&
-                        <Link to={`/organizations/${org.id}`}> <button>View Details</button></Link>
-                    }
-                    {active &&
-                        <Link to={`/organizations/${org.id}/edit`}> <button>Edit Details</button></Link>
-                    }
-                </>
-            )}
+            {expanded && loading && <ComponentLoading />}
+            {expanded && active && 
+                <div>
+                    {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                    {active.full_name && <h3>{active.full_name}</h3>}
+                    {active.description ? <p><i>{active.description}</i></p> :
+                        <p><i>No Description</i></p>}
+                    {active.executive_director && <p>Executive Director: {active.executive_director}</p>}
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <Link to={`/organizations/${org.id}`}><ButtonHover noHover={<GiJumpAcross />} hover={'Go to page'} /></Link>
+                        <Link to={`/organizations/${org.id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
+                    </div>
+                </div>
+            }
         </div>
     );
 }
 
-export default function OrganizationsIndex( { callback=null, callbackText='Add Organization', excludeProject=null, excludeProjectTrigger=null, excludeEvent=null, excludeEventTrigger=null, projAdd=null, addRedirect=null }){
-    const { user } = useAuth()
+export default function OrganizationsIndex( { callback=null, callbackText='Add Organization', excludeProject=null, excludeEvent=null, updateTrigger=null, projAdd=null, addRedirect=null }){
+    //context
+    const { user } = useAuth();
+    const { organizations, setOrganizations } = useOrganizations();
+    const { projects, setProjects } = useProjects();
+
+    //index helpers
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-    const { organizations, setOrganizations } = useOrganizations();
-    const [loading, setLoading] = useState(true);
-    const [parentFilter, setParentFilter] = useState('');
-    const [projectFilter, setProjectFilter] = useState('')
-    const [indicatorFilter, setIndicatorFilter] = useState('');
+    const [filters, setFilters] = useState(initial);
+    const [projectSearch, setProjectSearch] = useState(''); //helps control filter select search
 
+    //page meta
+    const [loading, setLoading] = useState(true);
+    const [errors, setErrors] = useState([]);
+    
+    //ref to scroll to errors automatically
+        const alertRef = useRef(null);
+        useEffect(() => {
+            if (errors.length > 0 && alertRef.current) {
+            alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            alertRef.current.focus({ preventScroll: true });
+            }
+        }, [errors]);
+
+    //load the list of orgs
     useEffect(() => {
         const loadOrgs = async () => {
             try {
                 const filterQuery = 
-                    (parentFilter ? `&parent_organization=${parentFilter}` : '') +
-                    (indicatorFilter ? `&indicator=${indicatorFilter}` : '') +
-                    (projectFilter ? `&project=${projectFilter}` : '') +
+                    (filters.project ? `&project=${filters.project}` : '') +
                     (excludeProject ? `&exclude_project=${excludeProject}` : '') +
                     (excludeEvent ? `&exclude_event=${excludeEvent}` : '');
                 const url = projAdd ? (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}` + filterQuery : `/api/manage/projects/${projAdd}/get-orgs/`) :  `/api/organizations/?search=${search}&page=${page}` + filterQuery;
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
                 setOrganizations(data.results);
-                setLoading(false);
             } 
             catch (err) {
                 console.error('Failed to fetch projects: ', err)
-                setLoading(false)
+                setErrors(['Something went wrong, Please try again later.']);
+            }
+            finally {
+                setLoading(false);
             }
         };
         loadOrgs();
-    }, [page, search, parentFilter, projectFilter, indicatorFilter, excludeProjectTrigger, excludeEventTrigger]);
+    }, [page, search, filters, updateTrigger]);
 
-    const setFilters = (filters) => {
-        setParentFilter(filters.parent_organization);
-        setProjectFilter(filters.project);
-        setIndicatorFilter(filters.indicator);
-    }
+    //load list of projects (for filter select), refresh on  search
+    useEffect(() => {
+        const getProjects = async() => {
+            try{
+                console.log('fetching projects...')
+                const response = await fetchWithAuth(`/api/manage/projects/?search=${projectSearch}`);
+                const data = await response.json();
+                setProjects(data.results)
+            }
+            catch(err){
+                console.error('Failed to fetch projects: ', err);
+                setErrors(['Something went wrong, Please try again later.']);
+            }
+        }
+        getProjects();
+    }, [projectSearch]);
+
+    //if the user came from a project page, redirect them to that, since they may not even have perms to view this org proper
+    //this checks the url params to see if they came from that page
     const redirect = useMemo(() => {
         if(!addRedirect) return '/organizations/new'
         return `/organizations/new?to=${addRedirect?.to}&projectID=${addRedirect.projectID}&orgID=${addRedirect.orgID}`
     }, [addRedirect])
+    
     if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Organizations' : 'My Organizations'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<OrganizationFilters organizations={organizations} onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}/>}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
+                filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} initial={initial} 
+                schema={filterConfig(projects, setSearch)} 
+            />}>
+                {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
-                <Link to={redirect || '/organizations/new'}><button>Add an Organiation</button></Link>}
+                <Link to={redirect || '/organizations/new'}><button><BsBuildingFillAdd /> Add an Organiation</button></Link>}
                 {organizations?.length == 0 ? 
                     <p>No organizations match your criteria.</p> :
                     organizations.map(org => (

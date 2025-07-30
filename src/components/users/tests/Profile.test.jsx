@@ -1,7 +1,7 @@
 import { render, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { MockUserAuthProvider } from '../../mocks/utils/UserAuth';
-import Profile from './Profile';
+import { MockUserAuthProvider } from '../../../mocks/utils/UserAuth';
+import Profile from '../Profile';
 import { screen, waitFor } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import userEvent from '@testing-library/user-event';

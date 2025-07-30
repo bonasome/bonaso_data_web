@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { server } from '../../mocks/server';
+import { server } from '../../../mocks/server';
 import { http, HttpResponse } from 'msw';
-import NarrativeReportUpload from './NarrativeReportUpload';
-import { MockUserAuthProvider } from '../../mocks/utils/UserAuth';
+import NarrativeReportUpload from '../NarrativeReportUpload';
+import { MockUserAuthProvider } from '../../../mocks/utils/UserAuth';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 const mockUser = { username: 'tester', role: 'admin', organization_id: 2 };

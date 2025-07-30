@@ -216,9 +216,10 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
     if(viewFlags){
         return(
             <FlagDetailModal flags={interaction.flags} displayName={interaction.display_name} 
-                onClose={() => setViewFlags(false)}/>
+                onClose={() => {onUpdate(); setViewFlags(false)}}/>
         )
     }
+
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             <h3>{interaction.task.indicator.code + ' '} {interaction.task.indicator.name}</h3>
@@ -233,7 +234,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
 
             {expanded && !editing && <div onClick={(e) => e.stopPropagation()}>
                 <p>By {interaction.task.organization.name}</p>
-                {interaction.subcategories && interaction?.subcategories.length >0 &&
+                {interaction.subcategories && interaction.subcategories.length >0 &&
                     <div>
                         <p>Subcategories:</p>
                         <ul>

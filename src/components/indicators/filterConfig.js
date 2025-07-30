@@ -4,7 +4,7 @@ export const initial = {
 }
 
 export function filterConfig(meta){
-    if(!meta) return []
+    if(!meta?.indicator_types) return []
     return [
         {name: 'indicator_type', label: 'Type', type: 'select', constructors: {
             values: meta.indicator_types.map((t) => (t.value)),

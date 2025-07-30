@@ -1,0 +1,41 @@
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+    gap: 1rem;
+}
+
+.active, .passive {
+    background-color: var(--bonaso-uber-dark-accent);
+    padding: 2vh;
+    text-align: center;
+    transition: all .6s;
+    height: 12vh;
+}
+.active > div, .passive > div {
+    padding-top: 3vh;
+}
+.passive > p {
+    color: var(--bonaso-uber-dark-accent);
+}
+.active:hover > div, .passive:hover > div {
+    padding-top: 0;
+}
+
+.passive:hover {
+    transform: scale(1.06);
+    background-color: var(--bonaso-main)
+}
+.passive:hover > p {
+    color: white;
+}
+
+.active {
+    background-color: var(--bonaso-light-accent);
+}
+.active > * {
+    color: var(--bonaso-uber-dark-accent)
+}
+.active:hover {
+    transform: scale(1.06);
+    background-color: white;
+}

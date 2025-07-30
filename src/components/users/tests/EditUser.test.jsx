@@ -2,10 +2,10 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { setupServer } from 'msw/node';
-import { handlers } from '../../mocks/handlers';
-import { MockUserAuthProvider } from '../../mocks/utils/UserAuth';
-import EditUser from './EditUser';
-import Profile from './Profile';
+import { handlers } from '../../../mocks/handlers';
+import { MockUserAuthProvider } from '../../../mocks/utils/UserAuth';
+import EditUser from '../EditUser';
+import Profile from '../Profile';
 import userEvent from '@testing-library/user-event';
 
 const user = userEvent.setup();

@@ -1,33 +1,38 @@
 import React from 'react';
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from 'react-router-dom';
+
 import { useAuth } from '../../contexts/UserAuth';
+import { useOrganizations } from '../../contexts/OrganizationsContext';
+
+import fetchWithAuth from "../../../services/fetchWithAuth";
+import organizationConfig from './organizationConfig';
+
 import Loading from '../reuseables/loading/Loading';
 import DynamicForm from '../reuseables/DynamicForm';
-import fetchWithAuth from "../../../services/fetchWithAuth";
-import { useOrganizations } from '../../contexts/OrganizationsContext';
+import ReturnLink from '../reuseables/ReturnLink';
+
 import styles from '../reuseables/dynamicForm.module.css';
-import organizationConfig from './organizationConfig';
 import errorStyles from '../../styles/errors.module.css';
 
 export default function CreateOrganization(){
     const navigate = useNavigate();
-    const { user } = useAuth();
 
+    //special params for redirecting
     const [searchParams] = useSearchParams();
-
     const jumpTo = searchParams.get('to');
     const projectID = searchParams.get('projectID');
     const orgID = searchParams.get('orgID');
 
-    const [loading, setLoading] = useState(true);
+    //context
+    const { setOrganizationDetails } = useOrganizations();
+
+    //page meta
+    //const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const { organizations, setOrganizations, setOrganizationDetails } = useOrganizations();
-    const [orgIDs, setOrgIDs] = useState([]);
-    const [orgNames, setOrgNames] = useState([]);
-    const [search, setSearch] = useState('');
     const [saving, setSaving] = useState(false);
 
+    //scroll to errors automatically
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
@@ -36,41 +41,22 @@ export default function CreateOrganization(){
         }
     }, [errors]);
 
-    useEffect(() => {
-            const getOrganizations = async () => {
-                try{
-                    console.log('fetching organizations...')
-                    const response = await fetchWithAuth(`/api/organizations/?search=${search}`);
-                    const data = await response.json();
-                    setOrganizations(data.results);
-                    if(organizations.length > 0){
-                        const ids = organizations.map((o) => o.id);
-                        const names= organizations.map((o)=> o.name);
-                        setOrgIDs(ids);
-                        setOrgNames(names);
-                    }
-                    setLoading(false)
-                }
-                catch(err){
-                    console.error('Failed to fetch organizations: ', err)
-                    setLoading(false)
-                }
-            }
-            getOrganizations();
-    }, [search])
-
+    //set up config for DynamicForm
     const formConfig = useMemo(() => {
-        return organizationConfig(orgIDs, orgNames, (val) => setSearch(val), user.role);
-    }, [orgIDs, orgNames]);
+        return organizationConfig();
+    }, []);
 
+
+    //redirect on cancel
     const handleCancel = () => {
         navigate(`/organizations`)
     }
 
+    //handle submission
     const handleSubmit = async(data, createAnother) => {
-        console.log('submitting data...')
         setErrors([]);
         try{
+            console.log('submitting data...')
             setSaving(true);
             const response = await fetchWithAuth('/api/organizations/', {
                 method: 'POST',
@@ -81,6 +67,7 @@ export default function CreateOrganization(){
             });
             const returnData = await response.json();
             if(response.ok){
+                //redirect switchboard
                 setOrganizationDetails(prev => [...prev, returnData]);
                 if(createAnother){
                     navigate('/organizations/new')
@@ -105,23 +92,23 @@ export default function CreateOrganization(){
                         serverResponse.push(`${field}: ${returnData[field]}`);
                     }
                 }
-                setErrors(serverResponse)
+                setErrors(serverResponse);
             }
         }
         catch(err){
-            setErrors(['Something went wrong. Please try again later.'])
-            console.error('Could not record organization: ', err)
+            setErrors(['Something went wrong. Please try again later.']);
+            console.error('Could not record organization: ', err);
         }
         finally{
-            setSaving(false)
+            setSaving(false);
         }
     }
 
-    if(loading) return <Loading />
-
+    //if(loading) return <Loading />
     return(
         <div className={styles.container}>
             <h1>New Organization</h1>
+            <ReturnLink url={ jumpTo == 'projects' && projectID && orgID ? `/projects/${projectID}/organizations/${orgID}` : '/organizations'} display='Return to organizations overview' />
             {errors.length != 0 &&
             <div className={errorStyles.errors} ref={alertRef}>
                 <ul>{errors.map((msg)=>

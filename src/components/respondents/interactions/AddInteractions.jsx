@@ -248,7 +248,7 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         const match = meta[field]?.find(range => range.value === value);
         return match ? match.label : null;
     };
-    
+
     //validation function for when a new task is entered
     const handleAdd = async (task) => {
         setErrors([]);
@@ -277,7 +277,8 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                     found = true //if in the batch, we're good. 
                     //if subcats are present and supposed to be matched, auto limit them for convenience
                     if(task.indicator.match_subcategories_to === prereq.id){
-                        const interSubcats = subcats[inBatch[0].id]
+                        const interSubcatIDs = subcats[inBatch[0].id]?.map((cat) => (cat?.subcategory?.id))
+                        const interSubcats = task.indicator.subcategories.filter(cat => (interSubcatIDs.includes(cat.id)))
                         setAllowedSubcats(prev=> ({...prev, [task.id]: interSubcats}));
                     }
                 } 
@@ -289,11 +290,12 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                         const data = await response.json();
                         //if something is found
                         if(data.results.length > 0){
-                            const validPastInt = data.results.find(inter => inter?.task_detail?.indicator?.id === prereq.id);
+                            const validPastInt = data.results.find(inter => inter?.task?.indicator?.id == prereq.id);
                             if (validPastInt && validPastInt.interaction_date <= date) {
+                                console.log(validPastInt)
                                 found=true //if found, we're good. Just like above, set subcats if applicable
                                 if(task.indicator.match_subcategories_to === prereq.id){
-                                    setAllowedSubcats(prev=> ({...prev, [task.id]: validPastInt.subcategories}));
+                                    setAllowedSubcats(prev=> ({...prev, [task.id]: validPastInt.subcategories.map((cat) => ({id: cat.subcategory.id, name: cat.subcategory.name}))}));
                                 }
                             }
                         }
@@ -308,14 +310,14 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                 if (!found) {
                     dropWarnings.push(
                         `This indicator requires this respondent to have had an interaction associated with 
-                        task ${prereq.name}, however, we could not find a prior record of this interaction. 
+                        task ${prereq.display_name}, however, we could not find a prior record of this interaction. 
                         If you record this interaction, it wil be flagged for further review.
                         (HINT: Make sure you have a date set.)`
                     );
                 }
             }
         }
-        console.log(meta)
+
         //if allow repeat is not ticked, check for an interaction in the past 30 days, as this will trigger a flag
         if (interactions?.length > 0 && !task.indicator.allow_repeat) {
             try{

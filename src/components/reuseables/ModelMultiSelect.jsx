@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from '../../styles/indexSelect.module.css';
 
-export default function ModelMultiSelect({ IndexComponent, title, callbackText, callback, existing=null, task=false }){
+export default function ModelMultiSelect({ IndexComponent, title, callbackText, callback, existing=null }){
     const [selecting, setSelecting] = useState(false);
     const [selected, setSelected] = useState(existing || []);
 
@@ -26,7 +26,6 @@ export default function ModelMultiSelect({ IndexComponent, title, callbackText, 
         callback(selected);
     }, [selected]);
 
-    console.log(selected)
     return(
         <div>
             <p>{title}</p>
@@ -34,8 +33,8 @@ export default function ModelMultiSelect({ IndexComponent, title, callbackText, 
                 {selected.length > 0 ? 
                     <div>
                         {selected.map((s) => (<div style={{ display: 'flex', flexDirection: 'row'}}>
-                            <p>{task ? s?.indicator?.name : s.name}</p>
-                            <button onClick = {() => remove(s)} style={{ marginLeft: 'auto'}}>Remove</button>
+                            <p>{s.display_name}</p>
+                            <button type="button" onClick = {() => remove(s)} style={{ marginLeft: 'auto'}}>Remove</button>
                         </div>))}
                     </div>
                 

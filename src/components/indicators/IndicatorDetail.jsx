@@ -1,30 +1,46 @@
 import React from 'react';
 import { useEffect, useState } from "react";
-import { useParams } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
+
 import { useIndicators } from '../../contexts/IndicatorsContext';
-import fetchWithAuth from '../../../services/fetchWithAuth';
-import Loading from '../reuseables/loading/Loading';
 import { useAuth } from '../../contexts/UserAuth';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import errorStyles from '../../styles/errors.module.css';
+
+import fetchWithAuth from '../../../services/fetchWithAuth';
+
+import Loading from '../reuseables/loading/Loading';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
+import UpdateRecord from '../reuseables/meta/UpdateRecord';
+import ReturnLink from '../reuseables/ReturnLink';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
+
 import styles from './indicatorDetail.module.css';
-import IndicatorChart from '../reuseables/charts/IndicatorChart';
-import { IoMdReturnLeft } from "react-icons/io";
-import ButtonLoading from '../reuseables/loading/ButtonLoading';
+import errorStyles from '../../styles/errors.module.css';
+import { ImPencil } from 'react-icons/im';
+import { FaTrashAlt } from 'react-icons/fa';
+
 export default function IndicatorDetail(){
-    const { user } = useAuth();
-    const { id } = useParams();
-    const[loading, setLoading] = useState(true)
-    const { indicatorDetails, setIndicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
-    const[activeIndicator, setActiveIndicator] = useState(null);
-    const [projects, setProjects] = useState([]);
-    const [errors, setErrors] = useState([]);
-    const [del, setDel] = useState(false);
-    const [labels, setLabels] = useState({})
     const navigate = useNavigate();
+    //indicator id from url
+    const { id } = useParams();
+
+    //context
+    const { user } = useAuth();
+    const { setIndicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
+    
+    //detail of the current indicator
+    const[indicator, setIndicator] = useState(null);
+    
+    //page meta
+    const[loading, setLoading] = useState(true)
+    const [del, setDel] = useState(false);
+    const [errors, setErrors] = useState([]);
+
+    //list of projects this indicator is in
+    const [projects, setProjects] = useState([]);
+
+    //get details from server    
     useEffect(() => {
+        //get indicator information
         const getIndicatorDetails = async () => {
             try {
                 console.log('fetching indicator details...');
@@ -32,7 +48,7 @@ export default function IndicatorDetail(){
                 const data = await response.json();
                 if(response.ok){
                     setIndicatorDetails(prev => [...prev, data]);
-                    setActiveIndicator(data);
+                    setIndicator(data);
                 }
                 else{
                     navigate('/not-found')
@@ -40,11 +56,13 @@ export default function IndicatorDetail(){
                 
             } 
             catch (err) {
+                setErrors(['Something went wrong. Please try again later.']);
                 console.error('Failed to fetch indicator: ', err);
             } 
         };
         getIndicatorDetails();
         
+        //get the meta
         const getMeta = async() => {
             if(Object.keys(indicatorsMeta).length != 0){
                 setLoading(false);
@@ -59,8 +77,9 @@ export default function IndicatorDetail(){
                     setLoading(false);
                 }
                 catch(err){
-                    console.error('Failed to fetch indicators meta: ', err)
-                    setLoading(false)
+                    setErrors(['Something went wrong. Please try again later.']);
+                    console.error('Failed to fetch indicators meta: ', err);
+                    setLoading(false);
                 }
             }
         }
@@ -69,36 +88,24 @@ export default function IndicatorDetail(){
     }, [id]);
 
     useEffect(() => {
+        //get a list of projects
         const getProjects = async () => {
-            if(!activeIndicator) return;
+            if(!indicator) return;
             try {
                 console.log('fetching projects...');
-                const response = await fetchWithAuth(`/api/manage/projects/?indicators=${activeIndicator.id}`);
+                const response = await fetchWithAuth(`/api/manage/projects/?indicator=${indicator.id}`);
                 const data = await response.json();
                 setProjects(data.results);
-                setLoading(false);
             } 
             catch (err) {
-                setErrors(['Something went wrong. Please try again later.'])
+                setErrors(['Something went wrong. Please try again later.']);
                 console.error('Failed to fetch indicator: ', err);
-                setLoading(false)
             } 
         };
         getProjects();
-    }, [activeIndicator])
+    }, [indicator])
 
-    useEffect(() => {
-        if (!indicatorsMeta?.indicator_types || !activeIndicator) return;
-        const typeIndex = indicatorsMeta.indicator_types.indexOf(activeIndicator.indicator_type);
-        const govIndex = indicatorsMeta.required_attributes.indexOf(activeIndicator.governs_attribute);
-        const attrIndexes = activeIndicator?.required_attribute?.map((s) => (indicatorsMeta.required_attributes.indexOf(s.name))).filter(s => s!= -1)
-        setLabels({
-            indicator_type: indicatorsMeta.indicator_type_labels[typeIndex],
-            governs_attribute: indicatorsMeta.required_attribute_labels[govIndex],
-            required_attribute: attrIndexes?.map((s) => (indicatorsMeta.required_attribute_labels[s]))
-        })
-    }, [indicatorsMeta, activeIndicator])
-
+    //function to delete indicator
     const deleteIndicator = async() => {
         try {
             console.log('deleting indicator...');
@@ -140,68 +147,71 @@ export default function IndicatorDetail(){
         }
         
     } 
-    console.log(activeIndicator)
-    if (loading || !activeIndicator) return <Loading />
+
+    //helper function that converts db values to labels
+    const getLabelFromValue = (field, value) => {
+        if(!indicatorsMeta) return null
+        const match = indicatorsMeta[field]?.find(range => range.value === value);
+        return match ? match.label : null;
+    };
+
+    if (loading || !indicator) return <Loading />
     return(
         <div className={styles.container}>
-            {del && <ConfirmDelete name={activeIndicator.name} statusWarning={'We advise against deleting indicators. Instead, please consider setting its status as "deprecated".'} onConfirm={() => deleteIndicator()} onCancel={() => setDel(false)} />}
-            <Link to={'/indicators'} className={styles.return}>
-                <IoMdReturnLeft className={styles.returnIcon} />
-                <p>Return to indicators overview</p>   
-            </Link>
+            {del && <ConfirmDelete name={indicator?.display_name} statusWarning={'We advise against deleting indicators. Instead, please consider setting its status as "deprecated".'} onConfirm={() => deleteIndicator()} onCancel={() => setDel(false)} />}
+            
             <div className={styles.section}>
-                <h1>{activeIndicator?.code}: {activeIndicator?.name}</h1>
+                <ReturnLink url={'/indicators'} display='Return to indicators overview' />
+                <h1>{indicator.display_name}</h1>
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-                <p>{activeIndicator?.description}</p>
-                <p><i>{activeIndicator?.status}, {labels?.indicator_type}{activeIndicator?.require_numeric && ', Requires a number'} {activeIndicator?.allow_repeat && '(Allows Repeats)'}</i></p>
-                {activeIndicator?.prerequisites?.length > 0 && <div>
+                
+                <p>{indicator.description}</p>
+
+                <p><i>
+                    {getLabelFromValue('statuses',indicator.status)}, {getLabelFromValue('indicator_types',indicator.indicator_type)}
+                    {indicator.require_numeric && ', Requires a number'} 
+                    {indicator.allow_repeat && '(Allows Repeats)'}
+                </i></p>
+
+                {indicator.prerequisites?.length > 0 && <div>
                     <p>Prerequisites: </p>
                     <ul>
-                        {activeIndicator.prerequisites.map((p) => (<li>{p.code}: {p.name}</li>))}
+                        {indicator.prerequisites.map((p) => (<li>{p.display_name}</li>))}
                     </ul>
                 </div>}
-                {activeIndicator?.required_attribute.length > 0 && <div>
+
+                {indicator.required_attributes.length > 0 && <div>
                     <p>Requires Special Respondent Attributes:</p>
-                    <ul>{labels?.required_attribute?.map((a) => (<li key={a}>{a}</li>))}</ul>
+                    <ul>{indicator.required_attributes?.map((a) => (<li key={a}>{getLabelFromValue('required_attributes', a)}</li>))}</ul>
                 </div>}
-                {activeIndicator?.governs_attribute && <p><i>Controls Respondent Attribute: {labels.governs_attribute}</i></p> }
-                {activeIndicator?.subcategories.length > 0 && 
-                    <div>
-                        <h4>Subcategories</h4>
+
+                {indicator.governs_attribute && <p><i>Controls Respondent Attribute: {getLabelFromValue('required_attributes', indicator.governs_attribute)}</i></p> }
+                
+                {indicator.subcategories.length > 0 && <div>
+                    <h4>Subcategories</h4>
                     <ul>
-                        {activeIndicator.subcategories.map((cat) => (
+                        {indicator.subcategories.map((cat) => (
                             <li key={cat.id}>{cat.name}</li>
                         ))}
                     </ul>
-                    </div>
-                }
-
+                </div>}
                 
-                
-                <Link to={`/indicators/${id}/edit`}><button>Edit Details</button></Link>
-                {user.role == 'admin' && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)} >Delete Indicator</button>}
-                {del && <ButtonLoading forDelete={true} /> }
-                {user.role == 'admin' && 
-                    <div>
-                        <p><i>Created by: {activeIndicator?.created_by?.first_name} {activeIndicator?.created_by?.last_name} at {new Date(activeIndicator?.created_at).toLocaleString()}</i></p>
-                        {activeIndicator?.updated_by && activeIndicator?.updated_by && <p><i>Updated by: {activeIndicator.updated_by?.first_name} {activeIndicator.updated_by?.last_name} at {new Date(activeIndicator?.updated_at).toLocaleString()}</i></p>}
-                    </div>
-                } 
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <Link to={`/indicators/${id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
+                    {!del && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt /> } hover={'Delete Indicator'} forDelete={true} />}
+                </div>
+                <UpdateRecord created_by={indicator.created_by} updated_by={indicator.updated_by}
+                    created_at={indicator.created_at} updated_at={indicator.updated_at} /> 
             </div>
-            {activeIndicator?.status != 'Planned' && <div className={styles.section}>
-                <h2>Performance Over Time</h2>
-                <IndicatorChart indicatorID={activeIndicator?.id} showFilters={true} />
-            </div>}
-            
             
             <div className={styles.section}>
                 <h2>In projects</h2>
-                {projects.length > 0 && projects.map((p) =>(
+                {projects && projects.length > 0 && projects.map((p) =>(
                     <div key={p.id} className={styles.card}>
                         <Link to={`/projects/${p.id}`}><h3>{p.name}</h3></Link>
                     </div>
                 ))}
-                {projects.length === 0 && <p><i>This indicator is not in any projects.</i></p>}
+                {!projects || projects.length === 0 && <p><i>This indicator is not in any projects.</i></p>}
             </div>
             <div className={styles.spacer}></div>
         </div>

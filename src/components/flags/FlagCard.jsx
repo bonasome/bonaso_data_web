@@ -11,7 +11,7 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import styles from './flags.module.css';
 import { MdThumbUp } from 'react-icons/md';
 
-export default function FlagCard({ flag, perm, link=null }){
+export default function FlagCard({ flag, onUpdate=null }){
     const [flagDetail, setFlagDetail] = useState(flag);
     const [resolving, setResolving] = useState(false);
     const [resolveReason, setResolveReason] = useState('');
@@ -39,6 +39,9 @@ export default function FlagCard({ flag, perm, link=null }){
             if (response.ok) {
                 setFlagDetail(data.flag);
                 setResolving(false);
+                if(onUpdate){
+                    onUpdate(data.flag);
+                }
             } 
             else {
                 const serverResponse = [];

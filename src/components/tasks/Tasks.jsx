@@ -1,30 +1,37 @@
 import React, { useState, useEffect, useRef } from "react";
+
 import fetchWithAuth from '../../../services/fetchWithAuth';
+
 import IndexViewWrapper from "../reuseables/IndexView";
-import { useAuth } from '../../contexts/UserAuth'
-import styles from './tasks.module.css';
-import errorStyles from '../../styles/errors.module.css';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import ButtonHover from "../reuseables/inputs/ButtonHover";
+
+import styles from './tasks.module.css';
+import errorStyles from '../../styles/errors.module.css';
+
 import { FaTrashAlt } from "react-icons/fa";
 
-function TaskCard({ task, isDraggable = false, callback=null, canDelete=false, onDelete=null, callbackText, onError }) {
+//card that holds task details
+function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, callback=null, callbackText, onError }) {
+    //comp meta
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
     const [expanded, setExpanded] = useState(false);
-    const { user } = useAuth();
 
+    //(for interactions) if this card should be draggable, mark it as such
     const handleDragStart = (e) => {
         e.dataTransfer.setData('application/json', JSON.stringify(task));
     };
 
+    //pass errors up to parent if they arrise
     useEffect(() => {
         if(errors.length > 0){
             onError(errors);
         } 
     }, [errors]);
 
+    //delete this task
     const removeTask = async() => {
         setErrors([]);
         try {
@@ -67,7 +74,8 @@ function TaskCard({ task, isDraggable = false, callback=null, canDelete=false, o
         }
 
     }
-
+    
+    //return delete seperately, since the card hover messes with the modal
     if(del){
         return(
             <div>
@@ -82,32 +90,40 @@ function TaskCard({ task, isDraggable = false, callback=null, canDelete=false, o
         )
 
     }
+
     return (
-        <div className={styles.card} onClick={() => setExpanded(!expanded)} draggable={isDraggable} onDragStart={isDraggable ? handleDragStart : undefined}>
-            <h3>{task.indicator.code}: {task.indicator.name}</h3>
+        <div className={styles.card} onClick={() => setExpanded(!expanded)} 
+            draggable={isDraggable} onDragStart={isDraggable ? handleDragStart : undefined}
+        >
+            <h3>{task.indicator.display_name}</h3>
+
             {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button">{callbackText}</button>}
+            
             {expanded && (
                 <div>
                     <p><i>{task.organization.name}</i></p>
                     <p><i>{task.project.name}</i></p>
+
                     <p>{task.indicator.description}</p>
+
                     {task.indicator.prerequisites.length > 0 && <div>
                         <p>Prerequisites: </p>
                         <ul>
                             {task.indicator.prerequisites.map((p) => (<li>{p.code}: {p.name}</li>))}
                         </ul>
                     </div>}
-                    {task.indicator.subcategories && task.indicator.subcategories.length > 0 && (
-                        <div>
-                            <p>Subcategories:</p>
-                            <ul>
-                                {task.indicator.subcategories.map((cat, index) => (
-                                    <li key={index}>{cat.name}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+
+                    {task.indicator.subcategories && task.indicator.subcategories.length > 0 && <div>
+                        <p>Subcategories:</p>
+                        <ul>
+                            {task.indicator.subcategories.map((cat, index) => (
+                                <li key={index}>{cat.name}</li>
+                            ))}
+                        </ul>
+                    </div>}
+
                     {task.indicator.require_numeric && <p>Requires Number</p>}
+
                     {canDelete && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Remove Task'} forDelete={true} />}
                 </div>
             )}
@@ -115,19 +131,30 @@ function TaskCard({ task, isDraggable = false, callback=null, canDelete=false, o
     );
 }
 
-export default function Tasks({ sendData, update=null, organizationID=null, projectID=null, isDraggable=false, blacklist=[], canDelete=false, updateTrigger=null, callback=null, callbackText='Add Task', type=null, event=null, onError=[], onSuccess=null }) {
-    const [loading, setLoading] = useState(true);
+//task index view
+export default function Tasks({ update=null, organizationID=null, 
+        projectID=null, isDraggable=false, blacklist=[], canDelete=false, updateTrigger=null, 
+        callback=null, callbackText='Add Task', type=null, event=null, onError=[], onSuccess=null 
+}) {
+    //the tasks themselves (suually not pulled in very large numbers)
     const [ tasks, setTasks ] = useState([]);
+
+    //index helpers
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
+
+    //page meta
+    const [loading, setLoading] = useState(true);
     const [success, setSuccess] = useState('')
     const [errors, setErrors] = useState([]);
-
+    
+    //in the event that this is used in another component, allow the parent to pass errors to this directly
     useEffect(() => {
         if(onError.length > 0) setErrors(onError);
     }, [onError])
 
+    //scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
@@ -136,18 +163,23 @@ export default function Tasks({ sendData, update=null, organizationID=null, proj
         }
     }, [errors]);
 
+    //get a list of the tasks
     useEffect(() => {
         const getTasks = async () => {
             try {
                 console.log('fetching tasks...');
-                const includeOrg = organizationID ? `&organization=${organizationID}` : ''
-                const includeProject = projectID ? `&project=${projectID}` : ''
-                const includeType = type ? `&indicator_type=${type}` : ''
-                const includeEvent = event ? `&event=${event}` : '';
-                const url = `/api/manage/tasks/?search=${search}&page=${page}` + includeOrg + includeProject + includeType + includeEvent
-                console.log(url)
+                //run the filters
+                const filterQuery = 
+                    (organizationID ? `&organization=${organizationID}` : '') + //filter to one org
+                    (projectID ? `&project=${projectID}` : '') + //filter to one project
+                    (type ? `&indicator_type=${type}` : '') + //filter based on type (ex. only show respondent)
+                    (event ? `&event=${event}` : ''); //pull based on event
+                
+                const url = `/api/manage/tasks/?search=${search}&page=${page}` + filterQuery;
+
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
+
                 setTasks(data.results);
                 setEntries(data.count); 
                 if(sendData){
@@ -163,27 +195,35 @@ export default function Tasks({ sendData, update=null, organizationID=null, proj
             }
         };
         getTasks();
+    }, [search, page, update, organizationID, projectID, updateTrigger]); //run on param changes or on parent request
 
-    }, [search, page, update, organizationID, projectID, updateTrigger]);
-
+    //update the tasks when one is deleted, triggering a parent update if necessary
     const updateTasks = (id) => {
         const updated = tasks.filter(t => t.id !=id)
         setTasks(updated);
         updateTrigger();
         setSuccess('Task removed.');
     }
+
+    //filter out blacklisted tasks (used for hiding tasks already added to interactions)
     const filteredTasks = tasks.filter(t => !blacklist.includes(t.id))
+
     if(loading) return <ComponentLoading />
     return (
         <div className={styles.tasks}>
             {onSuccess && <div className={errorStyles.success}>{onSuccess}</div>}
             {success !== '' && <div className={errorStyles.success}>{success}</div>}
             {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            
             <p><i>Search your tasks by name, organization, or project.</i></p>
+            
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
-            {tasks.length > 0 ? filteredTasks.map((task) => (
-                <TaskCard task={task} key={task.id} tasks={tasks} isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} callback={callback} callbackText={callbackText} onError={(e) => (setErrors(e))} />
-            )) : <p>No tasks yet.</p>}
+                {tasks.length > 0 ? filteredTasks.map((task) => (
+                    <TaskCard task={task} key={task.id} tasks={tasks} 
+                        isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} 
+                        callback={callback} callbackText={callbackText} onError={(e) => (setErrors(e))} 
+                    />
+                )) : <p>No tasks yet.</p>}
             </IndexViewWrapper>
         </div>
     );
