@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import ButtonLoading from "../reuseables/loading/ButtonLoading";
 import errorStyles from '../../styles/errors.module.css';
 import fetchWithAuth from "../../../services/fetchWithAuth";
-import SimpleSelect from '../reuseables/inputs/SimpleSelect';
+import RadioButtons from '../reuseables/inputs/RadioButtons';
 
 export default function FlagModal({ model, id, onConfirm, onCancel }){
     const [saving, setSaving] = useState(false);
@@ -91,8 +91,7 @@ export default function FlagModal({ model, id, onConfirm, onCancel }){
         <div className={modalStyles.modal}>
             <h2>New Flag</h2>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <SimpleSelect optionValues={meta.flag_reasons.map((r) => (r.value))} optionLabels={meta.flag_reasons.map((r) => (r.label))}
-                name={'flag_reason'} label={'Select a Flag Type'} callback={(val) => setFlagType(val)} value={flagType} />
+            <RadioButtons name='flag_type' label='Flag Category' options={meta?.flag_reasons} value={flagType} onChange={(val) => setFlagType(val)}/>
             <label htmlFor='reason'>Flag Reason</label>
             <textarea id='reason' type='text' onChange={(e) => setFlagReason(e.target.value)} value={flagReason} />
             <div style={{ display: 'flex', flexDirection: 'row' }}>

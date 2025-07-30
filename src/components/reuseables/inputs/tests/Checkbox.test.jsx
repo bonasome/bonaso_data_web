@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import Checkbox from './Checkbox';
+import Checkbox from '../Checkbox';
 
 describe('Checkbox', () => {
     it('renders with label and unchecked by default', () => {

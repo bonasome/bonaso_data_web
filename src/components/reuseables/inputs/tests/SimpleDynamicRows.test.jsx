@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import SimpleDynamicRows from './SimpleDynamicRows';
+import SimpleDynamicRows from '../SimpleDynamicRows';
 
 function TestWrapper({ existing = [] }) {
     const ref = useRef();

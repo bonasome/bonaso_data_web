@@ -49,9 +49,8 @@ import EditOrganization from '../components/organizations/EditOrganization';
 
 //indicators
 import IndicatorsIndex from '../components/indicators/IndicatorsIndex';
-import CreateIndicator from '../components/indicators/CreateIndicator';
-import EditIndicator from '../components/indicators/EditIndicator';
 import IndicatorDetail from '../components/indicators/IndicatorDetail';
+import IndicatorForm from '../components/indicators/IndicatorForm'
 
 import Tutorial from '../components/tutorial/Tutorial';
 import NotFound from '../components/redirects/NotFound';
@@ -246,12 +245,12 @@ function Router() {
             
             <Route path='new' element={
                 <RedirectIfNoPerm level={['admin']}>
-                    <CreateIndicator/>
+                    <IndicatorForm />
                 </RedirectIfNoPerm>
                 }/>
             <Route path=':id/edit' element={
                 <RedirectIfNoPerm level={['admin']}>
-                    <EditIndicator />
+                    <IndicatorForm />
                 </RedirectIfNoPerm>
                 }/>
         </Route>

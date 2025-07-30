@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import IndicatorsIndex from '../indicators/IndicatorsIndex';
-import ModelSelect from '../reuseables/ModelSelect';
+import ModelSelect from '../reuseables/inputs/ModelSelect';
 import SimpleSelect from '../reuseables/inputs/SimpleSelect';
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
 import getColor from '../../../services/getColor';

@@ -1,23 +1,22 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
 import styles from './checkbox.module.css';
+
 import { GrCheckbox } from "react-icons/gr";
 import { IoCheckboxSharp } from "react-icons/io5";
 
-export default function Checkbox({ label, name, checked=false, callback = null, disabled=false }){
-    const [isChecked, setIsChecked] = useState(false)
+import Messages from '../Messages';
 
-    useEffect(() => {
-        if(checked == true) setIsChecked(true);
-        else if(checked == false) setIsChecked(false);
-        else setIsChecked(false);
-    }, [checked]);
-
-    return(
-        <div className={styles.checkbox}>
-            {isChecked ? <IoCheckboxSharp onClick={() => {setIsChecked(false); callback(false)}}/> : 
-            <GrCheckbox onClick={() => {setIsChecked(true); callback(true)}}/>}
-            <label htmlFor={name}>{label}</label>
-        </div>
-    )
+export default function Checkbox({ name, label, value, onChange, onBlur, errors = [] }) {
+  return (
+    <div>
+        <label htmlFor={name} className={styles.checkbox}>
+            <input
+                name={name} id={name} type="checkbox" style={{ display: "none" }}
+                checked={value} onChange={e => onChange(e.target.checked)} onBlur={onBlur}
+            />
+            {value ? <IoCheckboxSharp /> : <GrCheckbox />}
+            {label}
+        </label>
+        <Messages errors={errors} />
+    </div>
+  );
 }

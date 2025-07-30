@@ -72,11 +72,12 @@ export default function CreateSocialPost(){
 
     //handle form submission
     const handleSubmit = async(data, createAnother) => {
+        setErrors([]);
+        setSuccess(null);
         //tasks sends objects by default, so convert to just the id
         if(data.task_ids.length > 0) {
             data.task_ids = data.task_ids.map(task => (task.id))
         }
-        
         try{
             console.log('submitting data...');
             setSaving(true);
@@ -92,6 +93,7 @@ export default function CreateSocialPost(){
                 setSocialPosts(prev => [...prev, returnData])
                 if(createAnother){
                     navigate(`/social/new`);
+                    setSuccess('Post successfuly created!')
                 }
                 else{
                     navigate(`/social/${returnData.id}`);
@@ -132,6 +134,7 @@ export default function CreateSocialPost(){
                     <li key={msg}>{msg}</li>)}
                 </ul>
             </div>}
+            {success && success !== '' && <div className={errorStyles.success}><p>{success}</p></div>}
             <DynamicForm config={formConfig} onSubmit={handleSubmit} createAnother={true}
                 onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} 
             />

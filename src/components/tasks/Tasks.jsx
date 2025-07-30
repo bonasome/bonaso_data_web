@@ -182,9 +182,6 @@ export default function Tasks({ update=null, organizationID=null,
 
                 setTasks(data.results);
                 setEntries(data.count); 
-                if(sendData){
-                    sendData(data.results)
-                }
             } 
             catch (err) {
                 console.error('Failed to delete organization:', err);

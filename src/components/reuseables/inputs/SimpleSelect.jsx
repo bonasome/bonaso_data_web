@@ -77,7 +77,7 @@ export default function SimpleSelect({
         const term = searchTerm.toLowerCase();
         return options.filter(
         (opt) =>
-            opt.label.toLowerCase().includes(term) || opt.value.toString().toLowerCase().includes(term)
+            opt.label.toLowerCase().includes(term) || opt.value.toString().toLowerCase().includes(term) || opt.value == ''
         );
     }, [searchTerm, options]);
 

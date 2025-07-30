@@ -182,7 +182,7 @@ export default function IndicatorDetail(){
 
                 {indicator.required_attributes.length > 0 && <div>
                     <p>Requires Special Respondent Attributes:</p>
-                    <ul>{indicator.required_attributes?.map((a) => (<li key={a}>{getLabelFromValue('required_attributes', a)}</li>))}</ul>
+                    <ul>{indicator.required_attributes?.map((a) => (<li key={a.name}>{getLabelFromValue('required_attributes', a.name)}</li>))}</ul>
                 </div>}
 
                 {indicator.governs_attribute && <p><i>Controls Respondent Attribute: {getLabelFromValue('required_attributes', indicator.governs_attribute)}</i></p> }

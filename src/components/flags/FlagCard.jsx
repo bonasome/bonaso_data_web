@@ -70,7 +70,7 @@ export default function FlagCard({ flag, onUpdate=null }){
         <div className={flagDetail.resolved ? styles.cardResolved : styles.cardActive}>
             <h3>{flagDetail.reason} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <p><i>{flagDetail.auto_flagged ? 'Automatically Flagged' : `Flagged by ${flagDetail.created_by.display_name}`} at {prettyDates(flagDetail.created_at)}</i></p>
+            <p><i>{flagDetail.auto_flagged ? 'Automatically Flagged' : `Flagged by ${flagDetail.created_by.display_name}`} at {prettyDates(flagDetail.created_at, true)}</i></p>
             
             {resolving && <div>
                 <label htmlFor='reason'>Reason for Resolving</label>
@@ -83,7 +83,7 @@ export default function FlagCard({ flag, onUpdate=null }){
             </div>}
 
             {flagDetail.resolved && <div>
-                <p><i>Resolved by {flagDetail.auto_resolved ? 'System' : `${flagDetail.resolved_by.display_name}`} at {prettyDates(flagDetail.resolved_at)} </i></p>
+                <p><i>Resolved by {flagDetail.auto_resolved ? 'System' : `${flagDetail.resolved_by.display_name}`} at {prettyDates(flagDetail.resolved_at, true)} </i></p>
                 {flagDetail.resolved_reason && <p>{flagDetail.resolved_reason}</p>}
             </div>}
             {!resolving && !flagDetail.resolved && ['meofficer', 'manager', 'admin'].includes(user.role) &&

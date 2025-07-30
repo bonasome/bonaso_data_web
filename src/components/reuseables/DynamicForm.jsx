@@ -6,17 +6,17 @@ import validate from '../../../services/validate';
 import styles from './dynamicForm.module.css';
 import { useAuth } from '../../contexts/UserAuth';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
-import ModelSelect from './ModelSelect';
+import ModelSelect from './inputs/ModelSelect';
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
 import IndicatorsIndex from '../indicators/IndicatorsIndex';
 import ClientsIndex from '../projects/clients/ClientsIndex';
 import Checkbox from './inputs/Checkbox';
 import MultiCheckbox from './inputs/MultiCheckbox';
-import ModelMultiSelect from './ModelMultiSelect';
+import ModelMultiSelect from './inputs/ModelMultiSelect';
 
 import Tasks from '../tasks/Tasks';
 import IndicatorPrereqLogic from '../indicators/IndicatorPrereqLogic';
-import ImgSelect from './inputs/ImgSelect';
+import ImgSelect from './inputs/ImageSelect';
 //config [{type: , switchpath: false, hideonpath: false, name: , label: null, value: null, required: false, max: null, expand: null, constructors:{values: [], labels: [], multiple: false} }]
 export default function DynamicForm({ config, onSubmit, onCancel, onError, saving, createAnother=false }){
     const { user } = useAuth();
@@ -39,6 +39,12 @@ export default function DynamicForm({ config, onSubmit, onCancel, onError, savin
             }
             else if(field.type == 'checkbox'){
                 struct[field.name] = field.value || false;
+            }
+            else if(['indicator', 'organization','indicator-prereq'].includes(field.type)){
+                struct[field.name] = field.value || null
+            }
+            else if(['multi-indicator', 'multi-tasks'].includes(field.type)){
+                struct[field.name] = field.value || []
             }
             else{
                 struct[field.name] = field.value || '';

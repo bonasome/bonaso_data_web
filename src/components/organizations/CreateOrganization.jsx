@@ -31,7 +31,8 @@ export default function CreateOrganization(){
     //const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [saving, setSaving] = useState(false);
-
+    const [success, setSuccess] = useState(null);
+    
     //scroll to errors automatically
     const alertRef = useRef(null);
     useEffect(() => {
@@ -55,6 +56,7 @@ export default function CreateOrganization(){
     //handle submission
     const handleSubmit = async(data, createAnother) => {
         setErrors([]);
+        setSuccess(null);
         try{
             console.log('submitting data...')
             setSaving(true);
@@ -70,7 +72,8 @@ export default function CreateOrganization(){
                 //redirect switchboard
                 setOrganizationDetails(prev => [...prev, returnData]);
                 if(createAnother){
-                    navigate('/organizations/new')
+                    navigate('/organizations/new');
+                    setSuccess('Organization successfuly created!')
                 }
                 else if(jumpTo == 'projects' && projectID && orgID){
                     navigate(`/projects/${projectID}/organizations/${orgID}?adding=true`)
@@ -115,6 +118,7 @@ export default function CreateOrganization(){
                     <li key={msg}>{msg}</li>)}
                 </ul>
             </div>}
+            {success && success !== '' && <div className={errorStyles.success}><p>{success}</p></div>}
             <DynamicForm config={formConfig} onSubmit={handleSubmit} onCancel={handleCancel} onError={(e) => setErrors(e)} saving={saving} createAnother={true} />
         </div>
     )

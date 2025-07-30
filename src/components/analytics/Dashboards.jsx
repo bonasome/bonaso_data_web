@@ -3,7 +3,7 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useParams } from 'react-router-dom';
 import Loading from '../reuseables/loading/Loading';
 import errorStyles from '../../styles/errors.module.css'
-import ModelSelect from '../reuseables/ModelSelect';
+import ModelSelect from '../reuseables/inputs/ModelSelect';
 import ProjectsIndex from '../projects/ProjectsIndex';
 import Dashboard from './Dashboard';
 import styles from './dashboard.module.css';

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 
 import SimpleSelect from '../reuseables/inputs/SimpleSelect';
-import ModelMultiSelect from '../reuseables/ModelMultiSelect';
+import ModelMultiSelect from '../reuseables/inputs/ModelMultiSelect';
 import IndicatorsIndex from './IndicatorsIndex';
 
 //helper function to manage some of the special logic for creating indicators so dynamic form does not get
@@ -21,7 +21,6 @@ export default function IndicatorPrereqLogic({ existing, callback }){
     useEffect(() => {
         setInitial(existing?.prereqs ?? []);
         setMatchTo(existing?.match ?? null);
-
     }, [existing])
 
     //callback/update match select on indicators change

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import ProjectsIndex from '../../projects/ProjectsIndex';
-import ModelSelect from '../../reuseables/ModelSelect';
+import ModelSelect from '../../reuseables/inputs/ModelSelect';
 import Checkbox from '../../reuseables/inputs/Checkbox';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../contexts/UserAuth';

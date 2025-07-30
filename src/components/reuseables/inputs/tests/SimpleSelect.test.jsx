@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
-import SimpleSelect from './SimpleSelect';
+import SimpleSelect from '../SimpleSelect';
 
 describe('SimpleSelect', () => {
     const optionValues = ['apple', 'banana', 'cherry'];

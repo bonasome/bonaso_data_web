@@ -163,6 +163,11 @@ export default function RespondentDetail(){
     const miniFlagUpdate = (data) => {
         setRespondent(prev => ({ ...prev, flags: [...(prev.flags || []), data] }));
     }
+    //update when a flag is resolved
+    const updateFlag = (data) => {
+        const others = respondent.flags.filter(f => (f.id != data.id));
+        setRespondent(prev => ({ ...prev, flags: [...others, data]}));
+    }
     
     //delete respondent
     const deleteRespondent = async() => {
@@ -221,7 +226,7 @@ export default function RespondentDetail(){
                     />}
                     {flagging &&
                         <FlagModal id={respondent.id} model={'respondents.respondent'} onCancel={() => setFlagging(false)} 
-                            onConfirm={(flag) => miniFlagUpdate(flag)} />
+                            onConfirm={(flag) => {setFlagging(false); miniFlagUpdate(flag)}} />
                     }
                     <h1>{respondent.display_name}</h1>
                     
@@ -315,7 +320,7 @@ export default function RespondentDetail(){
                         </div>
 
                         {showFlags && <div>
-                            {respondent.flags.map((flag) => (<FlagCard flag={flag}/>))}
+                            {respondent.flags.map((flag) => (<FlagCard flag={flag} onUpdate={(flag) => updateFlag(flag)}/>))}
                         </div>}
                     </div>}
                 

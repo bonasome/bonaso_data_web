@@ -159,7 +159,6 @@ export default function OrganizationsIndex( { callback=null, callbackText='Add O
         if(!addRedirect) return '/organizations/new'
         return `/organizations/new?to=${addRedirect?.to}&projectID=${addRedirect.projectID}&orgID=${addRedirect.orgID}`
     }, [addRedirect])
-    
     if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
@@ -173,7 +172,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Add O
                 <Link to={redirect || '/organizations/new'}><button><BsBuildingFillAdd /> Add an Organiation</button></Link>}
                 {organizations?.length == 0 ? 
                     <p>No organizations match your criteria.</p> :
-                    organizations.map(org => (
+                    organizations?.map(org => (
                     <OrganizationCard key={org.id} org={org} callback={callback ? callback : null} callbackText={callbackText} />
                     ))
                 }
