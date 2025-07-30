@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from '../../../styles/indexSelect.module.css';
 
-export default function ModelMultiSelect({ IndexComponent, value, onChange, label, errors, callbackText, displayField='display_name' }){
+export default function ModelMultiSelect({ IndexComponent, value, onChange, label, errors, callbackText, labelField='display_name' }){
     const [selecting, setSelecting] = useState(false);
 
     
@@ -22,7 +22,7 @@ export default function ModelMultiSelect({ IndexComponent, value, onChange, labe
                 {value.length > 0 ? 
                     <div>
                         {value.map((v) => (<div style={{ display: 'flex', flexDirection: 'row'}}>
-                            <p>{v[displayField]}</p>
+                            <p>{v[labelField]}</p>
                             <button type="button" onClick = {() => remove(v)} style={{ marginLeft: 'auto'}}>Remove</button>
                         </div>))}
                     </div>

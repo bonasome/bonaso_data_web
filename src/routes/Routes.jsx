@@ -20,8 +20,7 @@ import ViewOnly from '../components/redirects/ViewOnly';
 //respondents
 import RespondentsLayout from '../layouts/RespondentLayout';
 import RespondentsIndex from '../components/respondents/RespondentsIndex';
-import CreateRespondent from '../components/respondents/CreateRespondent';
-import EditRespondent from '../components/respondents/EditRespondent';
+import RespondentForm from '../components/respondents/RespondentForm';
 import RespondentDetail from '../components/respondents/RespondentDetail';
 
 //projects
@@ -29,9 +28,8 @@ import ProjectLayout from '../layouts/ProjectLayout';
 import ProjectsIndex from '../components/projects/ProjectsIndex';
 import ProjectDetail from '../components/projects/ProjectDetail';
 import ProjectOrganization from '../components/projects/ProjectOrganization';
+import ProjectForm from '../components/projects/ProjectForm';
 
-import CreateProject from '../components/projects/CreateProject';
-import EditProject from '../components/projects/EditProject';
 import NarrativeReportUpload from '../components/narrativeReports/NarrativeReportUpload';
 import NarrativeReportDownload from '../components/narrativeReports/NarrativeReportDownload';
 
@@ -44,8 +42,7 @@ import BatchRecord from '../components/batchRecord/BatchRecord';
 //organizations
 import OrganizationsIndex from '../components/organizations/OrganizationsIndex';
 import OrganizationDetail from '../components/organizations/OrganizationDetail';
-import CreateOrganization from '../components/organizations/CreateOrganization';
-import EditOrganization from '../components/organizations/EditOrganization';
+import OrganizationForm from '../components/organizations/OrganizationForm';
 
 //indicators
 import IndicatorsIndex from '../components/indicators/IndicatorsIndex';
@@ -58,27 +55,23 @@ import NotFound from '../components/redirects/NotFound';
 import ProfileLayout from '../layouts/ProfileLayout';
 import Profile from '../components/users/Profile';
 import UsersIndex from '../components/users/UsersIndex';
-import CreateUser from '../components/users/CreateUser';
-import EditUser from '../components/users/EditUser';
+import UserForm from '../components/users/UserForm';
 
 import EventDetail from '../components/events/EventDetail';
-import CreateEvent from '../components/events/CreateEvent';
-import EditEvent from '../components/events/EditEvent';
+import EventForm from '../components/events/EventForm';
 import EventsIndex from '../components/events/EventsIndex';
 
 import Dashboards from '../components/analytics/Dashboards';
 
 import Messages from '../components//messages/Messages';
 import ComposeAnnouncements from '../components/messages/announcements/ComposeAnnouncement';
-import CreateProjectActivity from '../components/projects/activities/CreateProjectActivity';
-import EditProjectActivity from '../components/projects/activities/EditProjectActivity';
-import EditProjectDeadline from '../components/projects/deadlines/EditProjectDeadine';
-import CreateProjectDeadline from '../components/projects/deadlines/CreateProjectDeadline';
+import ProjectActivityForm from '../components/projects/activities/ProjectActivityForm';
+import ProjectDeadlineForm from '../components/projects/deadlines/ProjectDeadlineForm';
 
-import CreateSocialPost from '../components/social/CreateSocialPost';
 import SocialPostsIndex from '../components/social/SocialPostsIndex';
 import SocialPostDetail from '../components/social/SocialPostDetail';
-import EditSocialPost from '../components/social/EditSocialPost';
+import SocialPostForm from '../components/social/SocialPostForm';
+
 function Router() {
     return (
         <Routes>
@@ -103,8 +96,8 @@ function Router() {
         >
             <Route index element={<RespondentsIndex />}/>
             <Route path=':id' element={<RespondentDetail />} />
-            <Route path='new' element={<CreateRespondent />} />
-            <Route path=':id/edit' element={<EditRespondent />} />
+            <Route path='new' element={<RespondentForm />} />
+            <Route path=':id/edit' element={<RespondentForm />} />
         </Route>
         
         <Route 
@@ -150,37 +143,37 @@ function Router() {
             } />
             <Route path=':id/activities/new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <CreateProjectActivity />
+                    <ProjectActivityForm />
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id/activities/:activityID/edit' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <EditProjectActivity />
+                    <ProjectActivityForm />
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id/deadlines/new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <CreateProjectDeadline />
+                    <ProjectDeadlineForm />
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id/deadlines/:deadlineID/edit' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <EditProjectDeadline />
+                    <ProjectDeadlineForm />
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id/announcements/new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <CreateProjectDeadline />
+                    <ProjectDeadlineForm />
                 </RedirectIfNoPerm>
             }/>
             <Route path='new' element={
                 <RedirectIfNoPerm level={['admin']}>
-                    <CreateProject />
+                    <ProjectForm />
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id/edit' element={
                 <RedirectIfNoPerm level={['admin']}>
-                    <EditProject />
+                    <ProjectForm />
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id/narrative-reports/download' element={
@@ -213,12 +206,12 @@ function Router() {
             
             <Route path='new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <CreateOrganization/>
+                    <OrganizationForm />
                 </RedirectIfNoPerm>
                 }/>
             <Route path=':id/edit' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']} org={true}>
-                    <EditOrganization />
+                    <OrganizationForm />
                 </RedirectIfNoPerm>
                 }/>
         </Route>
@@ -275,11 +268,11 @@ function Router() {
             
             <Route path='new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <CreateUser/>
+                    <UserForm />
                 </RedirectIfNoPerm>
                 }/>
             <Route path=':id/edit' element={
-                    <EditUser />
+                    <UserForm />
                 }/>
         </Route>
         
@@ -305,12 +298,12 @@ function Router() {
             
             <Route path='new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <CreateSocialPost/>
+                    <SocialPostForm />
                 </RedirectIfNoPerm>
                 }/>
             <Route path=':id/edit' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']} org={true}>
-                    <EditSocialPost />
+                    <SocialPostForm />
                 </RedirectIfNoPerm>
                 }/>
         </Route>
@@ -373,7 +366,7 @@ function Router() {
             }/>
             <Route path='new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <CreateEvent />
+                    <EventForm />
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id' element={
@@ -383,7 +376,7 @@ function Router() {
             }/>
             <Route path=':id/edit' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <EditEvent />
+                    <EventForm />
                 </RedirectIfNoPerm>
             }/>
         </Route>

@@ -28,6 +28,7 @@ export default function Field({ field, control }) {
                 case "text":
                 case "email":
                 case "password":
+                case "date":
                 case "textarea":
                     return <Input type={type} {...commonProps} />;
                 case "radio":

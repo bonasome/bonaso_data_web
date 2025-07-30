@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Messages from '../Messages';
 import styles from './imgSelect.module.css';
 
 function ImgCard({ value, label, Img, active, callback }) {
@@ -17,7 +18,7 @@ function ImgCard({ value, label, Img, active, callback }) {
     );
 }
 
-export default function ImageSelect({ label, value = null, onChange, options, images, multiple = false, errors }) {
+export default function ImageSelect({ label, value = null, onChange, options, images, multiple = false, errors, valueField='value', labelField='label' }) {
     const handleChange = (val) => {
         if (multiple) {
             const exists = value?.includes(val);
@@ -34,16 +35,18 @@ export default function ImageSelect({ label, value = null, onChange, options, im
                 <legend>{label}</legend>
                 <Messages errors={errors} />
                 <div className={styles.container}>
-                    {options.values.map((val, index) => (
-                        <ImgCard
-                            key={val}
-                            value={val}
-                            label={options.labels[index]}
+                    {options.map((o, index) => {
+                        const optionValue = o[valueField];
+                        const optionLabel = o[labelField];
+                        return <ImgCard
+                            key={optionValue}
+                            value={optionValue}
+                            label={optionLabel}
                             Img={images[index]}
-                            active={multiple ? value?.includes(val) : value === val}
+                            active={multiple ? value?.includes(optionValue) : value === optionValue}
                             callback={handleChange}
                         />
-                    ))}
+                    })}
                 </div>
             </fieldset>
         </div>

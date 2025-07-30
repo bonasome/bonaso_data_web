@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest';
 import { MemoryRouter, Routes, Route, useLocation, BrowserRouter } from 'react-router-dom';
 import { setupServer } from 'msw/node';
-import { handlers } from '../../mocks/handlers';
-import { ProjectProvider } from '../../contexts/ProjectsContext';
-import { UserAuth } from '../../contexts/UserAuth';
-import ProjectsIndex from './ProjectsIndex';
+import { handlers } from '../../../mocks/handlers';
+import { ProjectProvider } from '../../../contexts/ProjectsContext';
+import { UserAuth } from '../../../contexts/UserAuth';
+import ProjectsIndex from '../ProjectsIndex';
 import ProjectDetail from './projectDetail/ProjectDetail';
 const navigateMock = vi.fn();
 vi.mock('react-router-dom', async () => {

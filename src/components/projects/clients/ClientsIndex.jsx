@@ -13,10 +13,10 @@ function ClientCard({ client, callback=null, callbackText }){
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             <Link to={`/clients/${client.id}`} style={{display:'flex', width:"fit-content"}}><h2>{client.name}</h2></Link>
+            {callback && <button onClick={() => callback(client)}>{callbackText}</button> }
             {expanded &&
                 <div>
                     {client.full_name && <p>{client.full_name}</p>}
-                    {callback && <button onClick={() => callback(client)}>{callbackText}</button> }
                 </div>
             }
         </div>

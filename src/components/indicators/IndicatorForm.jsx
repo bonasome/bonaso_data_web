@@ -22,8 +22,9 @@ import { BsDatabaseFillAdd } from "react-icons/bs";
 export default function IndicatorForm(){
     const navigate = useNavigate();
     
-    //param to get indicator (balnk if new)
+    //param to get indicator (blank if new)
     const { id } = useParams();
+
     //context
     const { setIndicatorDetails, indicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
 
@@ -69,6 +70,7 @@ export default function IndicatorForm(){
         getMeta();
     }, []);
 
+    //get the existing details if an id is found in the params
     useEffect(() => {
         const getIndicatorDetail = async () => {
             if(!id) return;
@@ -104,12 +106,24 @@ export default function IndicatorForm(){
     const onSubmit = async(data, e) => {
         setSubmissionErrors([]);
         setSuccess([]);
+        let sErrors = [] //store business logic errors caught before server
+
         //prerequisites sends objects by default, so map just the ids
         if(data.prerequisite_ids.length > 0) {
             data.prerequisite_ids = data.prerequisite_ids.map(pre => (pre.id))
         }
-
-        let sErrors = []
+        //collect subcategories from the rows ref
+        const ref = rowRefs.current['subcategory_data'];
+        if (ref?.current?.collect) {
+            const collected = ref.current.collect();
+            if (collected === null) {
+                sErrors.push(`Please double check your subcategories.`);
+            } 
+            else {
+                data['subcategory_data'] = collected;
+            }
+        }
+        
         //prevent forbidden chars from appearing in subcat names
         const names = data.subcategory_data
         let commas = []
@@ -123,18 +137,22 @@ export default function IndicatorForm(){
             setSubmissionErrors(sErrors);
             return;
         }
+        //remove stale values possibly caused by switching types
         if(type !== 'respondent'){
             data.required_attribute_names = [];
             data.governs_attribute = null;
             data.require_numeric = false;
             data.allow_repeat = false;
         }
+        //clear match
         if(!data?.prerequisite_ids || data?.prerequisite_ids?.length === 0){
             data.match_subcategories_to = null;
         }
+        //clear data if using matched (only one is allowed, can't match and have custom)
         if(usingMatched){
             data.subcategory_data = [];
         }
+        //clear subcat data if unchecked
         if(!requireSubcats){
             data.subcategory_data = [];
         }
@@ -182,7 +200,7 @@ export default function IndicatorForm(){
             }
         }
         catch(err){
-            //setErrors(['Something went wrong. Please try again later.'])
+            setSubmissionErrors(['Something went wrong. Please try again later.']);
             console.error('Could not record indicator: ', err)
         }
         finally{
@@ -212,7 +230,7 @@ export default function IndicatorForm(){
             subcategory_data: existing?.subcategories ?? [],
         }
     }, [existing]);
-
+    console.log(existing)
     const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
 
     useEffect(() => {
@@ -236,7 +254,9 @@ export default function IndicatorForm(){
     }, [prereqs]);
 
     const rowRefs = useRef({});
-
+    if (!rowRefs.current['subcategory_data']) {
+        rowRefs.current['subcategory_data'] = React.createRef();
+    }
     const basicInfo = [
         { name: "code", label: "Indicator Code", type: "text", rules: { required: "Required" } },
         { name: "name", label: "Indicator Name", type: "textarea", rules: { required: "Required" } },
@@ -266,7 +286,7 @@ export default function IndicatorForm(){
         {name: 'require_subcategories', label: 'Require Subcategories?', type: 'checkbox' },
     ]
 
-    if(!indicatorsMeta?.statuses) return <Loading />
+    if(loading || !indicatorsMeta?.statuses) return <Loading />
     return(
         <div>
             <ReturnLink url={id ? `/indicators/${id}` : '/indicators'} display={id ? 'Return to detail page' : 'Return to indicators overview'} />
@@ -278,7 +298,7 @@ export default function IndicatorForm(){
                 <FormSection fields={prerequisites} control={control} />
                 {availableSubcats.length > 0 && <FormSection fields={matchSubcats} control={control} />}
                 {!usingMatched && <FormSection fields={subcats} control={control} />}
-                {requireSubcats && !usingMatched && <SimpleDynamicRows ref={rowRefs.current['subcategories_data']}
+                {requireSubcats && !usingMatched && <SimpleDynamicRows ref={rowRefs.current['subcategory_data']}
                      existing={existing?.subcategories ?? []} />}
                 
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>

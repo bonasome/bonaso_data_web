@@ -66,7 +66,7 @@ function OrganizationCard({ org, callback, callbackText }) {
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             <Link to={`/organizations/${org.id}`} style={{display:'flex', width:"fit-content"}}><h2>{org.name}</h2></Link>
-            {callback && <button onClick={() => callback(org)}>{callbackText}</button>}
+            {callback && <button type="button" onClick={() => callback(org)}>{callbackText}</button>}
             {expanded && loading && <ComponentLoading />}
             {expanded && active && 
                 <div>
