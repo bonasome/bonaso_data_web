@@ -126,7 +126,7 @@ export default function RespondentsIndex(){
             <h1>Respondents</h1> 
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
                 filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} 
-                initial={initial} schema={filterConfig(respondentsMeta)} 
+                initial={initial} config={filterConfig(respondentsMeta)} 
             />}>
                 {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 <Link to='/respondents/new'><button> <IoPersonAddSharp style={{marginRight: '1vh'}}/> Create New Respondent</button></Link>

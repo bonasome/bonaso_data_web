@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import CreateClient from './CreateClientModal';
+import CreateClient from '../clients/CreateClientModal';
 
 // Mock fetchWithAuth
 vi.mock('../../../services/fetchWithAuth', () => {

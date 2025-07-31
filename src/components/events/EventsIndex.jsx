@@ -8,8 +8,9 @@ import Loading from '../reuseables/loading/Loading';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import { useEvents } from '../../contexts/EventsContext';
 import { Link } from 'react-router-dom';
-import EventFilters from './EventFilters';
+import Filter from '../reuseables/Filter';
 import prettyDates from '../../../services/prettyDates';
+import { filterConfig } from './filterConfig';
 function EventCard({ event }) {
     const [loading, setLoading] = useState(false);
     const { eventDetails, setEventDetails } = useEvents();
@@ -71,12 +72,10 @@ export default function EventsIndex(){
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
     const { events, setEvents } = useEvents();
+    const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [orgFilter, setOrgFilter] = useState('');
-    const [indFilter, setIndFilter] = useState('');
-    const [typeFilter, setTypeFilter] = useState('');
-    const [startFilter, setStartFilter] = useState('');
-    const [endFilter, setEndFilter] = useState('')
+    const [orgsFilter, setOrgs] = useState('');
+    const [filters, setFilters]
 
     useEffect(() => {
         const loadEvents = async () => {
@@ -104,20 +103,32 @@ export default function EventsIndex(){
         loadEvents();
     }, [page, search, orgFilter, indFilter, typeFilter, startFilter, endFilter]);
 
-    const setFilters = (filters) => {
-        setOrgFilter(filters.organization);
-        setIndFilter(filters.indicator);
-        setTypeFilter(filters.type);
-        setStartFilter(filters.start);
-        setEndFilter(filters.end);
-        setPage(1);
-    }
+    useEffect(() => {
+        const loadOrgs = async () => {
+            try {
+                const url = `/api/organizations/?search=${search}`;
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setOrgs(data.results);
+            } 
+            catch (err) {
+                console.error('Failed to fetch projects: ', err)
+                setErrors(['Something went wrong, Please try again later.']);
+            }
+            finally {
+                setLoading(false);
+            }
+        };
+        loadOrgs();
+    }, [orgSearch]);
 
     if(loading) return <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Events' : 'My Events'}</h1> 
-            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<EventFilters onFilterChange={setFilters} />} >
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter 
+                onFilterChange={setFilters} config={filterConfig(eventsMeta, orgs, (s) => setOrgSearch(s))} initial={initial}  
+            />}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <Link to='/events/new'><button>Create a New Event</button></Link>} 
                 {events?.length === 0 ? 

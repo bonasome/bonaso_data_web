@@ -10,7 +10,7 @@ import SimpleDynamicRows from '../inputs/SimpleDynamicRows';
 import ImageSelect from '../inputs/ImageSelect';
 
 export default function Field({ field, control }) {
-  const { type, name, rules, label, options, IndexComponent, images, labelField, valueField } = field;
+  const { type, name, rules, label, options, IndexComponent, images, labelField, valueField, includeParams, excludeParams } = field;
 
   return (
         <Controller
@@ -29,6 +29,7 @@ export default function Field({ field, control }) {
                 case "email":
                 case "password":
                 case "date":
+                case "number":
                 case "textarea":
                     return <Input type={type} {...commonProps} />;
                 case "radio":
@@ -42,9 +43,9 @@ export default function Field({ field, control }) {
                 case 'rows':
                     return <SimpleDynamicRows {...commonProps} />
                 case 'model':
-                    return <ModelSelect labelField={labelField} {...commonProps} IndexComponent={IndexComponent} />
+                    return <ModelSelect labelField={labelField} {...commonProps} IndexComponent={IndexComponent} includeParams={includeParams} excludeParams={excludeParams}/>
                 case 'multimodel':
-                    return <ModelMultiSelect labelField={labelField} {...commonProps} IndexComponent={IndexComponent} />
+                    return <ModelMultiSelect labelField={labelField} {...commonProps} IndexComponent={IndexComponent} includeParams={includeParams} excludeParams={excludeParams}/>
                     
                 default:
                     return <p>Unsupported field type: {type}</p>;

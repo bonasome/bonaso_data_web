@@ -5,7 +5,7 @@ export const initial = {
 }
 
 export function filterConfig(meta){
-    if(!projects) return []
+    if(!meta?.statuses) return [];
     return [
         {name: 'status', label: 'In Project', type: 'select', constructors: {
             values: meta.statuses.map((s) => (s.value)),
@@ -13,6 +13,5 @@ export function filterConfig(meta){
         }},
         {name: 'start', label: 'Starts After', type: 'date'},
         {name: 'end', label: 'Ends Before', type: 'date'},
-
     ]
 }   

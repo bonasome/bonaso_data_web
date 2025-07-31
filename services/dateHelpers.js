@@ -27,7 +27,7 @@ export function tryMatchDates(start, end, project){
     if(((startDay === 1 || (startDay === projectStartDay && startMonth===projectStartMonth && startYear===projectStartYear)) &&
         (endDay === new Date(endYear, endMonth, 0).getDate() || (endDay === projectEndDay && endMonth===projectEndMonth && endYear===projectEndYear)) 
         && (endMonth === startMonth))){
-        return {type: 'months', value: `${startYear}-${String(startMonth).padStart(2, '0')}`}
+        return {type: 'month', value: `${startYear}-${String(startMonth).padStart(2, '0')}`}
     }
     const quarters = [
         { start: new Date(`${startYear}-01-01`), end: new Date(`${startYear}-03-31`), str: `Q1 ${startYear}` },
@@ -36,32 +36,32 @@ export function tryMatchDates(start, end, project){
         { start: new Date(`${startYear}-10-01`), end: new Date(`${startYear}-12-31`), str: `Q4 ${startYear}` },
     ];
 
-let quarter = null;
-for (const q of quarters) {
-    const qStartMonth = q.start.getMonth() + 1;
-    const qEndMonth = q.end.getMonth() + 1;
-    const qEndDay = q.end.getDate();
+    let quarter = null;
+    for (const q of quarters) {
+        const qStartMonth = q.start.getMonth() + 1;
+        const qEndMonth = q.end.getMonth() + 1;
+        const qEndDay = q.end.getDate();
 
-    const isFullQuarter = (
-        (
-            startDay === 1 ||
-            (startDay === projectStartDay && startMonth === projectStartMonth && startYear === projectStartYear)
-        ) &&
-        (
-            endDay === qEndDay ||
-            (endDay === projectEndDay && endMonth === projectEndMonth && endYear === projectEndYear)
-        ) &&
-        endMonth === qEndMonth &&
-        startMonth === qStartMonth
-    );
+        const isFullQuarter = (
+            (
+                startDay === 1 ||
+                (startDay === projectStartDay && startMonth === projectStartMonth && startYear === projectStartYear)
+            ) &&
+            (
+                endDay === qEndDay ||
+                (endDay === projectEndDay && endMonth === projectEndMonth && endYear === projectEndYear)
+            ) &&
+            endMonth === qEndMonth &&
+            startMonth === qStartMonth
+        );
 
-    if (isFullQuarter) {
-        quarter = { type: 'quarters', value: q.str };
-        break;
+        if (isFullQuarter) {
+            quarter = { type: 'quarter', value: q.str };
+            break;
+        }
     }
-}
-    if(quarter) return quarter
-    else return {type: 'custom', value: ''}
+        if(quarter) return quarter
+        else return {type: 'custom', value: ''}
 }
 
 export function getWindowsBetween(startDateStr, endDateStr) {

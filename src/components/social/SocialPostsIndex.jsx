@@ -113,7 +113,7 @@ export default function SocialPostsIndex({ callback=null, callbackText='Add Post
             <h1>{user.role == 'admin' ? 'All Posts' : 'My Posts'}</h1> 
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={
                 <Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} 
-                schema={filterConfig(socialPostsMeta)} initial={initial} 
+                config={filterConfig(socialPostsMeta)} initial={initial} 
             /> }>
                 {errors.length != 0 && <div className={errorStyles.errors} ref={alertRef}>
                     <ul>{errors.map((msg)=>

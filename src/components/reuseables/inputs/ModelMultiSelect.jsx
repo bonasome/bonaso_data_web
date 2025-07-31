@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import styles from '../../../styles/indexSelect.module.css';
+import modalStyles from '../../../styles/modals.module.css';
 
 export default function ModelMultiSelect({ IndexComponent, value, onChange, label, errors, callbackText, labelField='display_name' }){
     const [selecting, setSelecting] = useState(false);
-
+    
     
     const handleAdd = (obj) => {
         const inSelected = value.filter((v) => v.id === obj.id).length > 0;
@@ -14,6 +15,8 @@ export default function ModelMultiSelect({ IndexComponent, value, onChange, labe
         const updated = value.filter((ex) => (ex.id != obj.id))
         onChange(updated)
     }
+
+    const blacklist = value?.map((val) => (val.id)) ?? [];
 
     return(
         <div>
@@ -30,7 +33,13 @@ export default function ModelMultiSelect({ IndexComponent, value, onChange, labe
                 : <p>Nothing selected</p>}
                 <button type="button" onClick={() => setSelecting(!selecting)}>{selecting ? 'Done' : 'Select'}</button>
                 <button type="button" onClick={() => onChange([])}>Clear Selection</button>
-                {selecting && <IndexComponent callback={(obj) => handleAdd(obj)} callbackText={callbackText}/>}
+                {selecting && <div className={modalStyles.modal}>
+                    <h2>{label}</h2>
+                    <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
+                        <IndexComponent callback={(obj) => handleAdd(obj)} callbackText={callbackText} blacklist={blacklist} />
+                    </div>
+                    <button onClick={() => setSelecting(false)}>Done</button>
+                </div>}
             </div>
         </div>
     )

@@ -1,0 +1,118 @@
+import { useState, useEffect, useMemo } from 'react';
+import { useForm,  useWatch } from "react-hook-form";
+
+import { useAuth } from '../../../contexts/UserAuth';
+
+import fetchWithAuth from '../../../../services/fetchWithAuth';
+
+import Messages from '../../reuseables/Messages';
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+import OrganizationsIndex from '../../organizations/OrganizationsIndex';
+import FormSection from '../../reuseables/forms/FormSection';
+
+import modalStyles from '../../../styles/modals.module.css';
+
+import { FcCancel } from "react-icons/fc";
+import { IoIosSave } from "react-icons/io";
+
+
+export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=null, existing=null }){
+    const [saving, setSaving] = useState(false);
+    const [pageErrors, setPageErrors] = useState([]);
+    const { user } = useAuth();
+
+    console.log(existing)
+    const onSubmit = async(data) => {
+        setPageErrors([]);
+        let sbWarnings = [];
+        data.organization_ids = data.organization_ids.map((org) => (org.id))
+        try{
+            setSaving(true);
+            data.project_id = existing?.project?.id ?? projectID
+            const url = existing ? `/api/messages/announcements/${existing.id}/` : `/api/messages/announcements/`
+            const response = await fetchWithAuth(url, {
+                method: existing ? 'PATCH' : 'POST',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify(data)
+            });
+            const returnData = await response.json();
+            if(response.ok){
+                onUpdate(returnData);
+                onClose();
+            }
+            else{
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${field}: ${returnData[field]}`);
+                    }
+                }
+                setPageErrors(serverResponse)
+            }
+        }
+        catch(err){
+            setPageErrors(['Something went wrong. Please try again later.'])
+            console.error('Could not record organization: ', err)
+        }
+        finally{
+            setSaving(false)
+        }
+
+    }
+
+    const defaultValues = useMemo(() => {
+            return {
+                subject: existing?.subject ?? '',
+                body: existing?.body ?? '',
+                organization_ids: existing?.organizations ?? []
+            }
+        }, [existing]);
+    
+    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+
+    useEffect(() => {
+        if (existing) {
+            reset(defaultValues);
+        }
+    }, [existing, reset, defaultValues]);
+
+
+    const basics = [
+        { name: 'subject', label: 'Subject', type: "text", rules: { required: "Required" }},
+        { name: 'body', label: "Body", type: "textarea",},
+
+        {name: 'cascade_to_children', label: 'Make Visible to Subgrantees?', type: 'checkbox'}
+    ]
+
+    const admin= [
+        { name: 'organization_ids', label: "Organizations Involved", type: "multimodel", IndexComponent: OrganizationsIndex,
+            labelField: 'name',
+        },
+        {name: 'visible_to_all', label: 'Make Visible to All Project Members', type: 'checkbox'}
+    ]
+    
+    return(
+        <div className={modalStyles.modal}>
+            <h1>{existing ? `Editing Announcement` : 'New Announcement' }</h1>
+            <Messages errors={pageErrors} />
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <FormSection fields={basics} control={control} />
+                {user.role === 'admin' && <FormSection fields={admin} control={control} />}
+                {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <button type="submit" value='normal'><IoIosSave /> Save</button>
+                    <button type="button" onClick={() => onClose()}>
+                        <FcCancel /> Cancel
+                    </button>
+                </div>}
+                {saving && <ButtonLoading />}
+            </form>
+        </div>
+    )
+}

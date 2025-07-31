@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/UserAuth'
@@ -13,6 +13,7 @@ import Loading from '../reuseables/loading/Loading';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import Filter from '../reuseables/Filter';
 import ButtonHover from '../reuseables/inputs/ButtonHover';
+import Messages from '../reuseables/Messages';
 
 import styles from '../../styles/indexView.module.css'
 import errorStyles from '../../styles/errors.module.css';
@@ -94,7 +95,7 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
     );
 }
 
-export default function IndicatorsIndex({ callback=null, callbackText='Add Indicator', excludeProject=null, excludeOrg=null, updateTrigger=null }){
+export default function IndicatorsIndex({ callback=null, callbackText='Add Indicator', includeParams=[], excludeParams=[], updateTrigger=null, blacklist=[], }){
     /*
     Callback: A function that can pass the details of a specific entry to another component. Useful for model selects.
     Callback Text: Text to display on callback button.
@@ -145,6 +146,22 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
         getMeta();
     }, []);
 
+    const params = useMemo(() => {
+        //sepereate from filters, these are passed as params
+
+        const allowedFields = ['project', 'organization'];
+        const include = includeParams?.filter(p => allowedFields.includes(p?.field))
+        ?.map(p => `&${p?.field}=${p?.value}`)
+        .join('') ?? '';
+
+        const exclude = excludeParams?.filter(p => allowedFields.includes(p?.field))
+        ?.map(p => `&exclude_${p?.field}=${p?.value}`)
+        .join('') ?? '';
+
+        return include + exclude
+
+    }, [includeParams, excludeParams]);
+
     //load the list of indicators, refresh on search/filter/page changes
     useEffect(() => {
         const loadIndicators = async () => {
@@ -153,11 +170,10 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
                 //append any filter query
                 const filterQuery = 
                     (filters.status ? `&status=${filters.status}` : '') +
-                    (filters.indicator_type ? `&indicator_type=${filters.indicator_type}` : '') +
-                    (excludeProject ? `&exclude_project=${excludeProject}` : '') +
-                    (excludeOrg ? `&exclude_organization=${excludeOrg}` : '');
+                    (filters.indicator_type ? `&indicator_type=${filters.indicator_type}` : '');
 
-                const url = `/api/indicators/?search=${search}&page=${page}` + filterQuery;
+                const url = `/api/indicators/?search=${search}&page=${page}` + filterQuery + params;
+                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
@@ -169,24 +185,24 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
             }
         };
         loadIndicators();
-    }, [page, search, filters, updateTrigger]);
+    }, [page, search, filters, updateTrigger, params]);
 
+    const filteredIndicators = indicators?.filter(ind => !blacklist.includes(ind.id));
 
     if(loading || !indicators) return callback ? <ComponentLoading /> : <Loading /> //on callback don't show full load
-
     return(
         <div className={styles.index}>
-            <h1>{user.role == 'admin' ? 'All Indicators' : 'My Indicators'}</h1> 
+            {!callback && <h1>{user.role == 'admin' ? 'All Indicators' : 'My Indicators'}</h1>} 
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
                 filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} 
-                initial={initial} schema={filterConfig(indicatorsMeta)} 
+                initial={initial} config={filterConfig(indicatorsMeta)} 
             />}>
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <Link to='/indicators/new'><button><MdAddToPhotos />  Create a New Indicator</button></Link>} 
-                {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-                {indicators.length === 0 ? 
+                <Messages errors={errors} ref={alertRef} />
+                {filteredIndicators.length === 0 ? 
                     <p>No indicators match your criteria.</p> :
-                    indicators.map(ind => (
+                    filteredIndicators.map(ind => (
                         <IndicatorCard key={ind.id} indicator={ind} callback={callback ? (indicator)=> callback(indicator) : null} callbackText={callbackText} />)
                     )
                 }

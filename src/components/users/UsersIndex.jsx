@@ -169,7 +169,7 @@ export default function ProfilesIndex(){
             {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
                 filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}}
-                    schema={filterConfig(profilesMeta, orgs, clients, (s) => setOrgSearch(s), (s)=>setClientSearch(s))}
+                    config={filterConfig(profilesMeta, orgs, clients, (s) => setOrgSearch(s), (s)=>setClientSearch(s))}
                     initial={initial}
                 />}>
                 <Link to='/profiles/new'><button><IoPersonAddSharp /> Add New Team Member</button></Link>

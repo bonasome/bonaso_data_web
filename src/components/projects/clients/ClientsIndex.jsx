@@ -1,13 +1,20 @@
-import IndexViewWrapper from "../../reuseables/IndexView"
-import { useProjects } from "../../../contexts/ProjectsContext";
-import styles from '../../../styles/indexView.module.css';
-import fetchWithAuth from "../../../../services/fetchWithAuth";
-import Loading from "../../reuseables/loading/Loading";
-import ComponentLoading from "../../reuseables/loading/ComponentLoading";
 import { useState, useEffect } from 'react';
-import CreateClient from "./CreateClientModal";
 import { Link } from "react-router-dom";
 
+import { useProjects } from "../../../contexts/ProjectsContext";
+import fetchWithAuth from "../../../../services/fetchWithAuth";
+
+import IndexViewWrapper from "../../reuseables/IndexView"
+import Loading from "../../reuseables/loading/Loading";
+import ComponentLoading from "../../reuseables/loading/ComponentLoading";
+import CreateClient from "./CreateClientModal";
+
+import styles from '../../../styles/indexView.module.css';
+
+import { RiGovernmentFill } from "react-icons/ri";
+import Messages from '../../reuseables/Messages';
+
+//little card for each client obj
 function ClientCard({ client, callback=null, callbackText }){
     const [expanded, setExpanded] = useState(false);
     return(
@@ -23,13 +30,20 @@ function ClientCard({ client, callback=null, callbackText }){
     )
 }
 
-export default function ClientsIndex({ callback=null, callbackText='Select a Client' }){
-    const [loading, setLoading] = useState(true);
+//index to display clients
+export default function ClientsIndex({ callback=null, callbackText='Select a Client', blacklist=[] }){
+    //context
+    const { clients, setClients } = useProjects();
+
+    //index helpers
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-    const { clients, setClients } = useProjects();
-    const [showClientModal, setShowClientModal] = useState(false);
+
+    //page meta
+    const [loading, setLoading] = useState(true);
+    const [errors, setErrors] = useState(false);
+    const [showClientModal, setShowClientModal] = useState(false); //contorl create modal
 
     useEffect(() => {
         const getClients = async () => {
@@ -44,26 +58,29 @@ export default function ClientsIndex({ callback=null, callbackText='Select a Cli
                 else {
                     setClients((prev) => [...prev, ...data.results]);
                 }
-                setLoading(false);
             } 
             catch (err) {
-                console.error('Failed to fetch projects: ', err)
+                setErrors(['Something went wrong. Please try again later.'])
+                console.error('Failed to fetch clients: ', err)
+                
+            }
+            finally{
                 setLoading(false)
             }
         }
         getClients();
     }, [search])
 
-    console.log(clients)
+    const filteredClients = clients?.filter(c => !blacklist.includes(c.id));
     if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
-            <h1>Clients</h1>
+            {!callback && <h1>Clients</h1>}
             {showClientModal && <CreateClient onCreate={(client) => {setClients(prev=> [...prev, client]); setShowClientModal(false)}} onCancel={() => setShowClientModal(false)} /> }
-            <button onClick={() => setShowClientModal(true)}>Create New Client</button>
+            <button onClick={() => setShowClientModal(true)}> <RiGovernmentFill /> Create New Client</button>
             <IndexViewWrapper entries={entries} page={page} onSearchChange={setSearch} onPageChange={setPage}>
-                {clients?.length > 0 ? 
-                    clients.map((c) => (
+                {filteredClients?.length > 0 ? 
+                    filteredClients.map((c) => (
                         <ClientCard key={c.id} client={c} callback={callback ? callback : null} callbackText={callbackText}/>
                     )) :
                     <p>No clients yet!</p>

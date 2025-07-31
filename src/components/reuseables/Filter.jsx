@@ -8,7 +8,7 @@ import ButtonHover from '../reuseables/inputs/ButtonHover';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import cleanLabels from '../../../services/cleanLabels';
 
-export default function Filter({ onFilterChange, initial, schema }){
+export default function Filter({ onFilterChange, initial, config }){
     const [filters, setFilters] = useState(initial || {})
     const [showFilters, setShowFilters] = useState(false);
 
@@ -37,13 +37,13 @@ export default function Filter({ onFilterChange, initial, schema }){
     }
 
     
-    if(!initial || !schema ) return <ComponentLoading />
+    if(!initial || !config ) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
             <ButtonHover callback={() => setShowFilters(!showFilters)} noHover={<FaFilter />} hover={'Filter Results'} />
             {showFilters && (
                 <div className={styles.filters}>
-                        {schema.map((field) => {
+                        {config.map((field) => {
                             //get label or default to name (name is required)
                             const label = field?.label ?? cleanLabels(field.name);
                             if(field.type === 'select'){

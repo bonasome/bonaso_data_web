@@ -20,7 +20,6 @@
     z-index: 1000; /* High enough to sit above other content */
     display: flex;
     align-items: center;
-    justify-content: center;
     overflow-y: scroll;
 }
 @media screen and (max-width: 768px){

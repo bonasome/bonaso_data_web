@@ -201,7 +201,7 @@ function Home() {
                 const url = `/api/manage/tasks/`
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
-                const myTasks = data.results.filter(task => task.organization.id == user.organization_id)
+                const myTasks = data.results?.filter(task => task.organization.id == user.organization_id)
                 setTasks(myTasks);
             } 
             catch (err) {

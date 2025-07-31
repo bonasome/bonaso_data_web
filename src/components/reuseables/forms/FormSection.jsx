@@ -7,6 +7,7 @@ export default function FormSection({ fields, control }) {
                 <Field key={field.name} field={field} 
                     control={control} 
                     labelField={field?.labelField ?? 'label'} valueField={field?.valueField ?? 'value'}
+                    includeParams={field?.includeParams ?? []} excludeParams={field?.excludeParams ?? []}
                 />
             ))}
         </div>

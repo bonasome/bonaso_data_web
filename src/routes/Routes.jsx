@@ -64,7 +64,6 @@ import EventsIndex from '../components/events/EventsIndex';
 import Dashboards from '../components/analytics/Dashboards';
 
 import Messages from '../components//messages/Messages';
-import ComposeAnnouncements from '../components/messages/announcements/ComposeAnnouncement';
 import ProjectActivityForm from '../components/projects/activities/ProjectActivityForm';
 import ProjectDeadlineForm from '../components/projects/deadlines/ProjectDeadlineForm';
 
@@ -157,11 +156,6 @@ function Router() {
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id/deadlines/:deadlineID/edit' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <ProjectDeadlineForm />
-                </RedirectIfNoPerm>
-            }/>
-            <Route path=':id/announcements/new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
                     <ProjectDeadlineForm />
                 </RedirectIfNoPerm>
@@ -323,11 +317,6 @@ function Router() {
             }/>
             <Route path=':id' element={
                 <Messages />
-            }/>
-            <Route path='announcements/new' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <ComposeAnnouncements />
-                </RedirectIfNoPerm>
             }/>
         </Route>
 

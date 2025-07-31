@@ -1,36 +1,39 @@
-import styles from '../../../styles/modals.module.css';
-import errorStyles from '../../../styles/errors.module.css';
-import { useState } from 'react';
-import fetchWithAuth from '../../../../services/fetchWithAuth';
-import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+import { useState, useMemo, useEffect } from 'react';
+import { useForm,  useWatch } from "react-hook-form";
 
-export default function CreateClient({ onCreate, onCancel }){
-    const[name, setName] = useState('');
-    const [fullName, setFullName] = useState('');
-    const[errors, setErrors] = useState([])
+import fetchWithAuth from '../../../../services/fetchWithAuth';
+
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+import Messages from '../../reuseables/Messages';
+import FormSection from '../../reuseables/forms/FormSection';
+
+import styles from '../../../styles/modals.module.css';
+
+import { FcCancel } from "react-icons/fc";
+import { IoIosSave } from "react-icons/io";
+
+export default function CreateClient({ onCreate, onCancel, existing=null }){
+    //page meta
+    const[pageErrors, setPageErrors] = useState([])
     const [saving, setSaving] = useState(false);
 
-    const handleSubmit = async () => {
-        if(name == ''){
-            setErrors(['Client name is required.'])
-            return;
-        }
+    //handle form submission, vary method based on if its create or update
+    const onSubmit = async (data) => {
+        setPageErrors([]);
         try{
             setSaving(true);
-            const response = await fetchWithAuth(`/api/manage/clients/`, {
-                method: 'POST',
+            const url = existing ? `/api/manage/clients/${existing.id}/` : `/api/manage/clients/`
+            const response = await fetchWithAuth(url, {
+                method: existing ? 'PATCH' : 'POST',
                 headers: {
                     'Content-Type': "application/json",
                 },
-                body: JSON.stringify({
-                    'name': name,
-                    'full_name': fullName
-                })
+                body: JSON.stringify(data)
             });
             const returnData = await response.json();
             if(response.ok){
-                const client = {'id': returnData.id, 'name': name, 'full_name': fullName}
-                onCreate(client);
+                onCreate(returnData);
+                onCancel();
             }
             else{
                 const serverResponse = []
@@ -44,32 +47,54 @@ export default function CreateClient({ onCreate, onCancel }){
                         serverResponse.push(`${field}: ${returnData[field]}`);
                     }
                 }
-                setErrors(serverResponse)
+                setPageErrors(serverResponse)
             }
         }
         catch(err){
-            setErrors(['Something went wrong. Please try again later.'])
-            console.error('Could not record indicator: ', err)
+            setPageErrors(['Something went wrong. Please try again later.']);
+            console.error('Could not record indicator: ', err);
         }
         finally{
             setSaving(false)
         }
     }
+
+    const defaultValues = useMemo(() => {
+            return {
+                name: existing?.name ?? '',
+                full_name: existing?.full_name ?? '',
+            }
+        }, [existing]);
+    
+    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+
+    useEffect(() => {
+        if (existing) {
+            reset(defaultValues);
+        }
+    }, [existing, reset, defaultValues]);
+
+
+    const basics = [
+        { name: 'name', label: 'Name (Shorter Version)', type: "text", rules: { required: "Required" }},
+        { name: 'full_name', label: "Full Name", type: "textarea",},
+        { name: 'description', label: "Client Description", type: "textarea",},
+    ]
+
     return(
         <div className={styles.modal} >
-            {errors.length > 0 && (
-                <div className={errorStyles.errors}>
-                    <ul>{errors.map((msg) => <li key={msg}>{msg}</li>)}</ul>
-                </div>
-            )}
             <h2>Creating New Client</h2>
-            <label htmlFor='name'>Client Name (Short)</label>
-            <input type='text' name='name' id='name' value={name} onChange={(e) => setName(e.target.value)}/>
-            <label htmlFor='full_name'>Client Name (Full)</label>
-            <input type='text' name='full_name' id='name' value={fullName} onChange={(e) => setFullName(e.target.value)}/>
-            {saving ? <ButtonLoading /> : <button onClick={() => handleSubmit()}>Save</button>}
-            <button onClick={() => onCancel()}>Cancel</button>
-            <></>
+             <Messages errors={pageErrors} />
+
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <FormSection fields={basics} control={control} />
+                {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <button type="submit" value='normal'><IoIosSave /> Save</button>
+                    <button type="button" onClick={() => onCancel()}><FcCancel /> Cancel</button>
+                </div>}
+                {saving && <ButtonLoading />}
+            </form>
+
         </div>
     )
 }

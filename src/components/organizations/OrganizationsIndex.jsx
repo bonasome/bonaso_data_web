@@ -85,7 +85,7 @@ function OrganizationCard({ org, callback, callbackText }) {
     );
 }
 
-export default function OrganizationsIndex( { callback=null, callbackText='Add Organization', excludeProject=null, excludeEvent=null, updateTrigger=null, projAdd=null, addRedirect=null }){
+export default function OrganizationsIndex( { callback=null, callbackText='Add Organization', includeParams=[], excludeParams=[], updateTrigger=null, projAdd=null, addRedirect=null, blacklist=[] }){
     //context
     const { user } = useAuth();
     const { organizations, setOrganizations } = useOrganizations();
@@ -111,15 +111,33 @@ export default function OrganizationsIndex( { callback=null, callbackText='Add O
             }
         }, [errors]);
 
+    const params = useMemo(() => {
+        //sepereate from filters, these are passed as params
+
+        const allowedFields = ['project', 'event'];
+        const include = includeParams?.filter(p => allowedFields.includes(p?.field))
+        ?.map(p => `&${p?.field}=${p?.value}`)
+        .join('') ?? '';
+
+        const exclude = excludeParams?.filter(p => allowedFields.includes(p?.field))
+        ?.map(p => `&exclude_${p?.field}=${p?.value}`)
+        .join('') ?? '';
+
+        return include + exclude
+
+    }, [includeParams, excludeParams]);
+
     //load the list of orgs
     useEffect(() => {
         const loadOrgs = async () => {
             try {
                 const filterQuery = 
-                    (filters.project ? `&project=${filters.project}` : '') +
-                    (excludeProject ? `&exclude_project=${excludeProject}` : '') +
-                    (excludeEvent ? `&exclude_event=${excludeEvent}` : '');
-                const url = projAdd ? (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}` + filterQuery : `/api/manage/projects/${projAdd}/get-orgs/`) :  `/api/organizations/?search=${search}&page=${page}` + filterQuery;
+                    (filters.project ? `&project=${filters.project}` : '');
+                
+                const url = projAdd ? 
+                    (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}` + filterQuery + params: 
+                        `/api/manage/projects/${projAdd}/get-orgs/`) :  
+                    `/api/organizations/?search=${search}&page=${page}` + filterQuery + params;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
@@ -134,7 +152,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Add O
             }
         };
         loadOrgs();
-    }, [page, search, filters, updateTrigger]);
+    }, [page, search, filters, updateTrigger, params]);
 
     //load list of projects (for filter select), refresh on  search
     useEffect(() => {
@@ -158,22 +176,25 @@ export default function OrganizationsIndex( { callback=null, callbackText='Add O
     const redirect = useMemo(() => {
         if(!addRedirect) return '/organizations/new'
         return `/organizations/new?to=${addRedirect?.to}&projectID=${addRedirect.projectID}&orgID=${addRedirect.orgID}`
-    }, [addRedirect])
+    }, [addRedirect]);
+
+    const filteredOrgs = organizations?.filter(org => !blacklist.includes(org.id));
+
     if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
-            <h1>{user.role == 'admin' ? 'All Organizations' : 'My Organizations'}</h1> 
+            {!callback && <h1>{user.role == 'admin' ? 'All Organizations' : 'My Organizations'}</h1>} 
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
                 filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} initial={initial} 
-                schema={filterConfig(projects, setSearch)} 
+                config={filterConfig(projects, setSearch)} 
             />}>
                 {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <Link to={redirect || '/organizations/new'}><button><BsBuildingFillAdd /> Add an Organiation</button></Link>}
-                {organizations?.length == 0 ? 
+                {filteredOrgs?.length == 0 ? 
                     <p>No organizations match your criteria.</p> :
-                    organizations?.map(org => (
-                    <OrganizationCard key={org.id} org={org} callback={callback ? callback : null} callbackText={callbackText} />
+                    filteredOrgs?.map(org => (
+                        <OrganizationCard key={org.id} org={org} callback={callback ? callback : null} callbackText={callbackText} />
                     ))
                 }
             </IndexViewWrapper>

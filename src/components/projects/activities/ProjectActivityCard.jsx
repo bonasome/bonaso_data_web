@@ -1,23 +1,39 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+
+import { useAuth } from '../../../contexts/UserAuth';
+
 import fetchWithAuth from '../../../../services/fetchWithAuth';
+import prettyDates from '../../../../services/prettyDates';
+
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
+import UpdateRecord from '../../reuseables/meta/UpdateRecord';
+import Messages from '../../reuseables/Messages';
+
+import styles from '../projectDetail.module.css';
+
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
-import { Link } from 'react-router-dom';
-import prettyDates from '../../../../services/prettyDates';
-import styles from '../projectDetail.module.css';
-import { useAuth } from '../../../contexts/UserAuth';
+
 export default function ProjectActivityCard({ activity, project, onDelete }) {
+    //context
+    const { user } = useAuth();
+
+    //page meta
     const [expanded, setExpanded] = useState(false);
     const [del, setDel] = useState(false);
-    const { user } = useAuth();
+    const [errors, setErrors] = useState([]);
+
+    //determine if a user has edit perms (their creation or an admin)
     const hasPerm = useMemo(() => {
         if(!user || !activity) return false
         if(user.role === 'admin') return true;
         if(user.organization_id == activity?.created_by_organization) return true
         return false
     }, [user, activity]);
+
+    //delete an activity
     const deleteActivity = async () => {
         try {
             console.log('deleting organization...');
@@ -59,6 +75,7 @@ export default function ProjectActivityCard({ activity, project, onDelete }) {
         }
     }
     
+    //return delete modal seperately since the card hover messes with the modal
     if(del){
         return(
             <ConfirmDelete name='Activity' onConfirm={() => deleteActivity()} onCancel={() => setDel(false)} />
@@ -68,6 +85,7 @@ export default function ProjectActivityCard({ activity, project, onDelete }) {
         <div className={styles.infoCard} onClick={() => setExpanded(!expanded)}>
             <div>
                 <h3>{activity.name}</h3>
+                <Messages errors={errors} />
             </div>
             {expanded && <div>
                 {activity.start === activity.end ? 
@@ -79,6 +97,7 @@ export default function ProjectActivityCard({ activity, project, onDelete }) {
                     <Link to={`/projects/${project.id}/activities/${activity.id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
                     <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Activity'} forDelete={true} />
                 </div>}
+                <UpdateRecord created_by={activity.created_by} created_at={activity.created_at} updated_by={activity.updated_by} updated_at={activity.updated_at} />
             </div>}
         </div>
     )

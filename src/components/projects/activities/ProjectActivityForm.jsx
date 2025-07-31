@@ -72,6 +72,7 @@ export default function ProjectActivityForm(){
         getMeta();
     }, []);
 
+    //get the activity details if existing
     useEffect(() => {
         const fetchProjectActivities = async () => {
             if(!activityID) return;

@@ -1,19 +1,25 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, ReferenceLine } from 'recharts';
+
 import ganttBuilder from './ganttBuilder';
 import theme from '../../../../theme/theme';
 import cleanLabels from '../../../../services/cleanLabels';
 import prettyDates from '../../../../services/prettyDates';
 
+//gantt chart that appears on project hom page. Uses deadlines/activities
+
 export default function ProjectActivityFAGantt({ project, activities, deadlines }){
+    //transfor the data using a config (ganttBuilder.js)
     const data = useMemo(() => {
         return ganttBuilder(project, activities, deadlines)
     }, [project, activities]);
-    console.log(data)
+
+    //calculate project dates
     const today = new Date();
     const projectStart = new Date(project.start);
     const todayOffset = (today - projectStart) / (1000 * 60 * 60 * 24);
 
+    //use those dates to help place deadlines as ref lines on the chart
     const deadlineLines = useMemo(() => {
         if(deadlines.length === 0) return [];
         return deadlines.map(a => ({
@@ -23,6 +29,7 @@ export default function ProjectActivityFAGantt({ project, activities, deadlines 
         }))
     }, [project, deadlines]);
 
+    //ref/chart width to help place deadline ref lines
     const ref = useRef();
     const [chartWidth, setChartWidth] = useState(0);
 
@@ -32,18 +39,21 @@ export default function ProjectActivityFAGantt({ project, activities, deadlines 
     }
     }, []);
 
-
+    //special comp to place ref lines and display a tooltip on hover (kind of crappy but it works)
     const ReferenceLineLabel = ({ viewBox, value, deadline }) => {
         const { x, y } = viewBox;
         const [hovered, setHovered] = useState(false);
+        //get cursor to determine tooltip placement
         const [cursorX, setCursorX] = useState(null);
         const [cursorY, setCursorY] = useState(null);
 
+        //determine which side of cursor based on midpoint
         const isLeft = useMemo(() => {
             return cursorX < chartWidth/2
         }, [chartWidth, cursorX])
 
-        const estimatedWidth = value.length * 7;
+        const estimatedWidth = value.length * 7; //idk
+
         return (
             <g transform={`translate(${x - estimatedWidth / 2}, ${y - 20})`}
                 onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
@@ -59,6 +69,7 @@ export default function ProjectActivityFAGantt({ project, activities, deadlines 
         );
     };
     
+    //custom tooltip
     const CustomTooltip = ({ active, payload, label }) => {
         if (!active || !payload || !payload.length) return null;
 
@@ -84,6 +95,7 @@ export default function ProjectActivityFAGantt({ project, activities, deadlines 
             </div>
         );
     };
+    
     return(
         <div style={{ backgroundColor: theme.colors.bonasoDarkAccent}} ref={ref}>
             <ResponsiveContainer width="100%" height={300}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 
 import fetchWithAuth from '../../../services/fetchWithAuth';
 
@@ -97,7 +97,9 @@ function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, c
         >
             <h3>{task.indicator.display_name}</h3>
 
-            {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button">{callbackText}</button>}
+            {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button">
+                {callbackText}
+            </button>}
             
             {expanded && (
                 <div>
@@ -132,11 +134,10 @@ function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, c
 }
 
 //task index view
-export default function Tasks({ update=null, organizationID=null, 
-        projectID=null, isDraggable=false, blacklist=[], canDelete=false, updateTrigger=null, 
-        callback=null, callbackText='Add Task', type=null, event=null, onError=[], onSuccess=null 
+export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=false, blacklist=[], 
+    canDelete=false, updateTrigger=null, callback=null, callbackText='Add Task', onError=[], onSuccess=null 
 }) {
-    //the tasks themselves (suually not pulled in very large numbers)
+    //the tasks themselves (usually not pulled in very large numbers)
     const [ tasks, setTasks ] = useState([]);
 
     //index helpers
@@ -163,20 +164,30 @@ export default function Tasks({ update=null, organizationID=null,
         }
     }, [errors]);
 
+    const params = useMemo(() => {
+        const allowedFields = ['organization', 'project', 'event', 'indicator_type'];
+        console.log(includeParams)
+        //these are not filters, they are passed as params for use during callbacks
+        const include = includeParams?.filter(p => allowedFields.includes(p?.field))
+        ?.map(p => `&${p?.field}=${p?.value}`)
+        .join('') ?? '';
+
+        const exclude = excludeParams?.filter(p => allowedFields.includes(p?.field))
+        ?.map(p => `&exclude_${p?.field}=${p?.value}`)
+        .join('') ?? '';
+
+        return include + exclude;
+    }, [includeParams, excludeParams]);
+
     //get a list of the tasks
     useEffect(() => {
         const getTasks = async () => {
             try {
                 console.log('fetching tasks...');
                 //run the filters
-                const filterQuery = 
-                    (organizationID ? `&organization=${organizationID}` : '') + //filter to one org
-                    (projectID ? `&project=${projectID}` : '') + //filter to one project
-                    (type ? `&indicator_type=${type}` : '') + //filter based on type (ex. only show respondent)
-                    (event ? `&event=${event}` : ''); //pull based on event
+               
                 
-                const url = `/api/manage/tasks/?search=${search}&page=${page}` + filterQuery;
-
+                const url = `/api/manage/tasks/?search=${search}&page=${page}` + params;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
 
@@ -192,7 +203,7 @@ export default function Tasks({ update=null, organizationID=null,
             }
         };
         getTasks();
-    }, [search, page, update, organizationID, projectID, updateTrigger]); //run on param changes or on parent request
+    }, [search, page, params]); //run on param changes or on parent request
 
     //update the tasks when one is deleted, triggering a parent update if necessary
     const updateTasks = (id) => {
@@ -203,7 +214,7 @@ export default function Tasks({ update=null, organizationID=null,
     }
 
     //filter out blacklisted tasks (used for hiding tasks already added to interactions)
-    const filteredTasks = tasks.filter(t => !blacklist.includes(t.id))
+    const filteredTasks = tasks?.filter(t => !blacklist.includes(t.id)) ?? []
 
     if(loading) return <ComponentLoading />
     return (
@@ -215,7 +226,7 @@ export default function Tasks({ update=null, organizationID=null,
             <p><i>Search your tasks by name, organization, or project.</i></p>
             
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
-                {tasks.length > 0 ? filteredTasks.map((task) => (
+                {filteredTasks?.length > 0 ? filteredTasks.map((task) => (
                     <TaskCard task={task} key={task.id} tasks={tasks} 
                         isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} 
                         callback={callback} callbackText={callbackText} onError={(e) => (setErrors(e))} 
