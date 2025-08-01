@@ -1,24 +1,40 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
+import { useAuth } from '../../contexts/UserAuth';
+
+import fetchWithAuth from '../../../services/fetchWithAuth';
+import cleanLabels from '../../../services/cleanLabels';
+import { getContentTypeLabel, generateURL } from '../../../services/modelMap';
+
 import prettyDates from '../../../services/prettyDates';
 import ButtonHover from '../reuseables/inputs/ButtonHover';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
-import { useAuth } from '../../contexts/UserAuth';
-import errorStyles from '../../styles/errors.module.css';
-import { FcCancel } from "react-icons/fc";
-import { IoIosSave } from "react-icons/io";
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import Messages from '../reuseables/Messages';
 
 import styles from './flags.module.css';
-import { MdThumbUp } from 'react-icons/md';
 
-export default function FlagCard({ flag, onUpdate=null }){
+import { MdThumbUp } from 'react-icons/md';
+import { FcCancel } from "react-icons/fc";
+import { IoIosSave } from "react-icons/io";
+
+export default function FlagCard({ flag, onUpdate=null, index=false }){
+    //context
+    const { user } = useAuth();
+    //convert the param to a state so that it can be updated 
     const [flagDetail, setFlagDetail] = useState(flag);
+    //control resolving information
     const [resolving, setResolving] = useState(false);
     const [resolveReason, setResolveReason] = useState('');
+    //meta
+    const [expanded, setExpanded] = useState(false);
     const [errors, setErrors] = useState([]);
     const [saving, setSaving] = useState(false);
-    const { user } = useAuth();
-
+    
+    useEffect(() => {
+        setFlagDetail(flag)
+    }, [flag]);
+    //function to resolve flag
     const resolveFlag = async() => {
         setErrors([]);
         if(resolveReason === ''){
@@ -50,8 +66,9 @@ export default function FlagCard({ flag, onUpdate=null }){
                     data[field].forEach(msg => {
                         serverResponse.push(`${msg}`);
                     });
-                    } else {
-                    serverResponse.push(`${data[field]}`);
+                    } 
+                    else {
+                        serverResponse.push(`${data[field]}`);
                     }
                 }
                 setErrors(serverResponse);
@@ -65,29 +82,38 @@ export default function FlagCard({ flag, onUpdate=null }){
             setSaving(false);
         }
     }
+
     if(!flagDetail) return <></>
     return(
-        <div className={flagDetail.resolved ? styles.cardResolved : styles.cardActive}>
-            <h3>{flagDetail.reason} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            <p><i>{flagDetail.auto_flagged ? 'Automatically Flagged' : `Flagged by ${flagDetail.created_by.display_name}`} at {prettyDates(flagDetail.created_at, true)}</i></p>
-            
-            {resolving && <div>
-                <label htmlFor='reason'>Reason for Resolving</label>
-                <textarea id='reason' type='text' onChange={(e) => setResolveReason(e.target.value)} value={resolveReason} />
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                {!saving && <button onClick={() => resolveFlag()}><IoIosSave /> Save</button>}
-                {!saving && <button onClick={() => setResolving(false)}><FcCancel /> Cancel</button>}
-                {saving && <ButtonLoading />}
-                </div>
-            </div>}
+        <div className={flagDetail.resolved ? styles.cardResolved : styles.cardActive} onClick={() => setExpanded(!expanded)}>
+            {index ? <Link to={generateURL(flagDetail.content_type, flagDetail.target)} style={{ display:'flex', width:"fit-content" }}><h3>Flag on {getContentTypeLabel(flagDetail.content_type)} {flagDetail.target.display} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3></Link> :
+                <h3>Flag on {getContentTypeLabel(flagDetail.content_type)} {flagDetail.target.display} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3>}
+            {expanded && <div onClick={(e) => {resolving ? e.stopPropagation() : null}}>
+                <Messages errors={errors} />
+                <h4>Data Type: {getContentTypeLabel(flag.content_type)}</h4>
+                <p><i>{flagDetail.auto_flagged ? 'Automatically Flagged' : `Flagged by ${flagDetail.created_by.display_name}`} at {prettyDates(flagDetail.created_at, true)}</i></p>
+               
+                <h4>Reason:</h4>
+                 <strong><p>{cleanLabels(flag.reason_type)}</p></strong>
+                <p>{flagDetail.reason} </p>
+                {resolving && <div style={{display: 'flex', flexDirection: 'column'}}>
+                    <label htmlFor='reason'>Reason for Resolving</label>
+                    <textarea id='reason' type='text' onChange={(e) => setResolveReason(e.target.value)} value={resolveReason} />
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        {!saving && <button onClick={() => resolveFlag()}><IoIosSave /> Save</button>}
+                        {!saving && <button onClick={() => setResolving(false)}><FcCancel /> Cancel</button>}
+                        {saving && <ButtonLoading />}
+                    </div>
+                </div>}
 
-            {flagDetail.resolved && <div>
-                <p><i>Resolved by {flagDetail.auto_resolved ? 'System' : `${flagDetail.resolved_by.display_name}`} at {prettyDates(flagDetail.resolved_at, true)} </i></p>
-                {flagDetail.resolved_reason && <p>{flagDetail.resolved_reason}</p>}
+                {flagDetail.resolved && <div>
+                    <p><i>Resolved by {flagDetail.auto_resolved ? 'System' : `${flagDetail.resolved_by.display_name}`} at {prettyDates(flagDetail.resolved_at, true)} </i></p>
+                    {flagDetail.resolved_reason && <p>{flagDetail.resolved_reason}</p>}
+                </div>}
+
+                {!resolving && !flagDetail.resolved && ['meofficer', 'manager', 'admin'].includes(user.role) &&
+                    <button onClick={(e) => {setResolving(true); e.stopPropagation()}}><MdThumbUp /> Resolve </button>}
             </div>}
-            {!resolving && !flagDetail.resolved && ['meofficer', 'manager', 'admin'].includes(user.role) &&
-                <ButtonHover callback={() => setResolving(true)} noHover={<MdThumbUp /> } hover={'Resolve'} /> }
         </div>
     )
 }   

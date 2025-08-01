@@ -71,6 +71,9 @@ import SocialPostsIndex from '../components/social/SocialPostsIndex';
 import SocialPostDetail from '../components/social/SocialPostDetail';
 import SocialPostForm from '../components/social/SocialPostForm';
 
+import FunWithFlags from '../components/flags/FunWithFlags';
+
+
 function Router() {
     return (
         <Routes>
@@ -210,6 +213,22 @@ function Router() {
                 }/>
         </Route>
         
+        <Route 
+            path='/flags' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <RespondentsLayout />
+                </RedirectIfNotAuthenticated>
+            }
+        >
+            <Route index element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <FunWithFlags />
+                </RedirectIfNoPerm>
+                }/>
+        </Route>
+
         <Route 
             path='/indicators' 
             element = {

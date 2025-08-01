@@ -1,4 +1,4 @@
-export default function prettyDates(uglyDate, time=false, long=false, ){
+export default function prettyDates(uglyDate, time=false, monthOnly=false, long=false, ){
     try{
         const dateObject = new Date(uglyDate)
         if(long){
@@ -16,6 +16,12 @@ export default function prettyDates(uglyDate, time=false, long=false, ){
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
+            });
+        }
+        else if(monthOnly){
+            return dateObject.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
             });
         }
         else{

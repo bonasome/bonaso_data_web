@@ -2,16 +2,27 @@
     padding: 3vh;
     width: 85%;
     transition: all .6s ease;
+    margin: 2vh;
 }
 
 .cardActive {
     background-color: var(--warning-bg);
-    color: var(--warning-text);
-    
+    color: var(--warning-text); 
+}
+.cardActive > a {
+    background-color: var(--warning-bg);
+    color: var(--warning-text); 
 }
 .cardResolved {
     background-color: var(--success);
 }
 .cardActive:hover, .cardResolved:hover {
+    cursor: pointer;
     transform: scale(1.06);
+}
+
+.count {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
 }

@@ -1,17 +1,22 @@
 import modalStyles from '../../styles/modals.module.css';
 import styles from './conflict.module.css';
-import errorStyles from '../../styles/errors.module.css';
+import Messages from '../reuseables/Messages';
 import { useState, useEffect } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
+import cleanLabels from '../../../services/cleanLabels';
 
 export default function ConflictManager({ existing, handleClose }){
-    const [errors, setErrors] = useState([]);
-    const [entries, setEntries] = useState(existing);
-    const [active, setActive] = useState(existing[0]);
-    const [pos, setPos] = useState(0);
-    const [dbVals, setDBVals] = useState([]);
-    const [uploadVals, setUplaodVals] = useState([]);
+    //
+    const [entries, setEntries] = useState(existing); //total # of conflicts
+    const [active, setActive] = useState(existing[0]); //currently active entry
+    const [pos, setPos] = useState(0); //the position of the current entry
+    const [dbVals, setDBVals] = useState([]); //corresponding db value
+    const [uploadVals, setUplaodVals] = useState([]); //upload values
 
+    //page meta
+    const [errors, setErrors] = useState([]);
+    
+    //on override call the api, data should be good to go
     const handleOverride = async () => {
         try{
             console.log('submitting override...', active.upload)
@@ -39,12 +44,15 @@ export default function ConflictManager({ existing, handleClose }){
             console.error('File upload failed: ', err);
         }
     }
+    //on skip/keep dv, remove this from entries and shift position
     const handleSkip = () => {
         const filtered = entries.filter((e, index) => index != pos)
         setEntries(filtered);
-        if(pos==0) setPos(0)
+        if(pos==0) setPos(0); //don't accidently go to -1
         else setPos(prev => prev-=1)
     }
+
+    //auto close when all conflicts are resolved
     useEffect(() => {
         if (entries.length === 0){
             handleClose()
@@ -79,6 +87,7 @@ export default function ConflictManager({ existing, handleClose }){
 
     return(
         <div className={modalStyles.modal} >
+            <Messages errors={errors} />
             <h1>This respondent already exists.</h1>
             <p>
                 This respondent is already in the database. Please compare it with your upload and determine which 
@@ -89,7 +98,7 @@ export default function ConflictManager({ existing, handleClose }){
                 <thead>
                     <tr>
                         <td></td>
-                        {Object.keys(active.in_database).map((h) => (<td>{h}</td>))}
+                        {Object.keys(active.in_database).map((h) => (<td>{cleanLabels(h)}</td>))}
                     </tr>
                 </thead>
                 <tbody>
@@ -114,7 +123,7 @@ export default function ConflictManager({ existing, handleClose }){
                 <button onClick={()=>handleOverride()}>Keep Upload and Override Database</button>
             </div>
 
-            <button>Skip all remaining conflicts</button>
+            <button onClick={() => handleClose()}>Skip all remaining conflicts</button>
         </div>
     )
 }

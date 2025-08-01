@@ -1,22 +1,38 @@
 import React from 'react';
-import styles from '../../styles/indexView.module.css'
 import { useEffect, useState } from 'react';
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import { Link } from 'react-router-dom';
+
 import { useAuth } from '../../contexts/UserAuth'
+import { useEvents } from '../../contexts/EventsContext';
+
+import fetchWithAuth from '../../../services/fetchWithAuth';
+import prettyDates from '../../../services/prettyDates';
+import { filterConfig, initial } from './filterConfig';
+
 import IndexViewWrapper from '../reuseables/IndexView';
 import Loading from '../reuseables/loading/Loading';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
-import { useEvents } from '../../contexts/EventsContext';
-import { Link } from 'react-router-dom';
 import Filter from '../reuseables/Filter';
-import prettyDates from '../../../services/prettyDates';
-import { filterConfig } from './filterConfig';
+import Messages from '../reuseables/Messages';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
+
+import styles from '../../styles/indexView.module.css';
+
+import { MdOutlineEvent } from "react-icons/md";
+import { ImPencil } from 'react-icons/im';
+import { GiJumpAcross } from 'react-icons/gi';
+
 function EventCard({ event }) {
-    const [loading, setLoading] = useState(false);
+    //context
     const { eventDetails, setEventDetails } = useEvents();
+    //event details
     const [active, setActive] = useState(null);
+    //card meta
+    const [errors, setErrors] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
     
+    //load additional details on click
     const handleClick = async () => {
         const willExpand = !expanded;
         setExpanded(willExpand);
@@ -26,6 +42,7 @@ function EventCard({ event }) {
         const found = eventDetails.find(e => e.id === event.id);
         if (found) {
             setActive(found);
+            setLoading(false);
             return;
         }
 
@@ -35,57 +52,93 @@ function EventCard({ event }) {
             const data = await response.json();
             setEventDetails(prev => [...prev, data]);
             setActive(data);
-            setLoading(false);
-        } catch (err) {
+        } 
+        catch (err) {
             console.error('Failed to fetch event: ', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
             setLoading(false);
         }
     };
 
     return (
-        <div
-            className={expanded ? styles.expandedCard : styles.card}
-            onClick={handleClick}
-        >
+        <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             <Link to={`/events/${event.id}`} style={{display:'flex', width:"fit-content"}}><h2>{event.name}</h2></Link>
             {expanded && loading && <ComponentLoading />}
             {expanded && active && (
-                <>
+                <div>
+                    <Messages errors={errors} />
                     <h3>{active.event_type} {active.host && `hosted by ${active.host.name}`}</h3>
                     <p>{active.description}</p>
                     <p>{active.event_date && (new Date(active.event_date) > new Date() ? 'Occurs on' : 'Occured on')} {prettyDates(active.event_date)} at {active.location}</p>
-                    <Link to={`/events/${event.id}`}>
-                        <button onClick={(e) => e.stopPropagation()}>View Details</button>
-                    </Link>
-                    <Link to={`/events/${event.id}/edit`}>
-                        <button onClick={(e) => e.stopPropagation()}>Edit Details</button>
-                    </Link>
-                </>
+                    <div style={{ display: 'flex', flexDirection: 'row'}}>
+                        <Link to={`/events/${event.id}`}>
+                            <ButtonHover noHover={<GiJumpAcross />} hover='Go to detail page' />
+                        </Link>
+                        <Link to={`/events/${event.id}/edit`}>
+                            <ButtonHover noHover={<ImPencil />} hover='Edit details' />
+                        </Link>
+                    </div>
+                </div>
             )}
         </div>
     );
 }
 
 export default function EventsIndex(){
-    const { user } = useAuth()
+    //context
+    const { user } = useAuth();
+    const { events, setEvents, eventsMeta, setEventsMeta } = useEvents();
+
+    //index helpers
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-    const { events, setEvents } = useEvents();
+    const [filters, setFilters] = useState(initial);
+    const [orgs, setOrgs] = useState([]); //for filters
+    const [orgSearch, setOrgSearch] = useState('');
+
+    //page meta
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [orgsFilter, setOrgs] = useState('');
-    const [filters, setFilters]
+    
+    //get events meta
+    useEffect(() => {
+        const getEventsMeta = async () => {
+            if(Object.keys(eventsMeta).length !== 0){
+                setLoading(false)
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/activities/events/meta/`);
+                    const data = await response.json();
+                    setEventsMeta(data);
+                }
+                catch(err){
+                    setErrors(['Something went wrong, Please try again later.']);
+                    console.error('Failed to fetch projects: ', err);
+                }
+                finally{
+                    setLoading(false);
+                }
+            }
+        }
+        getEventsMeta();
+    }, []);
 
+    //load events
     useEffect(() => {
         const loadEvents = async () => {
             try {
                 const filterQuery = 
-                    (startFilter ? `&start=${startFilter}` : '') + 
-                    (endFilter ? `&end=${endFilter}` : '') + 
-                    (orgFilter ? `&organization=${orgFilter}` : '') +
-                    (indFilter ? `&indicator=${indFilter}` : '') + 
-                    (typeFilter ? `&event_type=${typeFilter}` : '');
+                    (filters.start ? `&start=${filters.start}` : '') + 
+                    (filters.end ? `&end=${filters.end}` : '') + 
+                    (filters.host ? `&host=${filters.host}` : '') +
+                    (filters.status ? `&status=${filters.status}` : '') + 
+                    (filters.type ? `&event_type=${filters.type}` : '');
                 
                 const url = `/api/activities/events/?search=${search}&page=${page}` + filterQuery;
                 console.log(url)
@@ -96,13 +149,15 @@ export default function EventsIndex(){
                 setLoading(false);
             } 
             catch (err) {
-                console.error('Failed to fetch projects: ', err)
+                setErrors(['Something went wrong, Please try again later.']);
+                console.error('Failed to fetch events: ', err);
                 setLoading(false)
             }
         };
         loadEvents();
-    }, [page, search, orgFilter, indFilter, typeFilter, startFilter, endFilter]);
+    }, [page, search, filters]);
 
+    //get orgs (for filter)
     useEffect(() => {
         const loadOrgs = async () => {
             try {
@@ -112,7 +167,7 @@ export default function EventsIndex(){
                 setOrgs(data.results);
             } 
             catch (err) {
-                console.error('Failed to fetch projects: ', err)
+                console.error('Failed to fetch organizations: ', err)
                 setErrors(['Something went wrong, Please try again later.']);
             }
             finally {
@@ -126,11 +181,11 @@ export default function EventsIndex(){
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Events' : 'My Events'}</h1> 
+            <Messages errors={errors} />
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter 
                 onFilterChange={setFilters} config={filterConfig(eventsMeta, orgs, (s) => setOrgSearch(s))} initial={initial}  
             />}>
-                {['meofficer', 'manager', 'admin'].includes(user.role) && 
-                <Link to='/events/new'><button>Create a New Event</button></Link>} 
+                <Link to='/events/new'><button> <MdOutlineEvent /> Create a New Event</button></Link>
                 {events?.length === 0 ? 
                     <p>No events match your criteria.</p> :
                     events?.map(ind => (

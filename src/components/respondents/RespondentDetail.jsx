@@ -312,6 +312,7 @@ export default function RespondentDetail(){
                             <Pregnancies respondent={respondent} onUpdate={(data) => miniPregUpdate(data)}/>
                         </div>}
                     </div>
+                    
                     {respondent?.flags.length > 0 && <div className={styles.dropdownSegment}>
                         <div className={styles.toggleDropdown} onClick={() => setShowFlags(!showFlags)}>
                             <h3 style={{ textAlign: 'start'}}>Flags</h3>

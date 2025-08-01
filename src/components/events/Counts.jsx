@@ -9,8 +9,9 @@ import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ButtonLoading from "../reuseables/loading/ButtonLoading";
 import cleanLabels from '../../../services/cleanLabels';
 import { useAuth } from "../../contexts/UserAuth";
-import theme from '../../../theme/theme'
 import prettyDates from "../../../services/prettyDates";
+import Messages from '../reuseables/Messages';
+import FlagDetailModal from '../flags/FlagDetailModal';
 function Warn( {onConfirm, onClose }) {
     return(
         <div className={modalStyles.modal}>
@@ -25,161 +26,10 @@ function Warn( {onConfirm, onClose }) {
     )
 }
 
-function Flag({ event, flag, onUpdate }){
-    const [errors, setErrors] = useState([]);
-    const [reason, setReason] = useState('')
-    const [resolving, setResolving] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const handleResolve = async() => {
-        setErrors([]);
-        if(reason === ''){
-            setErrors(['You must give a reason for resolving this flag.']);
-            return;
-        }
-        try{
-            setSaving(true);
-            console.log('submitting flag...')
-            const url = `/api/activities/events/${event.id}/resolve-flag/${flag.id}/`
-            console.log(url)
-            const response = await fetchWithAuth(url, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': "application/json",
-                },
-                body: JSON.stringify({'resolved_reason': reason})
-            });
-            const returnData = await response.json();
-            if(response.ok){
-                onUpdate(returnData.flag)
-                setErrors([]);
-                setResolving(false);
-            }
-            else{
-                const serverResponse = [];
-                for (const field in returnData) {
-                    if (Array.isArray(returnData[field])) {
-                    returnData[field].forEach(msg => {
-                        serverResponse.push(`${msg}`);
-                    });
-                    } 
-                    else {
-                        serverResponse.push(`${returnData[field]}`);
-                    }
-                }
-                setErrors(serverResponse);
-            }
-        }
-        catch(err){
-            console.error('Failed to apply changes to flag:', err);
-            setErrors(['Something went wrong. Please try again later.'])
-        }
-        finally{
-            setSaving(false);
-        }
-    }
-
-    return(
-        <div className={flag.resolved ? styles.resolved : styles.flag}>
-            <p>{flag.reason} ({flag.auto_flagged ? `Auto Flagged` : `Flagged by ${flag.created_by.first_name} ${flag.created_by.last_name}`} at {prettyDates(flag.created_at)})</p>
-            {flag.resolved && <p>Resolved by {flag.resolved_by.first_name} {flag.resolved_by.last_name}: {flag.resolved_reason}</p>}
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {resolving && <div>
-                <label htmlFor="resolved">Enter a Reason</label>
-                <input type='text' id='resolved' value={reason} onChange={(e)=> setReason(e.target.value)} />
-                {!saving && <button onClick={() => handleResolve()}>Submit</button>}
-                {saving && <ButtonLoading />}
-            </div>}
-            {!flag.resolved && <button onClick={() => setResolving(!resolving)}>{resolving ? 'Cancel' : 'Resolve'}</button>}
-        </div>
-    )
-}
-
-function CountDetail({ event, count, onClose }){
-    const [errors, setErrors] = useState([])
-    const [saving, setSaving] = useState(false);
-    const [flags, setFlags] = useState(count.count_flags)
-    const [flagging, setFlagging] = useState(false);
-    const [reason, setReason] = useState('');
-
-    const handleFlag = async() => {
-        setErrors([]);
-        if(reason === ''){
-            setErrors(['You must give a reason for flagging this count.']);
-            return;
-        }
-        try{
-            setSaving(true);
-            console.log('submitting flag...')
-            const url = `/api/activities/events/${event.id}/flag-count/${count.id}/`
-            const response = await fetchWithAuth(url, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': "application/json",
-                },
-                body: JSON.stringify({'reason': reason})
-            });
-            const returnData = await response.json();
-            if(response.ok){
-                setErrors([]);
-                console.log(returnData)
-                setFlags(prev => [...prev, returnData.flag])
-                setFlagging(false);
-            }
-            else{
-                const serverResponse = [];
-                for (const field in returnData) {
-                    if (Array.isArray(returnData[field])) {
-                    returnData[field].forEach(msg => {
-                        serverResponse.push(`${msg}`);
-                    });
-                    } 
-                    else {
-                        serverResponse.push(`${returnData[field]}`);
-                    }
-                }
-                setErrors(serverResponse);
-            }
-        }
-        catch(err){
-            console.error('Failed to apply changes to flag:', err);
-            setErrors(['Something went wrong. Please try again later.'])
-        }
-        finally{
-            setSaving(false);
-        }
-    }
-
-    const onUpdate = (flag) => {
-        let updated = flags.filter(f => f.id!=flag.id)
-        updated.push(flag)
-        setFlags(updated)
-    }
-
-    if(!event || !count) return(
-        <div className={modalStyles.modal}>
-            <ComponentLoading />
-        </div>
-    )
-    return(
-        <div className={modalStyles.modal}>
-            <p>Details</p>
-            {flags.map((f) => (
-                <Flag key={f.id} event={event} flag={f} onUpdate={(flag) => onUpdate(flag)}/>
-            ))}
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {flagging && <div style={{ display: 'flex', flexDirection: 'row'}}>
-                <label htmlFor="resolved">Enter a Reason</label>
-                <input type='text' id='resolved' value={reason} onChange={(e)=> setReason(e.target.value)} />
-                {!saving && <button onClick={() => handleFlag()}>Submit</button>}
-                {saving && <ButtonLoading />}
-            </div>}
-            <button onClick={() => setFlagging(!flagging)} className={errorStyles.warningButton}>{flagging ? 'Cancel' : 'Add New Flag'}</button>
-            <button onClick={() => onClose()}>Close</button>
-        </div>
-    )
-}
-
 export default function Counts({ event, breakdownOptions, task, onSave, onCancel, onDelete, existing=null}) {
+    const { user } = useAuth(); 
+
+    //determine which params are "actively" being used to create demographic splits
     const [breakdowns, setBreakdowns] = useState({
         sex: false,
         citizenship: false,
@@ -191,7 +41,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         pregnancy: false,
         subcategory_id: false,
     });
-    
+    //create map of values/labels for each category (as well as preference for which should appear at the column)
     const [breakdownSplits, setBreakdownSplits] = useState({
         sex: {values: breakdownOptions?.sex, labels: breakdownOptions?.sex_labels, col: 5},
         age_range: {values: breakdownOptions?.age_range, labels: breakdownOptions?.age_range_labels, col: 0},
@@ -202,28 +52,33 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         pregnancy: {values: breakdownOptions?.pregnancy, labels: breakdownOptions?.pregnancy_labels, col: 7},
         hiv_status: {values: breakdownOptions?.hiv_status, labels: breakdownOptions?.hiv_status_labels, col: 8},
         subcategory_id: {values: [], labels: [], col: 3}
-    })
+    });
+
+    //table meta
     const [editing, setEditing] = useState(existing ? false: true);
+    const [del, setDel] = useState(false);
+    const [warning, setWarning] = useState(null); //controls warning modal that appears if a breakdown change will wipe counts
+    const [errors, setErrors] = useState([]);
+    const [saving, setSaving] = useState(false);
+    const [expanded, setExpanded] = useState(existing ? false : true);
+
     const [active, setActive] = useState([]);
     const [rows, setRows] = useState([]);
     const [counts, setCounts] = useState({});
-    const [errors, setErrors] = useState([]);
-    const [existingCounts, setExistingCounts] = useState([]);
-    const [existingIDs, setExistingIDs] = useState([]);
-    const [existingFlags, setExistingFlags] = useState([]);
-    const [existingMap, setExistingMap] = useState([]);
-    const [del, setDel] = useState(false);
-    const [warning, setWarning] = useState(null);
-    const [pastFlags, setPastFlags] = useState(false);
-    const [activeFlags, setActiveFlags] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const [expanded, setExpanded] = useState(existing ? false : true);
-    const [details, setDetails] = useState(null);
+    
+    //existing for edits
+    const [existingMap, setExistingMap] = useState([]); //breakdown "keys"
+    const [existingCounts, setExistingCounts] = useState([]); //array of counts corresponding to a key
+    const [existingIDs, setExistingIDs] = useState([]); //id corresponding to a key
+    const [existingFlags, setExistingFlags] = useState([]); //flag array corresponding to a key
+    
+    const [pastFlags, setPastFlags] = useState(false); //tracker to tell if a count has flags
+    const [activeFlags, setActiveFlags] = useState(false); //tracker to tell if a count has active flags
+    
+    const [details, setDetails] = useState(null); // when an individual count is clicked, it sets this state to that info, which is used to build the flag modal
+    const [flagging, setFlagging] = useState(false); //controls flag create modal
 
-    const [resolving, setResolving] = useState(false);
-    const [flagging, setFlagging] = useState(false);
-    const [reason, setReason] = useState('');
-    const { user } = useAuth(); 
+    //helper function that creates keys/ids/flags map from existing counts
     const mapExisting = () => {
         let ids = []
         let combos = []
@@ -232,17 +87,17 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         Object.keys(existing).forEach((group) => {
             let groupMap = {}
             Object.keys(existing[group]).forEach((ind) => {
-                if(ind === 'id') ids.push(existing[group][ind])
-                if(ind === 'count') countsArray.push(existing[group][ind]);
-                if(ind === 'count_flags'){
+                if(ind === 'id') ids.push(existing[group][ind]); //grab and append the id
+                if(ind === 'count') countsArray.push(existing[group][ind]); //grab and append the count (value for the input)
+                if(ind === 'flags'){ //see if there are any flags
                     const hasFlags = existing[group][ind].length > 0
-                    if(hasFlags) setPastFlags(true);
-                    if(determineFlagged(existing[group][ind])) setActiveFlags(true);
-                    flagsArray.push(existing[group][ind] || [])
+                    if(hasFlags) setPastFlags(true); //is has flags mark it as such
+                    if(determineFlagged(existing[group][ind])) setActiveFlags(true); //mark active seperate (for color coding)
+                    flagsArray.push(existing[group][ind] || []) //push to array to link to table 
                 }
-                if(existing[group][ind] != null && !['created_by', 'created_at', 'updated_by', 'updated_at', 'id', 'event', 'count', 'task', 'task_id', 'count_flags'].includes(ind)){
-                    const key = ind === 'subcategory' ? 'subcategory_id' : ind
-                    groupMap[key] = existing[group][ind]
+                if(existing[group][ind] != null && !['created_by', 'created_at', 'updated_by', 'updated_at', 'id', 'event', 'count', 'task', 'task_id', 'flags'].includes(ind)){ //exclude fields that are not breakdowns
+                    const key = ind === 'subcategory' ? 'subcategory_id' : ind 
+                    groupMap[key] = existing[group][ind] //create a unique key
                 }
             })
             combos.push(groupMap)
@@ -253,6 +108,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         setExistingMap(combos)
         
     }
+    //helper function to determine which breakdowns are checked
     const checkActive = () => {
         if(existingMap.length > 0){
             const fields = Object.keys(existingMap[0]).map((e) => (e))
@@ -261,7 +117,38 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             })
         }
     }
+    //create a cartesian product
+    function cartesianProduct(arrays) {
+        if (!arrays || arrays.length === 0) return [];
+        return arrays.reduce(
+            (acc, curr) => {
+                if (!Array.isArray(curr)) return acc;
+                return acc.flatMap(d => curr.map(e => [...d, e]));
+            },
+            [[]]
+        );
+    }
 
+    //on change, if there are any values with counts, set a warning, temprarily store the presumptive change
+    const changeBreakdowns = (key, value) => {
+        const warn = Object.keys(counts).some((c) => counts[c].count !== '');
+        if(warn){
+            setWarning({key: key, value: value})
+        }
+        else{
+            confirmChange(key, value)
+        }
+        
+    }
+    //on confirm, apply the change
+    const confirmChange = (key, value) => {
+        if(!key) key = warning.key
+        if(value == null || value == 'undefined') value = warning.value
+        setBreakdowns(prev => ({...prev, [key]: value}))
+        setWarning(null)
+    }  
+
+    //function that sets the breakdowns and runs map existing
     useEffect(() => {
         if (task?.indicator.subcategories.length > 0) {
             setBreakdowns(prev => ({ ...prev, subcategory_id: true }));
@@ -285,12 +172,14 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         }
     }, [existing, task]);
 
+    //recheck active with changes to the existing map
     useEffect(() => {
         if (existingMap.length > 0) {
             checkActive();
         }
     }, [existingMap]);
 
+    //create a cartesian product of all active breakdowns to build our data map
     useEffect(() => {
         const activeSplits = Object.entries(breakdownSplits)
             .filter(([key]) => breakdowns[key])
@@ -299,30 +188,37 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         mapCurrent(activeSplits)
         let labelsMap = activeSplits.map((a) => (a[1].labels))
         labelsMap = labelsMap.filter((m, index) => index != 0)
-        setRows(cartesianProduct(labelsMap))
+        setRows(cartesianProduct(labelsMap)) //create list of all possible row combinations (save the first row which will appear in the columns)
     }, [breakdowns, existingCounts, existingMap])
 
+    //check if two keys are equal (compare existing keys to the map above)
     function shallowEqual(obj1, obj2) {
         const keys1 = Object.keys(obj1);
         const keys2 = Object.keys(obj2);
+        console.log(keys1, keys2)
         if (keys1.length !== keys2.length) return false;
         return keys1.every(key => obj1[key] === obj2[key]);
     }
 
+    //create a "map" of each possible key, mapping to to a position, also check if it matches any existing data
+    //based on the key of breakdown fields
     const mapCurrent =(splits) => {
         if(!task) return
+        //if there are no breakdowns (just a number), any exisitng must be the value
         if(splits.length == 0) {
             let count = '';
-            let count_flags = []
+            let flags = []
             let id = null;
+
             if(existing){
                 count = existing[Object.keys(existing)[0]].count
-                count_flags = existing[Object.keys(existing)[0]].count_flags
+                flags = existing[Object.keys(existing)[0]].flags
                 id = existing[Object.keys(existing)[0]].id
             }
-            setCounts({0: {count: count, task_id: task.id, count_flags: count_flags, id: id}}); 
+            setCounts({0: {count: count, task_id: task.id, flags: flags, id: id}}); 
             return;
         }
+        //one dimension split, fund the matching value if it exists
         if(splits.length === 1){
             const map = {}
             const split = splits[0][0]
@@ -338,134 +234,100 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                         if(m[split] === v){
                             count = m.count,
                             id = m.id
-                            flags = m.count_flags
+                            flags = m.flags
                         }
                     })
                 }
                 else{
-                    map[index] = {[split]: v, count: count, task_id: task.id, count_flags: flags, id: id}
+                    map[index] = {[split]: v, count: count, task_id: task.id, flags: flags, id: id}
                 }
-                
             })
             setCounts(map)
         }
-
-        const splitMap = splits.map((s) => s[0])
-        const valuesArrays = splits.map((s) => (s[1].values))
-        const valuesMap = cartesianProduct(valuesArrays)
+        //two dimensions on gets tricky...
+        const splitMap = splits.map((s) => s[0]) //build a map of the split categories
+        const valuesArrays = splits.map((s) => (s[1].values)) //their vals too
+        const valuesMap = cartesianProduct(valuesArrays) //create the cartesian product
         const map = {}
         for(let i=0; i < valuesMap.length; i++){
-            map[i] = {}
+            map[i] = {} //create a obj for each key, using the index
             for(let j = 0; j < splitMap.length; j++){
-                map[i][splitMap[j]] = valuesMap[i][j]
+                map[i][splitMap[j]] = valuesMap[i][j] //create the map
             }
             if(existing){
                 let found = null
                 existingMap.forEach((m, index) => {
-                    if(shallowEqual(map[i], m)) found = index
+                    if(shallowEqual(map[i], m)) found = index //try to match key to existing 
                 })
-                if(found !== null){ 
+                if(found !== null){ //if it finds something, populate flags/id/count
                     map[i].count = existingCounts[found];
-                    map[i].count_flags = existingFlags[found] 
+                    map[i].flags = existingFlags[found] 
                     map[i].id = existingIDs[found] 
                 }
-                else{  
+                else{  //else set defaults
                     map[i].count = ''
-                    map[i].count_flags = []
+                    map[i].flags = []
                 }
             }
-            else{
+            else{ //also set defaults if no existing
                 map[i].count = ''
-                map[i].count_flags = []
+                map[i].flags = []
             }
-            map[i].task_id = task.id
+            map[i].task_id = task.id //finally set the task
         }
         setCounts(map)
     }
 
-
-    function cartesianProduct(arrays) {
-        if (!arrays || arrays.length === 0) return [];
-        return arrays.reduce(
-            (acc, curr) => {
-                if (!Array.isArray(curr)) return acc;
-                return acc.flatMap(d => curr.map(e => [...d, e]));
-            },
-            [[]]
-        );
-    }
-
-    const changeBreakdowns = (key, value) => {
-        const warn = Object.keys(counts).some((c) => counts[c].count !== '');
-        if(warn){
-            setWarning({key: key, value: value})
-        }
-        else{
-            confirmChange(key, value)
-        }
-        
-    }
-    const confirmChange = (key, value) => {
-        if(!key) key = warning.key
-        if(value == null || value == 'undefined') value = warning.value
-        setBreakdowns(prev => ({...prev, [key]: value}))
-        setWarning(null)
-    }   
-
+     
+    //upload the count
     const saveCount = async() => {
         setErrors([])
-        const currentBD = active.map((a) => a[0])
-        const warn = Object.keys(counts).every((c) => counts[c].count === '');
+        const warn = Object.keys(counts).every((c) => counts[c].count === ''); //filter out empty counts
         if(warn) {
             setErrors(['You must enter at least one value to save a count.']);
             return;
         }
         const data = [];
-        Object.keys(counts).forEach((c) => {if(counts[c].count != '') data.push(counts[c])})
-        console.log('submitting data...')
-            try{
-                setSaving(true);
-                const response = await fetchWithAuth(`/api/activities/events/${event.id}/update-counts/`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': "application/json",
-                    },
-                    body: JSON.stringify({'counts': data})
-                });
-                const returnData = await response.json();
-                if(response.ok){
-                    setEditing(false)
-
-                    const structured = {};
-                    returnData.created.forEach((c) => {
-                        structured[c.id] = c;
-                    });
-
-                    onSave({ [task.id]: structured });
-                }
-                else{
-                    const serverResponse = []
-                    for (const field in returnData) {
-                        if (Array.isArray(returnData[field])) {
-                            returnData[field].forEach(msg => {
-                            serverResponse.push(`${field}: ${msg}`);
-                            });
-                        } 
-                        else {
-                            serverResponse.push(`${field}: ${returnData[field]}`);
-                        }
+        Object.keys(counts).forEach((c) => {if(counts[c].count != '') data.push(counts[c])}); //convert to array and 
+        try{
+            console.log('submitting data...')
+            setSaving(true);
+            const response = await fetchWithAuth(`/api/activities/events/${event.id}/update-counts/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify({'counts': data})
+            });
+            const returnData = await response.json();
+            if(response.ok){
+                setEditing(false);
+                onSave(); //run update function
+            }
+            else{
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${field}: ${returnData[field]}`);
                     }
-                    setErrors(serverResponse)
                 }
+                setErrors(serverResponse)
             }
-            catch(err){
-                setErrors(['Something went wrong. Please try again later.'])
-                console.error('Could not record indicator: ', err)
-            }
-            finally{
-                setSaving(false);
-            }
+        }
+        catch(err){
+            setErrors(['Something went wrong. Please try again later.'])
+            console.error('Could not record indicator: ', err)
+        }
+        finally{
+            setSaving(false);
+        }
     }
+    //delete a count
     const deleteCount = async() => {
         setErrors([])
         try {
@@ -505,98 +367,60 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         finally{
             setDel(false)
         }
-        
     }
-    const changeFlags = async() => {
-        setErrors([]);
-        if(reason === ''){
-            setErrors(['Reason is required'])
-            return
-        }
-        try{
-            setSaving(true);
-            console.log('submitting flag...')
-            const data = resolving ? {'resolved_reason': reason} : {'reason': reason}
-            const url = resolving ? `/api/activities/events/${event.id}/resolve-count-flags/${task.id}/` : `/api/activities/events/${event.id}/flag-counts/${task.id}/`
-            console.log(url, data)
-            const response = await fetchWithAuth(url, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': "application/json",
-                },
-                body: JSON.stringify(data)
-            });
-            const returnData = await response.json();
-            if(response.ok){
-                setFlagging(false);
-                setResolving(false);
-                onSave();
-                setErrors([]);
-            }
-            else{
-                const serverResponse = [];
-                for (const field in returnData) {
-                    if (Array.isArray(returnData[field])) {
-                    returnData[field].forEach(msg => {
-                        serverResponse.push(`${msg}`);
-                    });
-                    } 
-                    else {
-                        serverResponse.push(`${returnData[field]}`);
-                    }
-                }
-                setErrors(serverResponse);
-            }
-        }
-        catch(err){
-            console.error('Failed to apply changes to flag:', err);
-            setErrors(['Something went wrong. Please try again later.'])
-        }
-        finally{
-            setSaving(false);
-        }
-    }
+
+    //calculate a cells position from the iteration (since cols)
     const calcCellIndex = (iter, index) => {
         const n = rows.length
         return n*index + iter
     }
+    //on cancel, stop editing
     const handleCancel = () => {
         onCancel();
         if(existing) mapCurrent(active);
         setEditing(false);
     }
 
+    //helper to determine what flags are what
     const determineFlagged = (flags) => {
         if(!flags || flags.length === 0) return false
         const active = flags.filter(f => f.resolved === false)
         if(active.length > 0) return true
         return false
     }
-    if(!task) return <div className={errorStyles.erors}>This count is not associated with any task.</div>
+
+    if(!task) return <></> //should never happen unless something has gone very wrong
+    
     return(
         <div className={existing ? styles.countSegment : styles.segment}>
             {warning && <Warn onConfirm={() => confirmChange()} onCancel={() => setWarning(null)} />}
+
             {del && <ConfirmDelete name={`Counts for Task: ${task.indicator.name} for for ${task?.organization.name} Event: ${event.name}`} onConfirm={() => deleteCount()} onCancel={() => setDel(false)} />}
-            {details && <CountDetail event={event} count={details} onClose={() => {setDetails(null); onSave()}}/>}
+            
+            {details && <FlagDetailModal flags={details.flags} model={'events.demographiccount'} id={details.id} onClose={() => {setDetails(null); onSave()}}/>}
+            
             <div onClick={() => setExpanded(!expanded)} className={styles.expander}>
                 <h2>Counts for {task?.indicator.name} ({task?.organization.name})</h2>
                 {!editing && 
                     <p>By {active.map((a) => (`${cleanLabels(a[0])}`)).join(', ')}</p>
                 }
             </div>
+
             {expanded && <div>
-                {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                <Messages errors={errors} />
                 {activeFlags && 
                     <div className={errorStyles.warnings}>
                         <h3>FLAGGED</h3>
                         <p>This count has unresolved flags. Please review the individual counts below for more information.</p>
                     </div>
                 }
+
                 {!activeFlags && pastFlags && 
                     <div className={errorStyles.success}>
                         <p>This interaction has had flags in the past. You can view flag history by clicking on a number below.</p>
                     </div>
                 }
+
                 {editing && <h3>Select your breakdowns here</h3>}
                 {editing && <p><i>Please note that selecting too many breakdown categories may result in poor performance.</i></p>}
                 {editing && <div className={styles.choices}>
@@ -604,14 +428,16 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                         if(b == 'subcategory_id') return
                         return <Checkbox key={b}
                             label={cleanLabels(b)} 
-                            name={b} checked={breakdowns[b]} 
-                            callback={(c) => changeBreakdowns(b, c)} 
+                            name={b} value={breakdowns[b]} 
+                            onChange={(c) => changeBreakdowns(b, c)} 
                         />
                     })}
                 </div>}
+
                 <div>
+                    {/*If only one value, return a single input */}
                     {active.length === 0 && 
-                        <div className={`${determineFlagged(counts[0]?.count_flags) ? styles.flaggedCount : styles.OK} ${styles.tooltipWrapper}`} onClick={() => !editing && counts[0]?.id && setDetails(counts[0])}>
+                        <div className={`${determineFlagged(counts[0]?.flags) ? styles.flaggedCount : styles.OK} ${styles.tooltipWrapper}`} onClick={() => !editing && counts[0]?.id && setDetails(counts[0])}>
                             <label htmlFor="count">Count</label>
                             {editing ? <input id="count" type="number" min={0}  value={counts[0]?.count} onChange={(e) => setCounts(prev => ({
                                 ...prev,
@@ -620,18 +446,20 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                                 count: e.target.value,
                                 },
                             }))} /> : <p>{counts[0]?.count}</p>}
-                            {determineFlagged(counts[0]?.count_flags) > 0 && (
+                            {determineFlagged(counts[0]?.flags) > 0 && (
                                 <div className={styles.tooltip}>
-                                {counts[0].count_flags.map((flag, i) => (
+                                {counts[0].flags.map((flag, i) => (
                                     <p key={i}>{flag.reason}</p>
                                 ))}
                                 </div>
                             )}
                         </div>
                     }
+
+                    {/*If one breakdown, just list as a row of inputs */}
                     {active.length === 1 &&
                         active[0][1].labels.map((b, index) => {
-                            const flagged = determineFlagged(counts[index]?.count_flags)
+                            const flagged = determineFlagged(counts[index]?.flags)
                             return (<div className={`${flagged ? styles.flaggedCount : styles.OK} ${styles.tooltipWrapper}`} onClick={() => !editing && counts[index]?.id && setDetails(counts[index])}>
                                 <label htmlFor={b}>{b}</label>
                                 {editing ? <input id={b} type="number" min={0} value={counts[index]?.count} onChange={(e) => setCounts(prev => ({
@@ -643,7 +471,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                                     }))} /> : <p>{counts[index]?.count}</p>}
                                     {flagged > 0 && (
                                         <div className={styles.tooltip}>
-                                        {counts[index].count_flags.map((flag, i) => (
+                                        {counts[index].flags.map((flag, i) => (
                                             <p key={i}>{flag.reason}</p>
                                         ))}
                                         </div>
@@ -651,12 +479,12 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                             </div>)
                         })
                     }
-                    {
-                        active.length > 1 &&
+                     {/*Now we need a whole thing */}
+                    {active.length > 1 &&
                         <table className={styles.countsTable}>
                             <thead>
                                 <tr>
-                                    {active.map((a, index) => {if(index != 0) return <th>{cleanLabels(a[0])}</th>})}
+                                    {active.map((a, index) => {if(index != 0) return <th key={a[0]}>{cleanLabels(a[0])}</th>})}
                                     {active[0][1].labels.map((c) => (<th>{c}</th>))}
                                 </tr>   
                             </thead>
@@ -667,11 +495,11 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                                         {row.map((r) => (<td>{r}</td>))}
                                         {active[0][1].labels.map((c, index) => {
                                             const pos = calcCellIndex(iter, index); 
-                                            const flagged = determineFlagged(counts[pos]?.count_flags)
+                                            const flagged = determineFlagged(counts[pos]?.flags)
                                             return <td key={pos} className={`${flagged ? styles.flaggedCount : styles.OK} ${styles.tooltipWrapper}`} onClick={() => !editing && counts[pos]?.id && setDetails(counts[pos])}> 
                                                 {flagged > 0 && (
                                                     <div className={styles.tooltip}>
-                                                    {counts[pos].count_flags.map((flag, i) => (
+                                                    {counts[pos].flags.map((flag, i) => (
                                                         <p key={i}>{flag.reason}</p>
                                                     ))}
                                                     </div>
@@ -694,13 +522,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                     <div>
                         {editing && (saving ? <ButtonLoading /> : <button onClick={() => saveCount()}>Save</button>)}
                         <button onClick={() => editing ? handleCancel() : setEditing(true)}>{editing ? 'Cancel' : 'Edit'}</button>
-                        {(flagging || resolving) && <input type='text' onChange={(e) => setReason(e.target.value)} value={reason} />}
-                        {existing && !editing && !flagging && !resolving && <button className={errorStyles.warningButton} onClick={() => setFlagging(true)}>Add Flag for All Counts</button>}
-                        {(flagging || resolving) && <button className={errorStyles.warningButton} onClick={() => changeFlags()}>Submit Flag</button>}
-                        {existing && !editing && !resolving && !flagging && user.role ==='admin' && <button className={errorStyles.warningButton} onClick={() => setResolving(true)}>Resolve all flags for all counts</button>}
-                        
                         {editing && existing && user.role ==='admin' && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
-                        {del && <ButtonLoading forDelete={true} />}
                     </div>
                 </div>
             </div>}

@@ -1,31 +1,39 @@
-import { useAuth } from '../../contexts/UserAuth';
 import { useState, useEffect, useRef } from 'react';
+
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import SimpleSelect from '../reuseables/inputs/SimpleSelect';
-import Loading from '../reuseables/loading/Loading';
-import errorStyles from '../../styles/errors.module.css';
-import styles from './batchRecord.module.css';
+
 import ConflictManagerModal from './ConflictManagerModal'
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
+import ModelSelect from '../reuseables/inputs/ModelSelect';
+import OrganizationsIndex from '../organizations/OrganizationsIndex';
+import ProjectsIndex from '../projects/ProjectsIndex';
+import Messages from '../reuseables/Messages';
+
+import styles from './batchRecord.module.css';
+
+import { FaFileDownload } from "react-icons/fa";
+import { FaFolderOpen } from "react-icons/fa6";
+import { MdCloudUpload } from "react-icons/md";
+import { IoDocumentTextSharp } from "react-icons/io5";
 
 export default function BatchRecord(){
-    const { user } = useAuth();
-    const [projects, setProjects] = useState([]);
-    const [organizations, setOrganizations] = useState([]);
-    const [projectSearch, setProjectSearch] = useState('');
-    const [orgSearch, setOrgSearch] = useState('');
+    //org and project for generating template
+    const [org, setOrg] = useState(null);
+    const [project, setProject] = useState(null);
+    //the file itself
     const [file, setFile] = useState(null);
-    const [selectTools, setSelectTools] = useState({})
-    const [targetOrg, setTargetOrg] = useState('');
-    const [targetProject, setTargetProject] = useState('');
-    const [loading, setLoading] = useState(true)
-    const [warnings, setWarnings] = useState([]);
-    const [errors, setErrors] = useState([]);
-    const [ok, setOK] = useState(false)
+    //vars to manage conflicts that arrise from files
     const [conflict, setConflict] = useState(false);
     const [conflictList, setConflictList] = useState([]);
+
+    //page meta
+    const [warnings, setWarnings] = useState([]);
+    const [errors, setErrors] = useState([]);
+    const [success, setSuccess] = useState([]);
     const [uploading, setUploading] = useState(false);
-    
+    const [gettingFile, setGettingFile] = useState(false);
+
+    //auto scroll to aler
     const alertRef = useRef(null);
     useEffect(() => {
         if (errors.length > 0 && alertRef.current) {
@@ -34,74 +42,26 @@ export default function BatchRecord(){
         }
     }, [errors]);
 
-    const [gettingFile, setGettingFile] = useState(false);
-    useEffect(() => {
-        const getProjects = async() => {
-            try{
-                console.log('fetching projects...')
-                const response = await fetchWithAuth(`/api/manage/projects/?${projectSearch}`);
-                const data = await response.json();
-                setProjects(data.results)
-            }
-            catch(err){
-                console.error('Failed to fetch projects: ', err);
-            }
-        }
-        getProjects();
-    }, [projectSearch])
-
-    useEffect(() => {
-        const getOrganizations = async () => {
-            try{
-                console.log('fetching organizations...')
-                const response = await fetchWithAuth(`/api/organizations/?${orgSearch}`);
-                const data = await response.json();
-                setOrganizations(data.results)
-                setLoading(false)
-            }
-            catch(err){
-                console.error('Failed to fetch projects: ', err);
-                setLoading(false)
-            }
-        }
-        getOrganizations();
-    }, [orgSearch])
-
-    useEffect(() => {
-        const orgIDs = organizations?.map((o) => (o.id));
-        const orgNames = organizations?.map((o) => (o.name))
-        const pIDs = projects?.map((p) => (p.id))
-        const pNames = projects?.map((p) => (p.name))
-        setSelectTools({
-             orgs: {
-                names: orgNames,
-                ids: orgIDs
-             },
-             projects: {
-                names: pNames,
-                ids: pIDs
-             }
-        })
-    }, [projects, organizations])
-
+    //function to get a template
     const handleClick = async() => {
+        setSuccess([]);
         setWarnings([]);
         setErrors([]);
         let getErrors = [];
-        if(targetProject === ''){
+        if(!project){
             getErrors.push('Please select a project.')
         }
-        if(targetOrg === ''){
+        if(!org){
             getErrors.push('Please select an organization.')
         }
         if(getErrors.length > 0){
             setErrors(getErrors)
             return;
         }
-        setGettingFile(true);
         try{
-            console.log('fetching template...')
-            const response = await fetchWithAuth(`/api/record/interactions/template/?project=${targetProject}&organization=${targetOrg}`);
+            console.log('fetching template...');
+            setGettingFile(true);
+            const response = await fetchWithAuth(`/api/record/interactions/template/?project=${project.id}&organization=${org.id}`);
             if(response.ok){
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -143,23 +103,36 @@ export default function BatchRecord(){
             setErrors(['Something went wrong, please try again.'])
             console.error('Failed to upload file: ', err);
         }
-        setGettingFile(false);
+        finally{
+            setGettingFile(false);
+        }
     }
 
+    //set the file
     const handleChange = (event) => {
         setFile(event.target.files[0]);
     };
 
+    //helper ref to click the hiden file input
+    const fileInputRef = useRef();
+    const handleFileSelection = () => {
+        fileInputRef.current.click(); // trigger hidden file input
+    };
+
+
+    //function to upload the template
     const handleSubmit = async (e) => {
+        setWarnings([]);
+        setSuccess([]);
         setErrors([]);
+
         e.preventDefault();
         if (!file) {
             setErrors(['Please select a file!'])
             return;
         }
-
         const formData = new FormData();
-        formData.append('file', file); // 'file' should match the key Django expects
+        formData.append('file', file);
         try{
             setUploading(true);
             console.log('submitting file...')
@@ -169,9 +142,8 @@ export default function BatchRecord(){
             });
             const data = await response.json();
             if(response.ok){
-                console.log(data)
                 if(data.errors.length == 0 && data.warnings.length ==0){
-                    setOK(true);
+                    setSuccess(['Uploaded with no errors. Great work!']);
                 }
                 setErrors(data.errors);
                 setWarnings(data.warnings);
@@ -189,7 +161,6 @@ export default function BatchRecord(){
                     // no JSON body or invalid JSON
                     data = { detail: 'Unknown error occurred' };
                 }
-
                 const serverResponse = [];
                 for (const field in data) {
                     if (Array.isArray(data[field])) {
@@ -211,34 +182,63 @@ export default function BatchRecord(){
             setUploading(false);
         }
     }
-    if (loading) return <Loading />
+
     return(
         <div className={styles.fileUpload}>
             <h1>Batch Uploading</h1>
-            {errors.length != 0 && <div ref={alertRef} role='alert' className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {warnings.length != 0 && <div role='alert' className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {ok && <div className={errorStyles.success}><p>Upload successful!</p></div>}
+            <Messages errors={errors} warnings={warnings} success={success} />
             {conflict && conflictList.length > 0 && <ConflictManagerModal existing={conflictList} handleClose={()=>setConflict(false)} />}
+            
             <div className={styles.template}>
+
                 <i>1. Select your organization and the project to get a ready to use template for recording data. There are directions and examples in the template for your reference.</i>
-                {selectTools?.orgs && <SimpleSelect name={'organization'} label={'Select an Organization'} 
-                    optionValues={selectTools.orgs.ids} optionLabels={selectTools.orgs.names}
-                    callback={(val)=>setTargetOrg(val)} search={true} searchCallback={(val) => setOrgSearch(val)}
-                    />}
-                {selectTools?.projects && <SimpleSelect name={'project'} label={'Select a Project'} 
-                    optionValues={selectTools.projects.ids} optionLabels={selectTools.projects.names}
-                    callback={(val)=>setTargetProject(val)} search={true} searchCallback={(val) => setProjectSearch(val)}
-                    />}
-                {gettingFile ? <ButtonLoading /> :  <button onClick={() => handleClick()}>Get my file!</button>}
+                    <ModelSelect IndexComponent={OrganizationsIndex} value={org} callbackText={'Choose Organization'}
+                         onChange={setOrg} label={'Select an Organization'} labelField={'name'} />
+
+                    <ModelSelect IndexComponent={ProjectsIndex} value={project} onChange={setProject}
+                        label={'Select a Project'} callbackText={'Choose Project'}/>
+                
+                {gettingFile ? <ButtonLoading /> : 
+                     <button onClick={() => handleClick()}><FaFileDownload /> Get my file!</button>}
+
             </div>
             
             <div className={styles.upload}>
                 <i>2. Upload your completed file. If there are any issues, you will be informed and can try to upload again. </i>
                 <form onSubmit={handleSubmit}  noValidate={true}>
-                    <label htmlFor="upload_file">Upload file</label>
-                    <input id="upload_file" type="file" onChange={handleChange} />
-                    {uploading ? <ButtonLoading /> :  <button type="submit">Upload</button>}
-                    <button type="button" onClick={() => setFile(null)}>Clear</button>
+                    <div style={{ display: 'flex', flexDirection: 'row'}}>
+                        <label htmlFor="upload_file">Select a file</label>
+                        {!file && <button onClick={handleFileSelection}  type="button" style={{ maxWidth: 200}}>
+                            <FaFolderOpen />
+                            Select a file to upload
+                        </button>}
+                        {file && <button className={styles.selectedFile} type="button">
+                            <div className={styles.selectedFileText}> <IoDocumentTextSharp /> {file.name}</div>
+                        </button>}
+                        
+                        <input 
+                            id="upload_file"
+                            type="file" 
+                            accept='.xlsx'
+                            style={{ display: 'none' }} 
+                            onChange={handleChange}
+                            ref={fileInputRef}
+                        />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        {uploading ? <ButtonLoading /> :  <button type="submit">Submit Upload</button>}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setFile(null);
+                                if (fileInputRef.current) {
+                                fileInputRef.current.value = ''; // reset the actual input
+                                }
+                            }}
+                            >
+                            Clear
+                        </button>
+                    </div>
                 </form>
             </div>
             <div className={styles.spacer}></div>

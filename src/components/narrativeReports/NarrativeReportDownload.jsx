@@ -5,8 +5,6 @@ import { useAuth } from '../../contexts/UserAuth';
 
 import fetchWithAuth from '../../../services/fetchWithAuth';
 
-
-
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import ButtonHover from '../reuseables/inputs/ButtonHover';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';

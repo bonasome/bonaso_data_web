@@ -34,7 +34,6 @@ export default function NarrativeReportUpload() {
     const handleChange = (event) => setFile(event.target.files[0]);
 
     const fileInputRef = useRef();
-
     const handleFileSelection = () => {
         fileInputRef.current.click(); // trigger hidden file input
     };

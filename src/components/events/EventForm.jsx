@@ -13,6 +13,7 @@ import Messages from '../reuseables/Messages';
 import ReturnLink from '../reuseables/ReturnLink';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
+import Tasks from '../tasks/Tasks';
 
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
@@ -107,6 +108,8 @@ export default function UserForm(){
         setSuccess([]);
         const action = e.nativeEvent.submitter.value;
         data.host_id = data.host_id?.id ?? null;
+        data.task_ids = data?.task_ids?.map((t) => (t.id)) ?? [];
+        data.organization_ids = data?.organization_ids?.map((o) => (o.id)) ?? [];
         try{
             setSaving(true);
             console.log('submitting data...', data);
@@ -168,6 +171,9 @@ export default function UserForm(){
             host_id: existing?.host ?? null,
             status: existing?.status ?? 'planned',
             event_type: existing?.event_type ?? '',
+
+            task_ids: existing?.tasks ?? [],
+            organization_ids: existing?.organizations ?? [],
         }
     }, [existing]);
 
@@ -196,6 +202,11 @@ export default function UserForm(){
             options: eventsMeta?.statuses,  rules: { required: "Required" } },
         {name: 'event_type', label: 'Event Type', type: 'radio',
             options: eventsMeta?.event_types,  rules: { required: "Required" } },
+        
+        {name: 'organization_ids', label: 'Participating Organizations', type: 'multimodel', IndexComponent: OrganizationsIndex,
+            labelField: 'name'
+         },
+        {name: 'task_ids', label: 'Linked to Tasks', type: 'multimodel', IndexComponent: Tasks },
     ]
 
     if(loading || !eventsMeta?.statuses) return <Loading />
