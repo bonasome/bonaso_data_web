@@ -15,6 +15,8 @@ import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
 import Tasks from '../tasks/Tasks';
 
+import styles from '../../styles/form.module.css';
+
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
@@ -211,7 +213,7 @@ export default function UserForm(){
 
     if(loading || !eventsMeta?.statuses) return <Loading />
     return(
-        <div>
+        <div className={styles.form}>
             <ReturnLink url={id ? `/events/${id}` : '/events'} display={id ? 'Return to detail page' : 'Return to events overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />

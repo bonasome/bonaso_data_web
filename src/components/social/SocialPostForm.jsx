@@ -14,6 +14,8 @@ import ReturnLink from '../reuseables/ReturnLink';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import Tasks from '../tasks/Tasks';
 
+import styles from '../../styles/form.module.css';
+
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
@@ -203,7 +205,7 @@ export default function UserForm(){
 
     if(loading || !socialPostsMeta?.platforms) return <Loading />
     return(
-        <div>
+        <div className={styles.form}>
             <ReturnLink url={id ? `/social/${id}` : '/social'} display={id ? 'Return to detail page' : 'Return to social overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />

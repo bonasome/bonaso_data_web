@@ -1,6 +1,7 @@
 import { useState, useEffect, useImperativeHandle, useRef, forwardRef } from "react";
+import Messages from '../Messages';
 import styles from './simpleDynamicRows.module.css'
-import errorStyles from "../../../styles/errors.module.css";
+
 
 // Row component
 function Row({ row, onCollect, onRemove, index, count }) {
@@ -84,25 +85,21 @@ const SimpleDynamicRows = forwardRef(({ label, existing=[] }, ref) => {
     };
 
     return (
-        <div>
-        {errors.length > 0 && (
-            <div className={errorStyles.errors} role="alert">
-            <ul>{errors.map((msg, i) => <li key={i}>{msg}</li>)}</ul>
-            </div>
-        )}
-        <p>{label}</p>
-        {rows.map((row, index) => (
-            <Row
-            key={row.key}
-            row={row}
-            count={rows.length}
-            label={label}
-            index={index}
-            onRemove={removeRows}
-            onCollect={(fn) => { getRow.current[row.key] = fn; }}
-            />
-        ))}
-        <button type="button" onClick={addRow}>Add Row</button>
+        <div className={styles.container}>
+            <Messages errors={errors} />
+            <p>{label}</p>
+            {rows.map((row, index) => (
+                <Row
+                key={row.key}
+                row={row}
+                count={rows.length}
+                label={label}
+                index={index}
+                onRemove={removeRows}
+                onCollect={(fn) => { getRow.current[row.key] = fn; }}
+                />
+            ))}
+            <button type="button" onClick={addRow}>Add Row</button>
         </div>
     );
 });

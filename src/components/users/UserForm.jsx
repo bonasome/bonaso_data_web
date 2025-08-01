@@ -16,6 +16,8 @@ import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
 import ClientsIndex from '../projects/clients/ClientsIndex';
 
+import styles from '../../styles/form.module.css';
+
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
@@ -108,13 +110,13 @@ export default function UserForm(){
         if(data.role == 'client' && !data.client_id){
             sErrors.push('Please provide a client organization for this user.')
         }
-        if(data.role != 'client' && !data.organization){
+        if(data.role != 'client' && !data.organization_id){
             sErrors.push('Organization is required.')
         }
         if(data.role != 'client'){
             data.client_id = null
         }
-        data.organization = data?.organization?.id ?? null;
+        data.organization_id = data?.organization_id?.id ?? null;
         data.client_id = data?.client?.id ?? null
         if(sErrors.length > 0){
             setSubmissionErrors(sErrors);
@@ -178,7 +180,7 @@ export default function UserForm(){
             password: '',
             confirm_password: '',
 
-            organization: existing?.organization ?? null,
+            organization_id: existing?.organization ?? null,
             client_id: existing?.client_organization ?? null,
             role: existing?.role ?? null,
 
@@ -225,7 +227,7 @@ export default function UserForm(){
     ]
 
     const organization= [
-        { name: 'organization', label: "User Organization", type: "model", IndexComponent: OrganizationsIndex},
+        { name: 'organization_id', label: "User Organization", type: "model", IndexComponent: OrganizationsIndex},
     ]
 
     const client = [
@@ -235,7 +237,7 @@ export default function UserForm(){
 
     if(loading || !profilesMeta?.roles) return <Loading />
     return(
-        <div>
+        <div className={styles.form}>
             <ReturnLink url={id ? `/profiles/${id}` : '/profiles'} display={id ? 'Return to detail page' : 'Return to profiles overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />

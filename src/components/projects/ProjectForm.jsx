@@ -13,8 +13,9 @@ import FormSection from '../reuseables/forms/FormSection';
 import Messages from '../reuseables/Messages';
 import ReturnLink from '../reuseables/ReturnLink';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
-import OrganizationsIndex from '../organizations/OrganizationsIndex';
 import ClientsIndex from '../projects/clients/ClientsIndex';
+
+import styles from '../../styles/form.module.css';
 
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
@@ -194,7 +195,7 @@ export default function ProjectForm(){
 
     if(loading || !projectsMeta?.statuses) return <Loading />
     return(
-        <div>
+        <div className={styles.form}>
             <ReturnLink url={id ? `/projects/${id}` : '/projects'} display={id ? 'Return to detail page' : 'Return to projects overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />

@@ -13,7 +13,7 @@ export default function Checkbox({ name, label, value, onChange, onBlur, errors 
                 name={name} id={name} type="checkbox" style={{ display: "none" }}
                 checked={value} onChange={e => onChange(e.target.checked)} onBlur={onBlur}
             />
-            {value ? <IoCheckboxSharp /> : <GrCheckbox />}
+            {value ? <IoCheckboxSharp style={{ marginRight: 12}}/> : <GrCheckbox style={{ marginRight: 12}}/>}
             {label}
         </label>
         <Messages errors={errors} />

@@ -1,3 +1,25 @@
-.container{
+.form{
+    padding: 4vh;
     margin: 5vh;
+    background-color: var(--bonaso-dark-accent);
+}
+.formSection {
+    margin: 3vh;
+    padding: 3vh;
+    background-color: var(--bonaso-uber-dark-accent);
+}
+.formSection >* label {
+    display: block;
+}
+.formSection >* input {
+    width: 50vw;
+}
+.formSection >* textarea {
+    width: 50vw;
+    height: 15vh;
+
+}
+.radio {
+    margin: 2vh;
+    padding: 2vh;
 }

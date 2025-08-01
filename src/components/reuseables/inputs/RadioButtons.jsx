@@ -1,6 +1,6 @@
 import Messages from "../Messages";
 import { IoMdRadioButtonOff, IoMdRadioButtonOn } from "react-icons/io";
-
+import styles from '../../../styles/form.module.css';
 export default function RadioButtons({
     name,
     label,
@@ -13,8 +13,8 @@ export default function RadioButtons({
 }) {
 
     return (
-        <div>
-            <label>{label}</label>
+        <div className={styles.radio}>
+            <label style={{ marginBottom: 20}}>{label}</label>
 
             {options.map((option, index) => {
                 const optionValue = option[valueField];
@@ -35,8 +35,8 @@ export default function RadioButtons({
                             }}
                             style={{ display: "none" }}
                         />
-                        <div className={`custom-radio-icon ${isSelected ? "active" : ""}`}>
-                            {isSelected ? <IoMdRadioButtonOn /> : <IoMdRadioButtonOff />}
+                        <div style={{ margin: 4}}>
+                            {isSelected ? <IoMdRadioButtonOn fontSize={20} /> : <IoMdRadioButtonOff fontSize={20}/>}
                         </div>
                         {optionLabel}
                         </label>

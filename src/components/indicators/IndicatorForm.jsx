@@ -15,6 +15,8 @@ import Messages from '../reuseables/Messages';
 import ReturnLink from '../reuseables/ReturnLink';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 
+import styles from '../../styles/form.module.css';
+
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
@@ -259,7 +261,8 @@ export default function IndicatorForm(){
     }
     const basicInfo = [
         { name: "code", label: "Indicator Code", type: "text", rules: { required: "Required" } },
-        { name: "name", label: "Indicator Name", type: "textarea", rules: { required: "Required" } },
+        { name: "name", label: "Indicator Name", type: "text", rules: { required: "Required" } },
+        { name: "description", label: "Indicator Description", type: "textarea", rules: { required: "Required" } },
         { name: "status", label: "Status", type: "radio", options: indicatorsMeta?.statuses, 
             rules: { required: "Required" } },
         { name: "indicator_type", label: "Indicator Type", type: "radio", options: indicatorsMeta?.indicator_types,
@@ -288,7 +291,7 @@ export default function IndicatorForm(){
 
     if(loading || !indicatorsMeta?.statuses) return <Loading />
     return(
-        <div>
+        <div className={styles.form}>
             <ReturnLink url={id ? `/indicators/${id}` : '/indicators'} display={id ? 'Return to detail page' : 'Return to indicators overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New Indicator' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />

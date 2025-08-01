@@ -15,9 +15,11 @@ import ReturnLink from '../../reuseables/ReturnLink';
 import ButtonLoading from '../../reuseables/loading/ButtonLoading';
 import OrganizationsIndex from '../../organizations/OrganizationsIndex';
 
+import styles from '../../../styles/form.module.css';
+
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
-import { BsDatabaseFillAdd } from "react-icons/bs";
+
 
 export default function ProjectDeadlineForm(){
     const navigate = useNavigate();
@@ -179,7 +181,7 @@ export default function ProjectDeadlineForm(){
 
     if(loading || !projectsMeta?.statuses) return <Loading />
     return(
-        <div>
+        <div className={styles.form}>
             <ReturnLink url={`/projects/${id}`} display={'Return to project page'} />
             <h1>{deadlineID ? `Editing ${existing?.display_name}` : 'New Deadline' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />

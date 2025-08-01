@@ -1,6 +1,5 @@
 import React from 'react';
 import { useEffect, useState, useRef, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/UserAuth'
 
@@ -10,16 +9,13 @@ import { initial, filterConfig } from './filterConfig';
 import IndexViewWrapper from '../reuseables/IndexView';
 import Loading from '../reuseables/loading/Loading';
 import Filter from '../reuseables/Filter';
-import ButtonHover from '../reuseables/inputs/ButtonHover';
 import Messages from '../reuseables/Messages';
 import FlagCard from './FlagCard';
-import { FlagTrendChart, FlagTypeChart } from './FlagCharts';
+import Metadata from './metadata/Metadata';
 
 import styles from '../../styles/indexView.module.css'
 
-import { MdAddToPhotos } from "react-icons/md";
-import { ImPencil } from 'react-icons/im';
-import { GiJumpAcross } from "react-icons/gi";
+import { IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 
 export default function FunWithFlags(){
     //contexts
@@ -30,7 +26,7 @@ export default function FunWithFlags(){
     //page meta
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const [showMetadata, setShowMetadata] = useState(true);
     //information for indexing
     const [filters, setFilters] = useState(initial);
     const [search, setSearch] = useState('');
@@ -136,26 +132,21 @@ export default function FunWithFlags(){
         <div className={styles.index}>
             <h1>Your Flags</h1>
             <Messages errors={errors} ref={alertRef} />
-            <div>
-                <h3>Flag Metadata</h3>
 
-                <div className={styles.count}>
-                    <h2>{metadata.active}</h2>
-                    <p>Active Flags</p>
+            <div className={styles.dropdownSegment}>
+                <div className={styles.toggleDropdown} onClick={() => setShowMetadata(!showMetadata)}>
+                    <h3 style={{ textAlign: 'start'}}>Flag Metadata</h3>
+                    {showMetadata ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
+                    <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                 </div>
 
-                <div className={styles.count}>
-                    <h2>{(metadata.total - metadata.active)}</h2>
-                    <p>Resolved Flags</p>
-                </div>
-                <FlagTrendChart data={metadata.by_month} />
-                <FlagTypeChart data={metadata.by_type} field={'reason_type'} />
-                <FlagTypeChart data={metadata.by_model} field={'content_type'} />
-
+                {showMetadata && <Metadata metadata={metadata} />}
             </div>
+            
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
                 filter={<Filter onFilterChange={(input) => {setFilters(input); setPage(1)}} config={filterConfig(meta, orgs, (s) => setOrgSearch)} initial={initial} />}
             >
+                <h2>All Flags</h2>
                 {flags.length === 0 ? 
                     <p>Phew. No flags. Keep checking though.</p> :
                     flags.map(f => (

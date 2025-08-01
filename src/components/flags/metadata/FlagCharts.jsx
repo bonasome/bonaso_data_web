@@ -1,10 +1,12 @@
-import { BarChart, Bar, Legend, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
-import prettyDates from '../../../services/prettyDates';
-import cleanLabels from '../../../services/cleanLabels';
-import { getContentTypeLabel } from '../../../services/modelMap';
-import theme from '../../../theme/theme';
-export function FlagTrendChart({ data }) {
+import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
+import prettyDates from '../../../../services/prettyDates';
+import cleanLabels from '../../../../services/cleanLabels';
+import { getContentTypeLabel } from '../../../../services/modelMap';
+
+import theme from '../../../../theme/theme';
+
+export function FlagTrendChart({ data }) {
     const cleanedData = data.map(d => ({
         ...d,
         monthLabel: prettyDates(d.month, false, true),
@@ -26,8 +28,8 @@ export function FlagTrendChart({ data }) {
     return (
         <ResponsiveContainer width="100%" height={300}>
             <LineChart data={cleanedData}>
-                <XAxis dataKey="monthLabel" />
-                <YAxis allowDecimals={false} />
+                <XAxis dataKey="monthLabel" tick={{ fill: 'white'}}/>
+                <YAxis allowDecimals={false}  tick={{ fill: 'white'}} />
                 <Tooltip content={<CustomTooltip />} />
                 <Line dataKey="count" fill="#8884d8" name="Flag Count" />
             </LineChart>
@@ -75,7 +77,7 @@ export function FlagTypeChart({ data, field }) {
     };
     return (
         <ResponsiveContainer width="100%" height={300}>
-            <PieChart width={400} height={300}>
+            <PieChart width={400} height={400}>
                 <Pie
                     data={cleanedData}
                     cx="50%" // center x

@@ -26,3 +26,21 @@
     cursor: pointer;
     transform: scale(1.05);
 }
+
+.toggleDropdown{
+    padding: 1.5vh;
+    display: flex;
+    flex-direction: row;
+}
+.toggleDropdown:hover {
+    cursor: pointer;
+}
+.dropdownSegment {
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+}
+.dropdownContent {
+    padding-left: 4vh;
+    padding-right: 4vh;
+    padding-bottom: 2vh;
+}

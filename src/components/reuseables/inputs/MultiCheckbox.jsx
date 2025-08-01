@@ -15,7 +15,7 @@ function MultiCheckboxItem({ name, label, checked, onChange, value }) {
                 style={{ display: "none" }}
             />
             <label htmlFor={`${name}-${value}`}>
-                {checked ? <IoCheckboxSharp /> : <GrCheckbox />}
+                {checked ? <IoCheckboxSharp style={{ marginRight: 12}} /> : <GrCheckbox style={{ marginRight: 12}}/>}
                 {label}
             </label>
         </div>

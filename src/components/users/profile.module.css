@@ -28,17 +28,39 @@
 
 .card{
     margin-top: 3vh;
-    padding: 4vh;
+    padding: 2vh;
     background-color: var(--bonaso-uber-dark-accent);
 }
 
-.feedItem {
+.activityCard {
+    background-color: var(--bonaso-light-accent);
+    color: var(--bonaso-uber-dark-accent);
     padding: 1vh;
-    margin: 1vh;
+    margin: 2vh;
     transition: transform .6s;
 }
-.feedItem:hover{
-    margin: 0;
-    background-color: var(--bonaso-main);
+.activityCard:hover{
     transform: scale(1.05);
+}
+.activityCard > a {
+    color: var(--bonaso-uber-dark-accent);
+}
+
+
+.toggleDropdown{
+    padding: 1.5vh;
+    display: flex;
+    flex-direction: row;
+}
+.toggleDropdown:hover {
+    cursor: pointer;
+}
+.dropdownSegment {
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+}
+.dropdownContent {
+    padding-left: 4vh;
+    padding-right: 4vh;
+    padding-bottom: 2vh;
 }
