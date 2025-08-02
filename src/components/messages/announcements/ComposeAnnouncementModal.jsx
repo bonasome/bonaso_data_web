@@ -41,7 +41,7 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
             const returnData = await response.json();
             if(response.ok){
                 onUpdate(returnData);
-                onClose();
+                onClose();  
             }
             else{
                 const serverResponse = []
@@ -72,7 +72,9 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
             return {
                 subject: existing?.subject ?? '',
                 body: existing?.body ?? '',
-                organization_ids: existing?.organizations ?? []
+                organization_ids: existing?.organizations ?? [],
+                cascade_to_children: existing?.cascade_to_children ?? [],
+                visible_to_all: existing?.visible_to_all ?? []
             }
         }, [existing]);
     
@@ -88,15 +90,15 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
     const basics = [
         { name: 'subject', label: 'Subject', type: "text", rules: { required: "Required" }},
         { name: 'body', label: "Body", type: "textarea",},
-
-        {name: 'cascade_to_children', label: 'Make Visible to Subgrantees?', type: 'checkbox'}
     ]
-
-    const admin= [
+    const orgs = [
+        {name: 'cascade_to_children', label: 'Make Visible to Subgrantees?', type: 'checkbox'},
         { name: 'organization_ids', label: "Organizations Involved", type: "multimodel", IndexComponent: OrganizationsIndex,
             labelField: 'name',
         },
-        {name: 'visible_to_all', label: 'Make Visible to All Project Members', type: 'checkbox'}
+    ]
+    const admin= [
+        {name: 'visible_to_all', label: 'Make Visible to All', type: 'checkbox'}
     ]
     
     return(
@@ -105,6 +107,7 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
             <Messages errors={pageErrors} />
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormSection fields={basics} control={control} />
+                {projectID && <FormSection fields={orgs} control={control} />}
                 {user.role === 'admin' && <FormSection fields={admin} control={control} />}
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>

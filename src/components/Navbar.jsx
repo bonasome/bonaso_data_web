@@ -28,24 +28,28 @@ function Dropdown({ name }){
             setUrls(['/projects', '/indicators', '/organizations', '/clients'])
             setLabels(['Manage Projects', 'Manage Indicators', 'Manage Organizations', 'Manage Clients'])
         }
-        if(name =='Respondents' && ['meofficer', 'manager', 'admin'].includes(user.role)){
-            let urls = ['/respondents', '/batch-record']
-            let labels = ['Manage Respondents', 'Batch Record']
-            if(!['client'].includes(user.role)){
-                urls.push('/respondents/flagged')
-                labels.push('Flagged Interactions')
-            }
+
+        if(name =='Record' && ['meofficer', 'manager', 'admin'].includes(user.role)){
+            let urls = ['/respondents', '/batch-record', '/events', '/social']
+            let labels = ['Manage Respondents', 'Batch Record', 'Record Events', 'Record Social Post']
             setUrls(urls)
             setLabels(labels)
         }
-        if(name ==`${user.username}`){
-            setUrls([`/profiles/${user.id}`, '/messages', '/help', '/users/logout'])
-            setLabels(['My Profile', 'Messages', 'Help', 'Logout'])
+        if(name =='Analyze' && ['meofficer', 'manager', 'admin', 'client'].includes(user.role)){
+            let urls = ['/analytics', '/flags']
+            let labels = ['View Dashboards', 'View Flags']
+            setUrls(urls)
+            setLabels(labels)
         }
         if(name=='Team'){
             setUrls(['/profiles', '/profiles/new'])
             setLabels(['My Team', 'Add a New User'])
         }
+        if(name ==`${user.username}`){
+            setUrls([`/profiles/${user.id}`, '/messages', '/help', '/users/logout'])
+            setLabels(['My Profile', 'Messages', 'Help', 'Logout'])
+        }
+        
     }, [])
     return(
         <div className={styles.expandedMenuDropdown}>
@@ -65,7 +69,7 @@ function MenuLink({ name, url }) {
     if(name == 'Projects' && !['meofficer', 'manager', 'admin', 'client'].includes(user.role)){
         return <></>
     }
-    if(name == 'Dataviewer' && !['meofficer', 'manager', 'admin', 'client'].includes(user.role)){
+    if(name == 'Analyze' && !['meofficer', 'manager', 'admin', 'client'].includes(user.role)){
         return <></>
     }
     if(name == 'Team' && !['meofficer', 'manager', 'admin'].includes(user.role)){
@@ -81,8 +85,8 @@ function MenuLink({ name, url }) {
 
 function ExpandedMenu() {
     const { user } = useAuth();
-    const links = ['Dataviewer', 'Projects', 'Events', 'Respondents', 'Team', `${user.username}`]
-    const urls = ['/analytics', '/projects', '/events', '/respondents', '/profiles', `/profiles/${user.id}`]
+    const links = ['Analyze', 'Record', 'Projects','Team', `${user.username}`]
+    const urls = ['/analytics', '/respondents', '/projects', '/profiles', `/profiles/${user.id}`]
 
     return(
         <div className={styles.expandedMenu}>
@@ -96,27 +100,28 @@ function ThinMenu() {
 
     return(
         <div className={styles.menuExpanded}>
-            <h3>Respondents</h3>
+            <h2>Record</h2>
             <div className={styles.menuBar}><Link to='/respondents'>Respondents</Link></div>
             {!['clients'].includes(user.role) && <div className={styles.menuBar}><Link to='/respondents/flagged'>Flagged Interactions</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/batch-record'}>Batch Record</Link></div>}
+            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/events'}>Events</Link></div>}
+            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/social'}>Social</Link></div>}
             
-            {['admin', 'meofficer', 'manager'].includes(user.role) && <h3>Data</h3>}
+            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h2>Analyze</h2>}
             {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics'}>Dashboards</Link></div>} 
             
-            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h3>Projects</h3>}
+            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h2>Projects</h2>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/organizations'}>Organizations</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/indicators'}>Indicators</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/clients'}>Clients</Link></div>}
 
-            {['admin', 'meofficer', 'manager'].includes(user.role) && <h3>Team</h3>}
+            {['admin', 'meofficer', 'manager'].includes(user.role) && <h2>Team</h2>}
             {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>My Team</Link></div>} 
 
-            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h3>Events</h3>}
-            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/events'}>Events</Link></div>}
             
-            <h3>Profile</h3>
+            
+            <h2>Profile</h2>
             <div className={styles.menuBar}><Link to={`/profiles/${user.id}`}>Profile</Link></div>
             <div className={styles.menuBar}><Link to={`/messages`}>Messages</Link></div>
             <div className={styles.menuBar}><Link to={'/users/logout'}>Logout</Link></div>

@@ -2,7 +2,9 @@ export const contentTypeMap = {
     'respondents.respondent': { id: 10, label: 'Respondent', url: 'respondents' },
     'respondents.interaction': { id: 14, label: 'Interaction', url: 'respondents' },
     'events.demographiccount': { id: 36, label: 'Event Count', url: 'events' },
-    'social.socialmediapost': { id: 63, label: 'Social Media Post', url: 'social' }
+    'social.socialmediapost': { id: 63, label: 'Social Media Post', url: 'social' },
+    'events.event': { id: 40, label: 'Event', url: 'events' },
+    'projects.project': { id: 4, label: 'Project', url: 'projects' }
 };
 
 export const getContentTypeString = (id) => {
@@ -19,6 +21,9 @@ export const getContentTypeURL = (id) => {
 export const generateURL = (id, target) => {
     const objID = target?.parent ?? target.id
     return `/${getContentTypeURL(id)}/${objID}`
+}
+export const faveURL = (id, contentType) => {
+    return `/${getContentTypeURL(contentType)}/${id}`
 }
 
 export const urlBuilder = (app, id, parent = '', otherParent = '') => {

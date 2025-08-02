@@ -195,7 +195,6 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
     function shallowEqual(obj1, obj2) {
         const keys1 = Object.keys(obj1);
         const keys2 = Object.keys(obj2);
-        console.log(keys1, keys2)
         if (keys1.length !== keys2.length) return false;
         return keys1.every(key => obj1[key] === obj2[key]);
     }
@@ -223,7 +222,6 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             const map = {}
             const split = splits[0][0]
             const valuesArray = splits.map((s) => (s[1].values))
-            console.log(valuesArray)
             valuesArray[0].forEach((v, index) => {
                 let count = ''
                 let flags = []

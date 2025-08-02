@@ -2,80 +2,67 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/UserAuth';
 
+
+import fetchWithAuth from '../../../services/fetchWithAuth';
+
+import ComposeAnnouncementModal from '../messages/announcements/ComposeAnnouncementModal';
+import UnopenedMsg from '../messages/UnopenedMsg';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import Messages from '../reuseables/Messages';
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import ConfirmDelete from '../reuseables/ConfirmDelete';
+import AnnouncementCard from '../messages/announcements/AnnouncementCard';
 
 import styles from '../home.module.css';
 
-function MsgCard({ msg, type, onDelete=null }){
-    const { user } = useAuth();
+import { GrAnnounce } from "react-icons/gr";
+import { ImPencil } from 'react-icons/im';
+
+//simple alert card since these don't show up anywhere else
+function AlertCard({ alert }){
     const [expanded, setExpanded] = useState(false);
-
-    const unread = useMemo(() => {
-        if (type !== 'message') return false;
-        const hasUnread = msg.recipients.some(r => r.recipient.id === user.id && !r.read);
-        if (hasUnread) return true;
-        const hasUnreadReplies = msg.replies?.some(reply =>
-            reply.recipients.some(r => r.recipient.id === user.id && !r.read)
-        );
-        return hasUnreadReplies || false;
-    }, [msg, user.id, type]);
-
-    const objectLink = useMemo(() => {
-        if (type !== 'alert') return;
-        if(!msg?.content_object || !msg?.object_id) return
-        if(msg.content_object.toLowerCase().includes('interaction')) return `/respondents/interaction/${msg.object_id}`;
-        if(msg.content_object.toLowerCase().includes('event')) return `/events/${msg.object_id}`
-    }, [msg, user.id, type]);
-
+    if(!alert) return <></>
     return(
         <div className={styles.msgCard} onClick={() => setExpanded(!expanded)}>
-            {type==='message' && <Link to={`/messages/${msg.id}`}><h4>{msg.subject} {!expanded && `- ${msg.sender.first_name}`} {unread && 'NEW'} </h4></Link> }
-            {type !== 'message' && <h4>{msg.subject} </h4>}
-            {expanded && <div onClick={(e) => e.stopPropagation()}>
-                <div>
-                    <p>{body}</p>
-                    {type == 'message' && <p><i>From {msg.sender.first_name}</i></p>}
-                    {type == 'message' && <p><i></i></p>}
-                    {type == 'message' && msg?.replies?.length > 0 && msg.replies.map((r) => (
-                        <div>
-                            <p>{r.body}</p>
-                            <p><i>from {r.sender.first_name}</i></p>
-                        </div>
-                    ))}
-                    {type == 'alert' && objectLink && <Link to={objectLink}>View</Link>}
-                </div>
+            <Link to={'/flags'}  style={{display:'flex', width:"fit-content"}}><h4>{alert.subject}</h4></Link>
+            {expanded && <div>
+                {alert.body}
             </div>}
-            
         </div>
     )
 }
 
+//box with tabs that show differnet lists of messages
 export default function UpdateBox(){
-    const [errors, setErrors] = useState([]);
+    const { user } = useAuth();
+    //determine what to display
+    const [msgPane, setMsgPane] = useState('announcements');
+    //content for different message types
     const [announcements, setAnnouncements] = useState([]);
     const [messages, setMessages] = useState([]);
     const [alerts, setAlerts] = useState([]);
-    const [msgPane, setMsgPane] = useState('announcements');
+    //meta
+    const [adding, setAdding] = useState(false);
+    const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const getAnnouncements = async () => {
-            try {
-                console.log('fetching announcements...');
-                const url = `/api/messages/announcements/`
-                const response = await fetchWithAuth(url);
-                const data = await response.json();
-                setAnnouncements(data.results);
-            } 
-            catch (err) {
-                console.error('Failed to delete organization:', err);
-                setErrors(['Something went wrong. Please try again later.'])
-            } 
-        };
-        getAnnouncements();
+    const getAnnouncements = async () => {
+        try {
+            console.log('fetching announcements...');
+            const url = `/api/messages/announcements/`
+            const response = await fetchWithAuth(url);
+            const data = await response.json();
+            setAnnouncements(data.results);
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        } 
+    };
 
+    useEffect(() => {
+        getAnnouncements();
+    
         const getMessages = async () => {
             try {
                 console.log('fetching messages...');
@@ -108,7 +95,11 @@ export default function UpdateBox(){
             }
         };
         getAlerts();
-    }, [])
+    }, []);
+
+    const handleAdd = (data) => {
+        setAnnouncements(prev => [...prev, data])
+    };
 
     if(loading) return <ComponentLoading />
     return(
@@ -125,18 +116,24 @@ export default function UpdateBox(){
                 </div>
             </div>
             <Messages errors={errors} />
+
             {msgPane == 'announcements' && <div className={styles.msgPane}>
-                {<Link to={'/messages/announcements/new'}><button>New Announcement</button></Link>}
                 {announcements.length == 0 && <p>No announcements yet.</p>}
-                {announcements.map((a) => (<MsgCard key={a.id} type={'announcement'} msg={a} onDelete={() => setAnnouncements(prev => prev.filter(a => (a.id != id)))}/>))}
+                {announcements.map((a) => (<AnnouncementCard key={a.id} announcement={a} onUpdate={getAnnouncements}/>))}
+
+                {user.role == 'admin' && <ButtonHover callback={() => setAdding(true)} noHover={<GrAnnounce />} hover={'New Announcement'} />}
+                {adding && <ComposeAnnouncementModal onClose={() => setAdding(false)} onUpdate={handleAdd} /> }
+            
             </div>}
+
             {msgPane == 'messages' && <div className={styles.msgPane}>
                 {messages.length == 0 && <p>It's lonely here!</p>}
-                {messages.map((msg) => (<MsgCard key={msg.id} type={'message'} msg={msg} />))}
+                {messages.map((msg) => (<UnopenedMsg key={msg.id} msg={msg} />))}
             </div>}
+
             {msgPane == 'alerts' && <div className={styles.msgPane}>
-                {messages.length == 0 && <p>Phew! No alerts.</p>}
-                {alerts.map((alr) => (<MsgCard key={alr.id} type={'alert'} msg={alr} />))}
+                {alerts.length == 0 && <p>Phew! No alerts.</p>}
+                {alerts.map((alr) => (<AlertCard key={alr.id} alert={alr} />))}
             </div>}
         </div>
     )

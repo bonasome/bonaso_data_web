@@ -14,11 +14,10 @@ import ComposeMessage from './ComposeMessage';
 import styles from './messages.module.css';
 
 import { IoIosChatboxes } from "react-icons/io";
-import { MdSupportAgent, MdOutlineMarkChatUnread } from "react-icons/md";
-import { IoPersonAdd, IoPersonRemove, IoCheckmarkDoneCircle  } from "react-icons/io5";
+import { MdSupportAgent } from "react-icons/md";
+import { IoPersonAdd, IoPersonRemove  } from "react-icons/io5";
 import { TiMessages } from "react-icons/ti";
-import { TbMessageReportFilled } from "react-icons/tb";
-import { BiSolidMessageAltCheck } from "react-icons/bi";
+import UnopenedMsg from './UnopenedMsg';
 
 export default function MyMessages(){
     const { id } = useParams(); //optional param that directs to a specific message on load
@@ -84,7 +83,7 @@ export default function MyMessages(){
                 const response = await fetchWithAuth(`/api/messages/dm/recipients/?search=${searchP}&page=${pageP}`);
                 const data = await response.json();
                 setEntriesP(data.count)
-                setProfiles(data.results.filter(p => p.id != user.id));
+                setProfiles(data.results?.filter(p => p.id != user.id));
             } 
             catch (error) {
                 setErrors(['Failed to get recipients']);
@@ -107,39 +106,7 @@ export default function MyMessages(){
         }
     }, [messages, id]);
 
-    const checkRead = (msg) => {
-        if(msg.recipients.find(r => r.recipient.id == user.id && !r.read)) return false;
-        if(msg.replies.find(rep => rep.recipients.find(r => r.recipient.id == user.id && !r.read))) return false
-        return true
-    }
-
-    const checkToDo = (msg) => {
-        if(msg.recipients.find(r => r.recipient.id == user.id && r.actionable && !r.completed)) return true;
-        if(msg.replies.find(rep => rep.recipients.find(r => r.recipient.id == user.id && r.actionable && !r.completed))) return true
-        return false
-    }
-    const checkCompleted = (msg) => {
-        const allRelevant = [
-            ...msg.recipients,
-            ...msg.replies.flatMap(rep => rep.recipients)
-        ].filter(r =>
-            r.recipient.id === user.id && r.actionable
-        );
-
-        if (allRelevant.length === 0) return false; // nothing assigned to this user
-
-        return allRelevant.every(r => r.completed);
-    };
-    const checkCompletedSender = (msg) => {
-        const allRelevant = [
-            ...msg.recipients,
-            ...msg.replies.flatMap(rep => rep.recipients)
-        ].filter(r => r.actionable);
-
-        if (allRelevant.length === 0) return false; // nothing assigned in thread
-
-        return allRelevant.every(r => r.completed);
-    };
+    
     if(loading || !messages) return <Loading />
     return(
         <div className={styles.container}>
@@ -177,19 +144,7 @@ export default function MyMessages(){
 
                 <div>
                      <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} >
-                        {messages.length > 0 ? messages.map((m) => (<div className={styles.sbCard} onClick={() => setActiveThread(m)}>
-                            {!checkRead(m) && <MdOutlineMarkChatUnread fontSize={25} style={{ marginTop: 'auto', marginBottom: 'auto', marginRight: 5}} />}
-                            {checkToDo(m) && <TbMessageReportFilled fontSize={25} style={{ marginTop: 'auto', marginBottom: 'auto', marginRight: 5}}/>}
-                            {checkCompleted(m) && <BiSolidMessageAltCheck 
-                                fontSize={25} style={{ marginTop: 'auto', marginBottom: 'auto', marginRight: 5}}
-                            />}
-                            {user.id === m.sender.id && checkCompletedSender(m) && 
-                                <IoCheckmarkDoneCircle fontSize={25} 
-                                    style={{ marginTop: 'auto', marginBottom: 'auto', marginRight: 5}}
-                            />}
-
-                            <h3>{m.subject} - {m.sender.display_name}</h3>
-                        </div>)) : 
+                        {messages.length > 0 ? messages.map((m) => (<UnopenedMsg msg={m} callback={(msg) => setActiveThread(msg)} />)) : 
                         <p>No messages yet. Click the button above to start talking!</p>}
                     </IndexViewWrapper>
                     <div className={styles.spacer}></div>

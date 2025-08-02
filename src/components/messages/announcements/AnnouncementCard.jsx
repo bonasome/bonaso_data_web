@@ -8,6 +8,8 @@ import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import ComposeAnnouncementModal from './ComposeAnnouncementModal';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 
+import styles from './announcement.module.css';
+
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 
@@ -65,10 +67,10 @@ export default function AnnouncementCard({ announcement, onUpdate }){
     if(!announcement) return <></>
 
     if(del) return <ConfirmDelete onConfirm={() => handleDelete()} onCancel={() => setDel(false)} name={'this announcement'} />
-    if(editing) return <ComposeAnnouncementModal existing={announcement} onUpdate={(data) => {setAnnc(data); onUpdate(returData)}} onClose={() => setEditing(false)} />
+    if(editing) return <ComposeAnnouncementModal existing={announcement} onUpdate={(data) => {setAnnc(data); onUpdate(data)}} onClose={() => setEditing(false)} />
     
     return(
-        <div onClick={() => setExpanded(!expanded)}>
+        <div onClick={() => setExpanded(!expanded)} className={styles.card}>
             <h3>{annc.subject}</h3>
             {expanded && <div>
                 <Messages errors={errors} />

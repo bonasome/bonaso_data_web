@@ -1,0 +1,14 @@
+.card{
+    padding: 2vh;
+    margin: 2vh;
+    background-color: var(--bonaso-uber-dark-accent);
+    transition: all .6s;
+}
+
+.card:hover{
+    cursor: pointer;
+    padding: 2vh;
+    margin: 2vh;
+    background-color: var(--bonaso-uber-dark-accent);
+    transform: scale(1.06);
+}

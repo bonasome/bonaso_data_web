@@ -47,7 +47,7 @@
 
 .msgCard{
     margin: 3vh;
-    padding: 1vh;
+    padding: 2vh;
     background-color: var(--bonaso-uber-dark-accent);
     transition: all .6s;
 }
@@ -56,16 +56,20 @@
 }
 
 .faves {
+    height: 60vh;
     padding: 4vh;
     background-color: var(--bonaso-dark-accent);
     text-align: center;
     overflow-y: scroll;
 }
-
+.favesSection {
+    padding: 2vh;
+    background-color: var(--bonaso-uber-dark-accent);
+}
 .favesCard {
     margin: 2vh;
     padding: 1vh;
-    background-color: var(--bonaso-uber-dark-accent);
+    background-color: var(--bonaso-dark-accent);
     transition: all .6s;
 }
 .favesCard:hover{
