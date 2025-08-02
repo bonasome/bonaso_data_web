@@ -1,6 +1,8 @@
 import { FlagTrendChart, FlagTypeChart } from './FlagCharts';
+
 import styles from '../flags.module.css';
 
+//helper to compile all the metadata
 export default function Metadata({ metadata }){
     return(
         <div>

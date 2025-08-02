@@ -6,7 +6,7 @@
 }
 
 .sidebar {
-    padding: 3vh;
+    padding: 2vh;
     overflow-y: scroll;
     height: 84vh;
     background-color: var(--bonaso-dark-accent);
@@ -15,13 +15,18 @@
     display: flex;
     flex-direction: row;
 }
-
+.pCard{
+    display: flex;
+    flex-direction: row;
+}
 .sbCard {
     background-color: var(--bonaso-uber-dark-accent);
     padding: 2vh;
     transition: all .6s;
     margin-top: 2vh;
     margin-bottom: 2vh;
+    display: flex;
+    flex-direction: row;
 }
 
 .sbCard:hover {
@@ -36,14 +41,27 @@
 }
 .message {
     background-color: var(--bonaso-dark-accent);
-    padding: 3vh;
+    padding: 2vh;
     margin-right: 4vh;
-    margin-bottom: 6vh;
 }
 .msgContent {
     padding: 2vh;
     background-color: var(--bonaso-uber-dark-accent);
-    margin-bottom: 2vh;
+}
+.pCard {
+    background-color: var(--bonaso-uber-dark-accent);
+    margin: 2vh;
+    padding: 1vh;
+    transition: all .6s ease;
+}
+.pCard >* {
+    margin-left: auto;
+}
+.pCard:hover {
+    background-color: var(--bonaso-uber-dark-accent);
+    margin: 2vh;
+    padding: 1vh;
+    transform: scale(1.06);
 }
 
 .compose {
@@ -52,9 +70,21 @@
     background-color: var(--bonaso-dark-accent);
 }
 .field > input {
-    width: 50vw;
+    width: 35vw;
 }
 .field > textarea {
-    width: 50vw;
-    height: 20vh;
+    width: 35vw;
+    height: 25vh;
+}
+.field > label {
+    display: block;
+}
+.placeholder {
+    height: 69vh;
+    text-align: center;
+    margin-top: 15vh;
+}
+
+.spacer {
+    padding: 4vh;
 }

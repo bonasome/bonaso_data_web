@@ -5,6 +5,7 @@ import { IoCheckboxSharp } from "react-icons/io5";
 
 import Messages from '../Messages';
 
+//toggle checkbox
 export default function Checkbox({ name, label, value, onChange, onBlur, errors = [] }) {
   return (
     <div>

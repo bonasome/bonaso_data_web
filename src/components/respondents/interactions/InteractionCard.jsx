@@ -264,7 +264,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             {editing && <div onClick={(e) => e.stopPropagation()}>
                 <label htmlFor='interaction_date'>Date</label>
                 <input type='date' name='interaction_date' id='interaction_date' value={interactionDate} onChange={(e)=>setInteractionDate(e.target.value)}/>
-                <label htmlFor='interaction_date'>Location</label>
+                <label htmlFor='interaction_location'>Location</label>
                 <input type='text' name='interaction_location' id='interaction_location' value={interactionLocation} onChange={(e)=>setInteractionLocation(e.target.value)}/>
                 {interaction.numeric_component &&
                     <div>
@@ -277,10 +277,10 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                         <div key={cat.id} style={{ display: 'flex', flexDirection: 'row', marginTop: 'auto', marginBottom: 'auto' }}>
                             <Checkbox key={cat.id}
                                 label={cat.name}
-                                checked={subcats.filter(c => c.subcategory.id == cat.id).length > 0}
+                                value={subcats.filter(c => c.subcategory.id == cat.id).length > 0}
                                 name={cat.name}
-                                callback={(checked) => setSubcats(prev =>
-                                    checked ? [...prev, {id: null, subcategory: {id: cat.id, name: cat.name}}] : prev.filter(c => c.id !== cat.id)
+                                onChange={(checked) => setSubcats(prev =>
+                                    checked ? [...prev, {id: null, subcategory: {id: cat.id, name: cat.name}}] : prev.filter(c => c.subcategory.id !== cat.id)
                                 )}
                             />
                             {interaction.task.indicator.require_numeric && subcats.filter(c => c.subcategory.id == cat.id).length > 0 && <div style={{ display: 'flex', flexDirection: 'row'}}>

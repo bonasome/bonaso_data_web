@@ -9,9 +9,11 @@ import ModelMultiSelect from '../inputs/ModelMultiSelect';
 import SimpleDynamicRows from '../inputs/SimpleDynamicRows';
 import ImageSelect from '../inputs/ImageSelect';
 
+//a singular field/question in a form. can support many different data types
 export default function Field({ field, control }) {
   const { type, name, rules, label, options, IndexComponent, images, labelField, valueField, includeParams, excludeParams } = field;
-
+    //IndexComponent is the model select component, label/valueField are used to when providing maps (if not names label/valuve)
+    //include/exclude params for filtering model index components
   return (
         <Controller
             name={name}
@@ -32,19 +34,19 @@ export default function Field({ field, control }) {
                 case "number":
                 case "textarea":
                     return <Input type={type} {...commonProps} />;
-                case "radio":
+                case "radio": //single select from list
                     return <RadioButtons options={options} labelField={labelField} valueField={valueField} {...commonProps} />;
-                case "checkbox":
+                case "checkbox": //toggle for true/false or switchpaths
                     return <Checkbox  {...commonProps} />;
-                case 'multiselect':
+                case 'multiselect': //multiselect from checkbox
                     return <MultiCheckbox labelField={labelField} valueField={valueField} {...commonProps} options={options} />
-                case 'image':
+                case 'image': //select with an icon, for that pretty factor
                     return <ImageSelect {...commonProps} options={options} images={images} />
-                case 'rows':
+                case 'rows': //add/subtract dynamic number of rows with inputs
                     return <SimpleDynamicRows {...commonProps} />
-                case 'model':
+                case 'model': //select a model instance 
                     return <ModelSelect labelField={labelField} {...commonProps} IndexComponent={IndexComponent} includeParams={includeParams} excludeParams={excludeParams}/>
-                case 'multimodel':
+                case 'multimodel': //select multiple models
                     return <ModelMultiSelect labelField={labelField} {...commonProps} IndexComponent={IndexComponent} includeParams={includeParams} excludeParams={excludeParams}/>
                     
                 default:

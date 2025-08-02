@@ -35,7 +35,7 @@ function Row({ row, onCollect, onRemove, index, count }) {
   );
 }
 
-// Main component with forwardRef to expose collection logic
+// Main component with forwardRef to expose collection logic from all row inputs
 const SimpleDynamicRows = forwardRef(({ label, existing=[] }, ref) => {
     const [rows, setRows] = useState([{ key: Date.now().toString(), value: "" }]);
     const [errors, setErrors] = useState([]);

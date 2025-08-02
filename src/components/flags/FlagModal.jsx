@@ -7,6 +7,7 @@ import errorStyles from '../../styles/errors.module.css';
 import fetchWithAuth from "../../../services/fetchWithAuth";
 import RadioButtons from '../reuseables/inputs/RadioButtons';
 
+//modal for creating a flag
 export default function FlagModal({ model, id, onConfirm, onCancel }){
     const [saving, setSaving] = useState(false);
     const [flagReason, setFlagReason] = useState('');
@@ -14,6 +15,7 @@ export default function FlagModal({ model, id, onConfirm, onCancel }){
     const [errors, setErrors] = useState([]);
     const [meta, setMeta] = useState(null);
 
+    //get the meta for the reason types
     useEffect(() => {
         const getMeta = async () => {
             try{
@@ -31,6 +33,7 @@ export default function FlagModal({ model, id, onConfirm, onCancel }){
         getMeta()
     }, [])
 
+    //function to submit the flag request
     const raiseFlag = async() => {
         setErrors([]);
         const sErrors = []
@@ -85,7 +88,7 @@ export default function FlagModal({ model, id, onConfirm, onCancel }){
             setSaving(false);
         }
     }
-    console.log(meta)
+
     if(!meta) return <></>
     return(
         <div className={modalStyles.modal}>

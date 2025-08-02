@@ -7,6 +7,7 @@ import { getContentTypeLabel } from '../../../../services/modelMap';
 import theme from '../../../../theme/theme';
 
 export function FlagTrendChart({ data }) {
+    //add readable month field
     const cleanedData = data.map(d => ({
         ...d,
         monthLabel: prettyDates(d.month, false, true),
@@ -37,13 +38,12 @@ export function FlagTrendChart({ data }) {
     );
 }
 export function FlagTypeChart({ data, field }) {
-
-    console.log(data)
+    //add cleaned label field
     const cleanedData = data.map(d => ({
         ...d,
         label: field ==='content_type' ? getContentTypeLabel(d[field]) : cleanLabels(d[field]),
     }));
-
+    //generate slice colors
     const getColor = (index) => {
         switch (index){
             case 0:
@@ -64,6 +64,7 @@ export function FlagTypeChart({ data, field }) {
                 return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
         }
     }
+
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const { label, count } = payload[0].payload;

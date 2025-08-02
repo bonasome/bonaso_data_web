@@ -1,7 +1,8 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { FaSearch } from "react-icons/fa";
+import { GrLinkPrevious, GrLinkNext } from "react-icons/gr";
 
+//index view wrapper that handles setting pages and controlling search inputs
 export default function IndexViewWrapper({ children, page, onSearchChange, onPageChange, entries, filter=null }){
     const [search, setSearch] = useState('');
     //const [page, setPage] = useState(1);
@@ -25,15 +26,18 @@ export default function IndexViewWrapper({ children, page, onSearchChange, onPag
     return( 
         <div >
             <div>
-                <input type='text' onChange={(e) => handleSearch(e.target.value)}/>
-                
+                <input type='text' onChange={(e) => handleSearch(e.target.value)} placeholder={'start typing to search'}/>
                 {filter && filter}
             </div>
+
             { children }
+
             <div>
-                <button type="button" onClick={() => handlePageChange(page - 1)} disabled={page === 1}>Previous Page</button>
+                <button type="button" onClick={() => handlePageChange(page - 1)} 
+                    disabled={page === 1}><GrLinkPrevious style={{ marginRight: 5}}/> Previous Page</button>
                     <span>Showing Page {page} of {totalPages}</span>
-                <button type="button" onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}>Next Page</button>
+                <button type="button" onClick={() => handlePageChange(page + 1)} 
+                    disabled={page === totalPages}>Next Page<GrLinkNext style={{ marginLeft: 5}}/></button>
             </div>
         </div>
     )

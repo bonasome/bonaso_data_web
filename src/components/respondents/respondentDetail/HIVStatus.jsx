@@ -78,7 +78,7 @@ export default function HIVStatus({ respondent, onUpdate }){
             {editing && <div>
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 {success !== '' && <div className={errorStyles.success}>{success}</div> }
-                <Checkbox label='Is this person HIV Positive?' name='hiv_positive' callback={(c) => setPos(c)} checked={pos}/>
+                <Checkbox label='Is this person HIV Positive?' name='hiv_positive' onChange={(c) => setPos(c)} value={pos}/>
                 {pos && <div>
                     <label htmlFor='date_positive'>When did this person become HIV Positve? (leave blank if unsure).</label>
                     <input type='date' id='date_positive' name='date_positive' value={date} onChange={(e)=> setDate(e.target.value)}/>

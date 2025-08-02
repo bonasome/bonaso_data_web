@@ -1,6 +1,8 @@
 import Field from "./Field";
+
 import styles from '../../../styles/form.module.css';
 
+//a section of a form. helps with logic/segmenting/styling.
 export default function FormSection({ fields, control, header=null }) {
     return (
         <div className={styles.formSection}>

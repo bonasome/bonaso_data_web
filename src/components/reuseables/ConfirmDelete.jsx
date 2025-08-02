@@ -1,8 +1,10 @@
 import styles from '../../styles/modals.module.css';
+
 import errorStyles from '../../styles/errors.module.css';
+
 import { useState } from 'react';
 
-
+//modal for confirming delete of important data
 export default function ConfirmDelete({ name, onConfirm, onCancel, statusWarning=null, allowEasy=false }){
     const [confirmDelete, setConfirmDelete] = useState('');
 

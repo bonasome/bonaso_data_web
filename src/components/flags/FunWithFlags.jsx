@@ -17,6 +17,7 @@ import styles from '../../styles/indexView.module.css'
 
 import { IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 
+//doubles as a flag index component and a data quality overview
 export default function FunWithFlags(){
     //contexts
     const { user } = useAuth();

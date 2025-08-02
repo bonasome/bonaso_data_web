@@ -1,21 +1,29 @@
 import { useState } from 'react';
-import Messages from '../../reuseables/Messages';
-import ButtonHover from '../../reuseables/inputs/ButtonHover';
-import { ImPencil } from "react-icons/im";
-import { FaTrashAlt } from "react-icons/fa";
-import ComposeAnnouncementModal from './ComposeAnnouncementModal';
-import ConfirmDelete from '../../reuseables/ConfirmDelete';
+
+import fetchWithAuth from '../../../../services/fetchWithAuth';
 import prettyDates from '../../../../services/prettyDates';
 
+import Messages from '../../reuseables/Messages';
+import ButtonHover from '../../reuseables/inputs/ButtonHover';
+import ComposeAnnouncementModal from './ComposeAnnouncementModal';
+import ConfirmDelete from '../../reuseables/ConfirmDelete';
+
+import { ImPencil } from "react-icons/im";
+import { FaTrashAlt } from "react-icons/fa";
+
+//card displaying announcement details and the like
 export default function AnnouncementCard({ announcement, onUpdate }){
     const [expanded, setExpanded] = useState(false);
     const [errors, setErrors] = useState([]);
     const [editing, setEditing] = useState(false);
     const [annc, setAnnc] = useState(announcement);
     const [del, setDel] = useState(false);
+
+
+    //handle deletion
     const handleDelete = async () => {
         try {
-            console.log('deleting organization...');
+            console.log('deleting announcement...');
             const response = await fetchWithAuth(`/api/messages/announcements/${announcement.id}/`, {
                 method: 'DELETE',
             });

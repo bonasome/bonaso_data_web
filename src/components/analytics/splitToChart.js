@@ -1,8 +1,9 @@
 import cleanLabels from '../../../services/cleanLabels';
 
-export default function splitToChart(data, axis='', legend='', stack='', targets = [], map) {
+export default function splitToChart(data, axis=null, legend=null, stack=null, targets = [], map) {
     const chartMap = {};
     const keyMeta = {};  // To track each key's subcategory for stacking
+    if(!data) return { dataArray: [], keys: []}
     const arr = Object.values(data);
     
     for (const row of arr) {
@@ -14,15 +15,15 @@ export default function splitToChart(data, axis='', legend='', stack='', targets
         // Initialize chartMap row
         if (!chartMap[period]) chartMap[period] = { period };
         
-        let legendValCleaned = legendVal
-        if(legend !== '' && legend !== 'subcategory'){
+        let legendValCleaned = legendVal;
+        if(legend && (legend !== 'subcategory' && legend !== 'indicator')){
             legendValCleaned = map[legend][legendVal]
         }
         let stackValCleaned = stackVal
-        if(stack !== '' && stack !== 'subcategory'){
+        if(stack && stack !== 'subcategory'){
             stackValCleaned = map[stack][stackVal]
         }
-        const key = stack !=='' ? `${legendVal}__${stackVal}` : `${legendVal}`
+        const key = stack ? `${legendVal}__${stackVal}` : `${legendVal}`
         // Add the value
         chartMap[period][key] = row.count;
         
@@ -32,11 +33,17 @@ export default function splitToChart(data, axis='', legend='', stack='', targets
     }
     
     // Overlay targets (e.g., target lines or bars)
+    console.log(targets)
     for (const tar of targets) {
-        const period = tar.period || 'All-Time';
-        const amount = tar.amount;
-        if (!chartMap[period]) chartMap[period] = { period };
-        chartMap[period]['Target'] = amount;
+        Object.keys(tar).forEach((t) => {
+            const period = t;
+            const amount = tar[t];
+            if(!axis) chartMap['Target'] += amount
+            else {
+                if (!chartMap[period]) chartMap[period] = { period };
+                chartMap[period]['Target'] = amount;
+            }
+        })
     }
 
     let dataArray = Object.values(chartMap);
@@ -60,7 +67,7 @@ export default function splitToChart(data, axis='', legend='', stack='', targets
         key: compoundKey,
         bar: legendKey ?? '',
         stackId: stackKey ||  '',
-        label: stack !== '' ? `${cleanLabels(legend)}: ${legendKey} - ${cleanLabels(stack)} ${stackKey}` : `${legendKey}`,
+        label: stack ? `${cleanLabels(legend)}: ${legendKey} - ${cleanLabels(stack)} ${stackKey}` : `${legendKey}`,
         fill: undefined // optional: use a color mapping here
     }));
 

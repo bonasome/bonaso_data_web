@@ -1,5 +1,6 @@
 import Messages from '../Messages';
 
+//input that generates most keyboard inputs
 export default function Input({ name, type, label, onChange, onBlur, value, errors=[] }){
     if(type==='textarea'){
         return(

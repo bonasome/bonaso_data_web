@@ -1,13 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-import Checkbox from '../../reuseables/inputs/Checkbox';
-import fetchWithAuth from "../../../../services/fetchWithAuth";
-import errorStyles from '../../../styles/errors.module.css';
-import modalStyles from '../../../styles/modals.module.css';
+
 import { useInteractions} from '../../../contexts/InteractionsContext';
-import styles from '../respondentDetail.module.css';
+
+import fetchWithAuth from "../../../../services/fetchWithAuth";
+
+import Checkbox from '../../reuseables/inputs/Checkbox';
+
 import useWindowWidth from '../../../../services/useWindowWidth';
 import ButtonLoading from '../../reuseables/loading/ButtonLoading';
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
+import Messages from '../../reuseables/Messages';
+
+import errorStyles from '../../../styles/errors.module.css';
+import modalStyles from '../../../styles/modals.module.css';
+import styles from '../respondentDetail.module.css';
+
 import { FaTrashAlt, FaCheck } from "react-icons/fa";
 import { IoIosSave } from "react-icons/io";
 import { BiSolidCommentAdd } from "react-icons/bi";
@@ -109,7 +116,7 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         return(
             <div className={modalStyles.modal}>
                 <h2>Additional Information Required</h2>
-                {modalErrors && <div role='alert' className={errorStyles.errors} style={{width: '30vw'}}><p>{modalErrors}</p></div>}
+                <Messages errors={modalErrors} />
                 <label htmlFor='number'>The task {task.indicator.name} requires a numeric component.</label>
                 <input id='number' type='number' value={localNumber || ''} onChange={(e) => setLocalNumber(e.target.value)} />
                 <div>
@@ -132,7 +139,7 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         const handleCheckbox = (checked, cat) => {
             setLocalSubcats(prev =>
                 checked ? [...prev, {id: null, subcategory: {id: cat.id, name: cat.name}, numeric_component: ''}] : 
-                    prev.filter(c => c.subcategory.id !== cat.subcategory.id)
+                    prev.filter(c => c.subcategory.id !== cat.id)
             );
         };
 
@@ -176,21 +183,15 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         return (
             <div className={modalStyles.modal}>
                 <h2>Additional Information Required</h2>
-                {modalErrors && (
-                    <div role='alert' className={errorStyles.errors} style={{ width: '30vw' }}>
-                        <ul>
-                            {modalErrors.map((e) => (<li key={e}>{e}</li>))}
-                        </ul>
-                    </div>
-                )}
+                <Messages errors={modalErrors} />
                 <p>Please select all relevant subcategories related to {task.indicator.name}.</p>
                 {taskSubcats.map((cat) => (
                     <div key={cat.id} className={modalStyles.checkbox} style={{display: 'flex', flexDirection: 'row'}}>
                         <Checkbox key={cat.id}
                             label={cat.name}
-                            checked={localSubcats.filter(c => c.subcategory.id === cat.id).length > 0}
+                            value={localSubcats.filter(c => c.subcategory.id === cat.id).length > 0}
                             name={cat.name}
-                            callback={(checked) => handleCheckbox(checked, cat)}
+                            onChange={(checked) => handleCheckbox(checked, cat)}
                         />
                         {localSubcats.filter(c => c.subcategory.id ==cat.id).length > 0 && 
                             task.indicator.require_numeric && <input type="number" onChange={(e) => 
@@ -483,8 +484,7 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                 </>
             )}
             <h3>New Interaction</h3>
-            {errors.length != 0 && <div ref={alertRef} role='alert' className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-            {warnings.length != 0 && <div role='alert' className={errorStyles.warnings}><ul>{warnings.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <Messages errors={errors} warnings={warnings} />
             {!active && <i>Start dragging and dropping tasks to begin.</i>}
             <label htmlFor="interaction_date">Interaction Date</label>
             <input id='interaction_date' type='date' onChange={(e) => handleDateChange(e)}/>

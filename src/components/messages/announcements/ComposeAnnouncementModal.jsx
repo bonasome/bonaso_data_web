@@ -15,13 +15,14 @@ import modalStyles from '../../../styles/modals.module.css';
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 
-
+//modal to create/edit announcement
 export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=null, existing=null }){
+    const { user } = useAuth();
+    //meta
     const [saving, setSaving] = useState(false);
     const [pageErrors, setPageErrors] = useState([]);
-    const { user } = useAuth();
-
-    console.log(existing)
+    
+    //handle submission 
     const onSubmit = async(data) => {
         setPageErrors([]);
         let sbWarnings = [];

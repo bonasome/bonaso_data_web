@@ -1,16 +1,11 @@
 import Messages from "../Messages";
-import { IoMdRadioButtonOff, IoMdRadioButtonOn } from "react-icons/io";
+
 import styles from '../../../styles/form.module.css';
-export default function RadioButtons({
-    name,
-    label,
-    value,
-    onChange,
-    options,
-    errors = [],
-    valueField = "value",
-    labelField = "label"
-}) {
+
+import { IoMdRadioButtonOff, IoMdRadioButtonOn } from "react-icons/io";
+
+//single select radio buttons from a list of options
+export default function RadioButtons({ name, label, value, onChange, options, errors = [], valueField = "value", labelField = "label"}) {
 
     return (
         <div className={styles.radio}>
@@ -23,9 +18,9 @@ export default function RadioButtons({
 
                 return (
                     <div key={index} style={{ display: "flex", flexDirection: "row" }}>
-                        <label htmlFor={optionValue} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <label htmlFor={`${name}__${optionValue}`} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                         <input
-                            id={optionValue}
+                            id={`${name}__${optionValue}`}
                             type="radio"
                             name={name}
                             value={optionValue}

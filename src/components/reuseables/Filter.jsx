@@ -1,19 +1,23 @@
 import React from 'react';
-import styles from '../../styles/filters.module.css';
 import { useEffect, useState, useRef } from 'react';
-import SimpleSelect from './inputs/SimpleSelect';
-import Checkbox from './inputs/Checkbox';
-import { FaFilter } from "react-icons/fa6";
-import ButtonHover from '../reuseables/inputs/ButtonHover';
-import ComponentLoading from '../reuseables/loading/ComponentLoading';
+
 import cleanLabels from '../../../services/cleanLabels';
 
+import SimpleSelect from './inputs/SimpleSelect';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
+
+import styles from '../../styles/filters.module.css';
+
+import { FaFilter } from "react-icons/fa6";
+
+//reuseable filter component that takes a schema and passes an object with selected items
 export default function Filter({ onFilterChange, initial, config }){
     const [filters, setFilters] = useState(initial || {})
-    const [showFilters, setShowFilters] = useState(false);
+    const [showFilters, setShowFilters] = useState(false); //determines visibility
 
+    //hide on outside click
     const containerRef = useRef(null);
-
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -24,19 +28,17 @@ export default function Filter({ onFilterChange, initial, config }){
         return () => document.removeEventListener('mousedown', handleClickOutside);
     },[])
 
+    //call callback on change
     useEffect(() => {
         onFilterChange(filters);
     }, [filters]);
 
-    const handleChange = () =>{
-        onFilterChange(filters);
-    }
+    //reset to initial
     const clearFilters = () => {
         setFilters(initial);
         onFilterChange(initial);
     }
 
-    
     if(!initial || !config ) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>

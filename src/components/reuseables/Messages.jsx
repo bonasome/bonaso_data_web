@@ -39,6 +39,8 @@ function Success({ success = [] }) {
     );
 }
 
+//simple comp that takes key messages (errors, warnings, and success) and displays them with style
+//also can take a ref from scrolling
 export default function Messages({ errors = [], success = [], warnings = [], ref=null }) {
     return (
         <div ref={ref ? ref : null}>

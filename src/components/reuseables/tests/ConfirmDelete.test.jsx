@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import ConfirmDelete from './ConfirmDelete';
+import ConfirmDelete from '../ConfirmDelete';
 
 describe('ConfirmDelete', () => {
   const name = 'Test Item';

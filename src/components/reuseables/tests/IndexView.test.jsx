@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
-import IndexViewWrapper from './IndexView';
+import IndexViewWrapper from '../IndexView';
 
 describe('IndexViewWrapper', () => {
   const childrenText = 'Child content';

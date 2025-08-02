@@ -18,6 +18,7 @@ function ImgCard({ value, label, Img, active, callback }) {
     );
 }
 
+//select from a list of options and a corresponding array of image/icon components
 export default function ImageSelect({ label, value = null, onChange, options, images, multiple = false, errors, valueField='value', labelField='label' }) {
     const handleChange = (val) => {
         if (multiple) {

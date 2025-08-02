@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
+
+import Messages from '../Messages';
+
 import styles from '../../../styles/indexSelect.module.css';
 import modalStyles from '../../../styles/modals.module.css';
-import Messages from '../Messages';
+
+
 
 import { FaCheckSquare } from "react-icons/fa";
 

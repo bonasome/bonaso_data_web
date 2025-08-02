@@ -1,21 +1,34 @@
 import { useEffect, useState } from 'react';
+
 import fetchWithAuth from '../../../services/fetchWithAuth';
+
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import IndicatorChart from './IndicatorChart';
+import ChartSettingsModal from './ChartSettingsModal';
+import ButtonLoading from '../reuseables/loading/ButtonLoading';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
+
 import styles from './dashboard.module.css';
-import { LuPencilLine } from "react-icons/lu";
+
+import { ImPencil } from 'react-icons/im';
+import { MdAddchart } from "react-icons/md";
+import { FcCancel } from 'react-icons/fc';
+import { IoIosSave } from 'react-icons/io';
 
 export default function Dashboard({ id, meta }){ 
+    const [dashboard, setDashboard] = useState(null); //dashboard data
+    const [adding, setAdding] = useState(false); //show chart settings modal
+    //meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const [dashboard, setDashboard] = useState(null);
-    const [refresh, setRefresh] = useState(0);
-    const [adding, setAdding] = useState(false);
-    const [charts, setCharts] = useState([]);
+    
     const [saving, setSaving] = useState(false);
+    //handle editing
     const [editing, setEditing] = useState(false);
     const [name, setName] = useState('');
-    const [desc, setDesc] = useState('')
+    const [desc, setDesc] = useState('');
+
+    //get the dashboard information, including charts/data
     useEffect(() => {
         const getData = async () => {
             if(!id) return;
@@ -25,11 +38,9 @@ export default function Dashboard({ id, meta }){
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 if(response.ok){
-                    console.log(data)
                     setDashboard(data);
                     setName(data.name);
                     setDesc(data.description);
-                    setCharts(data.indicator_charts)
                 }
                 else{
                     console.error(data);
@@ -45,54 +56,9 @@ export default function Dashboard({ id, meta }){
             }
         }
         getData();
-    }, [id, refresh]);
+    }, [id]);
 
-    const handleUpdate = async (data, id) => {
-        if(!name || name === ''){
-            setErrors(['Please enter a name.']);
-            return;
-        }
-        try{
-            setSaving(true);
-            const response = await fetchWithAuth(`/api/analysis/dashboards/${dashboard.id}/charts/`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': "application/json",
-                },
-                body: JSON.stringify(data)
-            });
-            const returnData = await response.json();
-            if(response.ok){
-                if(id){
-                    let others = charts.filter(c => c.id !== id)
-                    others.push(returnData.chart_data)
-                    setCharts(others)
-                }
-                else{
-                    setCharts(prev => [...prev, data])
-                }
-            }
-            else{
-                const serverResponse = []
-                for (const field in returnData) {
-                    if (Array.isArray(returnData[field])) {
-                        returnData[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
-                        });
-                    } 
-                    else {
-                        console.log(returnData)
-                        serverResponse.push(`${field}: ${returnData[field]}`);
-                    }
-                }
-                setErrors(serverResponse)
-            }
-        }
-        catch(err){
-            setErrors(['Something went wrong. Please try again later.'])
-            console.error('Could not record project: ', err)
-        }
-    }
+    //handle name/desc changes (probably future things like order as well)
     const handleEdit = async () => {
         try{
             setSaving(true);
@@ -120,7 +86,6 @@ export default function Dashboard({ id, meta }){
                         });
                     } 
                     else {
-                        console.log(returnData)
                         serverResponse.push(`${field}: ${returnData[field]}`);
                     }
                 }
@@ -132,54 +97,28 @@ export default function Dashboard({ id, meta }){
             console.error('Could not record project: ', err)
         }
     }
-    const handleRemove = async(id) => {
-        if(!id){
-            setAdding(false);
-            return
-        }
-        try{
-            setSaving(true);
-            const response = await fetchWithAuth(`/api/analysis/dashboards/${dashboard.id}/remove-chart/${id}/`, {
-                method: 'DELETE',
-            });
-            const returnData = await response.json();
-            if(response.ok){
-                setCharts(prev => prev.filter(c => c.id != id))
-            }
-            else{
-                const serverResponse = []
-                for (const field in returnData) {
-                    if (Array.isArray(returnData[field])) {
-                        returnData[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
-                        });
-                    } 
-                    else {
-                        console.log(returnData)
-                        serverResponse.push(`${field}: ${returnData[field]}`);
-                    }
-                }
-                setErrors(serverResponse)
-            }
-        }
-        catch(err){
-            setErrors(['Something went wrong. Please try again later.'])
-            console.error('Could not record project: ', err)
-        }
-        finally{
-            setSaving(false);
-        }
+    
+    //remove chart
+    const handleRemove = (id) => {
+        const updated = dashboard.indicator_charts.filter(c => c.id != id)
+        setDashboard(prev => ({...prev, indicator_charts: updated}));
     }
-    if(!dashboard) return <ComponentLoading />
+    //refresh chart with new data/settings
+    const handleUpdate = (data) => {
+        const others = dashboard.indicator_charts.filter(c => c.id != data.id);
+        setDashboard(prev => ({...prev, indicator_charts: [...others, data]}))
+    }
+
+    if(!dashboard || loading) return <ComponentLoading />
     return(
         <div>
-            <div>
-                <div style={{ display: 'flex', flexDirection:'row'}}>
-                    <h1>{dashboard.name}</h1>
-                    {!editing && <LuPencilLine onClick={() => setEditing(true)} style={{ margin: 30}}/>}
-                </div>
+            <div className={styles.field}>
+                <h1>{dashboard.name}</h1>
                 {dashboard.description && <p>{dashboard.description}</p>}
-                
+                <div style={{ display: 'flex', flexDirection: 'row'}}>
+                    {!editing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} />}
+                    {!adding && <ButtonHover callback={() => setAdding(true)} noHover={<MdAddchart />} hover={'Add Chart'} />}
+                </div>
             </div>
 
             {editing && <div>
@@ -192,18 +131,18 @@ export default function Dashboard({ id, meta }){
                     <label htmlFor='desc'>Dashboard Description</label>
                     <textarea id='desc' onChange={(e) => setDesc(e.target.value)} value={desc} />
                 </div>
-                <div className={styles.field}>
-                    <button onClick={() => handleEdit()}>Save</button>
-                    <button onClick={() => setEditing(false)}>Cancel</button>
-                </div>
+                {!saving && <div style={{ dispaly: 'flex', flexDirection: 'row'}}>
+                    <button onClick={() => handleEdit()}><IoIosSave /> Save</button>
+                    <button onClick={() => setEditing(false)}><FcCancel /> Cancel</button>
+                </div>}
+                {saving && <ButtonLoading />}
             </div>}
 
-            <button onClick={() => setAdding(!adding)}>{adding ? 'Cancel' : 'Add Chart'}</button>
-            {adding && <IndicatorChart chartData={null} dashboard={dashboard} meta={meta} onUpdate={(data) => handleUpdate(data)} onRemove={() => handleRemove()}/>}
+            {adding && <ChartSettingsModal chart={null} onClose={() => setAdding(false)} onUpdate={(data) => handleUpdate(data)} meta={meta} dashboard={dashboard} />}
             {dashboard.indicator_charts.length === 0 && <p><i>No charts yet. Add one!</i></p>}
-            {!editing && charts.length > 0 && <div className={styles.charts}>
-                {charts.map((ic) => (
-                    <IndicatorChart chartData={ic} dashboard={dashboard} meta={meta}  onUpdate={(data, id) => handleUpdate(data, id)} onRemove={(id) => handleRemove(id)}/>
+            {!editing && dashboard.indicator_charts.length > 0 && <div className={styles.charts}>
+                { dashboard.indicator_charts.map((ic) => (
+                    <IndicatorChart chartData={ic} dashboard={dashboard} meta={meta}  onUpdate={(data) => handleUpdate(data)} onRemove={(id) => handleRemove(id)}/>
                 ))}
             </div>}
         </div>

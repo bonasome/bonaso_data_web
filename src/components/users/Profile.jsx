@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+
 import { useAuth } from '../../contexts/UserAuth';
+import { useProfiles } from '../../contexts/ProfilesContext';
+
 import fetchWithAuth from "../../../services/fetchWithAuth";
-import Loading from '../reuseables/loading/Loading'
-import { Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
-import styles from './profile.module.css';
-import errorStyles from '../../styles/errors.module.css';
 import prettyDates from '../../../services/prettyDates';
+import Loading from '../reuseables/loading/Loading'
+import Messages from '../reuseables/Messages';
 import ReturnLink from '../reuseables/ReturnLink';
 import AdminResetPassword from '../auth/passwordReset/AdminResetPassword'
 import Activity from './Activity';
-import { useProfiles } from '../../contexts/ProfilesContext';
 import ButtonHover from "../reuseables/inputs/ButtonHover";
+
+import styles from './profile.module.css';
+
 import { ImPencil } from "react-icons/im";
 import { IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 import { RiUserForbidFill, RiUserFollowFill } from "react-icons/ri";
@@ -27,6 +30,7 @@ export default function Profile(){
     //profile/user details
     const [profile, setProfile] = useState(null);
     const [activity, setActivity] = useState([]);
+
     //manager for changing passwords
     const [changePass, setChangePass] = useState(false);
 
@@ -34,15 +38,11 @@ export default function Profile(){
     const [showDetails, setShowDetails] = useState(true);
     const [showActivity, setShowActivity] = useState(false);
 
-    //index helpers
-    const [page, setPage] = useState(1);
-    const [entries, setEntries] = useState(0);
-    const [search, setSearch] = useState('');
-
     //page meta
     const[loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     
+    //get profile detials, meta, and activity
     useEffect(() => {
         const getProfile = async () => {
             const found = profiles.find(p => p.id.toString() === id.toString());
@@ -102,8 +102,9 @@ export default function Profile(){
         }
         getActivity();
     }, [id])
-    console.log(activity)
-    //deactivate user
+
+
+    //deactivate/activate user
     const changeStatus = async(to) => {
         try{
             console.log('updating user status...')
@@ -140,21 +141,18 @@ export default function Profile(){
             console.error('Failed to fetch profile: ', err);
         }
     }
-
+    //helper to convert labels
     const getLabelFromValue = (field, value) => {
         if(!profilesMeta) return null
         const match = profilesMeta[field]?.find(range => range.value === value);
         return match ? match.label : null;
     };
 
-
-    console.log(profile)
-
     if(loading || !profile) return <Loading />
 
     return(
         <div className={styles.container}>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <Messages errors={errors} />
             
             {['admin', 'meofficer', 'manager'].includes(user.role) && 
                 <ReturnLink url={'/profiles'} display='Return to team overview' />}

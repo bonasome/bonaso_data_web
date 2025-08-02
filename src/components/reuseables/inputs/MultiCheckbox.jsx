@@ -22,8 +22,8 @@ function MultiCheckboxItem({ name, label, checked, onChange, value }) {
     );
 }
 
+//multiselect checkbox
 export default function MultiCheckbox({ name, label, options, value, onChange, onBlur, errors, valueField='value', labelField='label' }) {
-    console.log(value)
     const toggleValue = (val) => {
         if (value.includes(val)) {
             onChange(value.filter(v => v !== val));
@@ -32,6 +32,7 @@ export default function MultiCheckbox({ name, label, options, value, onChange, o
             onChange([...value, val]);
         }
     };
+
     return (
         <div>
             <Messages errors={errors} />
@@ -39,13 +40,14 @@ export default function MultiCheckbox({ name, label, options, value, onChange, o
             {options.map((o) => {
                 const optionValue = o[valueField];
                 const optionLabel = o[labelField];
+                const valueStr = value.map((v) => v.toString())
 
                 return <MultiCheckboxItem
                     key={optionValue}
                     name={name}
                     label={optionLabel}
                     value={optionValue}
-                    checked={value.includes(optionValue)}
+                    checked={valueStr.includes(optionValue.toString())}
                     onChange={toggleValue}
                     onBlur={onBlur}
                 />

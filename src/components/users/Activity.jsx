@@ -5,12 +5,13 @@ import { IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 import { urlBuilder } from '../../../services/modelMap';
 import { Link } from 'react-router-dom';
 function ModelSection({ category, objects }){
+    //control expansion
     const [expanded, setExpanded] = useState(false);
-
+    //replace camal case with spaces
     function insertCharAt(str, char, index) {
         return str.slice(0, index) + char + str.slice(index);
     }
-
+    //clean up the names 
     const cleanModelName = (modelStr) => {
         let cleaned = modelStr.split('.')[1]
         let cleaned2 = cleaned;
@@ -49,7 +50,7 @@ function ModelSection({ category, objects }){
 }
 
 export default function Activity({ activity }){
-    
+    //create section for each model
     return(
         <div>
             <h2>Audit Logs</h2>
