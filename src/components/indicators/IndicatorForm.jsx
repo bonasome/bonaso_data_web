@@ -262,7 +262,7 @@ export default function IndicatorForm(){
     const basicInfo = [
         { name: "code", label: "Indicator Code", type: "text", rules: { required: "Required" } },
         { name: "name", label: "Indicator Name", type: "text", rules: { required: "Required" } },
-        { name: "description", label: "Indicator Description", type: "textarea", rules: { required: "Required" } },
+        { name: "description", label: "Indicator Description", type: "textarea" },
         { name: "status", label: "Status", type: "radio", options: indicatorsMeta?.statuses, 
             rules: { required: "Required" } },
         { name: "indicator_type", label: "Indicator Type", type: "radio", options: indicatorsMeta?.indicator_types,
@@ -300,7 +300,7 @@ export default function IndicatorForm(){
                 {isRespondent && <FormSection fields={respondent} control={control} />}
                 <FormSection fields={prerequisites} control={control} />
                 {availableSubcats.length > 0 && <FormSection fields={matchSubcats} control={control} />}
-                {!usingMatched && <FormSection fields={subcats} control={control} />}
+                {!usingMatched && isRespondent && <FormSection fields={subcats} control={control} />}
                 {requireSubcats && !usingMatched && <SimpleDynamicRows ref={rowRefs.current['subcategory_data']}
                      existing={existing?.subcategories ?? []} />}
                 

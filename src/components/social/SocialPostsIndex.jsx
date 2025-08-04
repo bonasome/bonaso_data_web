@@ -107,7 +107,7 @@ export default function SocialPostsIndex({ callback=null, callbackText='Add Post
     console.log(socialPostsMeta)
     //const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
 
-    if(loading) return callback ? <ComponentLoading /> : <Loading />
+    if(loading || !socialPosts) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Posts' : 'My Posts'}</h1> 

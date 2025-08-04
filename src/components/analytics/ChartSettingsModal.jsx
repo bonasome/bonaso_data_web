@@ -14,11 +14,12 @@ import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import { FaChartBar, FaChartLine, FaChartPie } from "react-icons/fa";
 
+
 //module to edit chart settings
 export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, onClose, meta }){
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [saving, setSaving] = useState(false);
-
+    
     //ref to scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
@@ -109,6 +110,7 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
 
     const defaultValues = useMemo(() => {
         return {
+            indicator_type: chart?.indicators[0].indciator_type ?? null,
             chart_type: chart?.chart_type ?? null,
             axis: chart?.axis ?? null,
             legend: chart?.legend ?? null,
@@ -133,9 +135,11 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
     const chartType = watch("chart_type");
     const usingTargets = watch("use_target");
 
+    //helper function to calculate the type of splits (legend/breakdown) that are available
     const fields = useMemo(() => {
-        if (!inds || inds.length === 0) return meta.fields;
-
+        if (!inds || inds.length === 0 || inds.length > 1) return []; //return nothing if there is no indicator or if there are multiple indicators (if multiple, the indciator is treated as the legend)
+        if(['event_no', 'event_org_no'].includes(inds[0]?.indicator_type)) return meta.fields.filter(f => (['organization'].includes(f.value))); //only allow org for these
+        if(inds[0]?.indicator_type === 'social') return meta.fields.filter(f => (['platform', 'metric'].includes(f.value))); //only allow these for social
         const hasSubcats = inds.some(ind => {
             return (
                 (Array.isArray(ind.subcategories) && ind.subcategories.length > 0) ||
@@ -143,13 +147,14 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
             );
         });
 
-        if (hasSubcats) return meta.fields;
-        return meta.fields.filter(field => field.value !== 'subcategory');
+        if (hasSubcats) return meta.fields.filter(f => (!['platform', 'metric'].includes(f.value)));
+        return meta.fields.filter(f => (!['subcategory', 'platform', 'metric'].includes(f.value)));
     }, [inds, meta]);
 
+    
     const basics = [
         { name: 'indicators', label: 'View Indicator(s)', type: "multimodel", rules: { required: "Required" },
-            IndexComponent: IndicatorsIndex},
+            IndexComponent: IndicatorsIndex}, 
         { name: 'chart_type', label: 'Name (Shorter Version)', type: "image", rules: { required: "Required" },
             options: meta.chart_types, images: [FaChartPie, FaChartLine,FaChartBar]},
     ]
@@ -176,13 +181,14 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
 
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormSection fields={basics} control={control} />
-                {chartType != 'pie' && <FormSection fields={axis} control={control} />}
+                {chartType && chartType != 'pie' && <FormSection fields={axis} control={control} />}
                 
                 {inds.length == 1 && chartType && !usingTargets && <FormSection fields={legend} control={control} />}
-
                 {inds.length == 1 && chartType != 'pie' && <FormSection fields={target} control={control} />}
                 {inds.length == 1 && chartType == 'bar' && !usingTargets && <FormSection fields={stack} control={control} />}
+
                 {inds.length > 0 && <FormSection fields={table} control={control} />}
+                
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     <button type="button" onClick={() => onClose()}><FcCancel /> Cancel</button>

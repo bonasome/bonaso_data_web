@@ -193,7 +193,9 @@ export default function UserForm(){
         { name: 'description', label: "Post Description", type: "textarea",},
         { name: 'published_at', label: "Post Made On", type: "date", rules: { required: "Required" }},
 
-        { name: 'task_ids', label: "Post Associated with Task(s)", type: "multimodel", IndexComponent: Tasks},
+        { name: 'task_ids', label: "Post Associated with Task(s)", type: "multimodel", IndexComponent: Tasks,
+            includeParams: [{field: 'indicator_type', value: 'social'}]
+        },
         {name: 'platform', label: 'Post Made on Platform', type: 'image',
             options: socialPostsMeta?.platforms, images: images,  rules: { required: "Required" } },
     ]

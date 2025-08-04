@@ -5,7 +5,7 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
     const keyMeta = {};  // To track each key's subcategory for stacking
     if(!data) return { dataArray: [], keys: []}
     const arr = Object.values(data);
-    
+    console.log(data)
     for (const row of arr) {
         const period = row.period || 'All-Time';
 
@@ -16,11 +16,11 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
         if (!chartMap[period]) chartMap[period] = { period };
         
         let legendValCleaned = legendVal;
-        if(legend && (legend !== 'subcategory' && legend !== 'indicator')){
+        if(legend && (!['subcategory', 'indicator', 'platform', 'organization', 'metric'].includes(legend))){
             legendValCleaned = map[legend][legendVal]
         }
         let stackValCleaned = stackVal
-        if(stack && stack !== 'subcategory'){
+        if(stack && (!['subcategory', 'indicator', 'platform', 'organization', 'metric'].includes(legend))){
             stackValCleaned = map[stack][stackVal]
         }
         const key = stack ? `${legendVal}__${stackVal}` : `${legendVal}`
@@ -33,7 +33,7 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
     }
     
     // Overlay targets (e.g., target lines or bars)
-    console.log(targets)
+
     for (const tar of targets) {
         Object.keys(tar).forEach((t) => {
             const period = t;
@@ -70,6 +70,6 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
         label: stack ? `${cleanLabels(legend)}: ${legendKey} - ${cleanLabels(stack)} ${stackKey}` : `${legendKey}`,
         fill: undefined // optional: use a color mapping here
     }));
-
+    console.log(dataArray)
     return { dataArray, keys };
 }
