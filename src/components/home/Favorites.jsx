@@ -8,7 +8,7 @@ import fetchWithAuth from "../../../services/fetchWithAuth";
 
 import ComponentLoading from "../reuseables/loading/ComponentLoading";
 
-import styles from '../home.module.css';
+import styles from './home.module.css';
 
 export default function Faves(){
     const { user } = useAuth();

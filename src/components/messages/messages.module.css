@@ -28,8 +28,17 @@
     display: flex;
     flex-direction: row;
 }
-
-.sbCard:hover {
+.unreadSBCard {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+    padding: 2vh;
+    transition: all .6s;
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+    display: flex;
+    flex-direction: row;
+}
+.sbCard:hover, .unreadSBCard:hover {
     transform: scale(1.05);
     cursor: pointer;
 }

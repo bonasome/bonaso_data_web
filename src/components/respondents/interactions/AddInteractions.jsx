@@ -410,7 +410,7 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
 
         //parse through each task to create an appropriate package
         const allTaskData = added.map((task) => ({
-            task: task.id,
+            task_id: task.id,
             numeric_component: number[task.id] || null,
             subcategories_data: subcats[task.id] || [],
             comments: comments[task.id] || null

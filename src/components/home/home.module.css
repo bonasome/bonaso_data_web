@@ -24,34 +24,76 @@
     display: flex;
     flex-direction: row;
 }
+
 .tab{
     text-align: center;
     width: 33%;
     padding: 1vh;
     background-color: var(--bonaso-main);
     transition: all .6s;
+    display: flex;
+    flex-direction: row;
+    padding: 4vh;
 }
+.tab >* {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.unreadTab{
+    text-align: center;
+    width: 33%;
+    padding: 1vh;
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+    transition: all .6s;
+    display: flex;
+    flex-direction: row;
+    padding: 4vh;
+}
+.unreadTab >* {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
 .activeTab{
     text-align: center;
     width: 33%;
     padding: 1vh;
     background-color: var(--bonaso-dark-accent);
+    display: flex;
+    flex-direction: row;
     transition: all .6s;
+    padding: 4vh;
 }
-
+.activeTab >* {
+    margin-top: auto;
+    margin-bottom: auto;
+}
 .msgPane{
     padding: 3vh;
     overflow-y: scroll;
     height: 50vh;
 }
 
+.unreadCard {
+    padding: 2vh;
+    margin: 3vh;
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+    transition: all .6s;
+}
+.unreadCard > a {
+    color: var(--warning-text);
+}
 .msgCard{
     margin: 3vh;
     padding: 2vh;
     background-color: var(--bonaso-uber-dark-accent);
     transition: all .6s;
 }
-.msgCard:hover{
+
+.msgCard:hover, .unreadCard:hover{
     transform: scale(1.05);
 }
 
@@ -74,42 +116,4 @@
 }
 .favesCard:hover{
     transform: scale(1.1);
-}
-
-.tasksBox{
-    padding: 4vh;
-    background-color: var(--bonaso-dark-accent);
-}
-.tasks {
-    background-color: var(--bonaso-dark-accent);
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
-.task {
-    background-color: var(--bonaso-uber-dark-accent);
-    margin: 2vh;
-    padding: 3vh;
-    transition: transform 0.5s ease;
-}
-
-.task:hover {
-    background-color: var(--bonaso-uber-dark-accent);
-    margin: 2vh;
-    padding: 3vh;
-    transform: scale(1.15);
-}
-.taskLink {
-    background-color: var(--bonaso-uber-dark-accent);
-    margin: 2vh;
-    padding: 3vh;
-    transition: transform 0.5s ease;
-}
-
-.taskLink:hover {
-    background-color: var(--bonaso-uber-dark-accent);
-    margin: 2vh;
-    padding: 3vh;
-    cursor: pointer;
-    transform: scale(1.15);
 }

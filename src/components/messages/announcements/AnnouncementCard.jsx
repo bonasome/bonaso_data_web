@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import prettyDates from '../../../../services/prettyDates';
@@ -21,6 +21,40 @@ export default function AnnouncementCard({ announcement, onUpdate }){
     const [annc, setAnnc] = useState(announcement);
     const [del, setDel] = useState(false);
 
+    useEffect(() => {
+        setAnnc(announcement);
+    }, [announcement])
+    const handleRead = async () => {
+        if(annc.read) return;
+        try{
+            console.log('marking as read...');
+            const response = await fetchWithAuth(`/api/messages/announcements/${announcement.id}/read/` , {
+                method: 'PATCH',
+            });
+            if(response.ok){
+                setAnnc(prev => ({...prev, read: true}));
+                onUpdate();
+            }
+            else{
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${field}: ${returnData[field]}`);
+                    }
+                }
+                setErrors(serverResponse)
+            }
+        }
+        catch(err){
+            console.log('Failed to mark message as read', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        }
+    }
 
     //handle deletion
     const handleDelete = async () => {
@@ -63,14 +97,14 @@ export default function AnnouncementCard({ announcement, onUpdate }){
             setDel(false);
         }
     }
-
-    if(!announcement) return <></>
+    console.log(annc)
+    if(!annc) return <></>
 
     if(del) return <ConfirmDelete onConfirm={() => handleDelete()} onCancel={() => setDel(false)} name={'this announcement'} />
     if(editing) return <ComposeAnnouncementModal existing={announcement} onUpdate={(data) => {setAnnc(data); onUpdate(data)}} onClose={() => setEditing(false)} />
     
     return(
-        <div onClick={() => setExpanded(!expanded)} className={styles.card}>
+        <div onClick={() => {setExpanded(!expanded); handleRead()}} className={annc.read ? styles.card : styles.unreadCard}>
             <h3>{annc.subject}</h3>
             {expanded && <div>
                 <Messages errors={errors} />
@@ -80,6 +114,7 @@ export default function AnnouncementCard({ announcement, onUpdate }){
                     <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} />
                     <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Announcement'} forDelete={true} />
                 </div>
+                {annc.read && <p></p>}
             </div>}
         </div>
     )

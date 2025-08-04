@@ -6,7 +6,7 @@ import styles from '../../../styles/indexSelect.module.css';
 import modalStyles from '../../../styles/modals.module.css';
 
 //select multiple models from an index component
-export default function ModelMultiSelect({ IndexComponent, value, onChange, label, errors, callbackText, labelField='display_name' }){
+export default function ModelMultiSelect({ IndexComponent, value, onChange, label, errors, callbackText, labelField='display_name', includeParams=[], excludeParams=[], projAdd=false, addRedirect=null }){
     const [selecting, setSelecting] = useState(false);
     
     
@@ -41,7 +41,7 @@ export default function ModelMultiSelect({ IndexComponent, value, onChange, labe
                 {selecting && <div className={modalStyles.modal}>
                     <h2>{label}</h2>
                     <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
-                        <IndexComponent callback={(obj) => handleAdd(obj)} callbackText={callbackText} blacklist={blacklist} />
+                        <IndexComponent callback={(obj) => handleAdd(obj)} callbackText={callbackText} blacklist={blacklist} includeParams={includeParams} excludeParams={excludeParams} projAdd={projAdd} addRedirect={addRedirect} />
                     </div>
                     <button onClick={() => setSelecting(false)}>Done</button>
                 </div>}

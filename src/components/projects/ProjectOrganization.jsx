@@ -7,23 +7,20 @@ import { useAuth } from "../../contexts/UserAuth";
 import fetchWithAuth from "../../../services/fetchWithAuth";
 
 import Tasks from "../tasks/Tasks";
-import IndicatorsIndex from "../indicators/IndicatorsIndex";
 import ButtonHover from '../reuseables/inputs/ButtonHover';
 import Loading from "../reuseables/loading/Loading";
 import ConfirmDelete from "../reuseables/ConfirmDelete";
-import OrganizationsIndex from "../organizations/OrganizationsIndex";
 import NarrativeReportDownload from '../narrativeReports/NarrativeReportDownload';
 import Targets from "./targets/Targets";
 import Messages from '../reuseables/Messages';
 import ReturnLink from '../reuseables/ReturnLink';
-
+import { AssignTask, AssignChild } from './AssignModals'; 
 import styles from './projectDetail.module.css';
 
 import { FaAngleDoubleUp } from "react-icons/fa";
 import { BsFillBuildingsFill } from "react-icons/bs";
 import { MdAssignmentAdd } from "react-icons/md";
 import { IoIosArrowDropup, IoIosArrowDropdownCircle, IoIosRemoveCircle } from "react-icons/io";
-import { IoCheckboxSharp } from "react-icons/io5";
 
 //page for viewing project+organization specific information (tasks, view children, set targets)
 export default function ProjectOrganization(){
@@ -40,12 +37,14 @@ export default function ProjectOrganization(){
     const [loading, setLoading] = useState();
 
     //page meta
+    const [taskSuccess, setTaskSuccess] = useState([]);
+    const [coSuccess, setCOSuccess] = useState([]);
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
     const [updateTasks, setUpdateTasks] = useState(0);//trigger to call tasks again
     
     //contorl visibility of index components for adding
-    const [adding, setAdding] = useState(false); //adding a task
+    const [addingTask, setAddingTask] = useState(false); //adding a task
     const [addingChildOrg, setAddingChildOrg] = useState(false); //adding a subgrantee
 
     //controls which sections are visible
@@ -183,94 +182,6 @@ export default function ProjectOrganization(){
             setErrors(['Something went wrong. Please try again later.']);
         }
     }
-    //add new child org
-    const assignChild = async (org) => {
-        setErrors([]);
-        try {
-            console.log('assigning subgrantee...');
-            const response = await fetchWithAuth(`/api/manage/projects/${id}/assign-subgrantee/`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': "application/json",
-                },
-                body: JSON.stringify({
-                    'parent_id': orgID,
-                    'child_id': org.id,
-                })
-            });
-            if(response.ok){
-                await fetchProject()
-            }
-            else{
-                const returnData = await response.json();
-                let serverResponse = [];
-                if(Array.isArray(returnData)){
-                    setErrors(returnData);
-                    return;
-                }
-                for (const field in returnData) {
-                    if (Array.isArray(returnData[field])) {
-                        returnData[field].forEach(msg => {
-                            serverResponse.push(`${field}: ${msg}`);
-                        });
-                    } 
-                    else {
-                    serverResponse.push(`${field}: ${returnData[field]}`);
-                    }
-                }
-                setErrors(serverResponse);
-            }
-        }
-        catch(err){
-            setErrors(['Something went wrong. Please try again later.'])
-            console.error('Could not assign child: ', err)
-        }
-    } 
-
-    //add a new task
-    const addTask = async (indicator) => {
-        setErrors([]);
-        try {
-            console.log('assigning task...');
-            const response = await fetchWithAuth(`/api/manage/tasks/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': "application/json",
-                },
-                body: JSON.stringify({
-                    'organization_id': orgID,
-                    'indicator_id': indicator.id,
-                    'project_id': id,
-                })
-            });
-            const returnData = await response.json();
-            if(response.ok){
-                setUpdateTasks(prev => prev + 1);
-            }
-            else{
-                let serverResponse = [];
-                if(Array.isArray(returnData)){
-                    setErrors(returnData);
-                    return;
-                }
-                for (const field in returnData) {
-                    if (Array.isArray(returnData[field])) {
-                        returnData[field].forEach(msg => {
-                            serverResponse.push(`${field}: ${msg}`);
-                        });
-                    } 
-                    else {
-                    serverResponse.push(`${field}: ${returnData[field]}`);
-                    }
-                }
-                setErrors(serverResponse);
-            }
-        }
-        catch(err){
-            setErrors(['Something went wrong. Please try again later.']);
-            console.error('Could not add task: ', err);
-        }
-    } 
 
     const removeOrg = async() => {
         try {
@@ -335,6 +246,7 @@ export default function ProjectOrganization(){
             </div>
 
             <div className={styles.segment}>
+                
                 <div className={styles.dropdownSegment}>
                     <div className={styles.toggleDropdown} onClick={() => setShowTasks(!showTasks)}>
                         <h2 style={{ textAlign: 'start'}}>Tasks for {organization.name}</h2>
@@ -342,17 +254,16 @@ export default function ProjectOrganization(){
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
                     {showTasks && <div style={{ margin: 40}}>
-                        {hasPerm && <div >
-                            {!adding && <ButtonHover callback={() => setAdding(true)} noHover={<MdAssignmentAdd />} hover={'Assign a New Task'} />}
-                            {adding && <button onClick={() => setAdding(false)}> <IoCheckboxSharp /> Done </button>}
-                        </div>}
-                        {adding && <IndicatorsIndex callback={(ind) => addTask(ind)} callbackText={'Assign as Task'} 
-                            excludeParams={[{field: 'project', value: id}, {field: 'organization', value: orgID}]} 
-                            updateTrigger={updateTasks} 
+                        {hasPerm && <ButtonHover noHover={<MdAssignmentAdd />} hover={'Assign New Task(s)'} callback={() => setAddingTask(true)} />}
+                        {addingTask && <AssignTask project={project} organization={organization} 
+                            onSave={(data) => {
+                                setUpdateTasks(prev => prev+=1); setTaskSuccess([`Successfuly assigned ${data.created.length} new tasks to ${organization.name}!`])
+                            }} 
+                            onClose={() => setAddingTask(false)}
                         />}
+                        <Messages success={taskSuccess} />
                         <Tasks includeParams={[{field: 'organization', value: orgID}, {field: 'project', value: id}]} 
-                            canDelete={hasPerm} updateTrigger={() => setUpdateTasks(prev => prev += 1)} 
-                            onRemove={() => setUpdateTasks(prev => prev+=1)}
+                            canDelete={hasPerm} onRemove={() => setUpdateTasks(prev => prev+=1)} updateTrigger={updateTasks}
                         />
                     </div>}
                 </div>
@@ -368,28 +279,26 @@ export default function ProjectOrganization(){
                     </div>}
                 </div>
 
-                <div className={styles.dropdownSegment}>
+                {!organization?.parent && <div className={styles.dropdownSegment}>
                     <div className={styles.toggleDropdown} onClick={() => setShowChildOrgs(!showChildOrgs)}>
                         <h2 style={{ textAlign: 'start'}}>Subgrantees</h2>
                         {showChildOrgs ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
                     {showChildOrgs && <div style={{ margin: 20}}>
-                        {!addingChildOrg && ((user.organization_id == organization.id && !organization.parent) || user.role == 'admin') && 
-                            <ButtonHover noHover={<BsFillBuildingsFill />} hover={'Add Subgrantee'} callback={() => setAddingChildOrg(true)}/>}
-                        {addingChildOrg && <button onClick={() => setAddingChildOrg(false)}> <IoCheckboxSharp /> Done </button>}
-                        
-                        {addingChildOrg && <OrganizationsIndex 
-                            callback={(org) => assignChild(org)} callbackText="Assign as Subgrantee" 
-                            projAdd={project.id} addRedirect={{to: 'projects', projectID: project.id, orgID: organization.id }}
-                        />}
-                        
+                        <Messages success={coSuccess} />
+                        {hasPerm && <ButtonHover noHover={<BsFillBuildingsFill />} hover={'Assign New Subgrantee(s)'} callback={() => setAddingChildOrg(true)} />}
+                        {addingChildOrg && <AssignChild project={project} organization={organization} 
+                            onSave={(data) => {fetchProject(); setCOSuccess(
+                                [`Successfuly assigned ${data.added.length} new subgrantees. 
+                                    ${data.reassigned.length > 0 ? `Reassigned ${data.reassigned.length} organizations.` : ''}`]
+                            )}} onClose={() => setAddingChildOrg(false)}/>}
                         {organization.children.map((org) => (<div className={styles.orgCard}>
                             <Link to={`/projects/${id}/organizations/${org.id}`}><h3>{org.name}</h3></Link>
                         </div>))}
                         {organization.children.length === 0 && <p>No subgrantees yet.</p>}
                     </div>}
-                </div>
+                </div>}
 
                 <div className={styles.dropdownSegment}>
                     <div className={styles.toggleDropdown} onClick={() => setShowFiles(!showFiles)}>
