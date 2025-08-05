@@ -197,7 +197,7 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
                 filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} 
                 initial={initial} config={filterConfig(indicatorsMeta)} 
             />}>
-                {['meofficer', 'manager', 'admin'].includes(user.role) && 
+                {['admin'].includes(user.role) && 
                 <Link to='/indicators/new'><button><MdAddToPhotos />  Create a New Indicator</button></Link>} 
                 <Messages errors={errors} ref={alertRef} />
                 {filteredIndicators.length === 0 ? 

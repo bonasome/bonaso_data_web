@@ -42,11 +42,11 @@ export default function IndicatorForm(){
     //ref to scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
-        if (submissionErrors.length > 0 && alertRef.current) {
+        if ((submissionErrors.length > 0 || success.length > 0) && alertRef.current) {
         alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         alertRef.current.focus({ preventScroll: true });
         }
-    }, [submissionErrors]);
+    }, [submissionErrors, success]);
 
     useEffect(() => {
         //fetch the meta
@@ -260,33 +260,67 @@ export default function IndicatorForm(){
         rowRefs.current['subcategory_data'] = React.createRef();
     }
     const basicInfo = [
-        { name: "code", label: "Indicator Code", type: "text", rules: { required: "Required" } },
-        { name: "name", label: "Indicator Name", type: "text", rules: { required: "Required" } },
-        { name: "description", label: "Indicator Description", type: "textarea" },
-        { name: "status", label: "Status", type: "radio", options: indicatorsMeta?.statuses, 
-            rules: { required: "Required" } },
-        { name: "indicator_type", label: "Indicator Type", type: "radio", options: indicatorsMeta?.indicator_types,
-             rules: { required: "Required" } },
+        { name: "code", label: "Indicator Code (Required)", type: "text", rules: { required: "Required" },
+            tooltip: 'The code is just an extra reference to help you when searching indicators.',
+            placeholder: 'HIV100, NCD001...'
+        },
+        { name: "name", label: "Indicator Name (Required)", type: "text", rules: { required: "Required" },
+            tooltip: 'HINT: This name will be seen by community health workers, so make sure its readable/understandable.',
+            placeholder: 'Tested for HIV, Received Treatement for STIs...'    
+        },
+        { name: "description", label: "Indicator Description", type: "textarea", 
+            tooltip: `Add any information that may help people understand what this indicator tracks, when it should be used,
+            or what its objectives are.`
+         },
+        
+    ]
+    const meta = [
+        { name: "status", label: "Status (Required)", type: "radio", options: indicatorsMeta?.statuses, 
+            rules: { required: "Required" }, tooltip: 'This is just to help you categorize and filter indicators.' },
+        { name: "indicator_type", label: "Indicator Type (Required)", type: "radio", options: indicatorsMeta?.indicator_types,
+             rules: { required: "Required" }, tooltip: `The type determines what kind of data this indicator 
+                is meant to collect. Trying to track social posts? Check social. 
+                Tracking individual interactions with respondents? Select respondent.` },
     ]
     const respondent = [
-        {name: 'allow_repeat', label: 'Allow repeat interactions (within 30 days)', type: 'checkbox'},
-        {name: 'require_numeric', label: 'Require a Number', type: 'checkbox'},
-        {name: 'required_attribute_names', label: 'Respondent must be a:', type: 'multiselect',
-            options: indicatorsMeta?.required_attributes },
-        {name: 'governs_attribute', label: 'On Completion, Change Respondent to:', type: 'radio',
-            options: indicatorsMeta?.required_attributes?.filter(a => a.value=='PLWHIV') }
+        {name: 'allow_repeat', label: 'Allow repeat interactions (within 30 days)', type: 'checkbox',
+            tooltip: `By default, our system will flag any occasion where a respondent has multiple interactions related
+            to an indicator within a 30 day span (to prevent duplicates). Checking this box will disable that
+            and allow for multiple, unflagged, interactions over a 30-day period.`
+        },
+        {name: 'require_numeric', label: 'Require a Number', type: 'checkbox',
+            tooltip: `Should a community health worker be required to enter a number with interactions of this 
+            indicator (i.e., number of condoms distributed)? NOTE: Can be combined with subcategories to get numeric inputs for each subcategory.`
+        },
+        {name: 'required_attribute_names', label: 'Required Respondent Attributes', type: 'multiselect',
+            options: indicatorsMeta?.required_attributes, tooltip: `Does this respondent need to have a particular
+            trait/attribute to be eligible for this indicator (person living with HIV, staff, etc.)?` },
+        
+        {name: 'governs_attribute', label: 'Controls Respondent Attribute', type: 'radio',
+            options: indicatorsMeta?.required_attributes?.filter(a => a.value=='PLWHIV'), 
+            tooltip: `As of now, only select an option if you want this indicator to automatically update a person's HIV status
+            (example, "Tested Positive for HIV").`
+        }
     ]
     const prerequisites = [
         {name: 'prerequisite_ids', label: 'Prerequisite Indicators', type: 'multimodel', 
-            IndexComponent: IndicatorsIndex},
+            IndexComponent: IndicatorsIndex, tooltip: `Does this indicator require that a person has had an interaction
+            related to another indicator (example: Screened for disease & Referred for further treatment of disease)?
+            NOTE: If an interaction is had with this indicator, but not its prerequisities, the system will flag it.`
+        } 
     ]
     const matchSubcats = [
         {name: 'match_subcategories_to', label: 'Match Subcategories with a Prerequisite?', type: 'radio', 
-            options: availableSubcats, labelField: 'display_name', valueField: 'id'},
+            options: availableSubcats, labelField: 'display_name', valueField: 'id',
+            tooltip: `Select an indicator that you want this indicator's subcategories to match with exactly.`
+        },
     ]
 
     const subcats = [
-        {name: 'require_subcategories', label: 'Require Subcategories?', type: 'checkbox' },
+        {name: 'require_subcategories', label: 'Require Subcategories?', type: 'checkbox',
+            tooltip: `Does this indicator have an "subcategories", or additional information that needs to be collected
+            (example: HIV Messages, what types of HIV messages could this person be reached with?)?`
+         },
     ]
 
     if(loading || !indicatorsMeta?.statuses) return <Loading />
@@ -296,13 +330,17 @@ export default function IndicatorForm(){
             <h1>{id ? `Editing ${existing?.display_name}` : 'New Indicator' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={basicInfo} control={control} />
-                {isRespondent && <FormSection fields={respondent} control={control} />}
+                <FormSection fields={basicInfo} control={control} header={'Basic Information'} />
+                <FormSection fields={meta} control={control} header={'Indicator Type/Status'} />
+                {isRespondent && <FormSection fields={respondent} control={control} header={'Required Information for Collectors'} />}
                 <FormSection fields={prerequisites} control={control} />
                 {availableSubcats.length > 0 && <FormSection fields={matchSubcats} control={control} />}
                 {!usingMatched && isRespondent && <FormSection fields={subcats} control={control} />}
-                {requireSubcats && !usingMatched && <SimpleDynamicRows ref={rowRefs.current['subcategory_data']}
-                     existing={existing?.subcategories ?? []} />}
+                {requireSubcats && !usingMatched && 
+                    <SimpleDynamicRows ref={rowRefs.current['subcategory_data']} label={'Subcategory Options'}
+                        tooltip={`Enter the name of each subcategory. You may add or remove rows using the buttons. 
+                            ${existing ? ' If you are trying to remove an option from an existing indicator, mark it as deprecated.' : '' }`}
+                        existing={existing?.subcategories ?? []} header={'Subcategories'}/>}
                 
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>

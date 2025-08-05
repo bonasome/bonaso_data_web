@@ -30,7 +30,7 @@
     cursor: pointer;
 }
 .infoCard {
-    padding: 1vh;
+    padding: 2vh;
     background-color: var(--bonaso-dark-accent);
     transition: all .6s;
     margin-top: 2vh;
@@ -45,7 +45,7 @@
 }
 
 .orgCard {
-    padding: 1vh;
+    padding: 2vh;
     background-color: var(--bonaso-dark-accent);
     transition: all .6s;
     margin-top: 2vh;
@@ -58,7 +58,7 @@
 }
 
 .orgCard2 {
-    padding: 1vh;
+    padding: 2vh;
     background-color: var(--bonaso-uber-dark-accent);
     transition: all .6s;
     margin-top: 2vh;

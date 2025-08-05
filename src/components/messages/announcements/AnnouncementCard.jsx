@@ -97,7 +97,7 @@ export default function AnnouncementCard({ announcement, onUpdate }){
             setDel(false);
         }
     }
-    console.log(annc)
+
     if(!annc) return <></>
 
     if(del) return <ConfirmDelete onConfirm={() => handleDelete()} onCancel={() => setDel(false)} name={'this announcement'} />

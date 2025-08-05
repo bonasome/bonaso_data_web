@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEffect, useState } from "react";
-import { useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/UserAuth';
 import { useProjects } from '../../contexts/ProjectsContext';
@@ -22,6 +22,7 @@ import OrganizationsIndex from '../organizations/OrganizationsIndex';
 import ProjectActivityCard from './activities/ProjectActivityCard';
 import ProjectDeadlineCard from './deadlines/ProjectDeadlineCard';
 import ProjectActivityFAGantt from './activities/ProjectActivityFAGantt';
+import { AssignOrgToProject } from './AssignModals';
 
 import styles from './projectDetail.module.css';
 
@@ -63,6 +64,7 @@ function ProjectOrgCard({ org, project }){
 
 //full detail page
 export default function ProjectDetail(){
+    const navigate = useNavigate();
     //project id
     const { id } = useParams();
     //context
@@ -157,44 +159,6 @@ export default function ProjectDetail(){
         loadRelated()
     }, [id]);
 
-    //function to add an organization to the project (admin only, other orgs can add subgrantees)
-    const addOrg = async (org) => {
-        setErrors([])
-       try{
-        console.log('adding organization...')
-            const response = await fetchWithAuth(`/api/manage/projects/${project.id}/`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': "application/json",
-                },
-                body: JSON.stringify({
-                    'organization_id': [org.id]
-                })
-            });
-            if(response.ok){
-                await fetchProject();
-            }
-            else{
-                const data = await response.json();
-                let serverResponse = [];
-                for (const field in data) {
-                    if (Array.isArray(data[field])) {
-                        data[field].forEach(msg => {
-                            serverResponse.push(`${field}: ${msg}`);
-                        });
-                    } 
-                    else {
-                    serverResponse.push(`${field}: ${data[field]}`);
-                    }
-                }
-                setErrors(serverResponse);
-            }
-        }
-        catch(err){
-            console.error('Failed to remove indicator:', err);
-            setErrors(['Something went wrong. Please try again later.'])
-        }
-    }
     //function to delete the project
     const deleteProject = async() => {
         try {
@@ -287,8 +251,8 @@ export default function ProjectDetail(){
                     {showDetails && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
                         <i>Lasts from {prettyDates(project.start)} to {prettyDates(project.end)} {user.role =='admin' && '('+project.status+')'} </i>
                         {project?.client && <h4>From <Link to={`/clients/${project.client.id}`}>{project.client.name}</Link></h4>}
-                        <h5>Project Description</h5>
-                        <p>{project.description}</p>
+                        <h4>Project Description</h4>
+                        {project.description ? <p>{project.description}</p> : <p>No description yet.</p>}
                         <div style={{ display: 'flex', flexDirection: 'row'}}>
                             {favorited && <ButtonHover callback={() => {setFavorited(false); favorite('projects.project', project.id, true)}} noHover={<IoIosStar />} hover={'Unfavorite'} /> }
                             {!favorited && <ButtonHover callback={() => {setFavorited(true); favorite('projects.project', project.id)}} noHover={<IoIosStarOutline />} hover={'Favorite'} /> }
@@ -340,12 +304,12 @@ export default function ProjectDetail(){
                     </div>
                         
                     {showOrgs && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
-                        {!addingOrgs && user.role == 'admin' && <ButtonHover callback={() => setAddingOrgs(true)} noHover={<BsFillBuildingsFill />} hover={'Add an Organization'} />}
+                        {!addingOrgs && user.role == 'admin' && 
+                            <ButtonHover callback={() => setAddingOrgs(true)} noHover={<BsFillBuildingsFill />} hover={'Add an Organization'} />}
                         {addingOrgs && <button onClick={() => setAddingOrgs(false)}> <IoIosCheckbox /> Done </button>}
-                        {addingOrgs && 
-                            <OrganizationsIndex callback={(org) => addOrg(org)} 
-                                callbackText='Add to Project' excludeParams={[{field: 'project', value: project.id}]} 
-                            />}
+                        {addingOrgs && <AssignOrgToProject onSave={fetchProject} 
+                            onClose={() => setAddingOrgs(false)} project={project}
+                        />}
                         {project.organizations.map((org) => (
                             <ProjectOrgCard key={org.id} org={org} project={project} />
                         ))}

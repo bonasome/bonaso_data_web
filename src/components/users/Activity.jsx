@@ -27,7 +27,6 @@ function ModelSection({ category, objects }){
         else cleaned2 += 's';
         return cleaned2
     }
-
     return(
         <div className={styles.card}>
             <div className={styles.toggleDropdown} onClick={() => setExpanded(!expanded)}>

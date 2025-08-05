@@ -95,7 +95,7 @@ function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, c
         <div className={styles.card} onClick={() => setExpanded(!expanded)} 
             draggable={isDraggable} onDragStart={isDraggable ? handleDragStart : undefined}
         >
-            <h3>{task.indicator.display_name}</h3>
+            <h3>{task.display_name}</h3>
 
             {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button">
                 {callbackText}
@@ -103,15 +103,15 @@ function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, c
             
             {expanded && (
                 <div>
-                    <p><i>{task.organization.name}</i></p>
-                    <p><i>{task.project.name}</i></p>
+                    <p><i>for {task.organization.name} ({task.project.name})</i></p>
+                    <p><strong>Indicator Description:</strong> {task.indicator.description ? task.indicator.description : 'No description.'}</p>
 
                     <p>{task.indicator.description}</p>
 
                     {task.indicator.prerequisites.length > 0 && <div>
                         <p>Prerequisites: </p>
                         <ul>
-                            {task.indicator.prerequisites.map((p) => (<li>{p.code}: {p.name}</li>))}
+                            {task.indicator.prerequisites.map((p) => (<li>{p.display_name}</li>))}
                         </ul>
                     </div>}
 
@@ -124,7 +124,7 @@ function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, c
                         </ul>
                     </div>}
 
-                    {task.indicator.require_numeric && <p>Requires Number</p>}
+                    {task.indicator.require_numeric && <p><i>Requires a Number</i></p>}
 
                     {canDelete && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Remove Task'} forDelete={true} />}
                 </div>
@@ -166,7 +166,6 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
 
     const params = useMemo(() => {
         const allowedFields = ['organization', 'project', 'event', 'indicator_type'];
-        console.log(includeParams)
         //these are not filters, they are passed as params for use during callbacks
         const include = includeParams?.filter(p => allowedFields.includes(p?.field))
         ?.map(p => `&${p?.field}=${p?.value}`)
@@ -185,8 +184,6 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
             try {
                 console.log('fetching tasks...');
                 //run the filters
-               
-                
                 const url = `/api/manage/tasks/?search=${search}&page=${page}` + params;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
@@ -203,7 +200,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
             }
         };
         getTasks();
-    }, [search, page, params]); //run on param changes or on parent request
+    }, [search, page, params, updateTrigger]); //run on param changes or on parent request
 
     //update the tasks when one is deleted, triggering a parent update if necessary
     const updateTasks = (id) => {

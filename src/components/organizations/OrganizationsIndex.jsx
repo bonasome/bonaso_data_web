@@ -85,7 +85,7 @@ function OrganizationCard({ org, callback, callbackText }) {
     );
 }
 
-export default function OrganizationsIndex( { callback=null, callbackText='Add Organization', includeParams=[], excludeParams=[], updateTrigger=null, projAdd=null, addRedirect=null, blacklist=[] }){
+export default function OrganizationsIndex( { callback=null, callbackText='Select Organization', includeParams=[], excludeParams=[], updateTrigger=null, projAdd=null, addRedirect=null, blacklist=[] }){
     //context
     const { user } = useAuth();
     const { organizations, setOrganizations } = useOrganizations();
@@ -135,11 +135,14 @@ export default function OrganizationsIndex( { callback=null, callbackText='Add O
                     (filters.project ? `&project=${filters.project}` : '');
                 
                 const url = projAdd ? 
-                    (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}` + filterQuery + params: 
-                        `/api/manage/projects/${projAdd}/get-orgs/`) :  
+                    (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}` + filterQuery + params : 
+                        `/api/manage/projects/${projAdd}/get-orgs/?search=${search}&page=${page}`) :  
                     `/api/organizations/?search=${search}&page=${page}` + filterQuery + params;
+                console.log(url)
+
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
+                console.log(data)
                 setEntries(data.count);
                 setOrganizations(data.results);
             } 

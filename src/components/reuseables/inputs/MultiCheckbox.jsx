@@ -1,7 +1,11 @@
+import Messages from '../Messages';
+import Tooltip from '../Tooltip';
+
+import styles from './checkbox.module.css';
+
 import { GrCheckbox } from "react-icons/gr";
 import { IoCheckboxSharp } from "react-icons/io5";
-import styles from './checkbox.module.css';
-import Messages from '../Messages';
+
 
 function MultiCheckboxItem({ name, label, checked, onChange, value }) {
      return (
@@ -23,7 +27,7 @@ function MultiCheckboxItem({ name, label, checked, onChange, value }) {
 }
 
 //multiselect checkbox
-export default function MultiCheckbox({ name, label, options, value, onChange, onBlur, errors, valueField='value', labelField='label' }) {
+export default function MultiCheckbox({ name, label, options, value, onChange, onBlur, errors, valueField='value', labelField='label', tooltip=null }) {
     const toggleValue = (val) => {
         if (value.includes(val)) {
             onChange(value.filter(v => v !== val));
@@ -36,7 +40,10 @@ export default function MultiCheckbox({ name, label, options, value, onChange, o
     return (
         <div>
             <Messages errors={errors} />
-            <p>{label}</p>
+            <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <p>{label} (Select all that apply.)</p>
+                {tooltip && <Tooltip msg={tooltip} />}
+            </div>
             {options.map((o) => {
                 const optionValue = o[valueField];
                 const optionLabel = o[labelField];

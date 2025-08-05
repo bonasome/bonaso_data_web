@@ -55,7 +55,10 @@
     margin-top: auto;
     margin-bottom: auto;
 }
-
+.placeholder {
+    background-color: var(--bonaso-uber-dark-accent);
+    padding: 3vh;
+}
 .activeTab{
     text-align: center;
     width: 33%;

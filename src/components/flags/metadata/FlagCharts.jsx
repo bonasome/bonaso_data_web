@@ -25,7 +25,7 @@ export function FlagTrendChart({ data }) {
         }
         return null;
     };
-
+    if(cleanedData.length === 0) return <p>No data yet!</p>
     return (
         <ResponsiveContainer width="100%" height={300}>
             <LineChart data={cleanedData}>
@@ -76,6 +76,7 @@ export function FlagTypeChart({ data, field }) {
         }
         return null;
     };
+    if(cleanedData.length === 0) return <p>No data yet!</p>
     return (
         <ResponsiveContainer width="100%" height={300}>
             <PieChart width={400} height={400}>

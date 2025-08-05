@@ -3,14 +3,16 @@ import { Link } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/UserAuth';
 
+import Loading from '../reuseables/loading/Loading';
+
 import styles from './viewOnly.module.css';
 import bonasoWhite from '../../assets/bonasoWhite.png';
 
 
 export default function ViewOnly() {
-
     const { user } = useAuth();
-
+    console.log(user)
+    if(!user) return <Loading />
     return (
         <div className={styles.content}>
             <img src={bonasoWhite} className={styles.image} />

@@ -46,11 +46,11 @@ export default function OrganizationForm(){
     //ref to scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
-        if (submissionErrors.length > 0 && alertRef.current) {
+        if ((submissionErrors.length > 0 || success.length > 0) && alertRef.current) {
         alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         alertRef.current.focus({ preventScroll: true });
         }
-    }, [submissionErrors]);
+    }, [submissionErrors, success]);
 
     //fetch the meta
     useEffect(() => {
@@ -176,9 +176,16 @@ export default function OrganizationForm(){
     }, [existing, reset, defaultValues]);
 
     const basics = [
-        { name: 'name', label: "Name (Abbreviation/Shorthand)", type: "text", rules: { required: "Required" }},
-        { name: 'full_name', label: "Full Name", type: "textarea", },
-        { name: 'description', label: "Organization Description", type: "textarea", },
+        { name: 'name', label: "Name (Abbreviation/Shorthand) (Required)", type: "text", rules: { required: "Required" },
+            tooltip: 'This name will be used in content related to projects and tasks, so make sure its readable and not too long.',
+            placeholder: 'BONASO...'
+        },
+        { name: 'full_name', label: "Full Name", type: "textarea", tooltip: "Not required, but if desired, you can add the full formal name here. This will appear on the organization's detail page.",
+            placeholder: 'Botswana Network of AIDS Services Organizations...'
+        },
+        { name: 'description', label: "Organization Description", type: "textarea", 
+            placeholder: 'Any information about this organization, a mission, a brief history, anything...'
+        },
     ]
 
     const office = [
@@ -190,7 +197,7 @@ export default function OrganizationForm(){
     ]
 
     const ed = [
-        { name: 'executive_director', label: "Executive Director", type: "text"},
+        { name: 'executive_director', label: "Executive Director Name", type: "text"},
         { name: 'ed_email', label: "Executive Director's Email", type: "email", rules: {pattern: {value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
             message: 'Please enter a valid email.'
         }}},
@@ -205,9 +212,9 @@ export default function OrganizationForm(){
             <h1>{id ? `Editing ${existing?.display_name}` : 'New Organization' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={basics} control={control} />
-                <FormSection fields={office} control={control} />
-                <FormSection fields={ed} control={control} />
+                <FormSection fields={basics} control={control} header='Basic Information' />
+                <FormSection fields={office} control={control} header='Office Information'/>
+                <FormSection fields={ed} control={control} header='Executive Director Information'/>
 
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>

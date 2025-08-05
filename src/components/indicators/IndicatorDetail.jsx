@@ -188,7 +188,8 @@ export default function IndicatorDetail(){
                 {indicator.governs_attribute && <p><i>Controls Respondent Attribute: {getLabelFromValue('required_attributes', indicator.governs_attribute)}</i></p> }
                 
                 {indicator.subcategories.length > 0 && <div>
-                    <h4>Subcategories</h4>
+                    {indicator.match_subcategories_to ? <h4>Subcategories (matched with {indicator.prerequisites.find(p => p.id === indicator.match_subcategories_to)?.display_name ?? 'Unknown'})</h4> : 
+                    <h4>Subcategories</h4>}
                     <ul>
                         {indicator.subcategories.map((cat) => (
                             <li key={cat.id}>{cat.name}</li>

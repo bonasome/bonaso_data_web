@@ -22,6 +22,8 @@ body {
     place-items: center;
     min-width: 320px;
     min-height: 100vh;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 h1 {
@@ -97,4 +99,7 @@ textarea:focus{
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--bonaso-primary);
+}
+.spacer{
+    padding: 4vh
 }

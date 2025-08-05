@@ -166,16 +166,25 @@ export default function ProjectDeadlineForm(){
     const start = watch("start");
 
     const basics = [
-        { name: 'name', label: 'Deadline Name', type: "text", rules: { required: "Required" }},
-        { name: 'description', label: "Deadline Description", type: "textarea",},
-        { name: 'deadline_date', label: "Due Date", type: "date", rules: { required: "Required" }},
-
-        {name: 'cascade_to_children', label: 'Make Visible to Subgrantees?', type: 'checkbox'}
+        { name: 'name', label: 'Deadline Name (Required)', type: "text", rules: { required: "Required" },
+            placeholder: "Give this deadline a short snappy name so that people know what's due..."
+        },
+        { name: 'description', label: "Deadline Description", type: "textarea",
+            placeholder: "Any additional information that will help people understand this deadline..."
+        },
+        { name: 'deadline_date', label: "Due Date (Required)", type: "date", rules: { required: "Required" }}, 
     ]
-     const admin= [
+    const audience = [
         { name: 'organization_ids', label: "Organizations Involved", type: "multimodel", IndexComponent: OrganizationsIndex,
-            labelField: 'name'},
-        {name: 'visible_to_all', label: 'Make Visible to All Project Members', type: 'checkbox'}
+            labelField: 'name', tooltip: 'What organization(s) does this deadline affect (leave blank for your own organization, to include all subgrantees, use the box below)?'},
+        {name: 'cascade_to_children', label: 'Make Visible to Subgrantees?', type: 'checkbox',
+            tooltip: 'Apply this deadline to all your subgrantees'
+        }
+    ]
+    const admin = [
+        {name: 'visible_to_all', label: 'Make Visible to All Project Members', type: 'checkbox',
+            tooltip: 'Apply this deadline to all project members.'
+        }
     ]
     
 
@@ -186,8 +195,9 @@ export default function ProjectDeadlineForm(){
             <h1>{deadlineID ? `Editing ${existing?.display_name}` : 'New Deadline' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={basics} control={control} />
-                {user.role === 'admin' && <FormSection fields={admin} control={control} />}
+                <FormSection fields={basics} control={control} header='Basic Information'/>
+                <FormSection fields={audience} control={control} header='Audience' />
+                {user.role === 'admin' && <FormSection fields={admin} control={control} header='Admin Only' />}
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     <Link to={`/projects/${id}`}><button type="button">

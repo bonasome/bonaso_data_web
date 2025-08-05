@@ -73,8 +73,8 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
                 subject: existing?.subject ?? '',
                 body: existing?.body ?? '',
                 organization_ids: existing?.organizations ?? [],
-                cascade_to_children: existing?.cascade_to_children ?? [],
-                visible_to_all: existing?.visible_to_all ?? []
+                cascade_to_children: existing?.cascade_to_children ?? false,
+                visible_to_all: existing?.visible_to_all ?? false
             }
         }, [existing]);
     
@@ -88,8 +88,12 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
 
 
     const basics = [
-        { name: 'subject', label: 'Subject', type: "text", rules: { required: "Required" }},
-        { name: 'body', label: "Body", type: "textarea",},
+        { name: 'subject', label: 'Subject (Required)', type: "text", rules: { required: "Required" },
+            tooltip: 'Subject will appear on the unexpanded card. Let people know what this is about!'
+        },
+        { name: 'body', label: "Body (Required)", type: "textarea", rules: { required: "Required" },
+            tooltip: 'What do you want to announce? A deadline reminder? An important update?'
+        },
     ]
     const orgs = [
         {name: 'cascade_to_children', label: 'Make Visible to Subgrantees?', type: 'checkbox'},
@@ -98,9 +102,11 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
         },
     ]
     const admin= [
-        {name: 'visible_to_all', label: 'Make Visible to All', type: 'checkbox'}
+        {name: 'visible_to_all', label: 'Make Visible to All', type: 'checkbox',
+            tooltip: `Checking this box will make this visible to all members${projectID ? ' with access to this project' : ''}.`
+        }
     ]
-    
+    console.log(existing)
     return(
         <div className={modalStyles.modal}>
             <h1>{existing ? `Editing Announcement` : 'New Announcement' }</h1>

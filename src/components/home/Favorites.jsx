@@ -23,7 +23,6 @@ export default function Faves(){
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setFavorites(data);
-                console.log('faves', data)
             } 
             catch (err) {
                 console.error('Failed to get alerts:', err);
@@ -35,12 +34,16 @@ export default function Faves(){
         };
         getFavorites();
     }, []);
-    console.log(favorites);
-    if(loading || !favorites) return <ComponentLoading />
+
+    if(loading || !favorites?.favorites) return <ComponentLoading />
     return(
         <div className={styles.faves}>
             <h2>Favorites</h2>
-            {['client', 'meofficer', 'manager', 'admin'].includes(user.role) &&favorites.favorites.filter(f => (f.content_type == 4)).length > 0 &&
+            {!favorites?.favorites || favorites.favorites.length === 0 && <p className={styles.favesSection}><i>
+                Pro gamer tip: You can favorite projects, events, or
+                respondents on their pages for easy access when you log in.
+            </i></p>}
+            {['client', 'meofficer', 'manager', 'admin'].includes(user.role) && favorites.favorites.filter(f => (f.content_type == 4)).length > 0 &&
              <div className={styles.favesSection}> 
                 <h3>Projects</h3>
                 {favorites.favorites.filter(f => (f.content_type == 4)).map((f) => (<div className={styles.favesCard}>

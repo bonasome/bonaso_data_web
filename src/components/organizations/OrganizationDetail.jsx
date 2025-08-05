@@ -41,7 +41,7 @@ export default function OrganizationDetail(){
     //fetch organization details
     useEffect(() => {
         const getOrganizationDetails = async () => {
-            const found = organizationDetails.find(p => p.id.toString() === id.toString());
+            const found = organizationDetails.find(p => p?.id.toString() === id.toString());
             if (found) {
                 setActiveOrganization(found);
                 setLoading(false);
@@ -146,7 +146,8 @@ export default function OrganizationDetail(){
                 {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
 
                 {organization.full_name && <h3>{organization.full_name}</h3>}
-                {organization.description && <p>{organization.description}</p>}
+                <h3>Description</h3>
+                {organization.description ? <p>{organization.description}</p> : <p>No Description.</p>}
                 
                 
                 <UpdateRecord created_by={organization.created_by} created_at={organization.created_at} 

@@ -4,11 +4,12 @@ import { GrCheckbox } from "react-icons/gr";
 import { IoCheckboxSharp } from "react-icons/io5";
 
 import Messages from '../Messages';
+import Tooltip from '../Tooltip';
 
 //toggle checkbox
-export default function Checkbox({ name, label, value, onChange, onBlur, errors = [] }) {
+export default function Checkbox({ name, label, value, onChange, onBlur, errors = [], tooltip=null }) {
   return (
-    <div>
+    <div style={{ borderBottom: 'solid 1px white', borderTop: 'solid 1px white',}}>
         <label htmlFor={name} className={styles.checkbox}>
             <input
                 name={name} id={name} type="checkbox" style={{ display: "none" }}
@@ -16,6 +17,7 @@ export default function Checkbox({ name, label, value, onChange, onBlur, errors 
             />
             {value ? <IoCheckboxSharp style={{ marginRight: 12}}/> : <GrCheckbox style={{ marginRight: 12}}/>}
             {label}
+            {tooltip && <Tooltip msg={tooltip} />}
         </label>
         <Messages errors={errors} />
     </div>

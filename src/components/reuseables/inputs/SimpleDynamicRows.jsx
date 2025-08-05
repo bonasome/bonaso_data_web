@@ -1,5 +1,8 @@
 import { useState, useEffect, useImperativeHandle, useRef, forwardRef } from "react";
+
 import Messages from '../Messages';
+import Tooltip from '../Tooltip';
+
 import styles from './simpleDynamicRows.module.css'
 
 
@@ -36,7 +39,7 @@ function Row({ row, onCollect, onRemove, index, count }) {
 }
 
 // Main component with forwardRef to expose collection logic from all row inputs
-const SimpleDynamicRows = forwardRef(({ label, existing=[] }, ref) => {
+const SimpleDynamicRows = forwardRef(({ label, existing=[], header=null, tooltip=null }, ref) => {
     const [rows, setRows] = useState([{ key: Date.now().toString(), value: "" }]);
     const [errors, setErrors] = useState([]);
     const getRow = useRef({});
@@ -87,7 +90,11 @@ const SimpleDynamicRows = forwardRef(({ label, existing=[] }, ref) => {
     return (
         <div className={styles.container}>
             <Messages errors={errors} />
-            <p>{label}</p>
+            {header && <h3>{header}</h3>}
+            <div style={{ display: 'flex', flexDirection: 'row'}}>
+                <p>{label}</p>
+                {tooltip && <Tooltip msg={tooltip} />}
+            </div>
             {rows.map((row, index) => (
                 <Row
                 key={row.key}

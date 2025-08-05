@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 
 import Messages from '../Messages';
+import Tooltip from '../Tooltip';
 
 import styles from '../../../styles/indexSelect.module.css';
 import modalStyles from '../../../styles/modals.module.css';
 
 //select multiple models from an index component
-export default function ModelMultiSelect({ IndexComponent, value, onChange, label, errors, callbackText, labelField='display_name', includeParams=[], excludeParams=[], projAdd=false, addRedirect=null }){
+export default function ModelMultiSelect({ IndexComponent, value, onChange, label, errors, tooltip=null, callbackText, labelField='display_name', includeParams=[], excludeParams=[], projAdd=false, addRedirect=null }){
     const [selecting, setSelecting] = useState(false);
     
     
@@ -24,7 +25,10 @@ export default function ModelMultiSelect({ IndexComponent, value, onChange, labe
 
     return(
         <div>
-            <p>{label}</p>
+            <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <p>{label}</p>
+                {tooltip && <Tooltip msg={tooltip} />}
+            </div>
             <Messages errors={errors} />
             <div className={styles.card}>
                 {value.length > 0 ? 
@@ -37,7 +41,7 @@ export default function ModelMultiSelect({ IndexComponent, value, onChange, labe
                 
                 : <p>Nothing selected</p>}
                 <button type="button" onClick={() => setSelecting(!selecting)}>{selecting ? 'Done' : 'Select'}</button>
-                <button type="button" onClick={() => onChange([])}>Clear Selection</button>
+                <button type="button" onClick={() => onChange([])} disabled={(!value || value.length === 0)}>Clear Selection</button>
                 {selecting && <div className={modalStyles.modal}>
                     <h2>{label}</h2>
                     <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>

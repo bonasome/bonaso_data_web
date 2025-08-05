@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useForm,  useWatch } from "react-hook-form";
 
 import fetchWithAuth from '../../../../services/fetchWithAuth';
@@ -16,6 +16,15 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
     //page meta
     const[pageErrors, setPageErrors] = useState([])
     const [saving, setSaving] = useState(false);
+
+    //ref to scroll to errors
+        const alertRef = useRef(null);
+        useEffect(() => {
+            if (pageErrors.length > 0 && alertRef.current) {
+            alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            alertRef.current.focus({ preventScroll: true });
+            }
+        }, [pageErrors]);
 
     //handle form submission, vary method based on if its create or update
     const onSubmit = async (data) => {
@@ -40,11 +49,11 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
                         returnData[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
+                        serverResponse.push(`${msg}`);
                         });
                     } 
                     else {
-                        serverResponse.push(`${field}: ${returnData[field]}`);
+                        serverResponse.push(`${returnData[field]}`);
                     }
                 }
                 setPageErrors(serverResponse)
@@ -76,23 +85,33 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
 
 
     const basics = [
-        { name: 'name', label: 'Name (Shorter Version)', type: "text", rules: { required: "Required" }},
-        { name: 'full_name', label: "Full Name", type: "textarea",},
-        { name: 'description', label: "Client Description", type: "textarea",},
+        { name: 'name', label: 'Name (Required)', type: "text", rules: { required: "Required" }, 
+            tooltip: `This will appear in project pages, so make sure it's short and readable.`,
+            placeholder: 'NAHPA...',
+        },
+        { name: 'full_name', label: "Full Name", type: "textarea", tooltip: 'Their full name, if desired.',
+            placeholder: 'National AIDS and Health Promotion Agency...'
+        },
+        { name: 'description', label: "Client Description", type: "textarea", 
+            placeholder: 'Any additional information you may want to note...'
+        },
     ]
 
     return(
         <div className={styles.modal} >
             <h2>Creating New Client</h2>
-             <Messages errors={pageErrors} />
+             <Messages errors={pageErrors} ref={alertRef} />
 
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormSection fields={basics} control={control} />
-                {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {!saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     <button type="button" onClick={() => onCancel()}><FcCancel /> Cancel</button>
                 </div>}
-                {saving && <ButtonLoading />}
+                
+                {saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+                    <ButtonLoading />
+                </div> }
             </form>
 
         </div>

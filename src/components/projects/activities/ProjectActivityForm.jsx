@@ -169,24 +169,40 @@ export default function ProjectActivityForm(){
     const start = watch("start");
 
     const basics = [
-        { name: 'name', label: 'Activity Name', type: "text", rules: { required: "Required" }},
-        { name: 'description', label: "Activity Description", type: "textarea",},
-        { name: 'start', label: "Activity Starts On", type: "date", rules: { required: "Required" }},
-        { name: 'end', label: "Activity Ends On", type: "date", rules: { required: "Required" ,
+        { name: 'name', label: 'Activity Name (Required)', type: "text", rules: { required: "Required" },
+            placeholder: 'Project inception meeting...'
+        },
+        { name: 'description', label: "Activity Description", type: "textarea",
+            placeholder: 'Any information that might help people understand the purpose or objectives of this activity...'
+        },
+        { name: 'start', label: "Activity Starts On (Required)", type: "date", rules: { required: "Required" }},
+        { name: 'end', label: "Activity Ends On (Required)", type: "date", rules: { required: "Required" ,
             validate: value => !start || value >= start || "This project cannot end before it starts."
         }},
-
-        {name: 'status', label: 'Activity Status', type: 'radio',
-            options: projectsMeta?.statuses,  rules: { required: "Required" } },
-        {name: 'category', label: 'Activity Status', type: 'radio',
-            options: projectsMeta?.activity_categories,  rules: { required: "Required" } },
-        {name: 'cascade_to_children', label: 'Make Visible to Subgrantees?', type: 'checkbox'}
     ]
-     const admin= [
+    const moreInfo = [
+        {name: 'status', label: 'Activity Status (Required)', type: 'radio',
+            options: projectsMeta?.statuses,  rules: { required: "Required" },
+            tooltip: 'What is the current status of this activity? Is it planned, currently ongoing, finished? Be sure to check back later to update.'
+        },
+        {name: 'category', label: 'Activity Type (Required)' , type: 'radio',
+            options: projectsMeta?.activity_categories,  rules: { required: "Required" },
+            tooltip: 'What kind of activity is this? This is just for your own reference.'
+        },
+    ]
+    const forWho = [
         { name: 'organization_ids', label: "Organizations Involved", type: "multimodel", IndexComponent: OrganizationsIndex,
             labelField: 'name',
+            tooltip: 'What organization(s) are attending this activity (leave blank for your own organization, to include all subgrantees, use the box below)?'
         },
-        {name: 'visible_to_all', label: 'Make Visible to All Project Members', type: 'checkbox'}
+        {name: 'cascade_to_children', label: 'Make Visible to Subgrantees?', type: 'checkbox',
+            tooltip: 'Check this box to automatically include any subgrantees in this event.'
+        }
+    ]
+     const admin= [
+        {name: 'visible_to_all', label: 'Make Visible to All Project Members', type: 'checkbox',
+            tooltip: 'Make this activity visible to all project members.'
+        }
     ]
     
 
@@ -197,8 +213,14 @@ export default function ProjectActivityForm(){
             <h1>{activityID ? `Editing ${existing?.display_name}` : 'New Activity' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={basics} control={control} />
-                {user.role === 'admin' && <FormSection fields={admin} control={control} />}
+                <FormSection fields={basics} control={control} header='Basic Information'/>
+                
+                <FormSection fields={moreInfo} control={control} header='Additional Information' />
+                
+                <FormSection fields={forWho} control={control} header='Audience' />
+                
+                {user.role === 'admin' && <FormSection fields={admin} control={control} header={'Admin Only'}/>}
+                
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     <Link to={`/projects/${id}`}><button type="button">

@@ -121,52 +121,62 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
     const asP = watch('as_percentage')
 
     const task = [
-        { name: 'task_id', label: 'Related Task', type: "model", IndexComponent: Tasks,
+        { name: 'task_id', label: 'For Task (Required)', type: "model", IndexComponent: Tasks,
             labelField: 'display_name',  includeParams: [{field: 'organization', value: organization.id}]},
-        
-        { name: 'as_percentage', label: 'Measure as a Percentage of Another Task', type: "checkbox"},
+    ]
+    const asRelated = [
+        { name: 'as_percentage', label: 'Measure as a Percentage of Another Task', type: "checkbox", 
+            tooltip: `Instead of setting this target as a number, you can set it based on the organization's
+            achievement of another task (for example, 100% of all positive results are referred for further treatment).`
+        },
     ]
     const amount = [
-        { name: 'amount', label: 'Target Amount', type: "number", rules: { required: "Required" } },
+        { name: 'amount', label: 'Target Amount (Required)', type: "number", rules: { required: "Required" },
+            placeholder: 'ex. 99...',
+        },
     ]
     const relatedToTask = [
-        { name: 'related_to_id', label: 'Select Related Task', type: "model", IndexComponent: Tasks, labelField: 'display_name',
-            includeParams: [{field: 'organization', value: organization.id}]
+        { name: 'related_to_id', label: 'Select Related Task (Required)', type: "model", IndexComponent: Tasks, labelField: 'display_name',
+            includeParams: [{field: 'organization', value: organization.id}], 
+            tooltip: `This is the task whose achievement should set the target for the task selected above.`
         },
-        { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Task', type: "number", rules: { 
+        { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Task (Required)', type: "number", rules: { 
             min: { value: 1, message: "Must be at least 1" },
-            max: { value: 100, message: "Cannot exceed 100" }
-        }},
+            max: { value: 100, message: "Cannot exceed 100" }, 
+            }, placeholder: 'ex. 100%...', tooltip: 'What percentage of acheivement for the related task should be the target (100% for everyone)?'
+        },
     ]
 
     const dateType = [
-        { name: 'date_type', label: "Target Period (Select type)", type: "radio", rules: { required: "Required" },
+        { name: 'date_type', label: "Target Period (Select type) (Required)", type: "radio", rules: { required: "Required" },
             options: [{value: 'month', label: 'By Month'}, {value: 'quarter', label: 'By Quarter'}, {value: 'custom', label: 'Custom'}],
+            tooltip: `Select a period type for this target. You can choose to set by quarter, by month, or set a custom range.`
         },
     ]
     const quarter = [
-        { name: 'quarter', label: "Select a Quarter", type: "radio", rules: { required: "Required" },
+        { name: 'quarter', label: "Select a Quarter (Required)", type: "radio", rules: { required: "Required" },
             options: quarterOptions?.map((q) => ({'value': q, 'label': q}))
         },
     ]
     const month = [
-        { name: 'month', label: "Select a Month", type: "radio", rules: { required: "Required" },
+        { name: 'month', label: "Select a Month (Required)", type: "radio", rules: { required: "Required" },
             options: monthOptions?.map((month) => ({'value': month, 'label': month}))
         },
     ]
     const customDates = [
-        { name: 'start', label: "Project Starts On", type: "date", rules: { required: "Required" }},
+        { name: 'start', label: "Project Starts On (Required)", type: "date", rules: { required: "Required" }},
 
-        { name: 'end', label: "Project Ends On", type: "date", rules: { required: "Required" ,
+        { name: 'end', label: "Project Ends On (Required)", type: "date", rules: { required: "Required" ,
             validate: value => !start || value >= start || "This project cannot end before it starts."
         }},
     ]
     return(
         <div className={modalStyles.modal}>
-            <h1>{existing ? `Editing Target` : 'New Target' }</h1>
+            <h2>{existing ? `Editing Target` : 'New Target' }</h2>
             <Messages errors={submissionErrors} />
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={task} control={control} />
+                <FormSection fields={task} control={control} header={'Target For'}/>
+                <FormSection fields={asRelated} control={control} header={'Measure as Percentage?'} />
                 {!asP && <FormSection fields={amount} control={control} />}
                 {asP && <FormSection fields={relatedToTask} control={control} />}
 

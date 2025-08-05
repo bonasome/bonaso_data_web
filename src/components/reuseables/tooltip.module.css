@@ -1,0 +1,42 @@
+.tooltipContainer {
+  margin-top: auto;
+  margin-bottom: auto;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tooltipBox {
+  position: absolute;
+  bottom: 125%; /* adjust to place above the element */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--bonaso-light-accent);
+  color: var(--bonaso-uber-dark-accent);
+  padding: 6px 10px;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  min-width: 15vw;
+  max-width: 35vw;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.tooltipContainer:hover .tooltipBox {
+  opacity: 1;
+  pointer-events: auto;
+}
+.tooltipBox::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* place it just below the tooltip box */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--bonaso-light-accent) transparent transparent transparent;
+}

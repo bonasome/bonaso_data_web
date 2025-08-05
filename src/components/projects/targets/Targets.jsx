@@ -1,19 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useForm,  useWatch } from "react-hook-form";
+import { useParams } from 'react-router-dom';
 
 import { useAuth } from '../../../contexts/UserAuth';
 
 import fetchWithAuth from '../../../../services/fetchWithAuth';
-import { tryMatchDates, getMonthDatesStr, getQuarterDatesStr, getWindowsBetween } from '../../../../services/dateHelpers';
 import prettyDates from '../../../../services/prettyDates';
 
 import IndexViewWrapper from '../../reuseables/IndexView';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import ComponentLoading from '../../reuseables/loading/ComponentLoading';
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
-import UpdateRecord from '../../reuseables/meta/UpdateRecord';
 import Messages from '../../reuseables/Messages';
+import UpdateRecord from '../../reuseables/meta/UpdateRecord';
 import { EditTargetModal } from './EditTargetModal';
 
 import styles from './targets.module.css';
@@ -21,20 +19,20 @@ import styles from './targets.module.css';
 import { PiTargetBold } from "react-icons/pi";
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
-import { IoIosSave } from "react-icons/io";
-import { FcCancel } from "react-icons/fc";
 
 export function TargetCard({ target, project, organization, onUpdate, onCancel }){
+    //context
     const { user } = useAuth();
+    //meta
     const [editing, setEditing] = useState(false);
     const [del, setDel] = useState(false);
     const [expanded, setExpanded] = useState(false);
 
-
+    //function to delete the target
     const deleteTarget = async() => {
         try {
             console.log('deleting targets...');
-            const response = await fetchWithAuth(`/api/manage/targets/${existing.id}/`, {
+            const response = await fetchWithAuth(`/api/manage/targets/${target.id}/`, {
                 method: 'DELETE',
             });
             if (response.ok) {
@@ -73,24 +71,28 @@ export function TargetCard({ target, project, organization, onUpdate, onCancel }
         }
     }
 
+    //check if the user should have perms to create/edit targets for the org
     const hasPerm = useMemo(() => {
         if(user.organization_id == organization?.parent?.id || user.role == 'admin') return true
         return false
     }, [organization, user]);
-    console.log(target)
+
+
     if(!target || !project || !organization) return <ComponentLoading />
+
     if(editing) return <EditTargetModal existing={target} project={project} organization={organization} onCancel={() => setEditing(false)} onUpdate={() => onUpdate()}/>
+
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             {del && <ConfirmDelete name='Target' onConfirm={() => deleteTarget()} onCancel={() => setDel(false)} />}
            
             <div onClick={() => setExpanded(!expanded)}>
-                <h3>Target for {target.task.display_name}</h3>
+                <h3>Target for {target.display_name}</h3>
                 {expanded && <div>
 
                     <p>{(prettyDates(target?.start))} to {prettyDates(target?.end)}</p>
                     {target.amount && <p>
-                        Achievement: {target.achievement || 0} of {target.amount} 
+                        Achievement: {target.achievement || 0} of {target.amount} {' '}
                         ({target.amount != 0 ? Math.round((target.achievement/target.amount)*100) : '0'}%)
                     </p>}
 
@@ -105,23 +107,24 @@ export function TargetCard({ target, project, organization, onUpdate, onCancel }
                         {hasPerm && !editing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit'} />}
                         {hasPerm && !editing && !del && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Target'} forDelete={true} />}
                     </div>
-
+                    <UpdateRecord created_by={target.created_by} created_at={target.created_at} updated_by={target.updated_by} updated_at={target.updated_at} />
                 </div>}
         </div>
     </div>
     )
 }
 
-
-
 export default function Targets({ project, organization}) {
+    //params for project (id) and organizaton (orgID)
     const { id, orgID } = useParams();
+    //context
     const { user } = useAuth();
+    //meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [adding, setAdding] =useState(false);
     const [targets, setTargets] = useState([]);
-
+    //indexers
     const [page, setPage] = useState(1)
     const [search, setSearch] = useState('');
     const [entries, setEntries] = useState(0);
@@ -129,20 +132,15 @@ export default function Targets({ project, organization}) {
     useEffect(() => {
         const getTargets = async () => {
             if(!id || !orgID) return;
-            setLoading(true);
             try {
                 console.log('fetching targets...');
-                const response = await fetchWithAuth(`/api/manage/targets/?task__organization=${orgID}&task__project=${id}`);
+                const response = await fetchWithAuth(`/api/manage/targets/?task__organization=${orgID}&task__project=${id}&search=${search}`);
                 const data = await response.json();
                 if(response.ok){
                     setEntries(data.count);
                     setTargets(data.results);
                     setLoading(false);
                 }
-                else{
-                    navigate(`/not-found`);
-                }
-                
             } 
             catch (err) {
                 setErrors(['Failed to fetch targets. Please try again later.'])
@@ -151,7 +149,7 @@ export default function Targets({ project, organization}) {
             }
         }
         getTargets();
-    }, [id, orgID])
+    }, [id, orgID, search])
 
     const handleChange = async () => {
         const getTargets = async () => {
@@ -186,6 +184,7 @@ export default function Targets({ project, organization}) {
     if (loading) return <ComponentLoading />
     return (
         <div>
+            <Messages errors={errors} />
             {hasPerm && <ButtonHover callback={() => setAdding(true)} noHover={<PiTargetBold />} hover={'New Target'} />}
             {adding && <EditTargetModal onUpdate={handleChange} onCancel={() => setAdding(false)} project={project} organization={organization} />}
             <IndexViewWrapper entries={entries} onSearchChange={setSearch} page={page} onPageChange={setPage}>

@@ -1,7 +1,8 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { GrLinkPrevious, GrLinkNext } from "react-icons/gr";
 
+import { GrLinkPrevious, GrLinkNext } from "react-icons/gr";
+import { FaSearch } from "react-icons/fa";
 //index view wrapper that handles setting pages and controlling search inputs
 export default function IndexViewWrapper({ children, page, onSearchChange, onPageChange, entries, filter=null }){
     const [search, setSearch] = useState('');
@@ -26,6 +27,7 @@ export default function IndexViewWrapper({ children, page, onSearchChange, onPag
     return( 
         <div >
             <div>
+                <FaSearch style={{marginLeft: 15, marginRight: 10}} />
                 <input type='text' onChange={(e) => handleSearch(e.target.value)} placeholder={'start typing to search'}/>
                 {filter && filter}
             </div>

@@ -45,26 +45,18 @@ export default function Profile(){
     //get profile detials, meta, and activity
     useEffect(() => {
         const getProfile = async () => {
-            const found = profiles.find(p => p.id.toString() === id.toString());
-            if (found) {
-                setProfile(found);
-                setLoading(false);
-                return;
+            try{
+                console.log('fetching profile info...')
+                const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
+                const data = await response.json();
+                setProfile(data);
+                setProfiles(prev => [...prev, data]);
+                setLoading(false)
             }
-            else{
-                try{
-                    console.log('fetching profile info...')
-                    const response = await fetchWithAuth(`/api/profiles/users/${id}/`);
-                    const data = await response.json();
-                    setProfile(data);
-                    setProfiles(prev => [...prev, data]);
-                    setLoading(false)
-                }
-                catch(err){
-                    setErrors(['Something went wrong. Please try again later.']);
-                    console.error('Failed to fetch profile: ', err);
-                    setLoading(false)
-                }
+            catch(err){
+                setErrors(['Something went wrong. Please try again later.']);
+                console.error('Failed to fetch profile: ', err);
+                setLoading(false)
             }
         }
         getProfile();
@@ -148,7 +140,7 @@ export default function Profile(){
         return match ? match.label : null;
     };
 
-    if(loading || !profile) return <Loading />
+    if(loading || !profile?.organization) return <Loading />
 
     return(
         <div className={styles.container}>
@@ -178,7 +170,7 @@ export default function Profile(){
                         <p>{profile.username}</p>
 
                         <h3>Organization</h3>
-                        <Link to={`/organizations/${profile.organization.id}`}>
+                        <Link to={`/organizations/${profile?.organization?.id}`}>
                             <p>{profile.organization.name}</p>
                         </Link>
 
@@ -188,7 +180,7 @@ export default function Profile(){
                         </div>}
 
                         <h3>Role</h3> 
-                        <p>{getLabelFromValue('roles', user.role)}</p>
+                        <p>{getLabelFromValue('roles', profile.role)}</p>
 
                         {profile?.role=='client' && <div>
                             <h3>Client</h3>
@@ -223,9 +215,10 @@ export default function Profile(){
                 </div>
 
                 {showActivity && <div className={styles.dropdownContent}>
-                    <Activity activity={activity} />
+                    {Object.keys(activity).length > 0 ? <Activity activity={activity} /> : <p>No activity yet. Check back later.</p>}
                 </div>}
             </div>
+            <div className='spacer'></div>
         </div>
     )
 }

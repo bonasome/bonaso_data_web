@@ -28,6 +28,10 @@ function Dropdown({ name }){
             setUrls(['/projects', '/indicators', '/organizations', '/clients'])
             setLabels(['Manage Projects', 'Manage Indicators', 'Manage Organizations', 'Manage Clients'])
         }
+        if(name== 'Projects' && ['meofficer', 'manager'].includes(user.role)){
+            setUrls(['/projects', '/organizations']);
+            setLabels(['View My Projects', 'View My Organizations'])
+        }
 
         if(name =='Record' && ['meofficer', 'manager', 'admin'].includes(user.role)){
             let urls = ['/respondents', '/batch-record', '/events', '/social']
@@ -102,7 +106,7 @@ function ThinMenu() {
         <div className={styles.menuExpanded}>
             <h2>Record</h2>
             <div className={styles.menuBar}><Link to='/respondents'>Respondents</Link></div>
-            {!['clients'].includes(user.role) && <div className={styles.menuBar}><Link to='/respondents/flagged'>Flagged Interactions</Link></div>}
+            {['meofficer', 'manager', 'admin'].includes(user.role) && <div className={styles.menuBar}><Link to='/flags'>Flags</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/batch-record'}>Batch Record</Link></div>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/events'}>Events</Link></div>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/social'}>Social</Link></div>}

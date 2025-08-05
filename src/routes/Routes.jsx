@@ -9,7 +9,6 @@ import ResetForm from '../components/auth/passwordReset/ResetForm';
 
 import AuthLayout from '../layouts/AuthLayout';
 import { Routes, Route } from 'react-router-dom';
- 
 
 //redirects
 import RedirectIfAuthenticated from '../authRedirect/RedirectIfAuth';
@@ -223,7 +222,7 @@ function Router() {
             }
         >
             <Route index element={
-                <RedirectIfNoPerm level={['admin']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
                     <FunWithFlags />
                 </RedirectIfNoPerm>
                 }/>

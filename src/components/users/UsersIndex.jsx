@@ -33,7 +33,7 @@ function ProfileCard({ profile, meta }) {
         
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={()=>setExpanded(!expanded)}>
-            <Link to={`/profiles/${profile.id}`} style={{display:'flex', width:"fit-content"}}><h2>{profile.first_name} {profile.last_name}</h2></Link>
+            <Link to={`/profiles/${profile.id}`} style={{display:'flex', width:"fit-content"}}><h2>{profile.display_name}</h2></Link>
             {expanded && (
                 <>
                     <p>Organization: {profile?.organization_detail?.name}</p>
@@ -138,7 +138,7 @@ export default function ProfilesIndex(){
                 setOrgs(data.results);
             }
             catch(err){
-                console.error('Failed to fetch projects: ', err);
+                console.error('Failed to fetch organizations: ', err);
                 setErrors(['Something went wrong. Please try again later.']);
             }
         }
@@ -155,7 +155,7 @@ export default function ProfilesIndex(){
                 setClients(data.results);
             }
             catch(err){
-                console.error('Failed to fetch projects: ', err);
+                console.error('Failed to fetch clients: ', err);
                 setErrors(['Something went wrong. Please try again later.']);
             }
         }

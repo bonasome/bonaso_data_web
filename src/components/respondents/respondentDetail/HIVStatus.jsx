@@ -22,13 +22,14 @@ export default function HIVStatus({ respondent, onUpdate }){
     const handleSubmit = async() => {
         setSuccess('')
         setErrors([])
-        if(!date || date === ''){
+        if((!date || date === '') && pos){
             setErrors(['Please enter a date (select today if you are unsure).'])
             return;
         }
+        const useDate = pos ? date : null;
         try{
             setSaving(true);
-            const data = {'hiv_positive': pos, 'date_positive': date}
+            const data = {'hiv_positive': pos, 'date_positive': useDate}
             const url = `/api/record/respondents/${respondent.id}/`; 
             const response = await fetchWithAuth(url, {
                 method: 'PATCH',
@@ -57,6 +58,7 @@ export default function HIVStatus({ respondent, onUpdate }){
                 }
                 setErrors(serverResponse)
             }
+            console.log(returnData)
         }
         catch(err){
             setErrors(['Something went wrong. Please try again later.'])

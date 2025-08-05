@@ -217,6 +217,7 @@ export default function EventDetail(){
         setNewTask(null)
     }
     const hasPerm = useMemo(() => {
+        if(!event) return false
         if(user.role === 'admin') return true;
         if(user.organiation_id === event.host.id && ['meofficer', 'manager'].includes(user.role)) return true;
         return false; 

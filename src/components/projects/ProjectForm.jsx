@@ -27,7 +27,7 @@ export default function ProjectForm(){
     //param to get indicator (blank if new)
     const { id } = useParams();
     //context
-    const { projectsMeta, setProjectsMeta, setProjectDetails } = useProjects();
+    const { projectsMeta, setProjectsMeta, projectDetails, setProjectDetails } = useProjects();
     const { user } = useAuth();
 
     //existing values to start with
@@ -77,7 +77,7 @@ export default function ProjectForm(){
     useEffect(() => {
         const getProject = async () => {
             if(!id) return;
-            const found = projects.find(o => o.id.toString() === id.toString());
+            const found = projectDetails.find(o => o.id.toString() === id.toString());
             if (found) {
                 setExisting(found);
                 return;
@@ -180,15 +180,29 @@ export default function ProjectForm(){
     const start = watch("start");
 
     const basics = [
-        { name: 'name', label: 'Project Name', type: "text", rules: { required: "Required" }},
-        { name: 'description', label: "Project Description", type: "textarea",},
-        { name: 'start', label: "Project Starts On", type: "date", rules: { required: "Required" }},
-        { name: 'end', label: "Project Ends On", type: "date", rules: { required: "Required" ,
+        { name: 'name', label: 'Project Name (Required)', type: "text", rules: { required: "Required" },
+            placeholder: 'My cool project...', tooltip: 'Give it a memorable name.',
+        },
+        { name: 'description', label: "Project Description", type: "textarea",
+             placeholder: 'A brief overview, the purpose, objectives, anything...'
+        },
+    ]
+    const timing = [
+        { name: 'start', label: "Project Starts On (Required)", type: "date", rules: { required: "Required" },
+            tooltip: 'When does the project start? NOTE: Data collected before this date will not count!'
+        },
+        { name: 'end', label: "Project Ends On (Required)", type: "date", rules: { required: "Required" ,
             validate: value => !start || value >= start || "This project cannot end before it starts."
-        }},
-        { name: 'client_id', label: "Project for Client", type: "model", IndexComponent: ClientsIndex},
+        }, tooltip: 'When does the project end? NOTE: Data collected after this date will not count!'},
         {name: 'status', label: 'Project Status', type: 'radio',
-            options: projectsMeta?.statuses,  rules: { required: "Required" } },
+            options: projectsMeta?.statuses,  rules: { required: "Required" }, 
+            tooltip: 'For internal tracking, but also note that non-admins will only be able to see active projects.'
+        },
+    ]
+    const client = [
+        { name: 'client_id', label: "Project for Client", type: "model", IndexComponent: ClientsIndex,
+            tooltip: 'Who is this project done on behalf of?'
+        },
     ]
 
     
@@ -197,11 +211,12 @@ export default function ProjectForm(){
     return(
         <div className={styles.form}>
             <ReturnLink url={id ? `/projects/${id}` : '/projects'} display={id ? 'Return to detail page' : 'Return to projects overview'} />
-            <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
+            <h1>{id ? `Editing ${existing?.name}` : 'New User' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={basics} control={control} />
-
+                <FormSection fields={basics} control={control} header={'Basic Information'} />
+                <FormSection fields={timing} control={control} header={'Date & Status'}/>
+                <FormSection fields={client} control={control} header={'Client'} />
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     {!id && <button type="submit" value='create_another'><BsDatabaseFillAdd /> Save and Create Another</button>}

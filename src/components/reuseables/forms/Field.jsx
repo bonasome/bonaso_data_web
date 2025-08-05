@@ -11,7 +11,7 @@ import ImageSelect from '../inputs/ImageSelect';
 
 //a singular field/question in a form. can support many different data types
 export default function Field({ field, control }) {
-  const { type, name, rules, label, options, IndexComponent, images, labelField, valueField, includeParams, excludeParams } = field;
+  const { type, name, rules, label, options, IndexComponent, images, labelField, valueField, includeParams, excludeParams, tooltip, placeholder } = field;
     //IndexComponent is the model select component, label/valueField are used to when providing maps (if not names label/valuve)
     //include/exclude params for filtering model index components
   return (
@@ -24,6 +24,7 @@ export default function Field({ field, control }) {
                     ...controllerField,
                     label,
                     errors: fieldState.error ? [fieldState.error.message] : [],
+                    tooltip,
                 };
 
                 switch (type) {
@@ -33,7 +34,7 @@ export default function Field({ field, control }) {
                 case "date":
                 case "number":
                 case "textarea":
-                    return <Input type={type} {...commonProps} />;
+                    return <Input type={type} {...commonProps} placeholder={placeholder} />;
                 case "radio": //single select from list
                     return <RadioButtons options={options} labelField={labelField} valueField={valueField} {...commonProps} />;
                 case "checkbox": //toggle for true/false or switchpaths

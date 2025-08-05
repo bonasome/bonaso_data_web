@@ -6,7 +6,7 @@ import styles from '../flags.module.css';
 export default function Metadata({ metadata }){
     return(
         <div>
-            <div className={styles.section}>
+            <div className={styles.section} style={{display: 'flex', flexDirection: 'row'}}>
                 <div className={styles.count}>
                     <h2>{metadata.active}</h2>
                     <p>Active Flags</p>
@@ -18,6 +18,7 @@ export default function Metadata({ metadata }){
                 </div>
             </div>
             <div className={styles.section}>
+                <h3>Trend Over Time</h3>
                 <FlagTrendChart data={metadata.by_month} />
             </div>
 

@@ -200,38 +200,49 @@ export default function UserForm(){
     
     const password = watch("password");
 
-    const userRole = useWatch({ control, name: 'role', defaultValue: null })
-    const isClient = useMemo(() => {return userRole === 'client'}, [userRole])
+    const selectedRole = useWatch({ control, name: 'role', defaultValue: null })
+    const isClient = useMemo(() => {return selectedRole === 'client'}, [selectedRole])
 
     const username = [
-        { name: 'username', label: "Username", type: "text", rules: { required: "Required" }}
+        { name: 'username', label: "Username (Required)", type: "text", rules: { required: "Required" },
+            tooltip: 'Make note of this. It will be required for login. This can be changed later.'
+        }
     ]
 
     const pass = [
-        { name: 'password', label: "Password", type: "password", rules: { required: "Required" }},
-        { name: 'confirm_password', label: "ConfirmPassword", type: "password", rules: { 
-            required: "Required",   validate: value => value === password || "Passwords do not match" }},
+        { name: 'password', label: "Password (Required)", type: "password", rules: { required: "Required" },
+             tooltip: 'Make note of this. It will be required for login. This can be changed later.'
+        },
+        { name: 'confirm_password', label: "Confirm Password (Required)", type: "password", rules: { 
+            required: "Required",   validate: value => value === password || "Passwords do not match" },
+            tooltip: 'This must match the first password EXACTLY.'
+        },
     ]
 
     const basics = [
-        { name: 'first_name', label: "First Name", type: "text", rules: { required: "Required" }},
-        { name: 'last_name', label: "Last Name", type: "text", rules: { required: "Required" }},
+        { name: 'first_name', label: "First Name (Required)", type: "text", rules: { required: "Required" }},
+        { name: 'last_name', label: "Last Name (Required)", type: "text", rules: { required: "Required" }},
         {name: 'email', label: 'Email', type: 'email',  rules: {pattern: {value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
             message: 'Please enter a valid email.'
         }}},
     ]
 
     const role = [
-        {name: 'role', label: 'User Role', type: 'radio',
-            options: profilesMeta?.roles,  rules: { required: "Required" } },
+        {name: 'role', label: 'User Role (Required)', type: 'radio',
+            options: profilesMeta?.roles,  rules: { required: "Required" },
+            tooltip: `A user's role determines what they are allowed to do. WARNING: Please be cautious
+            assigning users higher level roles (M&E Officer, Manager) as these users will have permission
+            to alter existing data. BE VERY CAREFUL ASSIGNING SITE ADMINISTRATORS!! Site Administrators have 
+            significant power to delete and alter data. Only assign this role to trusted staff!!!`
+        },
     ]
 
     const organization= [
-        { name: 'organization_id', label: "User Organization", type: "model", IndexComponent: OrganizationsIndex},
+        { name: 'organization_id', label: "User Organization (Required)", type: "model", IndexComponent: OrganizationsIndex},
     ]
 
     const client = [
-        { name: 'client_id', label: "Client Organization", type: "model", IndexComponent: ClientsIndex},
+        { name: 'client_id', label: "Client Organization (Required)", type: "model", IndexComponent: ClientsIndex},
     ]
     
 
@@ -242,12 +253,13 @@ export default function UserForm(){
             <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={username} control={control} />
-                {!id && <FormSection fields={pass} control={control} />}
-                <FormSection fields={basics} control={control} />
-                {user.role === 'admin' && <FormSection fields={role} control={control} />}
-                <FormSection fields={organization} control={control} />
-                {isClient && user.role === 'admin' && <FormSection fields={client} control={control} />}
+                <FormSection fields={username} control={control} header='Username' />
+                {!id && <FormSection fields={pass} control={control} header='Password' />}
+                <FormSection fields={basics} control={control} header='Basic Information'/>
+                {selectedRole === 'admin' && <Messages warnings={['You are about to make this user an admin. Please be sure you trust this person. They will have power to edit and delete anything on the site.']} />}
+                {user.role === 'admin' && <FormSection fields={role} control={control} header='User Role' />}
+                {!isClient && <FormSection fields={organization} control={control} header='User Organization' />}
+                {isClient && user.role === 'admin' && <FormSection fields={client} control={control} header='User Organization' />}
 
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>

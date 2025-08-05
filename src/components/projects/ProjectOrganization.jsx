@@ -101,15 +101,7 @@ export default function ProjectOrganization(){
     //get project once on load
     useEffect(() => {
         const getProjectDetails = async () => {
-            const found = projectDetails.find(p => p.id.toString() === id.toString()); //try context first
-            if (found) {
-                setProject(found);
-                setLoading(false);
-                return;
-            }
-            else{
-                await fetchProject()
-            }
+            await fetchProject()
         };
         getProjectDetails();
     }, [id]);
@@ -231,7 +223,7 @@ export default function ProjectOrganization(){
         }
         setDel(false)
     }
-    
+
     if(loading || !project || !organization) return <Loading />
     return(
         <div className={styles.container}>
@@ -263,7 +255,7 @@ export default function ProjectOrganization(){
                         />}
                         <Messages success={taskSuccess} />
                         <Tasks includeParams={[{field: 'organization', value: orgID}, {field: 'project', value: id}]} 
-                            canDelete={hasPerm} onRemove={() => setUpdateTasks(prev => prev+=1)} updateTrigger={updateTasks}
+                            canDelete={hasPerm} updateTrigger={updateTasks}
                         />
                     </div>}
                 </div>
@@ -287,7 +279,7 @@ export default function ProjectOrganization(){
                     </div>
                     {showChildOrgs && <div style={{ margin: 20}}>
                         <Messages success={coSuccess} />
-                        {hasPerm && <ButtonHover noHover={<BsFillBuildingsFill />} hover={'Assign New Subgrantee(s)'} callback={() => setAddingChildOrg(true)} />}
+                        {((!organization.parent && user.organization_id===organization.id) || user.role === 'admin') && <ButtonHover noHover={<BsFillBuildingsFill />} hover={'Assign New Subgrantee(s)'} callback={() => setAddingChildOrg(true)} />}
                         {addingChildOrg && <AssignChild project={project} organization={organization} 
                             onSave={(data) => {fetchProject(); setCOSuccess(
                                 [`Successfuly assigned ${data.added.length} new subgrantees. 

@@ -12,6 +12,7 @@ export default function FormSection({ fields, control, header=null }) {
                     control={control} 
                     labelField={field?.labelField ?? 'label'} valueField={field?.valueField ?? 'value'}
                     includeParams={field?.includeParams ?? []} excludeParams={field?.excludeParams ?? []}
+                    tooltip={field?.tooltip ?? null} placeholder={field?.placeholder ?? null}
                 />
             ))}
         </div>
