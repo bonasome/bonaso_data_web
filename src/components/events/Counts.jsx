@@ -1,17 +1,27 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+
+import { useAuth } from "../../contexts/UserAuth";
+
 import fetchWithAuth from "../../../services/fetchWithAuth";
-import errorStyles from '../../styles/errors.module.css';
+import cleanLabels from '../../../services/cleanLabels';
+
 import Checkbox from "../reuseables/inputs/Checkbox";
-import styles from './eventDetail.module.css';
-import modalStyles from '../../styles/modals.module.css'
-import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ButtonLoading from "../reuseables/loading/ButtonLoading";
-import cleanLabels from '../../../services/cleanLabels';
-import { useAuth } from "../../contexts/UserAuth";
-import prettyDates from "../../../services/prettyDates";
 import Messages from '../reuseables/Messages';
 import FlagDetailModal from '../flags/FlagDetailModal';
+import Tooltip from '../reuseables/Tooltip';
+
+import styles from './eventDetail.module.css';
+import modalStyles from '../../styles/modals.module.css'
+import errorStyles from '../../styles/errors.module.css';
+
+import { ImPencil } from "react-icons/im";
+import { IoIosSave } from "react-icons/io";
+import { FcCancel } from "react-icons/fc";
+import ButtonHover from "../reuseables/inputs/ButtonHover";
+import { FaTrashAlt } from "react-icons/fa";
+
 function Warn( {onConfirm, onClose }) {
     return(
         <div className={modalStyles.modal}>
@@ -444,13 +454,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                                 count: e.target.value,
                                 },
                             }))} /> : <p>{counts[0]?.count}</p>}
-                            {determineFlagged(counts[0]?.flags) > 0 && (
-                                <div className={styles.tooltip}>
-                                {counts[0].flags.map((flag, i) => (
-                                    <p key={i}>{flag.reason}</p>
-                                ))}
-                                </div>
-                            )}
+                            {determineFlagged(counts[0]?.flags) > 0 && <Tooltip msg={counts[0].flags.map((flag, i) => (flag.reason)).join(', ')} />}
                         </div>
                     }
 
@@ -467,13 +471,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                                         count: e.target.value,
                                         },
                                     }))} /> : <p>{counts[index]?.count}</p>}
-                                    {flagged > 0 && (
-                                        <div className={styles.tooltip}>
-                                        {counts[index].flags.map((flag, i) => (
-                                            <p key={i}>{flag.reason}</p>
-                                        ))}
-                                        </div>
-                                    )}
+                                    {flagged > 0 && <Tooltip msg={counts[index].flags.map((flag, i) => (flag.reason)).join(', ')} />}
                             </div>)
                         })
                     }
@@ -495,13 +493,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                                             const pos = calcCellIndex(iter, index); 
                                             const flagged = determineFlagged(counts[pos]?.flags)
                                             return <td key={pos} className={`${flagged ? styles.flaggedCount : styles.OK} ${styles.tooltipWrapper}`} onClick={() => !editing && counts[pos]?.id && setDetails(counts[pos])}> 
-                                                {flagged > 0 && (
-                                                    <div className={styles.tooltip}>
-                                                    {counts[pos].flags.map((flag, i) => (
-                                                        <p key={i}>{flag.reason}</p>
-                                                    ))}
-                                                    </div>
-                                                )}
+                                                {flagged > 0 && <Tooltip msg={counts[pos].flags.map((flag, i) => (flag.reason)).join(', ')} />}
                                                 {editing ? <input id={pos} min={0} type="number" value={counts[pos]?.count} onChange={(e) => 
                                                     setCounts(prev => ({
                                                         ...prev,
@@ -517,10 +509,12 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                             </tbody>
                         </table>
                     }
-                    <div>
-                        {editing && (saving ? <ButtonLoading /> : <button onClick={() => saveCount()}>Save</button>)}
-                        <button onClick={() => editing ? handleCancel() : setEditing(true)}>{editing ? 'Cancel' : 'Edit'}</button>
-                        {editing && existing && user.role ==='admin' && !del && <button className={errorStyles.deleteButton} onClick={() => setDel(true)}>Delete</button>}
+                    <div style={{ display: 'flex', flexDirection: 'row'}}>
+                        {editing && !saving && <button onClick={() => saveCount()}><IoIosSave /> Save</button>}
+                        {saving && <ButtonLoading />}
+                        {editing && <button onClick={() => handleCancel()}><FcCancel /> Cancel</button>}
+                        {!editing && existing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover='Edit' /> }
+                        {!editing && existing && user.role ==='admin' && !del && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover='Delete Count' forDelete={true} />}
                     </div>
                 </div>
             </div>}

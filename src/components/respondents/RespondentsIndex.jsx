@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useRespondents } from '../../contexts/RespondentsContext';
+import { useAuth } from '../../contexts/UserAuth';
 
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import { initial, filterConfig } from './filterConfig';
@@ -50,6 +51,7 @@ function RespondentCard({ respondent, meta }) {
 
 export default function RespondentsIndex(){
     //context
+    const { user } = useAuth();
     const { respondents, setRespondents, setRespondentsMeta, respondentsMeta } = useRespondents();
 
     //page meta
@@ -129,7 +131,7 @@ export default function RespondentsIndex(){
                 initial={initial} config={filterConfig(respondentsMeta)} 
             />}>
                 {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-                <Link to='/respondents/new'><button> <IoPersonAddSharp style={{marginRight: '1vh'}}/> Create New Respondent</button></Link>
+                {!['client'].includes(user.role) &&  <Link to='/respondents/new'><button> <IoPersonAddSharp style={{marginRight: '1vh'}}/> Create New Respondent</button></Link>}
                 {respondents.length === 0 ? <p>No respondents match your criteria.</p> : (
                     respondents.map(p => (
                         <RespondentCard key={p.id} respondent={p} meta={respondentsMeta} />

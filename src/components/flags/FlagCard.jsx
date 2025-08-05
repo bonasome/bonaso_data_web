@@ -86,11 +86,11 @@ export default function FlagCard({ flag, onUpdate=null, index=false }){
     if(!flagDetail) return <></>
     return(
         <div className={flagDetail.resolved ? styles.cardResolved : styles.cardActive} onClick={() => setExpanded(!expanded)}>
-            {index ? <Link to={generateURL(flagDetail.content_type, flagDetail.target)} style={{ display:'flex', width:"fit-content" }}><h3>Flag on {getContentTypeLabel(flagDetail.content_type)} {flagDetail.target.display} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3></Link> :
-                <h3>Flag on {getContentTypeLabel(flagDetail.content_type)} {flagDetail.target.display} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3>}
+            {index ? <Link to={generateURL(flagDetail.model_string, flagDetail.target)} style={{ display:'flex', width:"fit-content" }}><h3>Flag on {getContentTypeLabel(flagDetail.model_string)} {flagDetail.target.display} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3></Link> :
+                <h3>Flag on {getContentTypeLabel(flagDetail.model_string)} {flagDetail.target.display} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3>}
             {expanded && <div onClick={(e) => {resolving ? e.stopPropagation() : null}}>
                 <Messages errors={errors} />
-                <h4>Data Type: {getContentTypeLabel(flag.content_type)}</h4>
+                <h4>Data Type: {getContentTypeLabel(flag.model_string)}</h4>
                 <p><i>{flagDetail.auto_flagged ? 'Automatically Flagged' : `Flagged by ${flagDetail.created_by.display_name}`} at {prettyDates(flagDetail.created_at, true)}</i></p>
                
                 <h4>Reason:</h4>

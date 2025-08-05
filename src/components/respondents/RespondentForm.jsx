@@ -2,6 +2,7 @@ import React from 'react';
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useForm,  useWatch } from "react-hook-form";
+import countries from 'world-countries';
 
 import { useRespondents } from '../../contexts/RespondentsContext';
 
@@ -187,11 +188,12 @@ export default function RespondentForm(){
             sex: existing?.sex ?? null,
             age_range: existing?.age_range ?? null,
             dob: existing?.dob ?? '',
-
+            
+            plot_no: existing?.plot_no ?? '',
             ward: existing?.ward ?? '',
             village: existing?.village ?? '',
             district: existing?.district ?? null,
-            citizenship: existing?.citizenship ?? 'Motswana',
+            citizenship: existing?.citizenship ?? 'BW',
 
             special_attribute_names: existing?.special_attribute?.map((a) => (a.name)) ?? [],
             kp_status_names: existing?.kp_status?.map((kp) => (kp.name)) ?? [],
@@ -213,48 +215,67 @@ export default function RespondentForm(){
         }
     }, [existing, reset, defaultValues]);
 
-    
+    const citOptions = countries.map(c => ({
+        label: c.name.common,
+        value: c.cca2
+    }));    
 
     const anon = useWatch({ control, name: 'is_anonymous', defaultValue: false })
 
     const isAnon = [
         { name: 'is_anonymous', label: "Does this respondent wish to remain anonymous", 
-            type: "checkbox"}
+            type: "checkbox", tooltip: `We encourage respondents to provide us with as much information as possible
+            so that we can better assist them, but we recognize that not every respondent wants to provide this information.
+            As such, you can mark a respondent as anonymous, in which case they will not have to give an personally identifying information.`
+        }
     ]
     const notAnonBasic= [
-        { name: 'id_no', label: "Omang/ID/Passport Number", type: "text", rules: { required: "Required" } },
-        {name: 'first_name', label: 'First Name (Include Middle Name if Applicable)', type: 'text',
+        { name: 'id_no', label: "Omang/ID/Passport Number (Required)", type: "text", rules: { required: "Required" } },
+        {name: 'first_name', label: 'First Name (Include Middle Name if Applicable) (Required)', type: 'text',
             rules: { required: "Required" } },
-        {name: 'last_name', label: 'Last Name', type: 'text',  rules: { required: "Required" } },  
-        {name: 'dob', label: 'Date of Birth', type: 'date',  rules: { required: "Required" } },
+        {name: 'last_name', label: 'Last Name (Required)', type: 'text',  rules: { required: "Required" } },  
+        {name: 'dob', label: 'Date of Birth (Required)', type: 'date',  rules: { required: "Required" } },
     ]
     const basics = [
-        {name: 'sex', label: 'Sex', type: 'radio', options: respondentsMeta?.sexs,  rules: { required: "Required" }}
+        {name: 'sex', label: 'Sex (Required)', type: 'radio', options: respondentsMeta?.sexs,  rules: { required: "Required" },
+            tooltip: 'Please provide the sex/gender that this person currently identifies as, or select "Non-Binary".'
+        }
     ]
     const anonBasic = [
-        {name: 'age_range', label: 'Respondent Age Range', type: 'radio',
+        {name: 'age_range', label: 'Respondent Age Range (Required)', type: 'select',
             options: respondentsMeta?.age_ranges,  rules: { required: "Required" } },
     ]
+    const address = [
+        {name: 'plot_no', label: 'Plot Number (or description)', type: 'text', 
+            tooltip: 'If you may visit this person again, you may want to record some information about where they live.'
+        },
+        {name: 'ward', label: 'Kgotlana/Ward', type: 'text'},
+    ]
     const geo = [
-        {name: 'ward', label: 'Ward', type: 'text'},
-        {name: 'village', label: 'Village/Town/City (Primary Residence)', type: 'text',  rules: { required: "Required" } },
-        {name: 'district', label: 'District', type: 'radio',  rules: { required: "Required" },
-            options: respondentsMeta?.districts},
-        {name: 'citizenship', label: 'Citizenship/Nationality', type: 'text',  rules: { required: "Required" } },
+        {name: 'village', label: 'Village/Town/City (Primary Residence) (Required)', type: 'text',  rules: { required: "Required" },
+            tooltip: 'Please provide the village, town, or city that best describes where this person currently resides.'
+        },
+        {name: 'district', label: 'District (Required)', type: 'select',  rules: { required: "Required" },
+            options: respondentsMeta?.districts, 
+            tooltip: 'Please provide the district where this person currently resides.'
+        },
+        {name: 'citizenship', label: 'Citizenship/Nationality (Required)', type: 'select',  rules: { required: "Required" },
+            options: citOptions, search: true
+        },
     ]
     const special = [
-        {name: 'kp_status_names', label: 'Key Population Status', type: 'multiselect',  
+        {name: 'kp_status_names', label: 'Key Population Status (Select all that apply)', type: 'multiselect',  
             options: respondentsMeta?.kp_types},
-        {name: 'disability_status_names', label: 'Disability Status', type: 'multiselect',  
+        {name: 'disability_status_names', label: 'Disability Status (Select all that apply)', type: 'multiselect',  
             options: respondentsMeta?.disability_types},
-        {name: 'special_attribute_names', label: 'Other Special Status', type: 'multiselect',  
+        {name: 'special_attribute_names', label: 'Other Special Status (Select all that apply)', type: 'multiselect',  
             options: respondentsMeta?.special_attributes?.filter(a => (!['PLWHIV', 'KP', 'PWD'].includes(a.value)))},
     ]
     const contact = [
         {name: 'email', label: 'Email', type: 'email',  rules: {pattern: {value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-            message: 'Please enter a valid email.'
-        }}},
-        {name: 'phone_number', label: 'Phone Number', type: 'text' },
+            message: 'Please enter a valid email.',
+        }}, tooltip: 'This information is not used by the system, but you may want to record it for your own records.'},
+        {name: 'phone_number', label: 'Phone Number', type: 'text', tooltip: 'This information is not used by the system, but you may want to record it for your own records.' },
     ]
 
 
@@ -265,14 +286,15 @@ export default function RespondentForm(){
             <h1>{id ? `Editing ${existing?.display_name}` : 'New Respondent' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={isAnon} control={control} />
-                {anon && <FormSection fields={anonBasic} control={control} />}
-                {!anon && <FormSection fields={notAnonBasic} control={control} />}
-                <FormSection fields={basics} control={control} />
-                <FormSection fields={geo} control={control} />
-                <FormSection fields={special} control={control} />
-                {!anon && <FormSection fields={contact} control={control} /> }
-
+                <FormSection fields={isAnon} control={control} header={'Respondent Anonymity'} />
+                {anon && <FormSection fields={anonBasic} control={control} header='Basic Information' />}
+                {!anon && <FormSection fields={notAnonBasic} control={control} header='Basic Information' />}
+                <FormSection fields={basics} control={control} header='Sex' />
+                {!anon && <FormSection fields={address} control={control} header='Address'/>}
+                <FormSection fields={geo} control={control} header='Geographic Information'/>
+                <FormSection fields={special} control={control} header='Additinal Information'/>
+                {!anon && <FormSection fields={contact} control={control} header='Contact Information'/> }
+                <p><i>You can record HIV Status and Pregnancy information on the respondent detail page after submitting.</i></p>
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     {!id && <button type="submit" value='create_another'><BsDatabaseFillAdd /> Save and Create Another</button>}

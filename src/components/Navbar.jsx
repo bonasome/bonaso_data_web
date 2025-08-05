@@ -1,9 +1,13 @@
-import styles from './navbar.module.css';
-import bonasoWhite from '../assets/bonasoWhite.png';
-import { useAuth } from '../contexts/UserAuth';
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+
+import { useAuth } from '../contexts/UserAuth';
+
+import styles from './navbar.module.css';
+import bonasoWhite from '../assets/bonasoWhite.png';
+
 import { TfiMenu } from "react-icons/tfi";
+import { IoMdClose } from "react-icons/io";
 
 function useWindowWidth() {
     const [width, setWidth] = useState(window.innerWidth);
@@ -168,7 +172,8 @@ export default function Navbar() {
                 {width >= 1100 ?
                     <ExpandedMenu /> :
                 <div className={styles.slimMenu} ref={containerRef}>
-                    <TfiMenu className={styles.hamburger} onClick={() => setMenuExpanded(!menuExpanded)}/>
+                    {menuExpanded ? <IoMdClose className={styles.hamburger} onClick={() => setMenuExpanded(!menuExpanded)}/> :
+                        <TfiMenu className={styles.hamburger} onClick={() => setMenuExpanded(!menuExpanded)}/>}
                     {menuExpanded && <ThinMenu />}
                 </div>
                 }

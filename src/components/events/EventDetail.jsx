@@ -23,7 +23,7 @@ import styles from './eventDetail.module.css'
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 import { IoIosStar, IoIosStarOutline, IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
-
+import { FaSearch } from "react-icons/fa";
 export default function EventDetail(){
     const navigate = useNavigate();
 
@@ -312,7 +312,10 @@ export default function EventDetail(){
                     breakdownOptions={breakdowns} event={event} task={event.tasks.find(t => t.id == newTask)} />}
 
                 {eventCounts && Object.keys(eventCounts).length > 0 && <div> 
-                    <input type='text' value={countsSearch} onChange={(e) => setCountsSearch(e.target.value)} />
+                    <div style={{display: 'flex', flexDirection: 'row'}}>
+                    <FaSearch style={{marginLeft: 15, marginRight: 10, marginTop: 'auto', marginBottom: 'auto'}} />
+                    <input type='text' value={countsSearch} onChange={(e) => setCountsSearch(e.target.value)} placeholder='Search for counts by task...' />
+                    </div>
                     {Object.keys(eventCounts)?.length > 0 && Object.keys(eventCounts).map((c) => {
                         const taskId = parseInt(c);
                         const task = event.tasks.find(t => t.id === taskId);

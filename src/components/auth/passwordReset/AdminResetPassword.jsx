@@ -31,7 +31,7 @@ export default function AdminResetPassword({ id }){
         }
         try{
             console.log('resetting password...')
-            response = await fetchWithAuth(`/api/users/admin-reset-password/`, {
+            const response = await fetchWithAuth(`/api/users/admin-reset-password/`, {
                 method: 'POST',
                 body: JSON.stringify({
                     user_id: id,
@@ -44,8 +44,13 @@ export default function AdminResetPassword({ id }){
             if(response.ok){
                 setSubmitted(true);
             }
+            else{
+                const returnData = await response.json();
+                console.log(returnData)
+            }
         }
         catch(err){
+            console.log(err)
             setErrors(['Something went wrong. Please try again later.'])
         }
         finally{
@@ -58,20 +63,20 @@ export default function AdminResetPassword({ id }){
             <div>
                 <h2>Enter your new password</h2>
             </div>
-            <div>
+            {!submitted &&<div>
                 <label htmlFor="password">New Password</label>
                 <input id='password' type='password' value={password} onChange={(e) => setPassword(e.target.value)}/>
 
                 <label htmlFor="password">Confirm Password</label>
-                <input id='confirm_password' type='password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
-                {submitted &&
+                <input id='confirm_password' type='password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>  
+                {!submitted && !saving && <button onClick={() => handleSubmit()}>Reset Password</button>}
+                {saving && <ButtonLoading />}
+            </div>}
+            {submitted &&
                     <div className={errorStyles.success}>
                         <p>Password Reset!</p>
                     </div>
-                }   
-                {!submitted && !saving && <button onClick={() => handleSubmit()}>Reset Password</button>}
-                {saving && <ButtonLoading />}
-            </div>
+                } 
         </div>
     )
 }

@@ -173,6 +173,7 @@ export default function UserForm(){
 
             platform: existing?.platform ?? null,
             other_platform: existing?.other_platform ?? '',
+            link_to_post: existing?.link_to_post ?? '',
         }
     }, [existing]);
 
@@ -189,21 +190,38 @@ export default function UserForm(){
     const images = [FaFacebookSquare, FaInstagramSquare, FaTiktok, FaTwitter, FaYoutube, FaQuestion];
 
     const basics = [
-        { name: 'name', label: 'Post Name', type: "text", rules: { required: "Required" }},
-        { name: 'description', label: "Post Description", type: "textarea",},
-        { name: 'published_at', label: "Post Made On", type: "date", rules: { required: "Required" }},
-
-        { name: 'task_ids', label: "Post Associated with Task(s)", type: "multimodel", IndexComponent: Tasks,
-            includeParams: [{field: 'indicator_type', value: 'social'}]
+        { name: 'name', label: 'Post Name (Required)', type: "text", rules: { required: "Required" },
+            tooltip: 'A quick name to help you remember what this post is about.',
+            placeholder: 'ex: NCD Facebook Campaign post 5...'
         },
-        {name: 'platform', label: 'Post Made on Platform', type: 'image',
-            options: socialPostsMeta?.platforms, images: images,  rules: { required: "Required" } },
+
+        { name: 'description', label: "Post Description", type: "textarea", 
+            placeholder: 'Any information tat you may want to rembmber about this post...'
+        },
+
+        { name: 'published_at', label: "Post Made On (Required)", type: "date", rules: { required: "Required" },
+            tooltip: 'What date did you make this post?'
+        },
+        
+        {name: 'link_to_post', label: 'Link to Post', type: 'text', rules: {pattern: {value: /^(https?:\/\/)?([\w.-]+)+(:\d+)?(\/[\w./#-]*)?$/,
+                message: 'Please enter a valid url.',
+            }}, tooltip: `You can provide a url to this post for your records.`
+        },
+    ]
+    const task = [
+        { name: 'task_ids', label: "Post Associated with Task(s) (Required)", type: "multimodel", IndexComponent: Tasks,
+            includeParams: [{field: 'indicator_type', value: 'social'}], tooltip: `What tasks does this post contribute towards?`
+        }
+    ]
+    const platformInfo = [
+        {name: 'platform', label: 'Post Made on Platform (Required)', type: 'image',
+            options: socialPostsMeta?.platforms, images: images,  rules: { required: "Required" },
+            tooltip: `What platform was this post made on? You may only select one per post.`
+        },
     ]
     const other = [
-        { name: 'other_platform', label: 'Please Specify the Platform', type: "text", rules: { required: "Required" }},
+        { name: 'other_platform', label: 'Please Specify the Platform (Required)', type: "text", rules: { required: "Required" }},
     ]
-
-    
 
     if(loading || !socialPostsMeta?.platforms) return <Loading />
     return(
@@ -212,8 +230,10 @@ export default function UserForm(){
             <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={basics} control={control} />
-                {platform==='other' && <FormSection fields={other} control={control} />}
+                <FormSection fields={basics} control={control} header='Basic Information'/>
+                <FormSection fields={task} control={control} header='Related to Task(s)' />
+                <FormSection fields={platformInfo} control={control} header='Made on Platform'/>
+                {platform==='other' && <FormSection fields={other} control={control} header='Specify Platform' />}
 
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>

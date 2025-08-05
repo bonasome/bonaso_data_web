@@ -126,7 +126,11 @@ function Router() {
                 </RedirectIfNotAuthenticated>
             }
         >
-            <Route index element={<ProjectsIndex />}/>
+            <Route index element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
+                    <ProjectsIndex />
+                </RedirectIfNoPerm>
+            }/>
             <Route path=':id' element = {
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <ProjectDetail />
@@ -222,7 +226,7 @@ function Router() {
             }
         >
             <Route index element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <FunWithFlags />
                 </RedirectIfNoPerm>
                 }/>

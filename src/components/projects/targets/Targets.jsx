@@ -73,7 +73,7 @@ export function TargetCard({ target, project, organization, onUpdate, onCancel }
 
     //check if the user should have perms to create/edit targets for the org
     const hasPerm = useMemo(() => {
-        if(user.organization_id == organization?.parent?.id || user.role == 'admin') return true
+        if((organization?.parent?.id && user.organization_id == organization.parent.id) || user.role == 'admin') return true
         return false
     }, [organization, user]);
 
@@ -175,9 +175,9 @@ export default function Targets({ project, organization}) {
         }
         getTargets();
     }
+    //check if the user should have perms to create/edit targets for the org
     const hasPerm = useMemo(() => {
-        if(!user || !organization) return false;
-        if(user.organization_id == organization?.parent?.id || user.role == 'admin') return true
+        if((organization?.parent?.id && user.organization_id == organization.parent.id) || user.role == 'admin') return true
         return false
     }, [organization, user]);
     

@@ -16,7 +16,7 @@ const RedirectIfNotAuthenticated = ({ children }) => {
     if (loggedIn && user?.role === 'view_only' && !allowedForViewOnly.includes(location.pathname)) {
         return <Navigate to="/viewer" replace />;
     }
-    if (loggedIn && !user?.organization_id && !allowedForViewOnly.includes(location.pathname)) {
+    if (loggedIn && !user?.organization_id && !user?.client_organization_id && !allowedForViewOnly.includes(location.pathname)) {
         return <Navigate to="/viewer" replace />;
     }
 

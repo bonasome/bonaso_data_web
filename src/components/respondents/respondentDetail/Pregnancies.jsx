@@ -1,18 +1,26 @@
 import { useState, useEffect } from 'react';
+
+import { useAuth } from '../../../contexts/UserAuth';
+
 import fetchWithAuth from '../../../../services/fetchWithAuth';
-import errorStyles from '../../../styles/errors.module.css';
+import prettyDates from '../../../../services/prettyDates';
+
 import ButtonHover from '../../reuseables/inputs/ButtonHover'
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+import UpdateRecord from '../../reuseables/meta/UpdateRecord';
+import Messages from '../../reuseables/Messages';
+
+
+import styles from './row.module.css';
+
+import { MdLibraryAdd } from "react-icons/md";
+import { FaTrashAlt } from "react-icons/fa";
 import { ImPencil } from "react-icons/im";
 import { IoIosSave } from "react-icons/io";
 import { FcCancel } from "react-icons/fc";
-import ButtonLoading from '../../reuseables/loading/ButtonLoading';
-import UpdateRecord from '../../reuseables/meta/UpdateRecord';
-import { MdLibraryAdd } from "react-icons/md";
-import { FaTrashAlt } from "react-icons/fa";
-import prettyDates from '../../../../services/prettyDates';
-import styles from './row.module.css';
 
 function PregnancyRow({ respondent, onError, existing=null, onUpdate, onCancel }){
+    const { user } = useAuth();
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState([]);
     const [termBegan, setTermBegan] = useState(existing?.term_began || '');
@@ -43,7 +51,6 @@ function PregnancyRow({ respondent, onError, existing=null, onUpdate, onCancel }
     const send = async(data) => {
         try{
             setSaving(true);
-            console.log(data)
             const url = `/api/record/respondents/${respondent.id}/`; 
             const response = await fetchWithAuth(url, {
                 method: 'PATCH',
@@ -99,8 +106,8 @@ function PregnancyRow({ respondent, onError, existing=null, onUpdate, onCancel }
                     </div>
                 </div>}
                 <div style ={{ marginLeft: 'auto', display: 'flex', flexDirection: 'row' }}>
-                    {existing && !editing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} /> }
-                    {existing && !editing && <ButtonHover callback={() => handleDelete()} noHover={<FaTrashAlt />} hover={'Delete Pregnancy'} forDelete={true}/>}
+                    {existing && !['client'].includes(user.role) && !editing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} /> }
+                    {existing && !['client'].includes(user.role) && !editing && <ButtonHover callback={() => handleDelete()} noHover={<FaTrashAlt />} hover={'Delete Pregnancy'} forDelete={true}/>}
                 </div>
             </div>
             {existing &&  <UpdateRecord created_by={existing.created_by} updated_by={existing.updated_by}
@@ -109,9 +116,11 @@ function PregnancyRow({ respondent, onError, existing=null, onUpdate, onCancel }
     )
 }
 export default function Pregnancies({ respondent, onUpdate }){
+    const { user } = useAuth();
     const [errors, setErrors] = useState([]);
     const [pregnancies, setPregnancies] = useState(respondent?.pregnancies || [])
-    const [adding, setAdding] = useState(false)
+    const [adding, setAdding] = useState(false);
+
     const update = async () => {
         try {
             console.log('fetching respondent details...');
@@ -132,10 +141,11 @@ export default function Pregnancies({ respondent, onUpdate }){
     }
     return(
         <div>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <Messages errors={errors} />
             {adding && <PregnancyRow respondent={respondent} onError={(e) => setErrors(e)} onUpdate={()=>update()} onCancel={() => {setAdding(false); setErrors([])}}/>}
             {pregnancies.length > 0 && pregnancies.map((p) => (<PregnancyRow respondent={respondent} onError={(e) => setErrors(e)} existing={p} onUpdate={()=>update()} />))}
-            {!adding && <ButtonHover callback={() => setAdding(true)} noHover={<MdLibraryAdd />} hover={'Record New Pregnancy'} />}
+            {pregnancies.length === 0 && <p>No recorded pregnancies.</p>}
+            {!adding && !['client'].includes(user.role) && <ButtonHover callback={() => setAdding(true)} noHover={<MdLibraryAdd />} hover={'Record New Pregnancy'} />}
         </div>
     )
 }

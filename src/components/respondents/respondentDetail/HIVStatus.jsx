@@ -1,26 +1,31 @@
 import { useState, useEffect } from 'react';
+
+import { useAuth } from '../../../contexts/UserAuth';
+
 import fetchWithAuth from '../../../../services/fetchWithAuth';
-import errorStyles from '../../../styles/errors.module.css';
+import prettyDates from '../../../../services/prettyDates';
+
+
 import ButtonHover from '../../reuseables/inputs/ButtonHover'
 import Checkbox from '../../reuseables/inputs/Checkbox';
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+import UpdateRecord from '../../reuseables/meta/UpdateRecord';
+import Messages from '../../reuseables/Messages';
+
+import styles from './row.module.css';
+
 import { ImPencil } from "react-icons/im";
 import { IoIosSave } from "react-icons/io";
 import { FcCancel } from "react-icons/fc";
-import ButtonLoading from '../../reuseables/loading/ButtonLoading';
-import UpdateRecord from '../../reuseables/meta/UpdateRecord';
-import prettyDates from '../../../../services/prettyDates';
-import styles from './row.module.css';
-
 export default function HIVStatus({ respondent, onUpdate }){
+    const { user } = useAuth();
     const [saving, setSaving] = useState(false);
     const [editing, setEditing] = useState(false);
     const [pos, setPos] = useState(respondent?.hiv_status?.hiv_positive || false);
     const [date, setDate] = useState(respondent?.hiv_status?.date_positive || '')
-    const [success, setSuccess] = useState('');
     const [errors, setErrors] = useState([]);
     
     const handleSubmit = async() => {
-        setSuccess('')
         setErrors([])
         if((!date || date === '') && pos){
             setErrors(['Please enter a date (select today if you are unsure).'])
@@ -41,7 +46,6 @@ export default function HIVStatus({ respondent, onUpdate }){
             const returnData = await response.json();
             if(response.ok){
                 onUpdate(data)
-                setSuccess(['Changes Saved!'])
                 setEditing(false);
             }
             else{
@@ -74,15 +78,14 @@ export default function HIVStatus({ respondent, onUpdate }){
             {!editing && <div style={{ display: 'flex', flexDirection: 'row' }}>
                 <h3>HIV {pos ? `Positive since ${prettyDates(date)}`: 'Negative'}</h3>
                 <div style={{marginLeft: 'auto'}}>
-                <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit HIV Status'} />
+                {!['client'].includes(user.role) && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit HIV Status'} />}
                 </div>
             </div>}
             {editing && <div>
-                {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
-                {success !== '' && <div className={errorStyles.success}>{success}</div> }
+                <Messages errors={errors} />
                 <Checkbox label='Is this person HIV Positive?' name='hiv_positive' onChange={(c) => setPos(c)} value={pos}/>
                 {pos && <div>
-                    <label htmlFor='date_positive'>When did this person become HIV Positve? (leave blank if unsure).</label>
+                    <label htmlFor='date_positive'>When did this person become HIV Positve? (enter today if unsure).</label>
                     <input type='date' id='date_positive' name='date_positive' value={date} onChange={(e)=> setDate(e.target.value)}/>
                 </div>}
                 <div style ={{ display: 'flex', flexDirection: 'row'}}>

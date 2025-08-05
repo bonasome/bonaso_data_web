@@ -12,10 +12,10 @@ export const getContentTypeString = (id) => {
 };
 
 export const getContentTypeLabel = (id) => {
-    return Object.values(contentTypeMap).find(ct => ct.id === id)?.label ?? `Unknown (${id})`;
+    return contentTypeMap[id]?.label ?? `Unknown (${id})`;
 };
 export const getContentTypeURL = (id) => {
-    return Object.values(contentTypeMap).find(ct => ct.id === id)?.url?? ``;
+    return contentTypeMap[id]?.url?? ``;
 };
 
 export const generateURL = (id, target) => {

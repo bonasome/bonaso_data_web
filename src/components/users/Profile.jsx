@@ -139,8 +139,8 @@ export default function Profile(){
         const match = profilesMeta[field]?.find(range => range.value === value);
         return match ? match.label : null;
     };
-
-    if(loading || !profile?.organization) return <Loading />
+    
+    if(loading || !profile?.role) return <Loading />
 
     return(
         <div className={styles.container}>
@@ -170,9 +170,12 @@ export default function Profile(){
                         <p>{profile.username}</p>
 
                         <h3>Organization</h3>
-                        <Link to={`/organizations/${profile?.organization?.id}`}>
-                            <p>{profile.organization.name}</p>
-                        </Link>
+                        {profile.role == 'client' ? <Link to={`/clients/${profile?.client_organization?.id}`}>
+                                <p>{profile.client_organization.name}</p>
+                            </Link> :
+                            <Link to={`/organizations/${profile?.organization?.id}`}>
+                                <p>{profile.organization.name}</p>
+                            </Link>}
 
                         {profile.email && <div> 
                             <h3>Email</h3>
@@ -182,10 +185,6 @@ export default function Profile(){
                         <h3>Role</h3> 
                         <p>{getLabelFromValue('roles', profile.role)}</p>
 
-                        {profile?.role=='client' && <div>
-                            <h3>Client</h3>
-                            <p>{profile?.client_organization.name}</p>
-                        </div>}
                         {changePass && <AdminResetPassword id={profile.id} />}
                         <h3>Joined</h3>
                         <p>{prettyDates(profile.date_joined)}</p>

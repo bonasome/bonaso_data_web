@@ -117,7 +117,7 @@ export default function UserForm(){
             data.client_id = null
         }
         data.organization_id = data?.organization_id?.id ?? null;
-        data.client_id = data?.client?.id ?? null
+        data.client_id = data?.client_id?.id ?? null
         if(sErrors.length > 0){
             setSubmissionErrors(sErrors);
             return;

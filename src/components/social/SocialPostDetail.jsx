@@ -15,9 +15,9 @@ import FlagModal from '../flags/FlagModal';
 import FlagCard from '../flags/FlagCard';
 import ReturnLink from '../reuseables/ReturnLink';
 import UpdateRecord from '../reuseables/meta/UpdateRecord';
+import Messages from '../reuseables/Messages';
 
 import styles from './postDetail.module.css';
-import errorStyles from '../../styles/errors.module.css';
 
 import { ImPencil } from 'react-icons/im';
 import { FcCancel } from 'react-icons/fc';
@@ -211,6 +211,7 @@ export default function SocialPostDetail(){
         let comments = isNaN(parseInt(formData.comments)) ? 0 : parseInt(formData.comments)
         return likes + views + comments;
     }
+    
     if(loading) return <Loading />
     return(
         <div>
@@ -223,16 +224,19 @@ export default function SocialPostDetail(){
             <div className={styles.segment}>
                 <ReturnLink url={'/social'} display={'Return to social overview'} />
                 <h1>{post.name}</h1>
-                {errors.length != 0 &&
-                <div className={errorStyles.errors} ref={alertRef}>
-                    <ul>{errors.map((msg)=>
-                        <li key={msg}>{msg}</li>)}
-                    </ul>
-                </div>}
+                <Messages errors={errors} ref={alertRef} />
                 
                 <div>
                     <p>On Platform: {post.platform==='other' ? post.other_platform : cleanLabels(post.platform)}</p>
                     <p>Published: {post.published_at ? prettyDates(post.published_at) : prettyDates(post.created_at)} </p>
+                    <p>Linked to Tasks: </p>
+                    <ul>
+                        {post.tasks.map((t) => (<li key={t.id}> {t.display_name}</li>))}
+                    </ul>
+                    <h4>Link to Post:</h4>
+                    {!post.link_to_post && <p>No link on record.</p>}
+                    {post.link_to_post && <Messages warnings={['This link will take you to an external site. Please review it first.']} />}
+                    {post.link_to_post && <a href={post.link_to_post}>See post here!</a>}
                     <UpdateRecord created_by={post.created_by} created_at={post.created_at} updated_by={post.updated_by}
                         updated_at={post.updated_at} 
                     />

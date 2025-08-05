@@ -107,7 +107,7 @@ export default function SocialPostsIndex({ callback=null, callbackText='Add Post
     console.log(socialPostsMeta)
     //const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
 
-    if(loading || !socialPosts) return callback ? <ComponentLoading /> : <Loading />
+    if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Posts' : 'My Posts'}</h1> 
@@ -124,7 +124,7 @@ export default function SocialPostsIndex({ callback=null, callbackText='Add Post
                     <Link to='/social/new'><button><MdOutlinePostAdd /> Record a New Post</button></Link>} 
                 {socialPosts?.length === 0 ? 
                     <p>No posts match your criteria.</p> :
-                    socialPosts.map(post => (
+                    socialPosts?.map(post => (
                         <PostCard key={post.id} post={post} callback={callback ? (indicator)=> callback(indicator) : null} callbackText={callbackText} />)
                     )
                 }

@@ -190,25 +190,48 @@ export default function UserForm(){
     const start = watch("start");
 
     const basics = [
-        { name: 'name', label: 'Event Name', type: "text", rules: { required: "Required" }},
-        { name: 'description', label: "Event Description", type: "textarea",},
-        { name: 'start', label: "Event Start", type: "date", rules: { required: "Required" }},
-        { name: 'end', label: "Event End", type: "date", rules: { required: "Required" ,
+        { name: 'name', label: 'Event Name (Required)', type: "text", rules: { required: "Required" },
+            placeholder: 'ex. World AIDS Day, Counselling Session, Blood Drive...'
+        },
+        { name: 'description', label: "Event Description", type: "textarea",
+            placeholder: 'Any notes about the purpose or function of this event...'
+        },
+    ]
+    const info = [
+        { name: 'start', label: "Event Start (Required)", type: "date", rules: { required: "Required" }},
+        { name: 'end', label: "Event End (Required)", type: "date", rules: { required: "Required" ,
             validate: value => !start || value >= start || "This event cannot end before it starts."
         }},
-        { name: 'location', label: "Event Location", type: "text", rules: { required: "Required" }},
-        { name: 'host_id', label: "Hosted by Organization", type: "model", IndexComponent: OrganizationsIndex,
-            rules: { required: "Required" }},
-
-        {name: 'status', label: 'Event Status', type: 'radio',
-            options: eventsMeta?.statuses,  rules: { required: "Required" } },
-        {name: 'event_type', label: 'Event Type', type: 'radio',
-            options: eventsMeta?.event_types,  rules: { required: "Required" } },
-        
+        { name: 'location', label: "Event Location (Required)", type: "text", rules: { required: "Required" },
+            tooltip: `Where did this event take place? Please be as specific as possible.`
+        },
+        { name: 'host_id', label: "Hosted by Organization (Required)", type: "model", IndexComponent: OrganizationsIndex,
+            rules: { required: "Required" }, tooltip: `Which organization was in charge of this event? Put your own
+            organization if you are not sure, even if you did not plan the event.`
+        },
+        {name: 'status', label: 'Event Status (Required)', type: 'radio',
+            options: eventsMeta?.statuses,  rules: { required: "Required" }, 
+            tooltip: `What is the current status of this event? Has it already happened? Is it ongoing?
+            NOTE: For this event to contribute towards tasks that measure the number of events held, it must be 
+            marked as complete!`
+        },
+        {name: 'event_type', label: 'Event Type (Required)', type: 'radio',
+            options: eventsMeta?.event_types,  rules: { required: "Required" }, 
+            tooltip: 'What kind of event was this? This is just for your own record.'
+        },
+        ]
+    const participants = [
         {name: 'organization_ids', label: 'Participating Organizations', type: 'multimodel', IndexComponent: OrganizationsIndex,
-            labelField: 'name'
+            labelField: 'name', tooltip: `Did any of your subgrantees attend this event? You can also include any 
+            subgrantees you may have trained. NOTE: If you assign a participant and also assign a task for this organization,
+            they will be allowed to edit counts for that task.`
          },
-        {name: 'task_ids', label: 'Linked to Tasks', type: 'multimodel', IndexComponent: Tasks },
+    ]
+    const tasks = [
+        {name: 'task_ids', label: 'Linked to Tasks (Required)', type: 'multimodel', IndexComponent: Tasks,
+            excludeParams: [{field: 'indicator_type', value: 'social'}],
+            tooltip: `What tasks does this event contribute to?`
+         },
     ]
 
     if(loading || !eventsMeta?.statuses) return <Loading />
@@ -218,7 +241,10 @@ export default function UserForm(){
             <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={basics} control={control} />
+                <FormSection fields={basics} control={control} header='Basic Information'/>
+                <FormSection fields={info} control={control} header='Event Information' />
+                <FormSection fields={participants} control={control} header='Participants' />
+                <FormSection fields={tasks} control={control} header='Associated with Task' />
 
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>

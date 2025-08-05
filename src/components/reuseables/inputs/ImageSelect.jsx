@@ -1,5 +1,8 @@
 import { useState } from 'react';
+
 import Messages from '../Messages';
+import Tooltip from '../Tooltip';
+
 import styles from './imgSelect.module.css';
 
 function ImgCard({ value, label, Img, active, callback }) {
@@ -19,7 +22,7 @@ function ImgCard({ value, label, Img, active, callback }) {
 }
 
 //select from a list of options and a corresponding array of image/icon components
-export default function ImageSelect({ label, value = null, onChange, options, images, multiple = false, errors, valueField='value', labelField='label' }) {
+export default function ImageSelect({ label, value = null, onChange, options, images, multiple = false, errors, tooltip=null, valueField='value', labelField='label' }) {
     const handleChange = (val) => {
         if (multiple) {
             const exists = value?.includes(val);
@@ -32,8 +35,11 @@ export default function ImageSelect({ label, value = null, onChange, options, im
 
     return (
         <div>
-            <fieldset>
-                <legend>{label}</legend>
+            <fieldset style={{ border: 'none' }}>
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <legend>{label}</legend>
+                    {tooltip && <Tooltip msg={tooltip} />}
+                </div>
                 <Messages errors={errors} />
                 <div className={styles.container}>
                     {options.map((o, index) => {

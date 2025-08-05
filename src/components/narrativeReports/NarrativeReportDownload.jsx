@@ -109,9 +109,9 @@ export default function NarrativeReportDownload({ organization, project }) {
                 <ul>{errors.map((msg) => <li key={msg}>{msg}</li>)}</ul>
             </div>}
 
-            <Link to={`/projects/${project.id}/organizations/${organization.id}/upload`} >
+            {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/organizations/${organization.id}/upload`} >
                 <ButtonHover noHover={<FaCloudUploadAlt />} hover={'Upload New Document'} />
-            </Link>
+            </Link>}
 
             {files.length > 0 ? files.map((report) => (
                 <NarrativeReportCard report={report} />
