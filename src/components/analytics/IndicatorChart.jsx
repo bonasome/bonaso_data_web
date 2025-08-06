@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
 
+import cleanLabels from '../../../services/cleanLabels';
 import getColor from '../../../services/getColor';
 import splitToChart from './splitToChart';
 import theme from '../../../theme/theme';
@@ -82,9 +83,9 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
     const pieData = useMemo(() => {
         if(!dataArray ||dataArray.length ===0 || chartData.chart.chart_type !== 'pie') return;
         return ['', 'subcategory'].includes(chartData.chart.legend) ? Object.entries(dataArray[0]).filter(([key]) => key !== 'period').map(([key, value]) => ({ name: key, value })) :
-            Object.entries(dataArray[0]).filter(([key]) => key !== 'period').map(([key, value]) => ({ name: options[chartData.chart.legend]?.[key] ?? key, value }))
+            Object.entries(dataArray[0]).filter(([key]) => key !== 'period').map(([key, value]) => ({ name: options[chartData.chart.legend]?.[key] ?? cleanLabels(key), value }))
     }, [dataArray]);
-
+    console.log(chartData)
     //custom toolip to show stacl/legend
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload?.length) {
@@ -114,8 +115,8 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
                 <h2>{chartData.chart.indicators.map(ind => (ind.display_name)).join(', ')}</h2>
                 
                 <Messages errors={errors} />
-                
-                {chartData.chart.chart_type ==='bar' && <ResponsiveContainer width="100%" height={300}>
+                {dataArray.length === 0 && <p><i>No data yet.</i></p>}
+                {dataArray.length > 0 && chartData.chart.chart_type ==='bar' && <ResponsiveContainer width="100%" height={300}>
                     <BarChart width={300} height={300} data={dataArray}>
                         <XAxis dataKey="period" tick={{fill: '#fff'}} />
                         <YAxis tick={{fill: '#fff'}}/>
@@ -128,7 +129,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
                     </BarChart>
                 </ResponsiveContainer>}   
     
-                {chartData.chart.chart_type === 'line' && <ResponsiveContainer width="100%" height={300}>
+                {dataArray.length > 0 && chartData.chart.chart_type === 'line' && <ResponsiveContainer width="100%" height={300}>
                     <LineChart width={600} height={300} data={dataArray}>
                         <XAxis dataKey="period" tick={{fill: '#fff'}}/>
                         <YAxis tick={{fill: '#fff'}}/>
@@ -141,7 +142,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
                 </ResponsiveContainer>}
                 
                 {chartData.chart.chart_type === 'pie' && !chartData.chart.legend &&  <p><i>Select a legend item to view pie charts.</i></p> }
-                {chartData.chart.chart_type === 'pie' && pieData  && (<ResponsiveContainer width="100%" height={300}>
+                {dataArray.length > 0 && chartData.chart.chart_type === 'pie' && pieData  && (<ResponsiveContainer width="100%" height={300}>
                     <PieChart width={400} height={300}>
                         <Pie
                             data={pieData}
@@ -162,7 +163,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
                 </ResponsiveContainer>)}
             </div>}
 
-            {chartData.chart.tabular && <DataTable data={dataArray} 
+            {dataArray.length > 0 && chartData.chart.tabular && <DataTable data={dataArray} 
                 breakdown1={chartData.chart.use_target ? 'Target' : (chartData.chart.indicators.length > 1 ? 
                     'indicator' : chartData.chart.legend)} 
                 breakdown2={chartData.chart.stack} map={options}

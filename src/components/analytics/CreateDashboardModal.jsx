@@ -7,6 +7,7 @@ import FormSection from '../reuseables/forms/FormSection';
 import Messages from '../reuseables/Messages';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import ProjectsIndex from '../projects/ProjectsIndex';
+import OrganizationsIndex from '../organizations/OrganizationsIndex';
 
 import modalStyles from '../../styles/modals.module.css';
 
@@ -20,6 +21,8 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
 
     //handle form submission
     const onSubmit = async (data) => {
+        if(data.project_id) data.project_id = data?.project_id?.id
+        if(data.organization_id) data.organization_id = data?.organization_id?.id
         try{
             console.log('submitting dashboard...', data)
             setSaving(true);
@@ -64,7 +67,9 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
         return {
             name: existing?.name ?? '',
             description: existing?.description ?? '',
-            project: existing?.project ?? null,
+            project_id: existing?.project ?? null,
+            organization_id: existing?.organization ?? null,
+            cascade_organization: existing?.cascade_organization ?? false,
         }
     }, [existing]);
         
@@ -75,14 +80,22 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
-    
-    
+    console.log(existing)
+    const projectSel =  watch('project_id');
+    const orgSel =  watch('organization_id');
+    console.log(projectSel)
     const basics = [
         { name: 'name', label: 'Name (Required)', type: "text", rules: { required: "Required" },
             tooltip: 'Subject will appear on the unexpanded card. Let people know what this is about!'
         },
         { name: 'description', label: "Description", type: "textarea"},
-        { name: 'project', label: 'Scope to Project', type: 'model', IndexComponent: ProjectsIndex, labelField: 'name' }
+        { name: 'project_id', label: 'Scope to Project', type: 'model', IndexComponent: ProjectsIndex, labelField: 'name' },
+        { name: 'organization_id', label: 'Scope to Organization', type: 'model', IndexComponent: OrganizationsIndex, 
+            labelField: 'name', includeParams: projectSel ? [{field: 'project', value: projectSel?.id ?? []}] : [] 
+        }
+    ]
+    const org = [
+        { name: 'cascade_organization', label: 'Include Subgrantees?', type: 'checkbox', }
     ]
 
     return(
@@ -91,6 +104,7 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
             <Messages errors={submissionErrors} />
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormSection fields={basics} control={control} />
+                {orgSel && <FormSection fields={org} control={control} />}
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     <button type="button" onClick={() => onClose()}>

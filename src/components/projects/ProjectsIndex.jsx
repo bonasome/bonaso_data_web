@@ -54,7 +54,7 @@ function ProjectCard({ project, callback=null, callbackText }) {
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             <Link to={`/projects/${project.id}`} style={{display:'flex', width:"fit-content"}}><h2>{project.name}</h2></Link>
-            {callback && <button onClick={() => callback(project)}>{callbackText}</button>}
+            {callback && <button type="button" onClick={() => callback(project)}>{callbackText}</button>}
             {expanded && loading && <ComponentLoading />}
             {expanded && active && 
                 <div>

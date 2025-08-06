@@ -177,10 +177,10 @@ export default function UpdateBox(){
             <Messages errors={errors} />
 
             {msgPane == 'announcements' && <div className={styles.msgPane}>
+                {user.role == 'admin' && <ButtonHover callback={() => setAdding(true)} noHover={<GrAnnounce />} hover={'New Announcement'} />}
                 {announcements.length == 0 && <p className={styles.placeholder}>No announcements yet.</p>}
                 {announcements.map((a) => (<AnnouncementCard key={a.id} announcement={a} onUpdate={getAnnouncements}/>))}
 
-                {user.role == 'admin' && <ButtonHover callback={() => setAdding(true)} noHover={<GrAnnounce />} hover={'New Announcement'} />}
                 {adding && <ComposeAnnouncementModal onClose={() => setAdding(false)} onUpdate={handleAdd} /> }
             
             </div>}

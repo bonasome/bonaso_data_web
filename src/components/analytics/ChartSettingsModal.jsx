@@ -63,11 +63,13 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
             setSubmissionErrors(['Line charts really need an axis to work.']);
             return;
         }
-        console.log(data.stack, data.legend)
         if(data.stack && data.legend && (data.stack == data.legend)){
             setSubmissionErrors(['Stack and legend must be different values.']);
             return;
         }
+        if(data.start === '') data.start = null;
+        if(data.end === '') data.end = null;
+        if(data.repeat_n === '') data.repeat_n = null;
         try{
             console.log('submiting data...', data)
             setSaving(true);
@@ -113,12 +115,17 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
             indicator_type: chart?.indicators[0].indciator_type ?? null,
             chart_type: chart?.chart_type ?? null,
             axis: chart?.axis ?? null,
+            repeat_only: chart?.repeat_only ?? false,
+            repeat_n: chart?.repeat_n ?? '',
             legend: chart?.legend ?? null,
             stack: chart?.stack ?? null,
             indicators: chart?.indicators ?? [],
             use_target: chart?.use_target ?? false,
             filters: chart?.filters ?? null,
             tabular: chart?.tabular ?? false,
+
+            start: chart?.start ?? '',
+            end: chart?.end ?? '',
 
         }
     }, [chart]);
@@ -134,6 +141,7 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
     const inds = watch("indicators");
     const chartType = watch("chart_type");
     const usingTargets = watch("use_target");
+    const needRepeat = watch('repeat_only');
 
     //helper function to calculate the type of splits (legend/breakdown) that are available
     const fields = useMemo(() => {
@@ -153,47 +161,82 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
 
     
     const basics = [
-        { name: 'indicators', label: 'View Indicator(s)', type: "multimodel", rules: { required: "Required" },
-            IndexComponent: IndicatorsIndex}, 
-        { name: 'chart_type', label: 'Name (Shorter Version)', type: "image", rules: { required: "Required" },
-            options: meta.chart_types, images: [FaChartPie, FaChartLine,FaChartBar]},
+        { name: 'indicators', label: 'View Indicator(s) (Required)', type: "multimodel", rules: { required: "Required" },
+            IndexComponent: IndicatorsIndex,
+            tooltip: `You can select as many indicators as you would like, but if you select more than one,
+            you will not be allowed to breakdown by legend. Selecting indicators of differnet data types may
+            not work very well either.`
+        }, 
+        { name: 'chart_type', label: 'Name (Shorter Version) (Required)', type: "image", rules: { required: "Required" },
+            options: meta.chart_types, images: [FaChartPie, FaChartLine,FaChartBar],
+            tooltip: `What type of chart do you need? Line charts work well when viewing over time,
+            pie charts are good for viewing overall percentage breakdowns. If in doubt, start with a bar.`
+        },
     ]
     const axis = [
-        { name: 'axis', label: "Axis", type: "radio", options: meta.axes},
+        { name: 'axis', label: "Axis", type: "radio", options: meta.axes,
+            tooltip: `This selection will breakdown the data on the X axis.`
+        },
     ]
     const target = [
-        { name: 'use_target', label: "Show Targets", type: "checkbox"},
+        { name: 'use_target', label: "Show Targets", type: "checkbox",
+            tooltip: `Check this box to show targets on the axis. This will server as the legend.`
+        },
+    ]
+    const repeat = [
+        { name: 'repeat_only', label: 'Show only repeat interactions', type: 'checkbox',
+            tooltip: `Check this box if you only want to measure the number of people who underwent this interaction
+            multiple times.`
+        },
+    ]
+    const repeatN = [
+        { name: 'repeat_n', label: 'Minimum Number to Show', type: 'number', rules: { required: 'Required'},
+            tooltip: `Select the minimum number of times a person needs to have undergone this interaction to
+            be counted (ex. twice, three times, four times).`
+        }
     ]
     const legend = [
         { name: 'legend', label: "Legend", type: "radio", options: fields},
     ]
     const stack = [
-        { name: 'stack', label: "Stack", type: "radio", options: fields},
+        { name: 'stack', label: "Stack", type: "radio", options: fields,
+            tooltip: `If you need an additional breakdown, you can also measure by stacked bars.`
+        },
     ]
     const table = [
-        { name: 'tabular', label: "Include Data Table?", type: "checkbox"},
+        { name: 'tabular', label: "Include Data Table?", type: "checkbox",
+            tooltip: `Checking this box will show a data table below the chart.`
+        },
     ]
 
+    const span = [
+        { name: 'start', label: 'Start of Tracking Period', type: 'date'},
+        { name: 'end', label: 'End of Tracking Period', type: 'date'}
+    ]
     return(
         <div className={styles.modal} >
             <h2>Creating New Client</h2>
                 <Messages errors={submissionErrors} ref={alertRef} />
 
             <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={basics} control={control} />
-                {chartType && chartType != 'pie' && <FormSection fields={axis} control={control} />}
-                
-                {inds.length == 1 && chartType && !usingTargets && <FormSection fields={legend} control={control} />}
-                {inds.length == 1 && chartType != 'pie' && <FormSection fields={target} control={control} />}
-                {inds.length == 1 && chartType == 'bar' && !usingTargets && <FormSection fields={stack} control={control} />}
+                <FormSection fields={basics} control={control} header={'Basics'}/>
+                {chartType && chartType != 'pie' && <FormSection fields={axis} control={control} header={'Axis'}/>}
+                {inds.length === 1 && chartType == 'bar' && <FormSection fields={repeat} control={control} header={'Track Repeat Only?'} />}
+                {needRepeat && <FormSection fields={repeatN} control={control} header={'How Many Times?'} />}
+                {inds.length == 1 && chartType != 'pie' && <FormSection fields={target} control={control} header='Show Targets' />}
+                {inds.length == 1 && chartType && !usingTargets && <FormSection fields={legend} control={control} header='Legend' />}
+                {inds.length == 1 && chartType == 'bar' && !usingTargets && <FormSection fields={stack} control={control} header='Stack' />}
 
-                {inds.length > 0 && <FormSection fields={table} control={control} />}
+                {inds.length > 0 && <FormSection fields={table} control={control} header='Data Table' />}
                 
-                {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {inds.length > 0 && <FormSection fields={span} control={control} header='Time Period' />}
+                {!saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     <button type="button" onClick={() => onClose()}><FcCancel /> Cancel</button>
                 </div>}
-                {saving && <ButtonLoading />}
+                {saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+                     <ButtonLoading />
+                </div>}
             </form>
         </div>
     )

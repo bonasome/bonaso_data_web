@@ -1,3 +1,4 @@
+import cleanLabels from "../../../services/cleanLabels";
 //build a data table based on rechart data
 export default function DataTable({ data, breakdown1, breakdown2, map }) {
     //data - the data
@@ -14,11 +15,11 @@ export default function DataTable({ data, breakdown1, breakdown2, map }) {
 
     let uniqueBreakdown1 = [...new Set(columns.map(([b1]) => b1))];
     if(breakdown1 && breakdown1 != 'subcategory' && breakdown1 != 'indicator' && breakdown1 != 'Target'){
-        uniqueBreakdown1 = uniqueBreakdown1.map((val) => (map[breakdown1][val]))
+        uniqueBreakdown1 = uniqueBreakdown1.map((val) => (map?.[breakdown1]?.[val] ?? val))
     }
     let uniqueBreakdown2 = [...new Set(columns.map(([, b2]) => b2).filter(Boolean))];
     if(breakdown2 && breakdown2 != 'subcategory'){
-        uniqueBreakdown2 = uniqueBreakdown2.map((val) => (map[breakdown2][val]))
+        uniqueBreakdown2 = uniqueBreakdown2.map((val) => (map?.[breakdown2]?.[val] ?? val))
     }
 
     return (
@@ -31,7 +32,7 @@ export default function DataTable({ data, breakdown1, breakdown2, map }) {
                     <th key={b1} colSpan={uniqueBreakdown2.length}>{b1}</th>
                     ))
                 ) : (
-                    uniqueBreakdown1.map((b1) => <th key={b1}>{b1}</th>)
+                    uniqueBreakdown1.map((b1) => <th key={b1}>{cleanLabels(b1)}</th>)
                 )}
                 </tr>
                 {breakdown2 && (

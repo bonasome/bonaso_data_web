@@ -28,6 +28,7 @@ function MultiCheckboxItem({ name, label, checked, onChange, value }) {
 
 //multiselect checkbox
 export default function MultiCheckbox({ name, label, options, value, onChange, onBlur, errors, valueField='value', labelField='label', tooltip=null }) {
+    
     const toggleValue = (val) => {
         if (value.includes(val)) {
             onChange(value.filter(v => v !== val));
