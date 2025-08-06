@@ -15,12 +15,10 @@ import ConfirmDelete from '../reuseables/ConfirmDelete';
 import Messages from '../reuseables/Messages';
 import ReturnLink from '../reuseables/ReturnLink';
 import UpdateRecord from '../reuseables/meta/UpdateRecord';
-import AnnouncementCard from '../messages/announcements/AnnouncementCard';
-import ComposeAnnouncementModal from '../messages/announcements/ComposeAnnouncementModal';
 import ButtonHover from '../reuseables/inputs/ButtonHover';
-import OrganizationsIndex from '../organizations/OrganizationsIndex';
-import ProjectActivityCard from './activities/ProjectActivityCard';
-import ProjectDeadlineCard from './deadlines/ProjectDeadlineCard';
+import AnnouncementsIndex from '../messages/announcements/AnnouncementsIndex';
+import ProjectDeadlineIndex from './deadlines/ProjectDeadlineIndex';
+import ProjectActivityIndex from './activities/ProjectActivityIndex';
 import ProjectActivityFAGantt from './activities/ProjectActivityFAGantt';
 import { AssignOrgToProject } from './AssignModals';
 
@@ -30,9 +28,7 @@ import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 import { IoIosStar, IoIosStarOutline,  IoIosArrowDropup, IoIosArrowDropdownCircle, IoIosCheckbox } from "react-icons/io";
 
-import { GrAnnounce } from "react-icons/gr";
 import { BsFillBuildingsFill } from "react-icons/bs";
-import { TbTimelineEventPlus, TbCalendarEvent } from "react-icons/tb";
 
 //card to help manage project orgs
 function ProjectOrgCard({ org, project }){
@@ -74,9 +70,6 @@ export default function ProjectDetail(){
     const [project, setProject] = useState();
     const [activities, setActivities] = useState([]);
     const [deadlines, setDeadlines] = useState([])
-    const [announcements, setAnnouncements] = useState([]);
-    //control compse announcement modal
-    const [composing, setComposing] = useState(false);
     //control adding orgaizations
     const [addingOrgs, setAddingOrgs] = useState(false);
     //control dropdowns
@@ -122,26 +115,6 @@ export default function ProjectDetail(){
             setLoading(false)
         } 
     }
-    //function to get related things (activities, deadlines, announcements)
-    const fetchRelated = async () => {
-        try {
-            console.log('fetching related activities...');
-            const response = await fetchWithAuth(`/api/manage/projects/${id}/get-related/`);
-            const data = await response.json();
-            if(response.ok){
-                setAnnouncements(data.announcements);
-                setActivities(data.activities);
-                setDeadlines(data.deadlines);
-            }
-            else{
-                navigate(`/not-found`);
-            }
-        } 
-        catch (err) {
-            setErrors(['Something went wrong. Please try again later.']);
-            console.error('Failed to fetch project: ', err);
-        } 
-    }
 
     //load project on init
     useEffect(() => {
@@ -149,14 +122,6 @@ export default function ProjectDetail(){
             await fetchProject()
         };
         getProjectDetails();
-    }, [id]);
-    
-    //load related on init
-    useEffect(() => {
-        const loadRelated = async () => {
-            await fetchRelated();
-        }
-        loadRelated()
     }, [id]);
 
     //function to delete the project
@@ -218,10 +183,10 @@ export default function ProjectDetail(){
                 <Messages errors={errors} />
             </div>
 
-            {activities && activities.length > 0 && <div className={styles.segment}>
+            <div className={styles.segment}>
                 <h2>Project Roadmap</h2>
                 <ProjectActivityFAGantt project={project} activities={activities} deadlines={deadlines}/> 
-            </div>}
+            </div>
 
             <div className={styles.segment}>
                 <div className={styles.dropdownSegment}>
@@ -230,14 +195,9 @@ export default function ProjectDetail(){
                         {showAnnouncements ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
-                    {composing && <ComposeAnnouncementModal projectID={project.id} onUpdate={(data) => setAnnouncements(prev => [...prev, data])} onClose={() => setComposing(false)} />}
+                    
                     {showAnnouncements && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
-                        <div>
-                            {announcements.length > 0 ? announcements.map((a) => (
-                                <AnnouncementCard key={a.id} announcement={a} onUpdate={() => fetchRelated()} />
-                            )) : <p>No announcements!</p>}
-                            <ButtonHover callback={() => setComposing(true)} noHover={<GrAnnounce />} hover={'New Announcement'} />
-                        </div>
+                        <AnnouncementsIndex project={project} />
                     </div>}
                 </div>
 
@@ -272,11 +232,7 @@ export default function ProjectDetail(){
                     </div>
                         
                     {showActivities && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
-                        {!activities || activities.length === 0 && <p>No activities yet. Be the first to make one!</p>}
-                        {activities && activities.length > 0 && 
-                            activities.map((act) => (<ProjectActivityCard key={act.id} activity={act} project={project} onDelete={() => fetchRelated()} /> ))
-                        }
-                        <Link to={`/projects/${project.id}/activities/new`}><ButtonHover  noHover={<TbCalendarEvent />} hover={'New Activity'} /></Link>
+                        <ProjectActivityIndex project={project} />
                     </div>}
                 </div>
                 
@@ -288,11 +244,7 @@ export default function ProjectDetail(){
                     </div>
                         
                     {showDeadlines && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
-                        {deadlines.length === 0 && <p>No deadlines yet. Be the first to make one!</p>}
-                        {deadlines && deadlines.length > 0 && 
-                            deadlines.map((dl) => (<ProjectDeadlineCard key={dl.id} deadline={dl} project={project} onDelete={() => fetchRelated()} /> ))
-                        }
-                        <Link to={`/projects/${project.id}/deadlines/new`}><ButtonHover  noHover={<TbTimelineEventPlus />} hover={'New Deadline'} /></Link>
+                        <ProjectDeadlineIndex project={project} />
                     </div>}
                 </div>
 

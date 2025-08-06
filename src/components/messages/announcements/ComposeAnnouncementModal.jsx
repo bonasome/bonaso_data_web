@@ -106,7 +106,7 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
             tooltip: `Checking this box will make this visible to all members${projectID ? ' with access to this project' : ''}.`
         }
     ]
-    console.log(existing)
+
     return(
         <div className={modalStyles.modal}>
             <h1>{existing ? `Editing Announcement` : 'New Announcement' }</h1>

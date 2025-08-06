@@ -19,34 +19,13 @@ import { FaTrashAlt } from 'react-icons/fa';
 import { IoIosArrowDropdownCircle, IoIosArrowDropup } from "react-icons/io";
 import { IoSettingsSharp } from "react-icons/io5";
 
-export default function IndicatorChart({ chartData, dashboard, meta, onUpdate, onRemove, pos=0 }) {
+export default function IndicatorChart({ chartData, dashboard, meta, options, onUpdate, onRemove, pos=0 }) {
     
     const [showFilters, setShowFilters] = useState(false); //toggle filter dropdown
     const [editing, setEditing] = useState(false); //toggle settings modal
-
-    const [options, setOptions] = useState(null); //list of all breakdown fields
     //meta
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
-
-    //get options list (basically the meta) for filters/legend/labels
-    useEffect(() => {
-        const getEventBreakdowns = async () => {
-            try {
-                console.log('fetching event details...');
-                const response = await fetchWithAuth(`/api/analysis/dashboards/breakdowns/`);
-                const data = await response.json();
-                if(response.ok){
-                    setOptions(data)
-                }
-            } 
-            catch (err) {
-                setErrors(['Something went wrong. Please try again later.'])
-                console.error('Failed to fetch event: ', err);
-            } 
-        }
-        getEventBreakdowns();
-    }, [])
 
     //handle delete
     const handleRemove = async(id) => {
@@ -103,7 +82,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, onUpdate, o
     const pieData = useMemo(() => {
         if(!dataArray ||dataArray.length ===0 || chartData.chart.chart_type !== 'pie') return;
         return ['', 'subcategory'].includes(chartData.chart.legend) ? Object.entries(dataArray[0]).filter(([key]) => key !== 'period').map(([key, value]) => ({ name: key, value })) :
-            Object.entries(dataArray[0]).filter(([key]) => key !== 'period').map(([key, value]) => ({ name: options[chartData.chart.legend][key], value }))
+            Object.entries(dataArray[0]).filter(([key]) => key !== 'period').map(([key, value]) => ({ name: options[chartData.chart.legend]?.[key] ?? key, value }))
     }, [dataArray]);
 
     //custom toolip to show stacl/legend

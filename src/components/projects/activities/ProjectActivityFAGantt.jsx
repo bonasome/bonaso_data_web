@@ -1,15 +1,39 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, ReferenceLine } from 'recharts';
 
+import fetchWithAuth from '../../../../services/fetchWithAuth';
 import ganttBuilder from './ganttBuilder';
 import theme from '../../../../theme/theme';
 import cleanLabels from '../../../../services/cleanLabels';
 import prettyDates from '../../../../services/prettyDates';
 
+import ComponentLoading from '../../reuseables/loading/ComponentLoading';
 //gantt chart that appears on project hom page. Uses deadlines/activities
 
-export default function ProjectActivityFAGantt({ project, activities, deadlines }){
+export default function ProjectActivityFAGantt({ project }){
     //transfor the data using a config (ganttBuilder.js)
+    const [activities, setActivities] = useState([]);
+    const [deadlines, setDeadlines] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+            const loadActivities = async () => {
+                try {
+                    const url = `/api/manage/projects/${project.id}/get-related/`;
+                    const response = await fetchWithAuth(url);
+                    const data = await response.json();
+                    setDeadlines(data.deadlines);
+                    setActivities(data.activities);
+                    setLoading(false);
+                } 
+                catch (err) {
+                    console.error('Failed to fetch events: ', err);
+                    setLoading(false)
+                }
+            };
+            loadActivities();
+        }, [project]);
+
     const data = useMemo(() => {
         return ganttBuilder(project, activities, deadlines)
     }, [project, activities]);
@@ -95,7 +119,7 @@ export default function ProjectActivityFAGantt({ project, activities, deadlines 
             </div>
         );
     };
-    
+    if(loading) return <ComponentLoading />
     return(
         <div style={{ backgroundColor: theme.colors.bonasoDarkAccent}} ref={ref}>
             <ResponsiveContainer width="100%" height={300}>

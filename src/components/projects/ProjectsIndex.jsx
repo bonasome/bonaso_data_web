@@ -120,28 +120,28 @@ export default function ProjectsIndex({callback=null, callbackText='Select Proje
 
     //get the meta
     useEffect(() => {
-            const getProjectMeta = async () => {
-                if(Object.keys(projectsMeta).length !== 0){
-                    return;
+        const getProjectMeta = async () => {
+            if(Object.keys(projectsMeta).length !== 0){
+                return;
+            }
+            else{
+                try{
+                    console.log('fetching model info...')
+                    const response = await fetchWithAuth(`/api/manage/projects/meta/`);
+                    const data = await response.json();
+                    setProjectsMeta(data);
                 }
-                else{
-                    try{
-                        console.log('fetching model info...')
-                        const response = await fetchWithAuth(`/api/manage/projects/meta/`);
-                        const data = await response.json();
-                        setProjectsMeta(data);
-                    }
-                    catch(err){
-                        console.error('Failed to fetch projects: ', err);
-                        setErrors(['Something went wrong. Please try again later.']);
-                    }
-                    finally{
-                        setLoading(false);
-                    }
+                catch(err){
+                    console.error('Failed to fetch projects: ', err);
+                    setErrors(['Something went wrong. Please try again later.']);
+                }
+                finally{
+                    setLoading(false);
                 }
             }
-            getProjectMeta();
-        }, []);
+        }
+        getProjectMeta();
+    }, []);
 
     const filteredProj = projects?.filter(p => !blacklist.includes(p.id));
     if(!projects || loading) return callback ? <ComponentLoading /> :  <Loading />
