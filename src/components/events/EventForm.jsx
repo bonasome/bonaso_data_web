@@ -190,7 +190,7 @@ export default function UserForm(){
     const start = watch("start");
 
     const basics = [
-        { name: 'name', label: 'Event Name (Required)', type: "text", rules: { required: "Required" },
+        { name: 'name', label: 'Event Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
             placeholder: 'ex. World AIDS Day, Counselling Session, Blood Drive...'
         },
         { name: 'description', label: "Event Description", type: "textarea",

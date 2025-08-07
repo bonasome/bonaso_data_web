@@ -176,11 +176,14 @@ export default function OrganizationForm(){
     }, [existing, reset, defaultValues]);
 
     const basics = [
-        { name: 'name', label: "Name (Abbreviation/Shorthand) (Required)", type: "text", rules: { required: "Required" },
+        { name: 'name', label: "Name (Abbreviation/Shorthand) (Required)", type: "text", rules: { required: "Required", 
+                maxLength: { value: 255, message: 'Maximum length is 255 characters.'}
+            },
             tooltip: 'This name will be used in content related to projects and tasks, so make sure its readable and not too long.',
             placeholder: 'BONASO...'
         },
         { name: 'full_name', label: "Full Name", type: "textarea", tooltip: "Not required, but if desired, you can add the full formal name here. This will appear on the organization's detail page.",
+            rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}},
             placeholder: 'Botswana Network of AIDS Services Organizations...'
         },
         { name: 'description', label: "Organization Description", type: "textarea", 
@@ -189,19 +192,19 @@ export default function OrganizationForm(){
     ]
 
     const office = [
-        { name: 'office_address', label: "Office Physical Address", type: "text"},
+        { name: 'office_address', label: "Office Physical Address", type: "text",  rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}},},
         { name: 'office_email', label: "Office/Admin Email", type: "email", rules: {pattern: {value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-            message: 'Please enter a valid email.'
-        }}},
-        { name: 'office_phone', label: "Office Phone", type: "text", },
+            message: 'Please enter a valid email.', 
+        }, maxLength: { value: 255, message: 'Maximum length is 255 characters.'} }},
+        { name: 'office_phone', label: "Office Phone", type: "text", rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}}, },
     ]
 
     const ed = [
-        { name: 'executive_director', label: "Executive Director Name", type: "text"},
+        { name: 'executive_director', label: "Executive Director Name", type: "text", rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}},},
         { name: 'ed_email', label: "Executive Director's Email", type: "email", rules: {pattern: {value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
             message: 'Please enter a valid email.'
-        }}},
-        { name: 'ed_phone', label: "Executive Director's Phone", type: "text", },
+        }, maxLength: { value: 255, message: 'Maximum length is 255 characters.'} }},
+        { name: 'ed_phone', label: "Executive Director's Phone", type: "text", rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}},},
     ]
     
 

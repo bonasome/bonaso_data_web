@@ -85,7 +85,7 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
     const orgSel =  watch('organization_id');
     console.log(projectSel)
     const basics = [
-        { name: 'name', label: 'Name (Required)', type: "text", rules: { required: "Required" },
+        { name: 'name', label: 'Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
             tooltip: 'Subject will appear on the unexpanded card. Let people know what this is about!'
         },
         { name: 'description', label: "Description", type: "textarea"},

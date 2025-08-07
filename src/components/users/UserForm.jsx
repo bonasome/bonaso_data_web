@@ -204,7 +204,7 @@ export default function UserForm(){
     const isClient = useMemo(() => {return selectedRole === 'client'}, [selectedRole])
 
     const username = [
-        { name: 'username', label: "Username (Required)", type: "text", rules: { required: "Required" },
+        { name: 'username', label: "Username (Required)", type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
             tooltip: 'Make note of this. It will be required for login. This can be changed later.'
         }
     ]
@@ -220,11 +220,15 @@ export default function UserForm(){
     ]
 
     const basics = [
-        { name: 'first_name', label: "First Name (Required)", type: "text", rules: { required: "Required" }},
-        { name: 'last_name', label: "Last Name (Required)", type: "text", rules: { required: "Required" }},
+        { name: 'first_name', label: "First Name (Required)", type: "text", rules: { required: "Required",
+            maxLength: { value: 255, message: 'Maximum length is 255 characters.'}
+        }},
+        { name: 'last_name', label: "Last Name (Required)", type: "text", rules: { required: "Required",
+            maxLength: { value: 255, message: 'Maximum length is 255 characters.'}
+         }},
         {name: 'email', label: 'Email', type: 'email',  rules: {pattern: {value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
             message: 'Please enter a valid email.'
-        }}},
+        }, maxLength: { value: 255, message: 'Maximum length is 255 characters.'}}},
     ]
 
     const role = [

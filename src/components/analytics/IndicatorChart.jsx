@@ -85,7 +85,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
         return ['', 'subcategory'].includes(chartData.chart.legend) ? Object.entries(dataArray[0]).filter(([key]) => key !== 'period').map(([key, value]) => ({ name: key, value })) :
             Object.entries(dataArray[0]).filter(([key]) => key !== 'period').map(([key, value]) => ({ name: options[chartData.chart.legend]?.[key] ?? cleanLabels(key), value }))
     }, [dataArray]);
-    console.log(chartData)
+
     //custom toolip to show stacl/legend
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload?.length) {
@@ -106,13 +106,13 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
         }
         return null;
     };
-
+    console.log(chartData?.chart)
     return(
         <div className={styles.chart}>
             {chartData &&  <div>
                 {del && <ConfirmDelete onCancel={() => setDel(false)} onConfirm={handleRemove} allowEasy={true} name={'this beautiful chart'} />}
                 
-                <h2>{chartData.chart.indicators.map(ind => (ind.display_name)).join(', ')}</h2>
+                <h2>{chartData.chart.display_name}</h2>
                 
                 <Messages errors={errors} />
                 {dataArray.length === 0 && <p><i>No data yet.</i></p>}

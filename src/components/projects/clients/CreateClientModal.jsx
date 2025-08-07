@@ -85,12 +85,14 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
 
 
     const basics = [
-        { name: 'name', label: 'Name (Required)', type: "text", rules: { required: "Required" }, 
+        { name: 'name', label: 'Name (Required)', type: "text", rules: { required: "Required", 
+                maxLength: { value: 255, message: 'Maximum length is 255 characters.'}, 
+            }, 
             tooltip: `This will appear in project pages, so make sure it's short and readable.`,
             placeholder: 'NAHPA...',
         },
         { name: 'full_name', label: "Full Name", type: "textarea", tooltip: 'Their full name, if desired.',
-            placeholder: 'National AIDS and Health Promotion Agency...'
+            placeholder: 'National AIDS and Health Promotion Agency...', rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}}
         },
         { name: 'description', label: "Client Description", type: "textarea", 
             placeholder: 'Any additional information you may want to note...'

@@ -186,13 +186,13 @@ export default function RespondentForm(){
             last_name: existing?.last_name ?? '',
 
             sex: existing?.sex ?? null,
-            age_range: existing?.age_range ?? null,
+            age_range: existing?.age_range ?? '',
             dob: existing?.dob ?? '',
             
             plot_no: existing?.plot_no ?? '',
             ward: existing?.ward ?? '',
             village: existing?.village ?? '',
-            district: existing?.district ?? null,
+            district: existing?.district ?? '',
             citizenship: existing?.citizenship ?? 'BW',
 
             special_attribute_names: existing?.special_attribute?.map((a) => (a.name)) ?? [],
@@ -230,10 +230,10 @@ export default function RespondentForm(){
         }
     ]
     const notAnonBasic= [
-        { name: 'id_no', label: "Omang/ID/Passport Number (Required)", type: "text", rules: { required: "Required" } },
+        { name: 'id_no', label: "Omang/ID/Passport Number (Required)", type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} } },
         {name: 'first_name', label: 'First Name (Include Middle Name if Applicable) (Required)', type: 'text',
-            rules: { required: "Required" } },
-        {name: 'last_name', label: 'Last Name (Required)', type: 'text',  rules: { required: "Required" } },  
+            rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} } },
+        {name: 'last_name', label: 'Last Name (Required)', type: 'text',  rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} } },  
         {name: 'dob', label: 'Date of Birth (Required)', type: 'date',  rules: { required: "Required" } },
     ]
     const basics = [
@@ -249,10 +249,12 @@ export default function RespondentForm(){
         {name: 'plot_no', label: 'Plot Number (or description)', type: 'text', 
             tooltip: 'If you may visit this person again, you may want to record some information about where they live.'
         },
-        {name: 'ward', label: 'Kgotlana/Ward', type: 'text'},
+        {name: 'ward', label: 'Kgotlana/Ward', type: 'text', rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}},},
     ]
     const geo = [
-        {name: 'village', label: 'Village/Town/City (Primary Residence) (Required)', type: 'text',  rules: { required: "Required" },
+        {name: 'village', label: 'Village/Town/City (Primary Residence) (Required)', type: 'text',  rules: { required: "Required",
+            maxLength: { value: 255, message: 'Maximum length is 255 characters.'},
+         },
             tooltip: 'Please provide the village, town, or city that best describes where this person currently resides.'
         },
         {name: 'district', label: 'District (Required)', type: 'select',  rules: { required: "Required" },
@@ -274,8 +276,11 @@ export default function RespondentForm(){
     const contact = [
         {name: 'email', label: 'Email', type: 'email',  rules: {pattern: {value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
             message: 'Please enter a valid email.',
-        }}, tooltip: 'This information is not used by the system, but you may want to record it for your own records.'},
-        {name: 'phone_number', label: 'Phone Number', type: 'text', tooltip: 'This information is not used by the system, but you may want to record it for your own records.' },
+        }, maxLength: { value: 255, message: 'Maximum length is 255 characters.'}}, 
+        tooltip: 'This information is not used by the system, but you may want to record it for your own records.'},
+        {name: 'phone_number', label: 'Phone Number', type: 'text', tooltip: 'This information is not used by the system, but you may want to record it for your own records.',
+            rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}},
+         },
     ]
 
 

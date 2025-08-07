@@ -260,11 +260,14 @@ export default function IndicatorForm(){
         rowRefs.current['subcategory_data'] = React.createRef();
     }
     const basicInfo = [
-        { name: "code", label: "Indicator Code (Required)", type: "text", rules: { required: "Required" },
+        { name: "code", label: "Indicator Code (Required)", type: "text", rules: { required: "Required", 
+                maxLength: { value: 10, message: 'Maximum length is 10 characters.'}
+            },
             tooltip: 'The code is just an extra reference to help you when searching indicators.',
             placeholder: 'HIV100, NCD001...'
         },
-        { name: "name", label: "Indicator Name (Required)", type: "text", rules: { required: "Required" },
+        { name: "name", label: "Indicator Name (Required)", type: "text", rules: { required: "Required", 
+                maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
             tooltip: 'HINT: This name will be seen by community health workers, so make sure its readable/understandable.',
             placeholder: 'Tested for HIV, Received Treatement for STIs...'    
         },

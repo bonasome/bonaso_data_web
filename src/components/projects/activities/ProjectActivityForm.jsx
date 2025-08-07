@@ -169,7 +169,9 @@ export default function ProjectActivityForm(){
     const start = watch("start");
 
     const basics = [
-        { name: 'name', label: 'Activity Name (Required)', type: "text", rules: { required: "Required" },
+        { name: 'name', label: 'Activity Name (Required)', type: "text", rules: { required: "Required",
+            rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}},
+         },
             placeholder: 'Project inception meeting...'
         },
         { name: 'description', label: "Activity Description", type: "textarea",

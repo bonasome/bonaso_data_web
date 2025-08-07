@@ -114,6 +114,7 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
         return {
             indicator_type: chart?.indicators[0].indciator_type ?? null,
             chart_type: chart?.chart_type ?? null,
+            name: chart?.name ?? '',
             axis: chart?.axis ?? null,
             repeat_only: chart?.repeat_only ?? false,
             repeat_n: chart?.repeat_n ?? '',
@@ -172,6 +173,7 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
             tooltip: `What type of chart do you need? Line charts work well when viewing over time,
             pie charts are good for viewing overall percentage breakdowns. If in doubt, start with a bar.`
         },
+        { name: 'name', label: 'Chart Name', type: 'text', rules: { maxLength: { value: 255, message: 'Maximum length is 255 characters.' }}}
     ]
     const axis = [
         { name: 'axis', label: "Axis", type: "radio", options: meta.axes,

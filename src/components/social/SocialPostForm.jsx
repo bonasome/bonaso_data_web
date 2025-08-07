@@ -190,8 +190,9 @@ export default function UserForm(){
     const images = [FaFacebookSquare, FaInstagramSquare, FaTiktok, FaTwitter, FaYoutube, FaQuestion];
 
     const basics = [
-        { name: 'name', label: 'Post Name (Required)', type: "text", rules: { required: "Required" },
-            tooltip: 'A quick name to help you remember what this post is about.',
+        { name: 'name', label: 'Post Name (Required)', type: "text", rules: { required: "Required",
+                maxLength: { value: 255, message: 'Maximum length is 255 characters.'}
+            }, tooltip: 'A quick name to help you remember what this post is about.',
             placeholder: 'ex: NCD Facebook Campaign post 5...'
         },
 
@@ -220,7 +221,9 @@ export default function UserForm(){
         },
     ]
     const other = [
-        { name: 'other_platform', label: 'Please Specify the Platform (Required)', type: "text", rules: { required: "Required" }},
+        { name: 'other_platform', label: 'Please Specify the Platform (Required)', type: "text", rules: { required: "Required",
+            maxLength: { value: 255, message: 'Maximum length is 255 characters.'}
+         }},
     ]
 
     if(loading || !socialPostsMeta?.platforms) return <Loading />

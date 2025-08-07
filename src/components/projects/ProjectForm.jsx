@@ -180,7 +180,7 @@ export default function ProjectForm(){
     const start = watch("start");
 
     const basics = [
-        { name: 'name', label: 'Project Name (Required)', type: "text", rules: { required: "Required" },
+        { name: 'name', label: 'Project Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
             placeholder: 'My cool project...', tooltip: 'Give it a memorable name.',
         },
         { name: 'description', label: "Project Description", type: "textarea",
