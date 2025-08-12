@@ -1,15 +1,15 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useForm,  useWatch } from "react-hook-form";
 
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import fetchWithAuth from '../../../../services/fetchWithAuth';
 
-import FormSection from '../reuseables/forms/FormSection';
-import Messages from '../reuseables/Messages';
-import ButtonLoading from '../reuseables/loading/ButtonLoading';
-import ProjectsIndex from '../projects/ProjectsIndex';
-import OrganizationsIndex from '../organizations/OrganizationsIndex';
+import FormSection from '../../reuseables/forms/FormSection';
+import Messages from '../../reuseables/Messages';
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+import ProjectsIndex from '../../projects/ProjectsIndex';
+import OrganizationsIndex from '../../organizations/OrganizationsIndex';
 
-import modalStyles from '../../styles/modals.module.css';
+import modalStyles from '../../../styles/modals.module.css';
 
 import { IoIosSave } from 'react-icons/io';
 import { FcCancel } from 'react-icons/fc';
@@ -80,17 +80,17 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
-    console.log(existing)
+
     const projectSel =  watch('project_id');
     const orgSel =  watch('organization_id');
-    console.log(projectSel)
+
     const basics = [
-        { name: 'name', label: 'Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
+        { name: 'name', label: 'Dashboard Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
             tooltip: 'Subject will appear on the unexpanded card. Let people know what this is about!'
         },
-        { name: 'description', label: "Description", type: "textarea"},
-        { name: 'project_id', label: 'Scope to Project', type: 'model', IndexComponent: ProjectsIndex, labelField: 'name' },
-        { name: 'organization_id', label: 'Scope to Organization', type: 'model', IndexComponent: OrganizationsIndex, 
+        { name: 'description', label: "Dashboard Description", type: "textarea"},
+        { name: 'project_id', label: 'Scope Data to Project', type: 'model', IndexComponent: ProjectsIndex, labelField: 'name' },
+        { name: 'organization_id', label: 'Scope Data to Organization', type: 'model', IndexComponent: OrganizationsIndex, 
             labelField: 'name', includeParams: projectSel ? [{field: 'project', value: projectSel?.id ?? []}] : [] 
         }
     ]

@@ -1,6 +1,6 @@
 import { useAuth } from "../../contexts/UserAuth"
 import styles from './tutorial.module.css'
-
+import { Link } from 'react-router-dom'
 
 export default function Tutorial(){
     const { user } = useAuth();
@@ -17,10 +17,11 @@ export default function Tutorial(){
                     this page, you can find a short description of what the website does and how
                     to make the most out of it.
                 </p>
-                <h3>Reach out!</h3>
+                <Link to={`/messages`}><button>Reach out!</button></Link>
                 <p>
                     If you're ever confused or need some help, do not help to contact a site 
                     administrator (or admin). We are always happy to help answer any questions you have.
+                    You can click the button above, or email us at <strong>info@bonaso.org</strong>.
                 </p>
                 <p>
                     Also, as you use the site, we would greatly appreciate it if you could tell us 
@@ -42,6 +43,7 @@ export default function Tutorial(){
                         <li>Task: A task is when an indicator is assigned to an organization within a project.</li>
                         <li>Respondent: A respondent is a person that you are collecting data from.</li>
                         <li>Interaction: An interaction is when you "interact" with a respondent. This could be testing them for HIV or delivering NCD messages. Each interaction is tied to a task you were assigned.</li>
+                        <li>Event: An event is any type of activity that contributes towards the project goals. This could include counselling sessions, walkathons, activations, or anything.</li>
                     </ul>
                 </p>
             </div>
@@ -50,24 +52,19 @@ export default function Tutorial(){
                     <h2>Projects</h2>
                         <p>
                             To begin, check out your projects. You can get their by clicking the 
-                            "Projects" link at the top of the screen (click the three bars if 
+                            <Link to={'/projects'}> "Projects"</Link> link at the top of the screen (click the three bars if 
                             needed). This is the place where you will see all important
                             information about the project/tasks you have been assigned. 
                         </p>
                         <p>
-                            Here you will be able to see the relevent organizations and indicators
-                            assigned to you for this project. If you need more detail, click the cards
-                            on either sidebar for more detail. 
+                            When you click on a project, you can explore the dropdown tabs. You can view/create 
+                            an activity to help you keep track of important meetings, set a deadline to keep
+                            track of important dates, and view organizations.
                         </p>
                         <p>
-                            If you look at the left sidebar, you may notice that you can add organizations. 
-                            You can also create a subgrantee if they don't exist, and then assign them any 
-                            "tasks", or indicators, by dragging one from the right sidebar (Indicators) into
-                            the dashed box in the center.
-                        </p>
-                        <p>
-                            From this page, you can also upload your narrative reports (in PDF or Word format)
-                            directly to the website. No need to email them.
+                            For more information, click on the "Organizations" tab and find your organization.
+                            On this page, you will see more information about the tasks assigned to your 
+                            organization and your targets. You can also view and add subgrantees here.
                         </p>
                 </div>
             }
@@ -75,15 +72,16 @@ export default function Tutorial(){
                 <h2>Respondents</h2>
                     <p>
                         Respondents (or clients) are the people that we are collecting data from. 
-                        They are at the core of this website. To view them, click on the respondents
-                        link above. Here, you will be taken to a list of all respondents. You can 
-                        search by name/village to find one or create a new one. 
+                        They are at the core of this website. To view them, click on the <Link to={'/respondents'}> 
+                        Respondents</Link>tab above. Here, you will be taken to a list of all respondents. 
+                        You can search by name/village to find one or create a new one. 
                     </p>
                     <p>
                         Once you have created or found a respondent, click on their name to get 
                         taken to a page that contains information about them. You 
                         will also see a list of all your tasks. When in the field, while interacting 
                         with respondents, simply drag and drop a task into the add interactions box
+                        (or click the "Add Task" button) 
                         to record it. Upon adding an interaction, you may be prompted to enter more
                         information about that interaction (such as a number or select some subcategories).
                     </p>
@@ -112,6 +110,44 @@ export default function Tutorial(){
                         </p>
                 </div>
             }
+            {['meofficer', 'manager', 'admin'].includes(user.role) && 
+                <div className={styles.section}>
+                    <h2>Events</h2>
+                        <p>
+                            If you hover over the  "Record" tab at the top (or click the three bars)
+                            you will see an option for <Link to={'/events'}></Link>. Here you can 
+                            record information about your events by linking the event to one of your tasks.
+                            You can also add counts (for example, if you trained a certain number of people)
+                            which can be broken down by demographic information. You can also assign organizations
+                            as participants, which both allows them to edit counts for their tasks in that event
+                            and will count them towards any "Number of Organization" task (i.e., number of subgrantees
+                            trained).
+                        </p>
+                </div>
+            }
+            {['meofficer', 'manager', 'admin'].includes(user.role) && 
+                <div className={styles.section}>
+                    <h2>Posts</h2>
+                        <p>
+                            Hovering over the "Record" tab will also give you access to <Link to='/posts'> Posts</Link>,
+                            which allows you to record data about social media posts. Each post is linked to a task and a 
+                            platform. After creating a post, you can view its detail page to edit metrics (likes, comments, views)
+                            which will contribute towards task targets.
+                        </p>
+                </div>
+            }
+            {['meofficer', 'manager', 'admin'].includes(user.role) && 
+                <div className={styles.section}>
+                    <h2>Team</h2>
+                        <p>
+                            If you hover over the <Link to={'/profiles'}> "Team"</Link> link at the top (or click the three bars)
+                            you will see an option to "Add a New User". Here you can enter the requested
+                            information and apply for a new member to be able to use the site. Once an 
+                            admin has reviewed your request, they will allow them access into the site.
+                        </p>
+                </div>
+            }
+            
         </div>
     )
 }

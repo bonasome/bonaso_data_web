@@ -262,9 +262,10 @@ export default function ProjectDetail(){
                         {addingOrgs && <AssignOrgToProject onSave={fetchProject} 
                             onClose={() => setAddingOrgs(false)} project={project}
                         />}
-                        {project.organizations.map((org) => (
+                        {project.organizations.length > 0 ? project.organizations.map((org) => (
                             <ProjectOrgCard key={org.id} org={org} project={project} />
-                        ))}
+                        )) : <p>No organizations yet.</p>}
+
                     </div>}
                 </div>
             </div>

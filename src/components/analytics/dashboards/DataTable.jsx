@@ -1,4 +1,4 @@
-import cleanLabels from "../../../services/cleanLabels";
+import cleanLabels from "../../../../services/cleanLabels";
 //build a data table based on rechart data
 export default function DataTable({ data, breakdown1, breakdown2, map }) {
     //data - the data

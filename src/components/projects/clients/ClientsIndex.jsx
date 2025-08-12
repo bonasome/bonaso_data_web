@@ -77,7 +77,7 @@ export default function ClientsIndex({ callback=null, callbackText='Select a Cli
         <div className={styles.index}>
             {!callback && <h1>Clients</h1>}
             {showClientModal && <CreateClient onCreate={(client) => {setClients(prev=> [...prev, client]); setShowClientModal(false)}} onCancel={() => setShowClientModal(false)} /> }
-            <button onClick={() => setShowClientModal(true)}> <RiGovernmentFill /> Create New Client</button>
+            {!callback && <button onClick={() => setShowClientModal(true)}> <RiGovernmentFill /> Create New Client</button>}
             <IndexViewWrapper entries={entries} page={page} onSearchChange={setSearch} onPageChange={setPage}>
                 {filteredClients?.length > 0 ? 
                     filteredClients.map((c) => (

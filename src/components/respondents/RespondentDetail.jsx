@@ -1,5 +1,5 @@
 import React from 'react';
-
+import countries from 'world-countries';
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -209,6 +209,10 @@ export default function RespondentDetail(){
         setDel(false)
     }
 
+    function getCountryNameFromCode(code) {
+        const country = countries.find(c => c.cca2 === code.toUpperCase());
+        return country ? country.name.common : null;
+    }
 
     if(loading || !respondent) return <Loading /> 
     return(
@@ -244,7 +248,7 @@ export default function RespondentDetail(){
                                     respondent.special_attribute.filter(s=> (!['KP', 'PWD', 'PLWHIV'].includes(s.name))).map((s) => `, ${getLabelFromValue('special_attributes', s.name)}`)}
                             </p>
                             <p>{respondent.ward && respondent.ward + ', '}{respondent.village}, {getLabelFromValue('districts', respondent.district)}</p>
-                            <p>{respondent.citizenship}</p>
+                            <p>{getCountryNameFromCode(respondent.citizenship)}</p>
                             
                             <div style={{ display: 'flex', flexDirection: 'row',}}>
                                 {favorited && <ButtonHover callback={() => {setFavorited(false); favorite('respondents.respondent', respondent.id, true)}} noHover={<IoIosStar />} hover={'Unfavorite'} /> }

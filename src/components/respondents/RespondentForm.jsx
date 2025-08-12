@@ -199,9 +199,6 @@ export default function RespondentForm(){
             kp_status_names: existing?.kp_status?.map((kp) => (kp.name)) ?? [],
             disability_status_names: existing?.disability_status?.map((d) => (d.name)) ?? [],
             
-            required_attribute_names: existing?.required_attributes?.map((a) => (a.name)) ?? [],
-            governs_attribute: existing?.governs_attribute ?? null,
-            
             email: existing?.email ?? '',
             phone_number: existing?.phone_number ?? '',
         }
@@ -297,7 +294,7 @@ export default function RespondentForm(){
                 <FormSection fields={basics} control={control} header='Sex' />
                 {!anon && <FormSection fields={address} control={control} header='Address'/>}
                 <FormSection fields={geo} control={control} header='Geographic Information'/>
-                <FormSection fields={special} control={control} header='Additinal Information'/>
+                <FormSection fields={special} control={control} header='Additional Information'/>
                 {!anon && <FormSection fields={contact} control={control} header='Contact Information'/> }
                 <p><i>You can record HIV Status and Pregnancy information on the respondent detail page after submitting.</i></p>
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>

@@ -60,7 +60,9 @@ import EventDetail from '../components/events/EventDetail';
 import EventForm from '../components/events/EventForm';
 import EventsIndex from '../components/events/EventsIndex';
 
-import Dashboards from '../components/analytics/Dashboards';
+import Dashboards from '../components/analytics/dashboards/Dashboards';
+import PivotTables from '../components/analytics/pivotTables/PivotTables';
+import LineLists from '../components/analytics/lineLists/LineLists';
 
 import Messages from '../components//messages/Messages';
 import ProjectActivityForm from '../components/projects/activities/ProjectActivityForm';
@@ -71,6 +73,8 @@ import SocialPostDetail from '../components/social/SocialPostDetail';
 import SocialPostForm from '../components/social/SocialPostForm';
 
 import FunWithFlags from '../components/flags/FunWithFlags';
+
+
 
 
 function Router() {
@@ -405,7 +409,17 @@ function Router() {
                 <RedirectIfNoPerm level={['admin', 'client',  'meofficer', 'manager']}>
                     <Dashboards />
                 </RedirectIfNoPerm>
-                }/>
+            }/>
+            <Route path='tables' element={
+                <RedirectIfNoPerm level={['admin', 'client',  'meofficer', 'manager']}>
+                    <PivotTables />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path='lists' element={
+                <RedirectIfNoPerm level={['admin', 'client',  'meofficer', 'manager']}>
+                    <LineLists />
+                </RedirectIfNoPerm>
+            }/>
         </Route>
         
         <Route 

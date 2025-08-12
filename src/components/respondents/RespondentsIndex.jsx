@@ -37,8 +37,7 @@ function RespondentCard({ respondent, meta }) {
             <Link to={`/respondents/${respondent.id}`} style={{display:'flex', width:"fit-content"}}><h2>{respondent.display_name}</h2></Link>
             {expanded && <div>
                     <h4>{respondent.village}, {getLabelFromValue('districts', respondent.district)}</h4>
-                    <p>{getLabelFromValue('age_ranges', respondent?.current_age_range)}, {getLabelFromValue('sexs', respondent.sex)}</p>
-                    <p>{respondent.citizenship}</p>
+                    <p>{getLabelFromValue('age_ranges', respondent?.age_range)}, {getLabelFromValue('sexs', respondent.sex)}</p>
                     <p>{respondent.comments ? respondent.comments : 'No Comments'}</p>
                     <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <Link to={`/respondents/${respondent.id}`}> <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} /></Link>
@@ -85,7 +84,7 @@ export default function RespondentsIndex(){
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
-                setRespondents(data.results);
+                setRespondents(data?.results ?? []);
             } 
             catch (err) {
                 console.error('Failed to fetch respondents: ', err);

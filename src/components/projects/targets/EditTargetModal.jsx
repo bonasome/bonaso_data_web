@@ -185,11 +185,13 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
                 {typeVal === 'month' && <FormSection fields={month} control={control} />}
                 {typeVal === 'custom' && <FormSection fields={customDates} control={control} />}
 
-                {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {!saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     <button type="button" onClick={() => onCancel()}><FcCancel /> Cancel</button>
                 </div>}
-                {saving && <ButtonLoading />}
+                {saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+                    <ButtonLoading />
+                </div>}
             </form>
         </div>
     )

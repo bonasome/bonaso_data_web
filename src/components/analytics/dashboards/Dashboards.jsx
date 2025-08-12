@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import fetchWithAuth from '../../../../services/fetchWithAuth';
 
-import Loading from '../reuseables/loading/Loading';
-import Messages from '../reuseables/Messages';
+import Loading from '../../reuseables/loading/Loading';
+import Messages from '../../reuseables/Messages';
 import Dashboard from './Dashboard';
 import CreateDashboardModal from './CreateDashboardModal';
 

@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 
-import { useSocialPosts } from "../../contexts/SocialPostsContext";
+import { useSocialPosts } from "../../../contexts/SocialPostsContext";
 
-import cleanLabels from "../../../services/cleanLabels";
-import fetchWithAuth from "../../../services/fetchWithAuth";
+import cleanLabels from "../../../../services/cleanLabels";
+import fetchWithAuth from "../../../../services/fetchWithAuth";
 
-import MultiCheckbox from "../reuseables/inputs/MultiCheckbox";
-import ButtonHover from "../reuseables/inputs/ButtonHover";
-import ComponentLoading from "../reuseables/loading/ComponentLoading";
+import MultiCheckbox from "../../reuseables/inputs/MultiCheckbox";
+import ButtonHover from "../../reuseables/inputs/ButtonHover";
+import ComponentLoading from "../../reuseables/loading/ComponentLoading";
 
 import styles from './dashboard.module.css';
 

@@ -76,7 +76,6 @@ export default function ProjectActivitiyIndex({ project }){
                     (filters.category ? `&category=${filters.category}` : '');
                 
                 const url = `/api/manage/activities/?search=${search}&page=${page}&project=${project.id}` + filterQuery;
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
@@ -119,7 +118,7 @@ export default function ProjectActivitiyIndex({ project }){
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter 
                 onFilterChange={setFilters} config={filterConfig(projectsMeta, orgs, (s) => setOrgSearch(s))} initial={initial}  
             />}>
-                <Link to={`/projects/${project.id}/activities/new`}><ButtonHover  noHover={<TbCalendarEvent />} hover={'New Activity'} /></Link>
+                {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/activities/new`}><ButtonHover  noHover={<TbCalendarEvent />} hover={'New Activity'} /></Link>}
                 {activities?.length === 0 ? 
                     <p>No activities match your criteria.</p> :
                     activities?.map(act => (

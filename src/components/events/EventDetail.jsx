@@ -228,7 +228,7 @@ export default function EventDetail(){
         const countKeys = Object.keys(eventCounts);
         return event?.tasks?.filter((t) => !countKeys.includes(t.id.toString())) ?? [];
     }, [event])
-    console.log(eventCounts)
+
     if(loading || !event || !breakdowns) return <Loading />
     return(
         <div>
@@ -286,7 +286,7 @@ export default function EventDetail(){
                        {event.tasks.length > 0 ? 
                             event.tasks.map((task) =>  (
                                 <div className={styles.card}>
-                                    <Link to={`/projects/${task.project.id}/organizations/${task.organization.id}`}> <h3>{task.indicator.name} for {task.organization.name}</h3></Link>
+                                    <Link to={`/projects/${task.project.id}/organizations/${task.organization.id}`}> <h3>{task.display_name}</h3></Link>
                                 </div>
                             )) : <p>No tasks yet.</p>
                         }
@@ -300,7 +300,7 @@ export default function EventDetail(){
                     <h2>Select a task to start adding counts.</h2>
                     {filteredTasks.length > 0 ? <SimpleSelect name={'task'} label={'Select a Task'} 
                         optionValues={filteredTasks.map((t) => (t.id))} 
-                        optionLabels={filteredTasks.map((t) => (t.indicator.name + ' ' + t.organization.name))} 
+                        optionLabels={filteredTasks.map((t) => (t.display_name))} 
                         callback={(val) => {setNewTask(val); if(val != '') setNewCount(true)}} 
                         value = {newTask}
                     /> : <p>No tasks left! Either edit your existing counts or add a new task.</p>}

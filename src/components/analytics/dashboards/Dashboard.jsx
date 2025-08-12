@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import fetchWithAuth from '../../../../services/fetchWithAuth';
 
-import ComponentLoading from '../reuseables/loading/ComponentLoading';
+import ComponentLoading from '../../reuseables/loading/ComponentLoading';
 import IndicatorChart from './IndicatorChart';
 import ChartSettingsModal from './ChartSettingsModal';
-import Messages from '../reuseables/Messages';
-import ButtonHover from '../reuseables/inputs/ButtonHover';
+import Messages from '../../reuseables/Messages';
+import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import CreateDashboardModal from './CreateDashboardModal';
-import ConfirmDelete from '../reuseables/ConfirmDelete';
+import ConfirmDelete from '../../reuseables/ConfirmDelete';
 
 import styles from './dashboard.module.css';
 
@@ -114,7 +114,7 @@ export default function Dashboard({ id, meta, breakdowns, onUpdate, onRemove }){
                 </div>
             </div>
 
-            {editing && <CreateDashboardModal existing={dashboard} onClose={() => setEditing(false)} onUpdate={(data) => onUpdate(data)} />}
+            {editing && <CreateDashboardModal existing={dashboard} onClose={() => setEditing(false)} onUpdate={(data) => {getData(); onUpdate(data)}} />}
             {adding && <ChartSettingsModal chart={null} onClose={() => setAdding(false)} onUpdate={getData} meta={meta} dashboard={dashboard} />}
             {dashboard?.indicator_charts?.length === 0 && <p><i>No charts yet. Add one!</i></p>}
             {!editing && dashboard.indicator_charts.length > 0 && <div className={styles.charts}>

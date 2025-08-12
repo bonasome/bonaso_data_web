@@ -194,7 +194,7 @@ export default function ProjectForm(){
         { name: 'end', label: "Project Ends On (Required)", type: "date", rules: { required: "Required" ,
             validate: value => !start || value >= start || "This project cannot end before it starts."
         }, tooltip: 'When does the project end? NOTE: Data collected after this date will not count!'},
-        {name: 'status', label: 'Project Status', type: 'radio',
+        {name: 'status', label: 'Project Status (Required)', type: 'radio',
             options: projectsMeta?.statuses,  rules: { required: "Required" }, 
             tooltip: 'For internal tracking, but also note that non-admins will only be able to see active projects.'
         },
@@ -211,7 +211,7 @@ export default function ProjectForm(){
     return(
         <div className={styles.form}>
             <ReturnLink url={id ? `/projects/${id}` : '/projects'} display={id ? 'Return to detail page' : 'Return to projects overview'} />
-            <h1>{id ? `Editing ${existing?.name}` : 'New User' }</h1>
+            <h1>{id ? `Editing ${existing?.name}` : 'New Project' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormSection fields={basics} control={control} header={'Basic Information'} />

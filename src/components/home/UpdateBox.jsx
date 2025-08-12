@@ -89,10 +89,12 @@ export default function UpdateBox(){
 
 
     const unreadAnnc = useMemo(() => {
+        if(!announcements) return []
         return announcements.some((a) => (!a.read));
     }, [announcements]);
 
     const unreadMsg = useMemo(() => {
+        if(!messages) return []
         return messages.some(msg => 
             msg.recipients?.some(r => r.recipient.id === user.id && !r.read) ||
             msg.replies?.some(rep => 
@@ -102,6 +104,7 @@ export default function UpdateBox(){
     }, [messages, user.id]);
 
     const unreadAlert = useMemo(() => {
+        if(!alerts) return []
         return alerts.some((a) => (!a.read));
     }, [alerts]);
 
@@ -178,21 +181,21 @@ export default function UpdateBox(){
 
             {msgPane == 'announcements' && <div className={styles.msgPane}>
                 {user.role == 'admin' && <ButtonHover callback={() => setAdding(true)} noHover={<GrAnnounce />} hover={'New Announcement'} />}
-                {announcements.length == 0 && <p className={styles.placeholder}>No announcements yet.</p>}
-                {announcements.map((a) => (<AnnouncementCard key={a.id} announcement={a} onUpdate={getAnnouncements}/>))}
+                {announcements?.length == 0 && <p className={styles.placeholder}>No announcements yet.</p>}
+                {announcements?.map((a) => (<AnnouncementCard key={a.id} announcement={a} onUpdate={getAnnouncements}/>))}
 
                 {adding && <ComposeAnnouncementModal onClose={() => setAdding(false)} onUpdate={handleAdd} /> }
             
             </div>}
 
             {msgPane == 'messages' && <div className={styles.msgPane}>
-                {messages.length == 0 && <p className={styles.placeholder}>No messages yet. It's lonely here!</p>}
-                {messages.map((msg) => (<UnopenedMsg key={msg.id} msg={msg} />))}
+                {messages?.length == 0 && <p className={styles.placeholder}>No messages yet. It's lonely here!</p>}
+                {messages?.map((msg) => (<UnopenedMsg key={msg.id} msg={msg} />))}
             </div>}
 
             {msgPane == 'alerts' && <div className={styles.msgPane}>
-                {alerts.length == 0 && <p className={styles.placeholder}>Phew! No alerts.</p>}
-                {alerts.map((alr) => (<AlertCard key={alr.id} alert={alr} onUpdate={getAlerts} />))}
+                {alerts?.length == 0 && <p className={styles.placeholder}>Phew! No alerts.</p>}
+                {alerts?.map((alr) => (<AlertCard key={alr.id} alert={alr} onUpdate={getAlerts} />))}
             </div>}
         </div>
     )

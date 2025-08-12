@@ -91,7 +91,7 @@ export default function ProjectDeadlineIndex({ project }){
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter 
                 onFilterChange={setFilters} config={filterConfig(orgs, (s) => setOrgSearch(s))} initial={initial}  
             />}>
-                <Link to={`/projects/${project.id}/deadlines/new`}><ButtonHover  noHover={<TbTimelineEventPlus />} hover={'New Deadline'} /></Link>
+                {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/deadlines/new`}><ButtonHover  noHover={<TbTimelineEventPlus />} hover={'New Deadline'} /></Link>}
                 {deadlines?.length === 0 ? 
                     <p>No activities match your criteria.</p> :
                     deadlines?.map(d => (

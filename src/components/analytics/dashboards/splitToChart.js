@@ -1,11 +1,11 @@
-import cleanLabels from '../../../services/cleanLabels';
+import cleanLabels from '../../../../services/cleanLabels';
 
 export default function splitToChart(data, axis=null, legend=null, stack=null, targets = [], map) {
     const chartMap = {};
     const keyMeta = {};  // To track each key's subcategory for stacking
     if(!data) return { dataArray: [], keys: []}
     const arr = Object.values(data);
-    console.log(data)
+
     for (const row of arr) {
         const period = row.period || 'All-Time';
 
@@ -63,13 +63,14 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
             return yearA - yearB || quarterA - quarterB;
         });
     }
+    console.log(dataArray)
     const keys = Object.entries(keyMeta).map(([compoundKey, { stackKey, legendKey }]) => ({
         key: compoundKey,
         bar: legendKey ?? '',
         stackId: stackKey ||  '',
-        label: stack ? `${cleanLabels(legend)}: ${legendKey} - ${cleanLabels(stack)} ${stackKey}` : `${legendKey}`,
+        label: stack ? `${cleanLabels(legend)}: ${legendKey} - ${cleanLabels(stack)} ${stackKey}` : `${cleanLabels(legendKey)}`,
         fill: undefined // optional: use a color mapping here
-    }));
-    console.log(dataArray)
+    })).sort((a, b) => a.label.localeCompare(b.label));
+
     return { dataArray, keys };
 }

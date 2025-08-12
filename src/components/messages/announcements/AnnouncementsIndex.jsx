@@ -45,18 +45,18 @@ export default function ProjectDeadlineIndex({ project }){
             catch (err) {
                 setErrors(['Something went wrong, Please try again later.']);
                 console.error('Failed to fetch events: ', err);
-                setLoading(false)
+                setLoading(false);
             }
         };
         loadAnncs();
-    }, [page, search]);
+    }, [page, search, project]);
 
     if(loading) return <ComponentLoading />
     return(
         <div className={styles.index}>
             <Messages errors={errors} />
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} >
-                <ButtonHover callback={() => setComposing(true)} noHover={<GrAnnounce />} hover={'New Announcement'} />
+                {!['client'].includes(user.role) && <ButtonHover callback={() => setComposing(true)} noHover={<GrAnnounce />} hover={'New Announcement'} />}
                 {composing && <ComposeAnnouncementModal projectID={project.id} onUpdate={(data) => setAnnouncements(prev => [...prev, data])} onClose={() => setComposing(false)} />}
                 {announcements?.length === 0 ? 
                     <p>No announcements match your criteria.</p> :

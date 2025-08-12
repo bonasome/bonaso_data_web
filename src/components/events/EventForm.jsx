@@ -238,7 +238,7 @@ export default function UserForm(){
     return(
         <div className={styles.form}>
             <ReturnLink url={id ? `/events/${id}` : '/events'} display={id ? 'Return to detail page' : 'Return to events overview'} />
-            <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
+            <h1>{id ? `Editing ${existing?.display_name}` : 'New Event' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormSection fields={basics} control={control} header='Basic Information'/>

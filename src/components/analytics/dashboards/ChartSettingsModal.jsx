@@ -1,14 +1,14 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useForm,  useWatch } from "react-hook-form";
 
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import fetchWithAuth from '../../../../services/fetchWithAuth';
 
-import ButtonLoading from '../reuseables/loading/ButtonLoading';
-import Messages from '../reuseables/Messages';
-import FormSection from '../reuseables/forms/FormSection';
-import IndicatorsIndex from '../indicators/IndicatorsIndex';
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+import Messages from '../../reuseables/Messages';
+import FormSection from '../../reuseables/forms/FormSection';
+import IndicatorsIndex from '../../indicators/IndicatorsIndex';
 
-import styles from '../../styles/modals.module.css';
+import styles from '../../../styles/modals.module.css';
 
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
@@ -147,7 +147,7 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
     //helper function to calculate the type of splits (legend/breakdown) that are available
     const fields = useMemo(() => {
         if (!inds || inds.length === 0 || inds.length > 1) return []; //return nothing if there is no indicator or if there are multiple indicators (if multiple, the indciator is treated as the legend)
-        if(['event_no', 'event_org_no'].includes(inds[0]?.indicator_type)) return meta.fields.filter(f => (['organization'].includes(f.value))); //only allow org for these
+        if(['event_no', 'org_event_no'].includes(inds[0]?.indicator_type)) return []; //only allow org for these
         if(inds[0]?.indicator_type === 'social') return meta.fields.filter(f => (['platform', 'metric'].includes(f.value))); //only allow these for social
         const hasSubcats = inds.some(ind => {
             return (
@@ -160,6 +160,7 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
         return meta.fields.filter(f => (!['subcategory', 'platform', 'metric'].includes(f.value)));
     }, [inds, meta]);
 
+    console.log(inds)
     
     const basics = [
         { name: 'indicators', label: 'View Indicator(s) (Required)', type: "multimodel", rules: { required: "Required" },
@@ -168,12 +169,14 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
             you will not be allowed to breakdown by legend. Selecting indicators of differnet data types may
             not work very well either.`
         }, 
-        { name: 'chart_type', label: 'Name (Shorter Version) (Required)', type: "image", rules: { required: "Required" },
+        { name: 'chart_type', label: 'Chart Type (Required)', type: "image", rules: { required: "Required" },
             options: meta.chart_types, images: [FaChartPie, FaChartLine,FaChartBar],
             tooltip: `What type of chart do you need? Line charts work well when viewing over time,
             pie charts are good for viewing overall percentage breakdowns. If in doubt, start with a bar.`
         },
-        { name: 'name', label: 'Chart Name', type: 'text', rules: { maxLength: { value: 255, message: 'Maximum length is 255 characters.' }}}
+        { name: 'name', label: 'Chart Name', type: 'text', rules: { maxLength: { value: 255, message: 'Maximum length is 255 characters.' }},
+            tooltip: `Give your chart a name so you know what it is supposed to track.`
+        }
     ]
     const axis = [
         { name: 'axis', label: "Axis", type: "radio", options: meta.axes,
@@ -221,13 +224,16 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
                 <Messages errors={submissionErrors} ref={alertRef} />
 
             <form onSubmit={handleSubmit(onSubmit)}>
+                <h2>Chart Settings</h2>
                 <FormSection fields={basics} control={control} header={'Basics'}/>
                 {chartType && chartType != 'pie' && <FormSection fields={axis} control={control} header={'Axis'}/>}
-                {inds.length === 1 && chartType == 'bar' && <FormSection fields={repeat} control={control} header={'Track Repeat Only?'} />}
+                {inds.length === 1 && inds[0].type == 'respondent' && chartType == 'bar' && 
+                    <FormSection fields={repeat} control={control} header={'Track Repeat Only?'} />}
                 {needRepeat && <FormSection fields={repeatN} control={control} header={'How Many Times?'} />}
                 {inds.length == 1 && chartType != 'pie' && <FormSection fields={target} control={control} header='Show Targets' />}
-                {inds.length == 1 && chartType && !usingTargets && <FormSection fields={legend} control={control} header='Legend' />}
-                {inds.length == 1 && chartType == 'bar' && !usingTargets && <FormSection fields={stack} control={control} header='Stack' />}
+                {inds.length == 1 && chartType && !usingTargets && fields?.length > 0 &&
+                     <FormSection fields={legend} control={control} header='Legend' />}
+                {inds.length == 1 && fields?.length > 0 && chartType == 'bar' && !usingTargets && <FormSection fields={stack} control={control} header='Stack' />}
 
                 {inds.length > 0 && <FormSection fields={table} control={control} header='Data Table' />}
                 

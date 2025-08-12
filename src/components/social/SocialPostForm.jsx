@@ -230,7 +230,7 @@ export default function UserForm(){
     return(
         <div className={styles.form}>
             <ReturnLink url={id ? `/social/${id}` : '/social'} display={id ? 'Return to detail page' : 'Return to social overview'} />
-            <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
+            <h1>{id ? `Editing Post ${existing?.display_name}` : 'New Post' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormSection fields={basics} control={control} header='Basic Information'/>

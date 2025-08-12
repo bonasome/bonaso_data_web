@@ -101,11 +101,12 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
 
     return(
         <div className={styles.modal} >
-            <h2>Creating New Client</h2>
+            <h2>{existing ? `Editing ${client.name}` : 'Creating New Client'}</h2>
              <Messages errors={pageErrors} ref={alertRef} />
 
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormSection fields={basics} control={control} />
+                
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     <button type="button" onClick={() => onCancel()}><FcCancel /> Cancel</button>

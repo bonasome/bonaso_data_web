@@ -1,17 +1,17 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
 
-import cleanLabels from '../../../services/cleanLabels';
-import getColor from '../../../services/getColor';
+import cleanLabels from '../../../../services/cleanLabels';
+import getColor from '../../../../services/getColor';
 import splitToChart from './splitToChart';
-import theme from '../../../theme/theme';
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import theme from '../../../../theme/theme';
+import fetchWithAuth from '../../../../services/fetchWithAuth';
 
-import ConfirmDelete from '../reuseables/ConfirmDelete';
-import Messages from '../reuseables/Messages';
+import ConfirmDelete from '../../reuseables/ConfirmDelete';
+import Messages from '../../reuseables/Messages';
 import ChartFilters from './ChartFilters';
 import DataTable from './DataTable';
-import ButtonHover from '../reuseables/inputs/ButtonHover';
+import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import ChartSettingsModal from './ChartSettingsModal';
 
 import styles from './dashboard.module.css';
@@ -106,7 +106,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
         }
         return null;
     };
-    console.log(chartData?.chart)
+    console.log(keys)
     return(
         <div className={styles.chart}>
             {chartData &&  <div>
@@ -138,6 +138,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
                         {keys.map(({ key, label }, index) => (
                             <Line key={key} dataKey={key} name={label} fill={getColor(index)} stroke={getColor(index)}/>
                         ))}
+                        {chartData.chart.use_target && <Line dataKey="Target" fill="#82ca9d" name="Target" />}
                     </LineChart>
                 </ResponsiveContainer>}
                 

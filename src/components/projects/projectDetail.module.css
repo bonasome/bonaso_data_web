@@ -31,7 +31,7 @@
 }
 .infoCard {
     padding: 2vh;
-    background-color: var(--bonaso-uber-dark-accent);
+    background-color: var(--bonaso-dark-accent);
     transition: all .6s;
     margin-top: 2vh;
     margin-bottom: 2vh;
