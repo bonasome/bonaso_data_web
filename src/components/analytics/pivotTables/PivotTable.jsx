@@ -156,7 +156,7 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
                 {table.params.length > 0 && <p>Split by {table.params.map(p => (cleanLabels(p))).join(', ')}</p>}
                 {table.start && <p>From {prettyDates(table.start)} {table.end && `to ${prettyDates(table.end)}`}</p>}
                 {table.project && <p><strong>Project: </strong> {table.project.name}</p>}
-                {table.organization && <p><strong>Organization: </strong> {table.organization.name} {list.cascade_organization && '(and subgrantees)'}</p>}
+                {table.organization && <p><strong>Organization: </strong> {table.organization.name} {table.cascade_organization && '(and subgrantees)'}</p>}
                 <table border="1" cellPadding="5" style={{ borderCollapse: 'collapse' }}>
                     <thead>
                         <tr>
