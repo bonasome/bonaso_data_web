@@ -164,10 +164,10 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         },
     ]
     const customDates = [
-        { name: 'start', label: "Project Starts On (Required)", type: "date", rules: { required: "Required" }},
+        { name: 'start', label: "Target Starts On (Required)", type: "date", rules: { required: "Required" }},
 
-        { name: 'end', label: "Project Ends On (Required)", type: "date", rules: { required: "Required" ,
-            validate: value => !start || value >= start || "This project cannot end before it starts."
+        { name: 'end', label: "Target Ends On (Required)", type: "date", rules: { required: "Required" ,
+            validate: value => !start || value > start || "This project cannot end before it starts."
         }},
     ]
     return(
