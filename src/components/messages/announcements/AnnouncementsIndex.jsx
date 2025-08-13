@@ -10,6 +10,7 @@ import IndexViewWrapper from '../../reuseables/IndexView';
 import AnnouncementCard from './AnnouncementCard';
 import ComponentLoading from '../../reuseables/loading/ComponentLoading';
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
+import ComposeAnnouncementModal from './ComposeAnnouncementModal';
 
 import styles from '../../../styles/indexView.module.css';
 
