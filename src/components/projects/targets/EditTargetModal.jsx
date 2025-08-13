@@ -166,9 +166,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
     const customDates = [
         { name: 'start', label: "Target Starts On (Required)", type: "date", rules: { required: "Required" }},
 
-        { name: 'end', label: "Target Ends On (Required)", type: "date", rules: { required: "Required" ,
-            validate: value => !start || value > start || "This target cannot end before it starts."
-        }},
+        { name: 'end', label: "Target Ends On (Required)", type: "date", rules: { required: "Required" }},
     ]
     return(
         <div className={modalStyles.modal}>
