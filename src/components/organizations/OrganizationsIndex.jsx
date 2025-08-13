@@ -135,7 +135,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
                     (filters.project ? `&project=${filters.project}` : '');
                 
                 const url = projAdd ? 
-                    (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}&exclude_project=${projID}` + filterQuery + params : 
+                    (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}` + filterQuery + params : 
                         `/api/manage/projects/${projAdd}/get-orgs/?search=${search}&page=${page}`) :  
                     `/api/organizations/?search=${search}&page=${page}` + filterQuery + params;
                 console.log(url)
