@@ -11,7 +11,7 @@ import LineListSettings from './LineListSettings';
 import styles from '../dashboards/dashboard.module.css';
 
 import { BiSolidShow, BiSolidHide } from "react-icons/bi";
-import { MdOutlinePivotTableChart } from "react-icons/md";
+import { MdOutlineViewList } from "react-icons/md";
 
 export default function LineLists() {
     //page information
@@ -124,7 +124,7 @@ export default function LineLists() {
                 {/* Show a placeholder when nothing is selected */}
                 {!viewing && <div className={styles.placeholder}>
                     <div>
-                        <MdOutlinePivotTableChart style={{ fontSize: '150px', margin: 30, opacity: '75%' }} />
+                        <MdOutlineViewList style={{ fontSize: '150px', margin: 30, opacity: '75%' }} />
                     </div>
                     <h1>Select or Create a Line List From the Sidebar to Begin.</h1>
                 </div>}
@@ -137,7 +137,7 @@ export default function LineLists() {
                 </div>
                 {!hidden && <div>
                     <h2>Your Pivot Tables</h2>
-                    <button onClick={() => setCreating(true)}> <MdOutlinePivotTableChart /> Create a New Line List</button>
+                    <button onClick={() => setCreating(true)}> <MdOutlineViewList /> Create a New Line List</button>
                     {lls.length > 0 && lls.map((l) => (
                         <div onClick={() => setViewing(l.id)} className={styles.dbCard}>
                             <h3>{l.name}</h3>
