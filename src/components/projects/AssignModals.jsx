@@ -232,7 +232,7 @@ export function AssignOrgToProject({ project, onSave, onClose}){
         <div className={modalStyles.modal}>
             <h2>Assigning organization to {project.name}</h2>
             <Messages errors={errors} />
-            <ModelMultiSelect IndexComponent={OrganizationsIndex} projAdd={true} projID={project.id}
+            <ModelMultiSelect IndexComponent={OrganizationsIndex} excludeParams={[{field: 'project', value: project.id}]}
                 labelField='name' onChange={(vals) => setOrgs(vals)} value={orgs} callbackText={`Assign to ${project.name}`}
             />
             {!saving && <div style={{ display: 'flex', flexDirection: 'row'}}>
