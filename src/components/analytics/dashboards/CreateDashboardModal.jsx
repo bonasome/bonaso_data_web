@@ -26,7 +26,7 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
         try{
             console.log('submitting dashboard...', data)
             setSaving(true);
-            const url = existing ? `api/analysis/dashboards/${existing.id}/` : '/api/analysis/dashboards/';
+            const url = existing ? `/api/analysis/dashboards/${existing.id}/` : '/api/analysis/dashboards/';
             const response = await fetchWithAuth(url, {
                 method: existing ? 'PATCH' : 'POST',
                 headers: {
