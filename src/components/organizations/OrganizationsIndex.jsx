@@ -85,7 +85,7 @@ function OrganizationCard({ org, callback, callbackText }) {
     );
 }
 
-export default function OrganizationsIndex( { callback=null, callbackText='Select Organization', includeParams=[], excludeParams=[], updateTrigger=null, projAdd=null, projID=null, addRedirect=null, blacklist=[] }){
+export default function OrganizationsIndex( { callback=null, callbackText='Select Organization', includeParams=[], excludeParams=[], updateTrigger=null, projAdd=null, addRedirect=null, blacklist=[] }){
     //context
     const { user } = useAuth();
     const { organizations, setOrganizations } = useOrganizations();
@@ -114,11 +114,11 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
     const params = useMemo(() => {
         //sepereate from filters, these are passed as params
         const allowedFields = ['project', 'event'];
-        const include = includeParams?.filter(p => allowedFields.includes(p?.field) && p.value)
+        const include = includeParams?.filter(p => (allowedFields.includes(p?.field) && p?.value))
         ?.map(p => `&${p?.field}=${p?.value}`)
         .join('') ?? '';
 
-        const exclude = excludeParams?.filter(p => allowedFields.includes(p?.field) && p.value)
+        const exclude = excludeParams?.filter(p => (allowedFields.includes(p?.field) && p?.value))
         ?.map(p => `&exclude_${p?.field}=${p?.value}`)
         .join('') ?? '';
 
