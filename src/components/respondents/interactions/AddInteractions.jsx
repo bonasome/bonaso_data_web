@@ -3,10 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { useInteractions} from '../../../contexts/InteractionsContext';
 
 import fetchWithAuth from "../../../../services/fetchWithAuth";
+import useWindowWidth from '../../../../services/useWindowWidth';
 
 import Checkbox from '../../reuseables/inputs/Checkbox';
 
-import useWindowWidth from '../../../../services/useWindowWidth';
 import ButtonLoading from '../../reuseables/loading/ButtonLoading';
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import Messages from '../../reuseables/Messages';
@@ -23,7 +23,6 @@ import { FcCancel } from "react-icons/fc";
 export default function AddInteractions({ interactions, respondent, meta, onUpdate, onFinish, setAddingTask }) {
     //context
     const { setInteractions } = useInteractions();
-
     //fields used for managing creation
     const [interactionDate, setInteractionDate] = useState('');
     const [interactionLocation, setInteractionLocation] = useState('');
@@ -486,10 +485,16 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
             <h3>New Interaction</h3>
             <Messages errors={errors} warnings={warnings} />
             {!active && <i>Start dragging and dropping tasks to begin.</i>}
-            <label htmlFor="interaction_date">Interaction Date</label>
-            <input id='interaction_date' type='date' onChange={(e) => handleDateChange(e)}/>
-            <label htmlFor="interaction_location">Interaction Location</label>
-            <input id='interaction_location' type='text' onChange={(e) => setInteractionLocation(e.target.value)}/>
+            <div style={{ display: 'flex', flexDirection: `${width > 500 ? 'row' : 'column'}`}}>
+                <div style={{ display: 'flex', flexDirection: 'column'}}>
+                    <label htmlFor="interaction_date">Interaction Date</label>
+                    <input id='interaction_date' type='date' onChange={(e) => handleDateChange(e)}/>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column'}}>
+                    <label htmlFor="interaction_location">Interaction Location</label>
+                    <input id='interaction_location' type='text' onChange={(e) => setInteractionLocation(e.target.value)}/>
+                </div>
+            </div>
 
             <div className={styles.dropBox} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray' }}>
                 {added.length === 0 && width >=768 && <p>Drag an indicator from the sidebar to start.</p>}
