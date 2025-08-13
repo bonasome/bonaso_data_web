@@ -113,13 +113,12 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
 
     const params = useMemo(() => {
         //sepereate from filters, these are passed as params
-
         const allowedFields = ['project', 'event'];
-        const include = includeParams?.filter(p => allowedFields.includes(p?.field))
+        const include = includeParams?.filter(p => allowedFields.includes(p?.field) && p.value)
         ?.map(p => `&${p?.field}=${p?.value}`)
         .join('') ?? '';
 
-        const exclude = excludeParams?.filter(p => allowedFields.includes(p?.field))
+        const exclude = excludeParams?.filter(p => allowedFields.includes(p?.field) && p.value)
         ?.map(p => `&exclude_${p?.field}=${p?.value}`)
         .join('') ?? '';
 
