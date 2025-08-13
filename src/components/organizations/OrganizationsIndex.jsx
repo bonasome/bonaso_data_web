@@ -117,7 +117,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
         const include = includeParams?.filter(p => (allowedFields.includes(p?.field) && p?.value))
         ?.map(p => `&${p?.field}=${p?.value}`)
         .join('') ?? '';
-
+        console.log(excludeParams)
         const exclude = excludeParams?.filter(p => (allowedFields.includes(p?.field) && p?.value))
         ?.map(p => `&exclude_${p?.field}=${p?.value}`)
         .join('') ?? '';
