@@ -136,7 +136,7 @@ export default function LineLists() {
                     {hidden ? <BiSolidHide /> : <BiSolidShow />}
                 </div>
                 {!hidden && <div>
-                    <h2>Your Pivot Tables</h2>
+                    <h2>Your Line Lists</h2>
                     <button onClick={() => setCreating(true)}> <MdOutlineViewList /> Create a New Line List</button>
                     {lls.length > 0 && lls.map((l) => (
                         <div onClick={() => setViewing(l.id)} className={styles.dbCard}>
