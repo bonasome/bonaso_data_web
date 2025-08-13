@@ -147,7 +147,7 @@ export default function ProjectDeadlineCard({ deadline, project, onDelete }) {
                     {completed &&
                         <p>Deadline met, awesome work!</p>}
                     <UpdateRecord created_by={deadline.created_by} created_at={deadline.created_at} updated_by={deadline.updated_by} updated_at={deadline.updated_at} />
-                    <Link to={`/projects/${project.id}/deadlines/${deadline.id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
+                    <Link to={`/projects/${project}/deadlines/${deadline.id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
                     <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Deadline'} forDelete={true} />
                 </div>
             </div>}
