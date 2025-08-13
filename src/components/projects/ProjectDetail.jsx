@@ -42,7 +42,7 @@ function ProjectOrgCard({ org, project }){
         </div>
     )}
     return(
-        <div className={styles.infoCard}>
+        <div className={styles.orgCard}>
             <div onClick={() => setExpanded(!expanded)} style={{ display: 'flex', flexDirection: 'row'}}>
                 <Link to={`/projects/${project.id}/organizations/${org.id}`}><h3>{org.name}</h3></Link>
                 {expanded ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
