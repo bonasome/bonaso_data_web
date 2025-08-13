@@ -119,7 +119,7 @@ export default function Dashboard({ id, meta, breakdowns, onUpdate, onRemove }){
             {dashboard?.indicator_charts?.length === 0 && <p><i>No charts yet. Add one!</i></p>}
             {!editing && dashboard.indicator_charts.length > 0 && <div className={styles.charts}>
                 { dashboard.indicator_charts.map((ic) => (
-                    <IndicatorChart chartData={ic} dashboard={dashboard} meta={meta} options={breakdowns} onUpdate={getData} onRemove={(id) => handleRemove(id)}/>
+                    <IndicatorChart chartData={ic} dashboard={dashboard} meta={meta} options={breakdowns} onUpdate={getData} onRemove={getData}/>
                 ))}
             </div>}
         </div>
