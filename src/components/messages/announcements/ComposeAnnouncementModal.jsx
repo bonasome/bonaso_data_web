@@ -115,13 +115,15 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
                 <FormSection fields={basics} control={control} />
                 {projectID && <FormSection fields={orgs} control={control} />}
                 {user.role === 'admin' && <FormSection fields={admin} control={control} />}
-                {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {!saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     <button type="button" onClick={() => onClose()}>
                         <FcCancel /> Cancel
                     </button>
                 </div>}
-                {saving && <ButtonLoading />}
+                {saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+                    <ButtonLoading />
+                </div>}
             </form>
         </div>
     )
