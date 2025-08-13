@@ -218,6 +218,7 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
         { name: 'start', label: 'Start of Tracking Period', type: 'date'},
         { name: 'end', label: 'End of Tracking Period', type: 'date'}
     ]
+
     return(
         <div className={styles.modal} >
             <h2>Creating New Client</h2>
@@ -227,7 +228,7 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
                 <h2>Chart Settings</h2>
                 <FormSection fields={basics} control={control} header={'Basics'}/>
                 {chartType && chartType != 'pie' && <FormSection fields={axis} control={control} header={'Axis'}/>}
-                {inds.length === 1 && inds[0].type == 'respondent' && chartType == 'bar' && 
+                {inds.length === 1 && inds[0].indicator_type == 'respondent' && chartType == 'bar' && 
                     <FormSection fields={repeat} control={control} header={'Track Repeat Only?'} />}
                 {needRepeat && <FormSection fields={repeatN} control={control} header={'How Many Times?'} />}
                 {inds.length == 1 && chartType != 'pie' && <FormSection fields={target} control={control} header='Show Targets' />}
