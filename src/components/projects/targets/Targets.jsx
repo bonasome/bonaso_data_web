@@ -81,11 +81,9 @@ export function TargetCard({ target, project, organization, onUpdate, onCancel }
     if(!target || !project || !organization) return <ComponentLoading />
 
     if(editing) return <EditTargetModal existing={target} project={project} organization={organization} onCancel={() => setEditing(false)} onUpdate={() => onUpdate()}/>
-
+    if(del) return <ConfirmDelete name='Target' onConfirm={() => deleteTarget()} onCancel={() => setDel(false)} />
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
-            {del && <ConfirmDelete name='Target' onConfirm={() => deleteTarget()} onCancel={() => setDel(false)} />}
-           
             <div onClick={() => setExpanded(!expanded)}>
                 <h3>Target for {target.display_name}</h3>
                 {expanded && <div>

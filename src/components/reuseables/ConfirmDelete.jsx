@@ -12,7 +12,7 @@ export default function ConfirmDelete({ name, onConfirm, onCancel, statusWarning
 
     return(
         <div className={styles.modal} >
-            <h3>You are about to delete {name}</h3>
+            <h3>You are about to delete {name}.</h3>
             <p>
                 Please be absolutely sure that you want to do this. This action cannot be undone.
             </p>
