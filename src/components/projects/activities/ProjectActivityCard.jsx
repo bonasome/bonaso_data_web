@@ -94,7 +94,7 @@ export default function ProjectActivityCard({ activity, project, onDelete }) {
                 {activity.organizations.length > 0 && <p>From: {activity.organizations.map((org) => (`${org.name}`)).join(', ')}</p>}
                 {activity.visible_to_all && <p>Project Wide</p>}
                 {hasPerm && <div style={{ display: 'flex', flexDirection: 'row'}}>
-                    <Link to={`/projects/${project.id}/activities/${activity.id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
+                    <Link to={`/projects/${project}/activities/${activity.id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
                     <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Activity'} forDelete={true} />
                 </div>}
                 <UpdateRecord created_by={activity.created_by} created_at={activity.created_at} updated_by={activity.updated_by} updated_at={activity.updated_at} />

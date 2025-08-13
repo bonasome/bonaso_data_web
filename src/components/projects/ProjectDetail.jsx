@@ -210,7 +210,7 @@ export default function ProjectDetail(){
                         
                     {showDetails && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
                         <i>Lasts from {prettyDates(project.start)} to {prettyDates(project.end)} {user.role =='admin' && '('+project.status+')'} </i>
-                        {project?.client && <h4>From <Link to={`/clients/${project.client.id}`}>{project.client.name}</Link></h4>}
+                        {project?.client && user.role == 'admin' && <h4>From <Link to={`/clients/${project.client.id}`}>{project.client.name}</Link></h4>}
                         <h4>Project Description</h4>
                         {project.description ? <p>{project.description}</p> : <p>No description yet.</p>}
                         <div style={{ display: 'flex', flexDirection: 'row'}}>
