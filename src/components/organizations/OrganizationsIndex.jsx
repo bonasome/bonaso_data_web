@@ -85,7 +85,7 @@ function OrganizationCard({ org, callback, callbackText }) {
     );
 }
 
-export default function OrganizationsIndex( { callback=null, callbackText='Select Organization', includeParams=[], excludeParams=[], updateTrigger=null, projAdd=null, addRedirect=null, blacklist=[] }){
+export default function OrganizationsIndex( { callback=null, callbackText='Select Organization', includeParams=[], excludeParams=[], updateTrigger=null, projAdd=null, projID=null, addRedirect=null, blacklist=[] }){
     //context
     const { user } = useAuth();
     const { organizations, setOrganizations } = useOrganizations();
@@ -135,7 +135,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
                     (filters.project ? `&project=${filters.project}` : '');
                 
                 const url = projAdd ? 
-                    (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}` + filterQuery + params : 
+                    (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}&exclude_project=` + filterQuery + params : 
                         `/api/manage/projects/${projAdd}/get-orgs/?search=${search}&page=${page}`) :  
                     `/api/organizations/?search=${search}&page=${page}` + filterQuery + params;
                 console.log(url)
