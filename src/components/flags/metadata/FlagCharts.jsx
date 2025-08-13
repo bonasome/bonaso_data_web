@@ -39,10 +39,12 @@ export function FlagTrendChart({ data }) {
 }
 export function FlagTypeChart({ data, field }) {
     //add cleaned label field
+    console.log(data)
     const cleanedData = data.map(d => ({
         ...d,
-        label: field ==='content_type' ? getContentTypeLabel(d[field]) : cleanLabels(d[field]),
+        label: field ==='content_type' ? getContentTypeLabel(`${d.app_label}.${d.model}`) : cleanLabels(d[field]),
     }));
+
     //generate slice colors
     const getColor = (index) => {
         switch (index){

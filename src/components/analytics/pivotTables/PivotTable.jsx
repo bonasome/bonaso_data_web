@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 
 import cleanLabels from '../../../../services/cleanLabels';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
-
+import prettyDates from '../../../../services/prettyDates';
 import Messages from '../../reuseables/Messages';
 import ComponentLoading from "../../reuseables/loading/ComponentLoading";
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import PivotTableSettings from './PivotTableSettings';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+
+import styles from './pt.module.css';
 
 import { IoSettingsSharp } from "react-icons/io5";
 import { FaTrashAlt } from 'react-icons/fa';
 import { PiFileCsvFill } from "react-icons/pi";
-import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+
 
 export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta }){
     const [table, setTable] = useState(null);
@@ -138,15 +141,22 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
         <div>
             {del && <ConfirmDelete name={'this pivot table'} onCancel={() => setDel(false)} onConfirm={handleDelete} allowEasy={true} /> }
             {editing && <PivotTableSettings existing={table} onUpdate={(data) => {getPT(); onUpdate(data)}} onClose={() => setEditing(false)} meta={meta} />}
-            <h1>{table.display_name}</h1>
-            <Messages errors={errors} />
-            <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <ButtonHover callback={() => setEditing(true)} noHover={<IoSettingsSharp />} hover='Edit Pivot Table' />
-                {downloading ? <ButtonLoading /> : 
-                <ButtonHover callback={() => handleDownload()} noHover={<PiFileCsvFill />} hover={'Download as CSV'} />}
-                <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover='Delete Pivot Table' forDelete={true} />
+            <div className={styles.segment}>
+                <h1>{table.display_name}</h1>
+                <Messages errors={errors} />
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <ButtonHover callback={() => setEditing(true)} noHover={<IoSettingsSharp />} hover='Edit Pivot Table' />
+                    {downloading ? <ButtonLoading /> : 
+                    <ButtonHover callback={() => handleDownload()} noHover={<PiFileCsvFill />} hover={'Download as CSV'} />}
+                    <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover='Delete Pivot Table' forDelete={true} />
+                </div>
             </div>
-            <div>
+            <div className={styles.table}>
+                <h2>Parameters</h2>
+                {table.params.length > 0 && <p>Split by {table.params.map(p => (cleanLabels(p))).join(', ')}</p>}
+                {table.start && <p>From {prettyDates(table.start)} {table.end && `to ${prettyDates(table.end)}`}</p>}
+                {table.project && <p><strong>Project: </strong> {table.project.name}</p>}
+                {table.organization && <p><strong>Organization: </strong> {table.organization.name} {list.cascade_organization && '(and subgrantees)'}</p>}
                 <table border="1" cellPadding="5" style={{ borderCollapse: 'collapse' }}>
                     <thead>
                         <tr>

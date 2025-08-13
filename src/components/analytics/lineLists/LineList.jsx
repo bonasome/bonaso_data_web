@@ -10,11 +10,14 @@ import ComponentLoading from "../../reuseables/loading/ComponentLoading";
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import LineListSettings from './LineListSettings';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
+import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+
+import styles from './ll.module.css';
 
 import { IoSettingsSharp } from "react-icons/io5";
 import { FaTrashAlt } from 'react-icons/fa';
 import { PiFileCsvFill } from "react-icons/pi";
-import ButtonLoading from '../../reuseables/loading/ButtonLoading';
+
 
 export default function LineList({ id, onUpdate, onDelete, breakdowns }){
     const [list, setList] = useState(null);
@@ -157,15 +160,24 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
         <div>
             {del && <ConfirmDelete name={'this line list'} onCancel={() => setDel(false)} onConfirm={handleDelete} allowEasy={true} /> }
             {editing && <LineListSettings existing={list} onUpdate={(data) => {getLL(); onUpdate(data)}} onClose={() => setEditing(false)} />}
-            <h1>{list.name}</h1>
-            <Messages errors={errors} />
-            <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <ButtonHover callback={() => setEditing(true)} noHover={<IoSettingsSharp />} hover='Edit Line List' />
-                {downloading ? <ButtonLoading /> : 
-                <ButtonHover callback={() => handleDownload()} noHover={<PiFileCsvFill />} hover={'Download as CSV'} />}
-                <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover='Delete Line List' forDelete={true} />
+            <div className={styles.segment}>
+                <h1>{list.name}</h1>
+                <Messages errors={errors} />
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <ButtonHover callback={() => setEditing(true)} noHover={<IoSettingsSharp />} hover='Edit Line List' />
+                    {downloading ? <ButtonLoading /> : 
+                    <ButtonHover callback={() => handleDownload()} noHover={<PiFileCsvFill />} hover={'Download as CSV'} />}
+                    <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover='Delete Line List' forDelete={true} />
+                </div>
             </div>
+
+            <div className={styles.table}>
             {list?.data?.length > 0 ? <div>
+                <h2>Parameters</h2>
+                {list.start && <p>From {prettyDates(list.start)} {list.end && `to ${prettyDates(list.end)}`}</p>}
+                {list.indicator && <p><strong>Indicator: </strong> {list.indicator.display_name}</p>}
+                {list.project && <p><strong>Project: </strong> {list.project.name}</p>}
+                {list.organization && <p><strong>Organization: </strong> {list.organization.name} {list.cascade_organization && '(and subgrantees)'}</p>}
                 <table>
                     <thead>
                         <tr>
@@ -185,6 +197,7 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
                     </tbody>
                 </table>
             </div> : <p>No data for this list</p>}
+            </div>
         </div>
     )
 }

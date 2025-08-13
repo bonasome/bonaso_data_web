@@ -1,0 +1,12 @@
+.segment {
+    background-color: var(--bonaso-dark-accent);
+    margin: 3vh;
+    padding: 3vh;
+}
+
+.table{
+    background-color: var(--bonaso-dark-accent);
+    margin: 3vh;
+    padding: 3vh;
+    overflow-x: scroll;
+}
