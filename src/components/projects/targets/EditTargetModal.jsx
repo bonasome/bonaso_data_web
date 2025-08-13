@@ -167,7 +167,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         { name: 'start', label: "Target Starts On (Required)", type: "date", rules: { required: "Required" }},
 
         { name: 'end', label: "Target Ends On (Required)", type: "date", rules: { required: "Required" ,
-            validate: value => !start || value > start || "This project cannot end before it starts."
+            validate: value => !start || value > start || "This target cannot end before it starts."
         }},
     ]
     return(
