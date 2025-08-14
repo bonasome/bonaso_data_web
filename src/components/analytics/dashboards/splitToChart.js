@@ -63,7 +63,7 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
             return yearA - yearB || quarterA - quarterB;
         });
     }
-    console.log(dataArray)
+
     const keys = Object.entries(keyMeta).map(([compoundKey, { stackKey, legendKey }]) => ({
         key: compoundKey,
         bar: legendKey ?? '',

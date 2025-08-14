@@ -147,8 +147,8 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
     //helper function to calculate the type of splits (legend/breakdown) that are available
     const fields = useMemo(() => {
         if (!inds || inds.length === 0 || inds.length > 1) return []; //return nothing if there is no indicator or if there are multiple indicators (if multiple, the indciator is treated as the legend)
-        if(['event_no', 'org_event_no'].includes(inds[0]?.indicator_type)) return []; //only allow org for these
-        if(inds[0]?.indicator_type === 'social') return meta.fields.filter(f => (['platform', 'metric'].includes(f.value))); //only allow these for social
+        if(['event_no', 'org_event_no'].includes(inds[0]?.indicator_type)) return meta.fields.filter(f => (['organization'].includes(f.value))); //only allow org for these
+        if(inds[0]?.indicator_type === 'social') return meta.fields.filter(f => (['platform', 'metric', 'organization'].includes(f.value))); //only allow these for social
         const hasSubcats = inds.some(ind => {
             return (
                 (Array.isArray(ind.subcategories) && ind.subcategories.length > 0) ||
@@ -160,7 +160,6 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
         return meta.fields.filter(f => (!['subcategory', 'platform', 'metric'].includes(f.value)));
     }, [inds, meta]);
 
-    console.log(inds)
     
     const basics = [
         { name: 'indicators', label: 'View Indicator(s) (Required)', type: "multimodel", rules: { required: "Required" },

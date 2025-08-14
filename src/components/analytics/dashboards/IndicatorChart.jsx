@@ -106,7 +106,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
         }
         return null;
     };
-    console.log(keys)
+    console.log(chartData)
     return(
         <div className={styles.chart}>
             {chartData &&  <div>
