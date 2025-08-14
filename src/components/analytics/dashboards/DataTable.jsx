@@ -1,11 +1,12 @@
 import cleanLabels from "../../../../services/cleanLabels";
+import styles from './dashboard.module.css';
 //build a data table based on rechart data
 export default function DataTable({ data, breakdown1, breakdown2, map }) {
     //data - the data
     //breakdown 1 -the name of the legend (alternatively indicator/target)
     //breakdown 2 - the name of the stack
     //map - the options/labels map to clean up the labels
-
+    console.log(data, breakdown1)
     const getBreakdowns = (key) => key.split("__");
     
     const columns = Object.keys(data[0] || {})
@@ -23,6 +24,7 @@ export default function DataTable({ data, breakdown1, breakdown2, map }) {
     }
 
     return (
+        <div className={styles.tableCont}>
         <table>
             <thead>
                 <tr>
@@ -63,5 +65,6 @@ export default function DataTable({ data, breakdown1, breakdown2, map }) {
                 ))}
             </tbody>
         </table>
+        </div>
     );
 }

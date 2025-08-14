@@ -7,7 +7,7 @@ export const initial = {
 export function filterConfig(meta){
     if(!meta?.statuses) return [];
     return [
-        {name: 'status', label: 'In Project', type: 'select', constructors: {
+        {name: 'status', label: 'Project Status', type: 'select', constructors: {
             values: meta.statuses.map((s) => (s.value)),
             labels: meta.statuses.map((s) => (s.label)),
         }},

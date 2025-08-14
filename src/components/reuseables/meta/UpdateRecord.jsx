@@ -4,7 +4,7 @@ import { useAuth } from "../../../contexts/UserAuth";
 function renderRecord(action, actor, timestamp, currentUser) {
     const canSeeName = currentUser.role === 'admin' || currentUser.organization_id === actor.organization.id;
     return (
-        <p>
+        <p style={{ fontSize: 14}}>
             <i>
                 {action} by{" "}
                 {canSeeName
