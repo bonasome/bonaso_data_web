@@ -13,7 +13,7 @@ import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import Messages from '../../reuseables/Messages';
 import UpdateRecord from '../../reuseables/meta/UpdateRecord';
 import { EditTargetModal } from './EditTargetModal';
-
+import GaugeChart from './GaugeChart';
 import styles from './targets.module.css';
 
 import { PiTargetBold } from "react-icons/pi";
@@ -77,7 +77,7 @@ export function TargetCard({ target, project, organization, onUpdate, onCancel }
         return false
     }, [organization, user]);
 
-
+    
     if(!target || !project || !organization) return <ComponentLoading />
 
     if(editing) return <EditTargetModal existing={target} project={project} organization={organization} onCancel={() => setEditing(false)} onUpdate={() => onUpdate()}/>
@@ -87,19 +87,9 @@ export function TargetCard({ target, project, organization, onUpdate, onCancel }
             <div onClick={() => setExpanded(!expanded)}>
                 <h3>Target for {target.display_name}</h3>
                 {expanded && <div>
-
-                    <p>{(prettyDates(target?.start))} to {prettyDates(target?.end)}</p>
-                    {target.amount && <p>
-                        Achievement: {target.achievement || 0} of {target.amount} {' '}
-                        ({target.amount != 0 ? Math.round((target.achievement/target.amount)*100) : '0'}%)
-                    </p>}
-
-                    {target.related_to && <p>
-                        {target.percentage_of_related}% of 
-                        {' ' + target.related_to?.display_name} ({target.achievement} of
-                        {' ' + target.related_as_number + ' - '}
-                        {target.related_as_number !== 0 ? Math.round((target.achievement/target.related_as_number)*100) : '0'}%)
-                    </p>}
+                    <GaugeChart achievement={target.achievement} target={target.related_to ? target.related_as_number :  target.amount} />
+                    {target.related_to && <p><i>Measured as {target.percentage_of_related}% of {' ' + target.related_to?.display_name}</i></p>}
+                    <p><i>From {(prettyDates(target?.start))} to {prettyDates(target?.end)}</i></p>
                     
                     <div style={{ display: 'flex', flexDirection: 'row'}}>
                         {hasPerm && !editing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit'} />}

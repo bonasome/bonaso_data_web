@@ -8,3 +8,18 @@
     transform: scale(1.06);
     cursor: pointer;
 }
+
+.chartContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: -10%;
+}
+.chartLabel {
+    text-align: center;
+    position: relative;
+    bottom: 18vh;
+}
+.chartLabel > h2, p {
+    margin: 10px;
+}

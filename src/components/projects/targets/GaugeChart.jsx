@@ -1,0 +1,40 @@
+import { PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import theme from '../../../../theme/theme';
+import styles from './targets.module.css';
+
+export default function GaugeChart({ target, achievement }){
+    
+    const data = [
+        { name: 'Acheivement', value: achievement },
+        { name: 'Remainder', value: target - achievement }
+    ];
+    return(
+        <div className={styles.chartContainer}>
+            <div className={styles.chart}>
+                <ResponsiveContainer width="100%" height={300}>
+                    <PieChart width={500} height={260}>
+                        <Pie
+                            startAngle={180}
+                            endAngle={0}
+                            innerRadius="55%"
+                            data={data}
+                            dataKey="value"
+                            labelLine={false}
+                            stroke={false}
+                            isAnimationActive={false}
+                            cy="70%"
+                        >
+                            <Cell fill={theme.colors.bonasoMain} />
+                            <Cell fill='white' />
+                        </Pie>
+                    </PieChart>
+                </ResponsiveContainer>
+            </div>
+
+            <div className={styles.chartLabel}>
+                <h2>{Math.round((achievement/target)*100)}%</h2>
+                <p>{achievement} of {target}</p>
+            </div>
+        </div>
+    )
+}
