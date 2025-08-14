@@ -11,7 +11,7 @@ export default function cleanLabels(str) {
 
     const words = str.split(' ');
     const cleaned = words.map(w =>
-        w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+        w.charAt(0).toUpperCase() + w.slice(1)
     );
 
     return cleaned.join(' ');

@@ -43,7 +43,7 @@ export default function DataTable({ data, breakdown1, breakdown2, map }) {
                 <tr>
                     {uniqueBreakdown1Labels.map((b1) =>
                     uniqueBreakdown2Labels.map((b2) => (
-                        <th key={`${b1}__${b2}`}>{b2}</th>
+                        <th key={`${b1}__${b2}`}>{cleanLabels(b2)}</th>
                     ))
                     )}
                 </tr>
