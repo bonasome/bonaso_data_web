@@ -243,7 +243,7 @@ export default function EventDetail(){
                         {showDetails ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
-                    {showDetails && <div>
+                    {showDetails && <div className={styles.detail}>
                         <h3>Host: {event?.host ? event.host.name : 'No host'}</h3>
                         <i>{prettyDates(event.start)} to {prettyDates(event.end)}, {event.location} ({cleanLabels(event?.status)})</i>
                         <h3>Description</h3>

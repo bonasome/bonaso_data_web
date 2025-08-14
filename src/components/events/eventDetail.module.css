@@ -2,7 +2,11 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
-
+.detail{
+    background-color: var(--bonaso-uber-dark-accent);
+    margin: 2vh;
+    padding: 3vh;
+}
 .toggleDropdown{
     padding: 1.5vh;
     display: flex;
