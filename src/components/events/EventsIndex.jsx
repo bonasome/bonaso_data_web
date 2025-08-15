@@ -71,7 +71,7 @@ function EventCard({ event }) {
                     <Messages errors={errors} />
                     <h3>{active.event_type} {active.host && `hosted by ${active.host.name}`}</h3>
                     <p>{active.description}</p>
-                    <p>{active.event_date && (new Date(active.event_date) > new Date() ? 'Occurs on' : 'Occured on')} {prettyDates(active.event_date)} at {active.location}</p>
+                    <p>{active.start == active.end ? prettyDates(active.end) : `From ${prettyDates(active.start)} to ${prettyDates(active.end)}`} at {active.location}</p>
                     <div style={{ display: 'flex', flexDirection: 'row'}}>
                         <Link to={`/events/${event.id}`}>
                             <ButtonHover noHover={<GiJumpAcross />} hover='Go to detail page' />
