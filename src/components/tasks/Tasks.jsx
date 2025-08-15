@@ -103,18 +103,17 @@ function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, c
             
             {expanded && (
                 <div>
-                    <p><i>for {task.organization.name} ({task.project.name})</i></p>
                     <p><strong>Indicator Description:</strong> {task.indicator.description ? task.indicator.description : 'No description.'}</p>
 
                     <p>{task.indicator.description}</p>
-
+                    <p><i>Data Type: {task.indicator.indicator_type}</i></p>
                     {task.indicator.prerequisites.length > 0 && <div>
                         <p>Prerequisites: </p>
                         <ul>
                             {task.indicator.prerequisites.map((p) => (<li>{p.display_name}</li>))}
                         </ul>
                     </div>}
-
+                    
                     {task.indicator.subcategories && task.indicator.subcategories.length > 0 && <div>
                         <p>Subcategories:</p>
                         <ul>
