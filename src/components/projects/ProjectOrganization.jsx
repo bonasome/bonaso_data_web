@@ -128,7 +128,7 @@ export default function ProjectOrganization(){
         if(!user || !organization) return false
         if(user.role === 'client') return false;
         if(user.role === 'admin') return true;
-        if(organiation?.parent?.id && user.organization_id == organization?.parent?.id) return true
+        if(organization?.parent?.id && user.organization_id == organization?.parent?.id) return true
         return false
     }, [user, organization]);
 
