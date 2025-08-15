@@ -188,6 +188,15 @@ export default function UserForm(){
     }, [existing, reset, defaultValues]);
 
     const start = watch("start");
+    const hostOrg = watch('host_id');
+    const participantOrgs = watch('organization_ids');
+    
+    console.log(participantOrgs)
+    const validOrgs = useMemo(() => {
+        const host_id = hostOrg?.id
+        const pos = participantOrgs.map((org) => (org.id));
+        return [...pos, host_id];
+    }, [hostOrg, participantOrgs])
 
     const basics = [
         { name: 'name', label: 'Event Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
@@ -229,9 +238,9 @@ export default function UserForm(){
     ]
     const tasks = [
         {name: 'task_ids', label: 'Linked to Tasks (Required)', type: 'multimodel', IndexComponent: Tasks,
-            excludeParams: [{field: 'indicator_type', value: 'social'}],
+            excludeParams: [{field: 'indicator_type', value: 'social'}], includeParams: [{field: 'organizations', value: validOrgs.join(',')}],
             tooltip: `What tasks does this event contribute to?`
-         },
+        },
     ]
 
     if(loading || !eventsMeta?.statuses) return <Loading />

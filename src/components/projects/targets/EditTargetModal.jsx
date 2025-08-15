@@ -116,9 +116,10 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
 
     const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
 
+    const targetTask = useWatch({ control, name: 'task_id', defaultValue: null});
     const typeVal = useWatch({ control, name: 'date_type', defaultValue: tryMatchDates(existing?.start, existing?.end, project)?.type});
 
-    const asP = watch('as_percentage')
+    const asP = watch('as_percentage');
 
     const task = [
         { name: 'task_id', label: 'For Task (Required)', type: "model", IndexComponent: Tasks,
@@ -137,7 +138,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
     ]
     const relatedToTask = [
         { name: 'related_to_id', label: 'Select Related Task (Required)', type: "model", IndexComponent: Tasks, labelField: 'display_name',
-            includeParams: [{field: 'organization', value: organization.id}], 
+            includeParams: [{field: 'organization', value: organization.id}], blacklist: [targetTask?.id],
             tooltip: `This is the task whose achievement should set the target for the task selected above.`
         },
         { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Task (Required)', type: "number", rules: { 

@@ -10,7 +10,7 @@ import modalStyles from '../../../styles/modals.module.css';
 
 import { FaCheckSquare } from "react-icons/fa";
 
-export default function ModelSelect({ IndexComponent, value, onChange, label,  errors, tooltip=null, callbackText, labelField='name', includeParams=[], excludeParams=[] }){
+export default function ModelSelect({ IndexComponent, value, onChange, label,  errors, tooltip=null, callbackText, labelField='name', includeParams=[], excludeParams=[], blacklist=[] }){
     
     const [selecting, setSelecting] = useState(false);
 
@@ -28,7 +28,7 @@ export default function ModelSelect({ IndexComponent, value, onChange, label,  e
                     <button type="button" onClick={() => onChange(null)} disabled={!value}>Clear Selection</button>
                     <div className={modalStyles.modal} style={{ display: selecting ? 'block' : 'none' }}>
                         <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
-                            <IndexComponent callback={(obj) => {onChange(obj); setSelecting(false)}} callbackText={callbackText} includeParams={includeParams} excludeParams={excludeParams}/>
+                            <IndexComponent callback={(obj) => {onChange(obj); setSelecting(false)}} callbackText={callbackText} includeParams={includeParams} excludeParams={excludeParams} blacklist={blacklist}/>
                         </div>
                         <button onClick={() => setSelecting(false)} type='button'><FaCheckSquare /> Done</button>
                     </div>

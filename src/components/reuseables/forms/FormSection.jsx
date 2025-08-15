@@ -14,6 +14,7 @@ export default function FormSection({ fields, control, header=null }) {
                     includeParams={field?.includeParams ?? []} excludeParams={field?.excludeParams ?? []} //filter model select index components
                     tooltip={field?.tooltip ?? null} placeholder={field?.placeholder ?? null}
                     search={field?.search ?? false} //used for select only
+                    blacklist={field?.blacklist ?? []} //used for model selects to filter out certain values
                 />
             ))}
         </div>

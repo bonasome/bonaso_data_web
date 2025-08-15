@@ -7,7 +7,7 @@ import styles from '../../../styles/indexSelect.module.css';
 import modalStyles from '../../../styles/modals.module.css';
 
 //select multiple models from an index component
-export default function ModelMultiSelect({ IndexComponent, value, onChange, label, errors, tooltip=null, callbackText, labelField='display_name', includeParams=[], excludeParams=[], projAdd=false, addRedirect=null }){
+export default function ModelMultiSelect({ IndexComponent, value, onChange, label, errors, tooltip=null, callbackText, labelField='display_name', includeParams=[], excludeParams=[], projAdd=false, addRedirect=null, blacklist=[] }){
     const [selecting, setSelecting] = useState(false);
     
     
@@ -21,7 +21,7 @@ export default function ModelMultiSelect({ IndexComponent, value, onChange, labe
         onChange(updated)
     }
 
-    const blacklist = value?.map((val) => (val.id)) ?? [];
+    const selectedVals = value?.map((val) => (val.id)) ?? [];
 
     return(
         <div>
@@ -45,7 +45,7 @@ export default function ModelMultiSelect({ IndexComponent, value, onChange, labe
                 {selecting && <div className={modalStyles.modal}>
                     <h2>{label}</h2>
                     <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
-                        <IndexComponent callback={(obj) => handleAdd(obj)} callbackText={callbackText} blacklist={blacklist} includeParams={includeParams} excludeParams={excludeParams} projAdd={projAdd} addRedirect={addRedirect} />
+                        <IndexComponent callback={(obj) => handleAdd(obj)} callbackText={callbackText} blacklist={[...selectedVals, ...blacklist]} includeParams={includeParams} excludeParams={excludeParams} projAdd={projAdd} addRedirect={addRedirect} />
                     </div>
                     <button onClick={() => setSelecting(false)}>Done</button>
                 </div>}

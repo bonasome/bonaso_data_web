@@ -172,7 +172,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
     }, [errors]);
 
     const params = useMemo(() => {
-        const allowedFields = ['organization', 'project', 'event', 'indicator_type'];
+        const allowedFields = ['organization', 'organizations', 'project', 'event', 'indicator_type'];
         //these are not filters, they are passed as params for use during callbacks
         const include = includeParams?.filter(p => allowedFields.includes(p?.field))
         ?.map(p => `&${p?.field}=${p?.value}`)

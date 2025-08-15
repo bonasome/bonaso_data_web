@@ -7,6 +7,7 @@ import { getContentTypeLabel } from '../../../../services/modelMap';
 import theme from '../../../../theme/theme';
 
 export function FlagTrendChart({ data }) {
+    console.log(data)
     //add readable month field
     const cleanedData = data.map(d => ({
         ...d,
@@ -15,7 +16,6 @@ export function FlagTrendChart({ data }) {
 
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
-            console.log(payload)
             const { monthLabel, count } = payload[0].payload;
             return (
                 <div style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, padding: '8px', border: '1px solid #ccc' }}>
@@ -39,7 +39,6 @@ export function FlagTrendChart({ data }) {
 }
 export function FlagTypeChart({ data, field }) {
     //add cleaned label field
-    console.log(data)
     const cleanedData = data.map(d => ({
         ...d,
         label: field ==='content_type' ? getContentTypeLabel(`${d.app_label}.${d.model}`) : cleanLabels(d[field]),

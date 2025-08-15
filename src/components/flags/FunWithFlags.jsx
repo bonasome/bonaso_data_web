@@ -125,10 +125,9 @@ export default function FunWithFlags(){
         };
         loadOrgs();
     }, [orgSearch]);
-    console.log(metadata)
 
 
-    if(loading || !flags || !metadata) return <Loading />
+    if(loading || !metadata) return <Loading />
     return(
         <div className={styles.index}>
             <h1>Your Flags</h1>
@@ -148,7 +147,7 @@ export default function FunWithFlags(){
                 filter={<Filter onFilterChange={(input) => {setFilters(input); setPage(1)}} config={filterConfig(meta, orgs, (s) => setOrgSearch)} initial={initial} />}
             >
                 <h2>All Flags</h2>
-                {flags.length === 0 ? 
+                {flags?.length === 0 ? 
                     <p>Phew. No flags. Keep checking though.</p> :
                     flags.map(f => (
                         <FlagCard flag={f} index={true} onUpdate={(flag) => updateFlag(flag)} />)
