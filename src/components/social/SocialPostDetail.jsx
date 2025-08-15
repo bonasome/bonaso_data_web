@@ -109,6 +109,9 @@ export default function SocialPostDetail(){
 
     //handle a mini submission of engagement metrics
     const handleUpdate = async() => {
+        if(formData.likes == '') formData.likes = null;
+        if(formData.views == '') formData.views = null;
+        if(formData.comments == '') formData.comments = null;
         try{
             console.log('submitting changes...', formData)
             setSaving(true);
