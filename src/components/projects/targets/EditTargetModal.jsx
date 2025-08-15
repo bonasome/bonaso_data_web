@@ -123,7 +123,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
 
     const task = [
         { name: 'task_id', label: 'For Task (Required)', type: "model", IndexComponent: Tasks,
-            labelField: 'display_name',  includeParams: [{field: 'organization', value: organization.id}]},
+            labelField: 'display_name',  includeParams: [{field: 'organization', value: organization.id}, {field: 'project', value: project.id}]},
     ]
     const asRelated = [
         { name: 'as_percentage', label: 'Measure as a Percentage of Another Task', type: "checkbox", 
@@ -138,7 +138,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
     ]
     const relatedToTask = [
         { name: 'related_to_id', label: 'Select Related Task (Required)', type: "model", IndexComponent: Tasks, labelField: 'display_name',
-            includeParams: [{field: 'organization', value: organization.id}], blacklist: [targetTask?.id],
+            includeParams: [{field: 'organization', value: organization.id}, {field: 'project', value: project.id}], blacklist: [targetTask?.id],
             tooltip: `This is the task whose achievement should set the target for the task selected above.`
         },
         { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Task (Required)', type: "number", rules: { 

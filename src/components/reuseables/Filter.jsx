@@ -68,7 +68,7 @@ export default function Filter({ onFilterChange, initial, config }){
                                 )
                             }
                         })}
-                    <button onClick={()=>clearFilters()}>Clear</button>
+                    <button type="button" onClick={()=>clearFilters()}>Clear</button>
                 </div>
             )}
         </div>

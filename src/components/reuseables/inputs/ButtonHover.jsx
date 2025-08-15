@@ -9,7 +9,7 @@ export default function ButtonHover({ callback, noHover, hover, showBoth=true, f
 
     return (
         <button className={forDelete ? styles.delete : forWarning ? styles.warning : styles.dynamicButton} onMouseEnter={() => setHovered(true)} 
-            onMouseLeave={() => setHovered(false)} 
+            onMouseLeave={() => setHovered(false)} type='button'
             onClick={()=> {callback ? callback() : null}}
         >
             <div className={(hovered && hover) ? styles.default : styles.noHoverDefault}>

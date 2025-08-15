@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 
 import { useIndicators } from "../../contexts/IndicatorsContext";
-
+import { useAuth } from "../../contexts/UserAuth";
 import fetchWithAuth from '../../../services/fetchWithAuth';
+import {filterConfig, initial} from './filtersConfig';
 
 import IndexViewWrapper from "../reuseables/IndexView";
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import ButtonHover from "../reuseables/inputs/ButtonHover";
+import Filter from '../reuseables/Filter';
 
 import styles from './tasks.module.css';
 import errorStyles from '../../styles/errors.module.css';
@@ -144,13 +146,19 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
     canDelete=false, updateTrigger=null, callback=null, callbackText='Add Task', onError=[], onSuccess=null 
 }) {
     const { indicatorsMeta, setIndicatorsMeta } = useIndicators();
-
+    const { user } = useAuth();
     //the tasks themselves (usually not pulled in very large numbers)
     const [ tasks, setTasks ] = useState([]);
     //index helpers
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
+    const [filters, setFilters] = useState(initial);
+    //for filters
+    const [orgSearch, setOrgSearch] = useState('');
+    const [projectSearch, setProjectSearch] = useState('');
+    const [projects, setProjects] = useState([]);
+    const [orgs, setOrgs] = useState([]);
 
     //page meta
     const [loading, setLoading] = useState(true);
@@ -190,8 +198,11 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
         const getTasks = async () => {
             try {
                 console.log('fetching tasks...');
+                const filterQuery = 
+                    (filters.project ? `&project=${filters.project}` : '') + 
+                    (filters.organization ? `&organization=${filters.organization}` : '');
                 //run the filters
-                const url = `/api/manage/tasks/?search=${search}&page=${page}` + params;
+                const url = `/api/manage/tasks/?search=${search}&page=${page}` + filterQuery + params;
                 console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
@@ -208,7 +219,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
             }
         };
         getTasks();
-    }, [search, page, params, updateTrigger]); //run on param changes or on parent request
+    }, [search, page, params, filters, updateTrigger]); //run on param changes or on parent request
 
     useEffect(() => {
         const getMeta = async () => {
@@ -231,6 +242,42 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
         getMeta();
     }, []);
 
+    useEffect(() => {
+        const loadOrgs = async () => {
+            try {
+                const url = `/api/organizations/?search=${search}`
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setOrgs(data.results);
+            } 
+            catch (err) {
+                console.error('Failed to fetch organizations: ', err)
+                setErrors(['Something went wrong, Please try again later.']);
+            }
+        };
+        loadOrgs();
+    }, [orgSearch]);
+
+    useEffect(() => {
+        const loadProjects = async () => {
+            try {
+                const url = `/api/manage/projects/?search=${search}`
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setProjects(data.results);
+            } 
+            catch (err) {
+                console.error('Failed to fetch organizations: ', err)
+                setErrors(['Something went wrong, Please try again later.']);
+            }
+        };
+        loadProjects();
+    }, [projectSearch]);
+
+
+
+
+
     //update the tasks when one is deleted, triggering a parent update if necessary
     const updateTasks = (id) => {
         const updated = tasks.filter(t => t.id !=id)
@@ -251,7 +298,9 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
             
             <p><i>Search your tasks by name, organization, or project.</i></p>
             
-            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}
+                filter={<Filter config={filterConfig(orgs, projects, (s) => setOrgSearch(s), (s) => setProjectSearch(s), user)} initial={initial} onFilterChange={(f) => setFilters(f)} /> } 
+            >
                 {filteredTasks?.length > 0 ? filteredTasks.map((task) => (
                     <TaskCard task={task} key={task.id} tasks={tasks} 
                         isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} 

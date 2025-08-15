@@ -106,7 +106,6 @@ export default function FunWithFlags(){
         setFlags([...others, flag]);
     }
 
-    console.log(metadata)
     useEffect(() => {
         const loadOrgs = async () => {
             try {

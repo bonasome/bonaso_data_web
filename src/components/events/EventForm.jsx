@@ -191,7 +191,6 @@ export default function UserForm(){
     const hostOrg = watch('host_id');
     const participantOrgs = watch('organization_ids');
     
-    console.log(participantOrgs)
     const validOrgs = useMemo(() => {
         const host_id = hostOrg?.id
         const pos = participantOrgs.map((org) => (org.id));

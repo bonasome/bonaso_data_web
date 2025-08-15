@@ -195,7 +195,7 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
             {!callback && <h1>{user.role == 'admin' ? 'All Indicators' : 'My Indicators'}</h1>} 
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
                 filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} 
-                initial={initial} config={filterConfig(indicatorsMeta)} 
+                initial={initial} config={filterConfig(indicatorsMeta, user)} 
             />}>
                 {['admin'].includes(user.role) && 
                 <Link to='/indicators/new'><button><MdAddToPhotos />  Create a New Indicator</button></Link>} 

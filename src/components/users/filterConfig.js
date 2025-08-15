@@ -2,12 +2,12 @@ export const initial = {
     role: '',
     organization: '',
     client: '',
-    active: '',
+    active: 'true',
 }
 
-export function filterConfig(meta, orgs, clients, orgSearchCallback, clientSearchCallback){
+export function filterConfig(meta, orgs, clients, orgSearchCallback, clientSearchCallback, user){
     if(!meta?.roles) return [];
-    return [
+    let filters = [
         {name: 'role', label: 'User Role', type: 'select', constructors: {
             values: meta?.roles?.map((r) => (r.value)),
             labels: meta?.roles?.map((r) => (r.label)),
@@ -19,17 +19,19 @@ export function filterConfig(meta, orgs, clients, orgSearchCallback, clientSearc
             search: true,
             searchCallback: orgSearchCallback,
         }},
-
-        {name: 'client', label: 'User With Client', type: 'select', constructors: {
+    ]
+    if(user.role == 'admin'){
+        filters.push({name: 'client', label: 'User With Client', type: 'select', constructors: {
             values: clients?.map((c) => (c.id)),
             labels: clients?.map((c) => (c.name)),
             search: true,
             searchCallback: clientSearchCallback,
-        }},
+        }})
 
-        {name: 'active', label: 'User is Active', type: 'select', constructors: {
+        filters.push({name: 'active', label: 'User is Active', type: 'select', constructors: {
             values: ['true', 'false'],
             labels: ['Active', 'Inactive'],
-        }},
-    ]
+        }})
+    }
+    return filters
 }   
