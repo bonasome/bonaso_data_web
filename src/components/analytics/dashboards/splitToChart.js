@@ -20,7 +20,7 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
             legendValCleaned = map[legend][legendVal]
         }
         let stackValCleaned = stackVal
-        if(stack && (!['subcategory', 'indicator', 'platform', 'organization', 'metric'].includes(legend))){
+        if(stack && (!['subcategory', 'indicator', 'platform', 'organization', 'metric'].includes(stack))){
             stackValCleaned = map[stack][stackVal]
         }
         const key = stack ? `${legendVal}__${stackVal}` : `${legendVal}`

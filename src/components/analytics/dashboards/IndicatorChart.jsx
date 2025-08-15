@@ -90,7 +90,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload?.length) {
             return (
-                <div className="custom-tooltip" style={{ background: theme.colors.bonasoDarkAccent, padding: '8px', border: '1px solid #ccc', zIndex: 10, }}>
+                <div className="custom-tooltip" style={{ backgroundColor: theme.colors.bonasoDarkAccent, padding: '8px', border: '1px solid #ccc', zIndex: 1000, }}>
                     <strong>{label}</strong>
                     <ul>
                     {payload.map((entry) => {
@@ -120,8 +120,8 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
                     <BarChart width={300} height={300} data={dataArray}>
                         <XAxis dataKey="period" tick={{fill: '#fff'}} />
                         <YAxis tick={{fill: '#fff'}}/>
-                        <Tooltip cursor={{ fill: 'none' }} content={<CustomTooltip />} />
-                        <Legend />
+                        <Tooltip cursor={{ fill: 'none' }} wrapperStyle={{ zIndex: 300 }} content={<CustomTooltip />} />
+                        {keys.length < 12 && <Legend />}
                         {keys.map((group, index) => (
                             <Bar key={group.key} stackId={group.bar} dataKey={group.key} name={group.label} fill={getColor(index)}/>
                         ))}
