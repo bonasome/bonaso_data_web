@@ -192,6 +192,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
                 console.log('fetching tasks...');
                 //run the filters
                 const url = `/api/manage/tasks/?search=${search}&page=${page}` + params;
+                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
 
