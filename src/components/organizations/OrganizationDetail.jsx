@@ -41,7 +41,7 @@ export default function OrganizationDetail(){
     //fetch organization details
     useEffect(() => {
         const getOrganizationDetails = async () => {
-            const found = organizationDetails.find(p => p?.id.toString() === id.toString());
+            const found = organizationDetails.find(p => p?.id == id);
             if (found) {
                 setActiveOrganization(found);
                 setLoading(false);

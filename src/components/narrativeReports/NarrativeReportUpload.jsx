@@ -107,7 +107,7 @@ export default function NarrativeReportUpload() {
             <div className={styles.template}>
                 <form onSubmit={handleSubmit}  noValidate={true}>
                     <div className={styles.form}>
-                        <label htmlFor="title">Upload Title</label>
+                        <label htmlFor="title">Upload Title (Required)</label>
                         <input
                             type="text"
                             name="title"
