@@ -252,7 +252,7 @@ export default function EventDetail(){
                             {favorited ? <ButtonHover callback={() => {favorite('events.event', event.id, true); setFavorited(false)}} noHover={<IoIosStar />} hover={'Unfavorite'} />:
                                 <ButtonHover callback={() => {favorite('events.event', event.id); setFavorited(true)}} noHover={<IoIosStarOutline />} hover={'Favorite'} />}
                             {hasPerm && <Link to={`/events/${event.id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /> </Link>}
-                            {hasPerm && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Event'} forDelete={true}/>}
+                            {user.role == 'admin' && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Event'} forDelete={true}/>}
                         </div>
                         <UpdateRecord created_by={event.created_by} created_at={event.created_at}
                             updated_by={event.updated_by} updated_at={event.updated_at} />
