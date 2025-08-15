@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 
+import { useIndicators } from "../../contexts/IndicatorsContext";
+
 import fetchWithAuth from '../../../services/fetchWithAuth';
 
 import IndexViewWrapper from "../reuseables/IndexView";
@@ -13,7 +15,7 @@ import errorStyles from '../../styles/errors.module.css';
 import { FaTrashAlt } from "react-icons/fa";
 
 //card that holds task details
-function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, callback=null, callbackText, onError }) {
+function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, callback=null, callbackText, onError, meta }) {
     //comp meta
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
@@ -74,7 +76,12 @@ function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, c
         }
 
     }
-    
+    //helper function that converts db values to labels
+    const getLabelFromValue = (field, value) => {
+        if(!meta) return value
+        const match = meta[field]?.find(range => range.value === value);
+        return match ? match.label : value;
+    };
     //return delete seperately, since the card hover messes with the modal
     if(del){
         return(
@@ -106,7 +113,7 @@ function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, c
                     <p><strong>Indicator Description:</strong> {task.indicator.description ? task.indicator.description : 'No description.'}</p>
 
                     <p>{task.indicator.description}</p>
-                    <p><i>Data Type: {task.indicator.indicator_type}</i></p>
+                    <p><i>Data Type: {getLabelFromValue('indicator_types', task.indicator.indicator_type)}</i></p>
                     {task.indicator.prerequisites.length > 0 && <div>
                         <p>Prerequisites: </p>
                         <ul>
@@ -136,9 +143,10 @@ function TaskCard({ task, isDraggable = false, canDelete=false, onDelete=null, c
 export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=false, blacklist=[], 
     canDelete=false, updateTrigger=null, callback=null, callbackText='Add Task', onError=[], onSuccess=null 
 }) {
+    const { indicatorsMeta, setIndicatorsMeta } = useIndicators();
+
     //the tasks themselves (usually not pulled in very large numbers)
     const [ tasks, setTasks ] = useState([]);
-
     //index helpers
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -201,6 +209,27 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
         getTasks();
     }, [search, page, params, updateTrigger]); //run on param changes or on parent request
 
+    useEffect(() => {
+        const getMeta = async () => {
+            try {
+                console.log('fetching meta...');
+                //run the filters
+                const url = `/api/indicators/meta/`;
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setIndicatorsMeta(data)
+            } 
+            catch (err) {
+                console.error('Failed to get meta:', err);
+                setErrors(['Something went wrong. Please try again later.'])
+            } 
+            finally {
+                setLoading(false);
+            }
+        };
+        getMeta();
+    }, []);
+
     //update the tasks when one is deleted, triggering a parent update if necessary
     const updateTasks = (id) => {
         const updated = tasks.filter(t => t.id !=id)
@@ -225,7 +254,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
                 {filteredTasks?.length > 0 ? filteredTasks.map((task) => (
                     <TaskCard task={task} key={task.id} tasks={tasks} 
                         isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} 
-                        callback={callback} callbackText={callbackText} onError={(e) => (setErrors(e))} 
+                        callback={callback} callbackText={callbackText} onError={(e) => (setErrors(e))} meta={indicatorsMeta}
                     />
                 )) : <p>No tasks yet.</p>}
             </IndexViewWrapper>
