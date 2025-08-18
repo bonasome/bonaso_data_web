@@ -19,6 +19,8 @@ import styles from '../../styles/indexView.module.css'
 import errorStyles from '../../styles/errors.module.css';
 
 import { MdOutlinePostAdd } from "react-icons/md";
+import { ImPencil } from 'react-icons/im';
+import { GiJumpAcross } from 'react-icons/gi';
 
 //card component to display post information
 function PostCard({ post, callback = null, callbackText }) {
@@ -35,6 +37,14 @@ function PostCard({ post, callback = null, callbackText }) {
             {expanded && <div>
                 <p>Posted on {cleanLabels(post.platform)} on {prettyDates(post.published_at)}</p>
                 {post.description ? <p>{post.description}</p> : <p>No description.</p>}
+            </div>}
+            {!['client'].includes(user.role) && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <Link to={`/indicators/${indicator.id}`}>
+                    <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} />
+                </Link>
+                <Link to={`/indicators/${indicator.id}/edit`}>
+                    <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} />
+                </Link>
             </div>}
         </div>
     );

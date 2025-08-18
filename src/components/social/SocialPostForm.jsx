@@ -21,7 +21,7 @@ import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 import { FaFacebookSquare, FaInstagramSquare, FaTiktok, FaTwitter, FaYoutube, FaQuestion } from "react-icons/fa";
 
-export default function UserForm(){
+export default function SocialPostForm(){
     const navigate = useNavigate();
     
     //param to get indicator (blank if new)
