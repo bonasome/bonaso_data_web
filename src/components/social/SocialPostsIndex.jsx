@@ -40,10 +40,10 @@ function PostCard({ post, callback = null, callbackText }) {
                 {post.description ? <p>{post.description}</p> : <p>No description.</p>}
             </div>}
             {!['client'].includes(user.role) && <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <Link to={`/indicators/${indicator.id}`}>
+                <Link to={`/social/${post.id}`}>
                     <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} />
                 </Link>
-                <Link to={`/indicators/${indicator.id}/edit`}>
+                <Link to={`/social/${post.id}/edit`}>
                     <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} />
                 </Link>
             </div>}
@@ -115,8 +115,6 @@ export default function SocialPostsIndex({ callback=null, callbackText='Add Post
         }
         getMeta();
     }, []);
-    console.log(socialPostsMeta)
-    //const visibleIndicators = indicators?.filter(ind => !blacklist.includes(ind.id)) || [];
 
     if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
@@ -136,7 +134,7 @@ export default function SocialPostsIndex({ callback=null, callbackText='Add Post
                 {socialPosts?.length === 0 ? 
                     <p>No posts match your criteria.</p> :
                     socialPosts?.map(post => (
-                        <PostCard key={post.id} post={post} callback={callback ? (indicator)=> callback(indicator) : null} callbackText={callbackText} />)
+                        <PostCard key={post.id} post={post} callback={callback ? (post)=> callback(post) : null} callbackText={callbackText} />)
                     )
                 }
             </IndexViewWrapper>
