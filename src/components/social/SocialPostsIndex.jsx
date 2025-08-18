@@ -14,6 +14,7 @@ import IndexViewWrapper from '../reuseables/IndexView';
 import Loading from '../reuseables/loading/Loading';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import Filter from '../reuseables/Filter';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
 
 import styles from '../../styles/indexView.module.css'
 import errorStyles from '../../styles/errors.module.css';
