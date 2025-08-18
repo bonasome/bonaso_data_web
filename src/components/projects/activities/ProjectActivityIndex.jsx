@@ -18,7 +18,7 @@ import styles from '../../../styles/indexView.module.css';
 
 import { TbTimelineEventPlus, TbCalendarEvent } from "react-icons/tb";
 
-export default function ProjectActivitiyIndex({ project, onDelete=null }){
+export default function ProjectActivitiyIndex({ project }){
     //context
     const { user } = useAuth();
     const { projectsMeta, setProjectsMeta } = useProjects();
@@ -36,7 +36,7 @@ export default function ProjectActivitiyIndex({ project, onDelete=null }){
     //page meta
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
-    
+    const [deleted, setDeleted] = useState([]);
     //get the meta
     useEffect(() => {
         const getProjectMeta = async () => {
@@ -112,6 +112,7 @@ export default function ProjectActivitiyIndex({ project, onDelete=null }){
     }, [orgSearch]);
 
     if(loading) return <ComponentLoading />
+    const validActivities = activities?.filter(a => {!deleted.includes(a?.id)})
     return(
         <div className={styles.index}>
             <Messages errors={errors} />
@@ -119,10 +120,10 @@ export default function ProjectActivitiyIndex({ project, onDelete=null }){
                 onFilterChange={setFilters} config={filterConfig(projectsMeta, orgs, (s) => setOrgSearch(s))} initial={initial}  
             />}>
                 {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/activities/new`}><ButtonHover  noHover={<TbCalendarEvent />} hover={'New Activity'} /></Link>}
-                {activities?.length === 0 ? 
+                {validActivities?.length === 0 ? 
                     <p>No activities match your criteria.</p> :
-                    activities?.map(act => (
-                        <ProjectActivityCard key={act.id} project={project.id} activity={act} onDelete={() => {onDelete ? onDelete() : null}} />)
+                    validActivities?.map(act => (
+                        <ProjectActivityCard key={act.id} project={project.id} activity={act} onDelete={() => setDeleted(prev => [...prev, act.id])} />)
                     )
                 }
             </IndexViewWrapper>
