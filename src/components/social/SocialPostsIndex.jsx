@@ -39,14 +39,15 @@ function PostCard({ post, callback = null, callbackText }) {
             {expanded && <div>
                 <p>Posted on {cleanLabels(post.platform)} on {prettyDates(post.published_at)}</p>
                 {post.description ? <p>{post.description}</p> : <p>No description.</p>}
-            </div>}
-            {!['client'].includes(user.role) && <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <Link to={`/social/${post.id}`}>
-                    <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} />
-                </Link>
-                <Link to={`/social/${post.id}/edit`}>
-                    <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} />
-                </Link>
+
+                {!['client'].includes(user.role) && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <Link to={`/social/${post.id}`}>
+                        <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} />
+                    </Link>
+                    <Link to={`/social/${post.id}/edit`}>
+                        <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} />
+                    </Link>
+                </div>}
             </div>}
         </div>
     );
