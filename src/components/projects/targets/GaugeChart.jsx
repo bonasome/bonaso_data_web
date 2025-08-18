@@ -32,7 +32,7 @@ export default function GaugeChart({ target, achievement }){
             </div>
 
             <div className={styles.chartLabel}>
-                <h2>{Math.round((achievement/target)*100)}%</h2>
+                <h2>{target === 0 ? 0 : Math.round((achievement/target)*100)}%</h2>
                 <p>{achievement} of {target}</p>
             </div>
         </div>
