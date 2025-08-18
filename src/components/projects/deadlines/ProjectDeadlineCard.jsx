@@ -124,6 +124,14 @@ export default function ProjectDeadlineCard({ deadline, project, onDelete }) {
         }
     }
 
+    //determine if a user has edit perms (their creation or an admin)
+    const hasPerm = useMemo(() => {
+        if(!user || !activity) return false
+        if(user.role === 'admin') return true;
+        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == activity?.created_by.organization.id) return true
+        return false
+    }, [user, activity]);
+
     if(del){
         return(
             <ConfirmDelete name='Deadline' onConfirm={() => deleteDeadline()} onCancel={() => setDel(false)} />
@@ -147,8 +155,8 @@ export default function ProjectDeadlineCard({ deadline, project, onDelete }) {
                     {completed &&
                         <p>Deadline met, awesome work!</p>}
                     <UpdateRecord created_by={deadline.created_by} created_at={deadline.created_at} updated_by={deadline.updated_by} updated_at={deadline.updated_at} />
-                    <Link to={`/projects/${project}/deadlines/${deadline.id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
-                    <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Deadline'} forDelete={true} />
+                    {hasPerm && <Link to={`/projects/${project}/deadlines/${deadline.id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>}
+                    {hasPerm && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Deadline'} forDelete={true} />}
                 </div>
             </div>}
         </div>
