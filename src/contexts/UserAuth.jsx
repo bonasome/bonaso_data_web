@@ -36,11 +36,13 @@ export function UserAuth({ children }) {
                     setLoggedIn(true);
                 } 
                 else {
+                    console.log('error thrown in else')
                     setUser(null);
                     setLoggedIn(false);
                 }
             } 
             catch (err) {
+                console.log('error thrown in catch')
                 setUser(null);
                 setLoggedIn(false);
                 throw err; // propagate so fetchWithAuth can catch it

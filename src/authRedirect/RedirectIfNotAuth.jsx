@@ -9,7 +9,7 @@ const RedirectIfNotAuthenticated = ({ children }) => {
 
     if(loading) return <Loading />
 
-    if (!loggedIn) {
+    if (!loggedIn && !loading) {
         return <Navigate to="/users/login" replace />;
     }
     
