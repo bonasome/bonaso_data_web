@@ -50,7 +50,7 @@
 }
 .message {
     background-color: var(--bonaso-dark-accent);
-    padding: 2vh;
+    padding: 4vh;
     margin-right: 4vh;
 }
 .msgContent {

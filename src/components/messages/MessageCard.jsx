@@ -26,7 +26,7 @@ export default function MessageCard({ message, onUpdate, reply=false, parent=nul
 
     const inThread = useMemo(() => {
         if(!message || !message?.recipients) return;
-        const recipients = message?.recipients.filter(r => r.id !== user.id).map((r) => (r.recipient))
+        const recipients = message?.recipients.map((r) => (r.recipient))
         recipients.push(message.sender)
         return recipients.filter(r => r.id !== user.id)
     }, [message])
@@ -147,6 +147,7 @@ export default function MessageCard({ message, onUpdate, reply=false, parent=nul
 
     console.log(message)
     if(!message || !inThread) return<></>
+    console.log(inThread)
     return(
         <div className={styles.message}>
             {!reply && <h3>with {inThread?.map((r) => (r.display_name)).join(', ')}</h3>}
