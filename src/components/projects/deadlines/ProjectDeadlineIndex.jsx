@@ -34,7 +34,7 @@ export default function ProjectDeadlineIndex({ project, onDelete=null }){
     //page meta
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
-    
+    const [deleted, setDeleted] = useState([]);
 
     //load events
     useEffect(() => {
@@ -85,6 +85,7 @@ export default function ProjectDeadlineIndex({ project, onDelete=null }){
     }, [orgSearch]);
 
     if(loading) return <ComponentLoading />
+    const validDeadlines = deadlines?.filter(d => (!deleted.includes(d?.id)))
     return(
         <div className={styles.index}>
             <Messages errors={errors} />
@@ -92,10 +93,10 @@ export default function ProjectDeadlineIndex({ project, onDelete=null }){
                 onFilterChange={setFilters} config={filterConfig(orgs, (s) => setOrgSearch(s))} initial={initial}  
             />}>
                 {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/deadlines/new`}><ButtonHover  noHover={<TbTimelineEventPlus />} hover={'New Deadline'} /></Link>}
-                {deadlines?.length === 0 ? 
+                {validDeadlines?.length === 0 ? 
                     <p>No activities match your criteria.</p> :
-                    deadlines?.map(d => (
-                        <ProjectDeadlineCard key={d.id} project={project.id} deadline={d} onDelete={() => {onDelete ? onDelete() : null}} />)
+                    validDeadlines?.map(d => (
+                        <ProjectDeadlineCard key={d.id} project={project.id} deadline={d} onDelete={() => setDeleted(prev => [...prev, d.id])} />)
                     )
                 }
             </IndexViewWrapper>

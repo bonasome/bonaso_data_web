@@ -112,7 +112,7 @@ export default function ProjectActivitiyIndex({ project }){
     }, [orgSearch]);
 
     if(loading) return <ComponentLoading />
-    const validActivities = activities?.filter(a => {!deleted.includes(a?.id)})
+    const validActivities = activities?.filter(a => (!deleted.includes(a?.id)))
     return(
         <div className={styles.index}>
             <Messages errors={errors} />
