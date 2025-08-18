@@ -1,11 +1,15 @@
+import { useState, useEffect } from "react";
+
+import fetchWithAuth from "../../../services/fetchWithAuth";
+
+import RadioButtons from '../reuseables/inputs/RadioButtons';
+import Messages from "../reuseables/Messages";
+import ButtonLoading from "../reuseables/loading/ButtonLoading";
+
+import modalStyles from '../../styles/modals.module.css';
+
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
-import modalStyles from '../../styles/modals.module.css';
-import { useState, useEffect } from "react";
-import ButtonLoading from "../reuseables/loading/ButtonLoading";
-import errorStyles from '../../styles/errors.module.css';
-import fetchWithAuth from "../../../services/fetchWithAuth";
-import RadioButtons from '../reuseables/inputs/RadioButtons';
 
 //modal for creating a flag
 export default function FlagModal({ model, id, onConfirm, onCancel }){
@@ -38,7 +42,7 @@ export default function FlagModal({ model, id, onConfirm, onCancel }){
         setErrors([]);
         const sErrors = []
         if(flagType === ''){
-            sErrors.push('You must select a flag typr.');
+            sErrors.push('You must select a flag type.');
         }
         if(flagReason === ''){
             sErrors.push('You must enter a reason for this flag.');
@@ -93,10 +97,14 @@ export default function FlagModal({ model, id, onConfirm, onCancel }){
     return(
         <div className={modalStyles.modal}>
             <h2>New Flag</h2>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+            <Messages errors={errors} />
+            <div>
             <RadioButtons name='flag_type' label='Flag Category' options={meta?.flag_reasons} value={flagType} onChange={(val) => setFlagType(val)}/>
-            <label htmlFor='reason'>Flag Reason</label>
-            <textarea id='reason' type='text' onChange={(e) => setFlagReason(e.target.value)} value={flagReason} />
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+                <label htmlFor='reason'>Flag Reason</label>
+                <textarea id='reason' style={{ width: '30vw', height: '20vh' }} onChange={(e) => setFlagReason(e.target.value)} value={flagReason} />
+            </div>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'row' }}>
                 {!saving && <button onClick={() => raiseFlag()}><IoIosSave /> Save</button>}
                 {!saving && <button onClick={() => onCancel()}><FcCancel /> Cancel</button>}

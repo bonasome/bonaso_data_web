@@ -6,6 +6,7 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import ReturnLink from '../reuseables/ReturnLink';
 import ButtonHover from '../reuseables/inputs/ButtonHover';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
+import Messages from '../reuseables/Messages';
 
 import errorStyles from '../../styles/errors.module.css';
 import styles from './narrative.module.css';
@@ -44,18 +45,20 @@ export default function NarrativeReportUpload() {
         setErrors([]);
         setSuccess('');
 
+        let submissionErrors = []
         //user should upload an actual file
         if (!file){
-            setErrors(['Please select a file.']);
-            setUploading(false);
-            return 
+            submissionErrors.push('Please select a file to upload.')
         } 
         //should also have a title (description is optional)
         if (!title.trim()){
-            setErrors(['Please enter a title for this upload.']);
+            submissionErrors.push('Title is required.')
+        } 
+        if(submissionErrors.length > 0){
+            setErrors(submissionErrors);
             setUploading(false);
             return 
-        } 
+        }
 
         //create and append object to a data mat
         const formData = new FormData();
@@ -73,7 +76,7 @@ export default function NarrativeReportUpload() {
             });
 
             if (response.ok) {
-                setSuccess('File successfully uploaded!');
+                setSuccess(['File successfully uploaded!']);
                 setTitle('');
                 setDesc('');
                 setFile(null);
@@ -98,11 +101,7 @@ export default function NarrativeReportUpload() {
             
             <h1>Upload a Narrative Report</h1>
 
-            {errors.length > 0 && <div className={errorStyles.errors}>
-                <ul>{errors.map((msg) => <li key={msg}>{msg}</li>)}</ul>
-            </div>}
-
-            {success && <div className={errorStyles.success}><p>{success}</p></div>}
+            <Messages errors={errors} success={success} />
 
             <div className={styles.template}>
                 <form onSubmit={handleSubmit}  noValidate={true}>
@@ -142,9 +141,8 @@ export default function NarrativeReportUpload() {
                             onChange={handleChange}
                         />
                     <div className={styles.buttons}>
-                        {uploading ? 
-                            <ButtonLoading /> : 
-                            <ButtonHover noHover={<MdCloudUpload />} hover={'Upload Report'} />}
+                        {uploading ? <ButtonLoading /> : 
+                            <button type="submit"><MdCloudUpload /> Upload File</button>}
                         <button type="button" onClick={() => setFile(null)}>Clear</button>
                     </div>
                     </div>

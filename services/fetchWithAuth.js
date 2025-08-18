@@ -1,4 +1,6 @@
+import { refreshAuth } from "./authServices";
 const baseUrl = import.meta.env.VITE_API_URL;
+
 export default async function fetchWithAuth(url, options = {}) {
 
     // Only set Content-Type for methods that send a body
@@ -13,26 +15,16 @@ export default async function fetchWithAuth(url, options = {}) {
     });
 
     if (response.status === 401) {
-        const refreshResponse = await fetch(`${baseUrl}/api/users/token/refresh/`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({}),
-        });
-
-        if (refreshResponse.ok) {
-            response = await fetch(baseUrl+url, {
-                ...options,
-                headers,
-                credentials: 'include',
-            });
-        } else {
-            const data = await refreshResponse.json();
-            console.warn('refresh token failed: ', data.detail);
+        try {
+            await refreshAuth(); // ask context to refresh
+        } 
+        catch (err) {
+            console.warn("Refresh failed:", err);
+            return response; // still return 401 so app can handle logout
         }
-    }
 
+        // retry once after refresh
+        response = await fetch(baseUrl+url, { ...options, credentials: "include" });
+    }
     return response;
 }

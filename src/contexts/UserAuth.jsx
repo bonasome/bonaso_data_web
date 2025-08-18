@@ -1,69 +1,68 @@
 import React from 'react';
 import { useState, useEffect, createContext, useContext } from "react";
-import fetchWithAuth from '../../services/fetchWithAuth';
+import { setRefreshAuth } from "../../services/authServices";
 export const UserContext = createContext();
 
 export function UserAuth({ children }) {
-    const dns = import.meta.env.VITE_DNS
+    const baseUrl = import.meta.env.VITE_API_URL;
     const [loading, setLoading] = useState(true);
     const [loggedIn, setLoggedIn] = useState(false);
     const [user, setUser] = useState(null);
+    const [refreshPromise, setRefreshPromise] = useState(null);
 
     const refreshAuth = async () => {
-        setLoading(true);
-        try {
-            const response = await fetchWithAuth(`/api/users/me/`, {
-                method: 'GET',
-                credentials: 'include'
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setUser(data);
-                setLoggedIn(true);
-            } else {
-                setUser(null);
-                setLoggedIn(false);
-            }
-        } catch (err) {
-            setUser(null);
-            setLoggedIn(false);
-        } finally {
-            setLoading(false);
-        }
-    };
+        if (refreshPromise) return refreshPromise;
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            try{
-                const response = await fetchWithAuth(`/api/users/me/`, {
+        const promise = (async () => {
+            setLoading(true);
+            try {
+            // Step 1: Refresh token
+                const refreshResponse = await fetch(`${baseUrl}/api/users/token/refresh/`, {
+                    method: 'POST',
+                    credentials: 'include',
+                });
+
+                if (!refreshResponse.ok) {
+                    throw new Error('Token refresh failed');
+                }
+                // Step 2: Fetch current user info
+                const response = await fetch(`${baseUrl}/api/users/me/`, {
                     method: 'GET',
                     credentials: 'include',
                 });
-                if(response.ok){
-                    const data = await response.json()
+                if (response.ok) {
+                    const data = await response.json();
                     setUser(data);
                     setLoggedIn(true);
-                    setLoading(false);
-                }
-                else{
-                    setLoggedIn(false);
+                } 
+                else {
                     setUser(null);
-                    setLoading(false);
+                    setLoggedIn(false);
                 }
-            }
-            catch(err){
-                console.warn(`Your login session is not valid: ${err}: Logging out...`);
-                setLoggedIn(false);
+            } 
+            catch (err) {
                 setUser(null);
+                setLoggedIn(false);
+                throw err; // propagate so fetchWithAuth can catch it
+            } 
+            finally {
                 setLoading(false);
+                setRefreshPromise(null);
             }
-        }
-        checkAuth();
-    }, [dns]);
+        })();
 
-    return(
-        <UserContext.Provider value={{ loggedIn, setLoggedIn, user, setUser, loading, refreshAuth }}>
-            { children }
+        setRefreshPromise(promise);
+        return promise;
+    };
+
+    useEffect(() => {
+        setRefreshAuth(refreshAuth); // make it available globally
+        refreshAuth(); // run on mount
+    }, [baseUrl]);
+
+    return (
+        <UserContext.Provider value={{ loggedIn, user, loading, refreshAuth }}>
+        {children}
         </UserContext.Provider>
     );
 }
