@@ -96,9 +96,12 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
         },
     ]
     const orgs = [
-        {name: 'cascade_to_children', label: 'Make Visible to Subgrantees?', type: 'checkbox'},
+        {name: 'cascade_to_children', label: 'Make Visible to Subgrantees?', type: 'checkbox',
+            tooltip: `Check this box to make this visible to all your subgrantees as well as your own organization.`
+        },
         { name: 'organization_ids', label: "Organizations Involved", type: "multimodel", IndexComponent: OrganizationsIndex,
-            labelField: 'name',
+            labelField: 'name', tooltip: `If you want this announcement to only be visible to members of specific organizations, you can select them hear.
+            Please note that if you have checked the above cascade to children box, you can likely ignore this.`
         },
     ]
     const admin= [

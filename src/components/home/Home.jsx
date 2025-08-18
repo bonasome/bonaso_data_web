@@ -18,9 +18,9 @@ function PopUp({ onClose }){
             <p>
                 Welcome to the BONASO data portal. Please note that any information you see in this portal
                 is confidential, and may not be shared or distributed to anyone outside of your organization.
-                <strong>Any violations of patient confidentiality is against the law and is punishable by fines
+                <strong> Any violations of client confidentiality is against the law and is punishable by fines
                 and/or jail time.</strong> By entering this portal, you agree to maintain confidentiality of
-                all data you see here and agree that you will not misuse any information here.
+                all data you see here and also agree that you will not misuse any information here.
             </p>
             <p>Thank you for all the important work you do in the fight for a healthier Botswana!</p>
             <button onClick={() => onClose()}>I understand, and will not misuse any data I access on this portal.</button>
