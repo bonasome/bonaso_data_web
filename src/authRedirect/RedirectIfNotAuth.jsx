@@ -1,9 +1,10 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/UserAuth';
 import Loading from '../components/reuseables/loading/Loading';
 
 const RedirectIfNotAuthenticated = ({ children }) => {
+    const location = useLocation();
     const { user, loading, loggedIn } = useAuth();
 
     if(loading) return <Loading />
