@@ -12,9 +12,10 @@ import ConfirmDelete from '../reuseables/ConfirmDelete';
 import UpdateRecord from '../reuseables/meta/UpdateRecord';
 import ReturnLink from '../reuseables/ReturnLink';
 import ButtonHover from '../reuseables/inputs/ButtonHover';
+import Messages from '../reuseables/Messages';
 
 import styles from './indicatorDetail.module.css';
-import errorStyles from '../../styles/errors.module.css';
+
 import { ImPencil } from 'react-icons/im';
 import { FaTrashAlt } from 'react-icons/fa';
 
@@ -155,22 +156,22 @@ export default function IndicatorDetail(){
         return match ? match.label : null;
     };
 
-    if (loading || !indicator) return <Loading />
+    if (loading) return <Loading />
     return(
         <div className={styles.container}>
             {del && <ConfirmDelete name={indicator?.display_name} statusWarning={'We advise against deleting indicators. Instead, please consider setting its status as "deprecated".'} onConfirm={() => deleteIndicator()} onCancel={() => setDel(false)} />}
             
             <div className={styles.section}>
                 <ReturnLink url={'/indicators'} display='Return to indicators overview' />
-                <h1>{indicator.display_name}</h1>
-                {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
+                <h1>{indicator?.display_name}</h1>
+                <Messages errors={errors} />
                 
                 <p>{indicator.description}</p>
 
                 <p><i>
-                    {getLabelFromValue('statuses',indicator.status)}, {getLabelFromValue('indicator_types',indicator.indicator_type)}
-                    {indicator.require_numeric && ', Requires a number'} 
-                    {indicator.allow_repeat && '(Allows Repeats)'}
+                    {getLabelFromValue('statuses',indicator?.status)}, {getLabelFromValue('indicator_types',indicator?.indicator_type)}
+                    {indicator?.require_numeric && ', Requires a number'} 
+                    {indicator?.allow_repeat && '(Allows Repeats)'}
                 </i></p>
 
                 {indicator.prerequisites?.length > 0 && <div>
@@ -180,14 +181,14 @@ export default function IndicatorDetail(){
                     </ul>
                 </div>}
 
-                {indicator.required_attributes.length > 0 && <div>
+                {indicator?.required_attributes.length > 0 && <div>
                     <p>Requires Special Respondent Attributes:</p>
                     <ul>{indicator.required_attributes?.map((a) => (<li key={a.name}>{getLabelFromValue('required_attributes', a.name)}</li>))}</ul>
                 </div>}
 
-                {indicator.governs_attribute && <p><i>Controls Respondent Attribute: {getLabelFromValue('required_attributes', indicator.governs_attribute)}</i></p> }
+                {indicator?.governs_attribute && <p><i>Controls Respondent Attribute: {getLabelFromValue('required_attributes', indicator.governs_attribute)}</i></p> }
                 
-                {indicator.subcategories.length > 0 && <div>
+                {indicator?.subcategories.length > 0 && <div>
                     {indicator.match_subcategories_to ? <h4>Subcategories (matched with {indicator.prerequisites.find(p => p.id === indicator.match_subcategories_to)?.display_name ?? 'Unknown'})</h4> : 
                     <h4>Subcategories</h4>}
                     <ul>

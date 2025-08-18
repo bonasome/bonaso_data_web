@@ -166,9 +166,8 @@ export default function ProjectDeadlineForm(){
     const start = watch("start");
 
     const basics = [
-        { name: 'name', label: 'Deadline Name (Required)', type: "text", rules: { required: "Required" },
+        { name: 'name', label: 'Deadline Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
             placeholder: "Give this deadline a short snappy name so that people know what's due...",
-            rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}},
         },
         { name: 'description', label: "Deadline Description", type: "textarea",
             placeholder: "Any additional information that will help people understand this deadline..."
