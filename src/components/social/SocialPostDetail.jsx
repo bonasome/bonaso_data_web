@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 import { useSocialPosts } from "../../contexts/SocialPostsContext";
 
@@ -27,6 +27,7 @@ import { IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 import { MdFlag } from 'react-icons/md';
 
 export default function SocialPostDetail(){
+    const navigate = useNavigate();
     //existing post id param
     const { id } = useParams();
 
