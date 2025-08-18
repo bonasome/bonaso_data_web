@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../../../contexts/UserAuth';
@@ -126,11 +126,11 @@ export default function ProjectDeadlineCard({ deadline, project, onDelete }) {
 
     //determine if a user has edit perms (their creation or an admin)
     const hasPerm = useMemo(() => {
-        if(!user || !activity) return false
+        if(!user || !deadline) return false
         if(user.role === 'admin') return true;
-        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == activity?.created_by.organization.id) return true
+        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == deadline?.created_by.organization.id) return true
         return false
-    }, [user, activity]);
+    }, [user, deadline]);
 
     if(del){
         return(

@@ -188,7 +188,6 @@ export default function ProjectDeadlineForm(){
         }
     ]
     
-
     if(loading || !projectsMeta?.statuses) return <Loading />
     return(
         <div className={styles.form}>
