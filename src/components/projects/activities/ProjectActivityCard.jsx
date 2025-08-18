@@ -29,7 +29,7 @@ export default function ProjectActivityCard({ activity, project, onDelete }) {
     const hasPerm = useMemo(() => {
         if(!user || !activity) return false
         if(user.role === 'admin') return true;
-        if(user.organization_id == activity?.created_by.organization.id) return true
+        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == activity?.created_by.organization.id) return true
         return false
     }, [user, activity]);
 
