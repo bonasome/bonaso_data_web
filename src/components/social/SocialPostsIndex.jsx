@@ -24,6 +24,7 @@ import { GiJumpAcross } from 'react-icons/gi';
 
 //card component to display post information
 function PostCard({ post, callback = null, callbackText }) {
+    const { user } = useAuth();
     const [expanded, setExpanded] = useState(false);
 
     return (
