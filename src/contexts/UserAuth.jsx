@@ -16,36 +16,45 @@ export function UserAuth({ children }) {
         const promise = (async () => {
             setLoading(true);
             try {
-            // Step 1: Refresh token
+                // Step 1: Refresh token
                 const refreshResponse = await fetch(`${baseUrl}/api/users/token/refresh/`, {
                     method: 'POST',
                     credentials: 'include',
                 });
 
                 if (!refreshResponse.ok) {
-                    throw new Error('Token refresh failed');
+                    // Only throw if it’s not 401, or you can log 401 and continue
+                    if (refreshResponse.status !== 401) {
+                        throw new Error('Token refresh failed');
+                    }
+                    // If 401, we know it’s “expected” sometimes — just clear state
+                    //setUser(null);
+                    //setLoggedIn(false);
+                    //return; // don't throw, just stop here
                 }
+
                 // Step 2: Fetch current user info
-                const response = await fetch(`${baseUrl}/api/users/me/`, {
+                const userResponse = await fetch(`${baseUrl}/api/users/me/`, {
                     method: 'GET',
                     credentials: 'include',
                 });
-                if (response.ok) {
-                    const data = await response.json();
+
+                if (userResponse.ok) {
+                    const data = await userResponse.json();
                     setUser(data);
                     setLoggedIn(true);
                 } 
                 else {
-                    console.log('error thrown in else')
                     setUser(null);
                     setLoggedIn(false);
                 }
             } 
             catch (err) {
-                console.log('error thrown in catch')
-                setUser(null);
-                setLoggedIn(false);
-                throw err; // propagate so fetchWithAuth can catch it
+                // Only propagate unexpected errors
+                if (!(err instanceof Error)) {
+                    console.warn('Unexpected refresh error:', err);
+                }
+                throw err;
             } 
             finally {
                 setLoading(false);
