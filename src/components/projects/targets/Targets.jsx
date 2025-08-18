@@ -177,7 +177,7 @@ export default function Targets({ project, organization}) {
             {adding && <EditTargetModal onUpdate={handleChange} onCancel={() => setAdding(false)} project={project} organization={organization} />}
             <IndexViewWrapper entries={entries} onSearchChange={setSearch} page={page} onPageChange={setPage}>
                 {(targets && project && organization && targets?.length) == 0 ? 
-                    <p>No targets yet. Make one!</p> :
+                    <p>No targets yet. Check back later.</p> :
                     targets?.map(tar => (
                     <TargetCard key={tar.id} target={tar} organization={organization} project={project} onUpdate={handleChange} />
                     ))

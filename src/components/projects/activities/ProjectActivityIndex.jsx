@@ -18,7 +18,7 @@ import styles from '../../../styles/indexView.module.css';
 
 import { TbTimelineEventPlus, TbCalendarEvent } from "react-icons/tb";
 
-export default function ProjectActivitiyIndex({ project }){
+export default function ProjectActivitiyIndex({ project, onDelete=null }){
     //context
     const { user } = useAuth();
     const { projectsMeta, setProjectsMeta } = useProjects();
@@ -122,7 +122,7 @@ export default function ProjectActivitiyIndex({ project }){
                 {activities?.length === 0 ? 
                     <p>No activities match your criteria.</p> :
                     activities?.map(act => (
-                        <ProjectActivityCard key={act.id} project={project.id} activity={act} onDelete={() => setPage(1)} />)
+                        <ProjectActivityCard key={act.id} project={project.id} activity={act} onDelete={() => {onDelete ? onDelete() : null}} />)
                     )
                 }
             </IndexViewWrapper>

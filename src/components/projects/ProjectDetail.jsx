@@ -232,7 +232,7 @@ export default function ProjectDetail(){
                     </div>
                         
                     {showActivities && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
-                        <ProjectActivityIndex project={project} />
+                        <ProjectActivityIndex project={project} onDelete={fetchProject} />
                     </div>}
                 </div>
                 
@@ -244,7 +244,7 @@ export default function ProjectDetail(){
                     </div>
                         
                     {showDeadlines && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
-                        <ProjectDeadlineIndex project={project} />
+                        <ProjectDeadlineIndex project={project} onDelete={fetchProject} />
                     </div>}
                 </div>
 

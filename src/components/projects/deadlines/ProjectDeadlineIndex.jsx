@@ -17,7 +17,7 @@ import styles from '../../../styles/indexView.module.css';
 
 import { TbTimelineEventPlus } from "react-icons/tb";
 
-export default function ProjectDeadlineIndex({ project }){
+export default function ProjectDeadlineIndex({ project, onDelete=null }){
     //context
     const { user } = useAuth();
 
@@ -95,7 +95,7 @@ export default function ProjectDeadlineIndex({ project }){
                 {deadlines?.length === 0 ? 
                     <p>No activities match your criteria.</p> :
                     deadlines?.map(d => (
-                        <ProjectDeadlineCard key={d.id} project={project.id} deadline={d} onDelete={() => setPage(1)} />)
+                        <ProjectDeadlineCard key={d.id} project={project.id} deadline={d} onDelete={() => {onDelete ? onDelete() : null}} />)
                     )
                 }
             </IndexViewWrapper>
