@@ -237,7 +237,7 @@ export default function IndicatorDetail(){
                 <h2>Assigned to Organizations</h2>
                 {tasks && tasks.length > 0 && tasks.map((t) =>(
                     <div key={t.id} className={styles.card}>
-                        <Link to={`/projects/${t.project.id}/organization/${t.organization.id}`}><h3>{t.display_name}</h3></Link>
+                        <Link to={`/projects/${t.project.id}/organization/${t.organization.id}`}><h3>Assigned to {t.organization.name} in project {t.project.name}</h3></Link>
                     </div>
                 ))}
                 {!projects || projects.length === 0 && <p><i>This indicator is not in any projects.</i></p>}
