@@ -11,7 +11,7 @@ import styles from './login.module.css';
 
 export default function Logout() {
     const navigate = useNavigate();
-    const { setUser, setLoggedIn } = useAuth();
+    const { setUser, setLoggedIn, refreshAuth } = useAuth();
 
     //get domain from env
     const dns = import.meta.env.VITE_DNS;
@@ -25,6 +25,7 @@ export default function Logout() {
                     credentials: 'include',
                 });
                 if (response.ok) {
+                    await refreshAuth();
                     setUser(null);
                     setLoggedIn(false);
                     console.log('Logged out successfuly.');
