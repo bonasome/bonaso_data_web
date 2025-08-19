@@ -40,7 +40,7 @@ export default function Logout() {
             }
         };
         logout();
-    }, [dns, refreshAuth, navigate]);
+    }, [dns, navigate]);
 
     //page display in case logout takes a second to register and redirect
     return(
