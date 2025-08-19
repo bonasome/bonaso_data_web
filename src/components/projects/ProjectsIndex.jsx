@@ -13,6 +13,7 @@ import IndexViewWrapper from '../reuseables/IndexView';
 import Messages from '../reuseables/Messages';
 import Loading from '../reuseables/loading/Loading';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
+import ButtonHover from '../reuseables/inputs/ButtonHover';
 
 import styles from '../../styles/indexView.module.css'
 
