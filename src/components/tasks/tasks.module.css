@@ -5,6 +5,12 @@
     height: fit-content;
     transition: all 0.3s ease;
 }
+@media screen and (max-width: 500px){
+    .card{
+        margin: 1vh;
+        padding: 2vh;
+    }
+}
 .card:hover{ 
     border: none;
     margin: 1vh;

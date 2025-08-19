@@ -4,6 +4,12 @@
     background-color: var(--bonaso-dark-accent);
     transition: all .6s;
 }
+@media screen and (max-width: 500px){
+    .card{
+        margin: 1vh;
+        padding: 2vh;
+    }
+}
 .card:hover {
     transform: scale(1.06);
     cursor: pointer;
@@ -25,6 +31,9 @@
 }
 @media screen and (max-width: 400px){
     .chartLabel{
-        position: block;
+        bottom: 10vh;
+    }
+    .chartLabel > h2, p {
+        margin: 4px;
     }
 }
