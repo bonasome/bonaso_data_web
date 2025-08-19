@@ -25,7 +25,6 @@ export default function Logout() {
                     credentials: 'include',
                 });
                 if (response.ok) {
-                    await refreshAuth();
                     setUser(null);
                     setLoggedIn(false);
                     console.log('Logged out successfuly.');

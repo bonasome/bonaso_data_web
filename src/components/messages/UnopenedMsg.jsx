@@ -46,7 +46,7 @@ export default function UnopenedMsg({ msg, callback=null }){
     };
 
     return(
-        <div className={checkRead ? styles.sbCard : styles.unreadSBCard} onClick={() => {callback ? callback(msg) : null}}>
+        <div className={checkRead(msg) ? styles.sbCard : styles.unreadSBCard} onClick={() => {callback ? callback(msg) : null}}>
             {!checkRead(msg) && <MdOutlineMarkChatUnread fontSize={25} style={{ marginTop: 'auto', marginBottom: 'auto', marginRight: 5}} />}
             {checkToDo(msg) && <TbMessageReportFilled fontSize={25} style={{ marginTop: 'auto', marginBottom: 'auto', marginRight: 5}}/>}
             {checkCompleted(msg) && <BiSolidMessageAltCheck 
