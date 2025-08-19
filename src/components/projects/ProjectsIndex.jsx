@@ -1,17 +1,24 @@
 import React from 'react';
-import styles from '../../styles/indexView.module.css'
 import { useEffect, useState, useRef } from 'react';
-import fetchWithAuth from '../../../services/fetchWithAuth';
+import { Link } from 'react-router-dom';
+
 import { useAuth } from '../../contexts/UserAuth'
+import { useProjects } from '../../contexts/ProjectsContext';
+
+import fetchWithAuth from '../../../services/fetchWithAuth';
+import { initial, filterConfig } from './filterConfig';
+
 import Filter from '../reuseables/Filter';
 import IndexViewWrapper from '../reuseables/IndexView';
-import { useProjects } from '../../contexts/ProjectsContext';
-import { Link } from 'react-router-dom';
+import Messages from '../reuseables/Messages';
 import Loading from '../reuseables/loading/Loading';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
-import { initial, filterConfig } from './filterConfig';
-import Messages from '../reuseables/Messages';
+
+import styles from '../../styles/indexView.module.css'
+
 import { HiLightBulb } from "react-icons/hi";
+import { GiJumpAcross } from 'react-icons/gi';
+import { ImPencil } from 'react-icons/im';
 
 function ProjectCard({ project, callback=null, callbackText }) {
     //context
