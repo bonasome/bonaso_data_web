@@ -3,6 +3,12 @@
     margin: 5vh;
     background-color: var(--bonaso-dark-accent);
 }
+@media screen and (max-width: 768px){
+    .form{
+        padding: 2vh;
+        margin: 4vh;
+    }
+}
 .formSection {
     margin: 3vh;
     padding: 3vh;

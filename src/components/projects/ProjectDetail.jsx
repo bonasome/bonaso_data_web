@@ -196,7 +196,7 @@ export default function ProjectDetail(){
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
                     
-                    {showAnnouncements && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
+                    {showAnnouncements && <div style={{ paddingLeft: '2vh', paddingRight: '2vh'}}>
                         <AnnouncementsIndex project={project} />
                     </div>}
                 </div>
@@ -208,7 +208,7 @@ export default function ProjectDetail(){
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
                         
-                    {showDetails && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
+                    {showDetails && <div style={{ paddingLeft: '2vh', paddingRight: '2vh'}}>
                         <i>Lasts from {prettyDates(project.start)} to {prettyDates(project.end)} {user.role =='admin' && '('+project.status+')'} </i>
                         {project?.client && user.role == 'admin' && <h4>From <Link to={`/clients/${project.client.id}`}>{project.client.name}</Link></h4>}
                         <h4>Project Description</h4>
@@ -231,7 +231,7 @@ export default function ProjectDetail(){
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
                         
-                    {showActivities && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
+                    {showActivities && <div style={{ paddingLeft: '2vh', paddingRight: '2vh'}}>
                         <ProjectActivityIndex project={project} />
                     </div>}
                 </div>
@@ -243,7 +243,7 @@ export default function ProjectDetail(){
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
                         
-                    {showDeadlines && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
+                    {showDeadlines && <div style={{ paddingLeft: '2vh', paddingRight: '2vh'}}>
                         <ProjectDeadlineIndex project={project} />
                     </div>}
                 </div>
@@ -255,7 +255,7 @@ export default function ProjectDetail(){
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
                         
-                    {showOrgs && <div style={{ paddingLeft: '3vh', paddingRight: '3vh'}}>
+                    {showOrgs && <div style={{ paddingLeft: '2vh', paddingRight: '2vh'}}>
                         {!addingOrgs && user.role == 'admin' && 
                             <ButtonHover callback={() => setAddingOrgs(true)} noHover={<BsFillBuildingsFill />} hover={'Add an Organization'} />}
                         {addingOrgs && <button onClick={() => setAddingOrgs(false)}> <IoIosCheckbox /> Done </button>}

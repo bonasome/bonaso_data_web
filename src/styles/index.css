@@ -87,7 +87,9 @@ textarea{
     padding: 10px;
     border: none;
     margin: 1vw;
+    max-width: 80%;
 }
+
 textarea:focus{
     outline: none;
     box-shadow: 4px 4px 4px var(--bonaso-uber-dark-accent);

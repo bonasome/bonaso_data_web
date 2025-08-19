@@ -28,7 +28,7 @@ export default function Select({ name, type, label, onChange, onBlur, value, opt
                         value={searchTerm}
                         onChange={(e) => {setSearchTerm(e.target.value)}}
                         placeholder='Start typing to search...'
-                        style={{ maxWidth: 250, padding: 4, marginBottom: 1}}
+                        style={{ maxWidth: 200, padding: 4, marginBottom: 1}}
                     />
                 </div>}
                 <select
