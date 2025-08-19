@@ -97,7 +97,7 @@ function PregnancyRow({ respondent, onError, existing=null, onUpdate, onCancel }
                 {editing && <div>
                     <label htmlFor={'term_began'}>Term Began</label>
                     <input type='date' id='term_began' name='term_began' value={termBegan} onChange={(e)=> setTermBegan(e.target.value)}/>
-                    <label htmlFor={'term_ended'}>Term Began</label>
+                    <label htmlFor={'term_ended'}>Term Ended</label>
                     <input type='date' id='term_ended' name='term_ended' value={termEnded} onChange={(e)=> setTermEnded(e.target.value)}/>
                     <div style ={{ display: 'flex', flexDirection: 'row'}}>
                     {!saving && <ButtonHover callback={() => handleSubmit()} noHover={<IoIosSave />} hover={'Save'} />}

@@ -342,7 +342,10 @@ export default function RespondentDetail(){
                 {width > 768 && <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
                     {sbVisible ? <BiSolidHide /> : <BiSolidShow />}
                 </div>}
-                {sbVisible && <Tasks isDraggable={true} callback={(t) => handleButtonAdd(t)} blacklist={added} includeParams={[{field: 'indicator_type', value:'respondent'}]} />}
+                {sbVisible && <div>
+                    <h2>My Tasks</h2>
+                    <Tasks isDraggable={true} callback={(t) => handleButtonAdd(t)} blacklist={added} includeParams={[{field: 'indicator_type', value:'respondent'}]} />
+                </div>}
             </div>}
         </div>
     )
