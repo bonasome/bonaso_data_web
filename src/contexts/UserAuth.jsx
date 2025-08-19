@@ -10,6 +10,25 @@ export function UserAuth({ children }) {
     const [user, setUser] = useState(null);
     const [refreshPromise, setRefreshPromise] = useState(null);
 
+    useEffect(() => {
+        if (loggedIn) {
+            const refreshInterval = setInterval(async () => {
+                try {
+                    console.log('refreshing token...')
+                    await fetch("/api/users/token/refresh/", {
+                    method: "POST",
+                    credentials: "include",
+                    });
+                    // if your server also rotates the refresh token, set-cookie will update it automatically
+                } 
+                catch (err) {
+                    console.error("Silent refresh failed", err);
+                }
+            }, 4 * 60 * 1000); // every 4 minutes if your access token is 5 min
+            return () => clearInterval(refreshInterval);
+        }
+    }, [loggedIn]);
+
     const refreshAuth = async () => {
         if (refreshPromise) return refreshPromise;
 
