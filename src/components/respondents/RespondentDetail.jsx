@@ -344,7 +344,7 @@ export default function RespondentDetail(){
                 </div>}
                 
                 {sbVisible && <div>
-                    <h2>My Tasks</h2>
+                    <h2 style={{ marginTop: 30, textAlign: 'center'}}>My Tasks</h2>
                     <Tasks isDraggable={true} callback={(t) => handleButtonAdd(t)} blacklist={added} includeParams={[{field: 'indicator_type', value:'respondent'}]} />
                 </div>}
             </div>}

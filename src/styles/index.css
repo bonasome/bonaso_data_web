@@ -74,6 +74,14 @@ input:focus{
         max-width: 66vw;
     }
 }
+@media screen and (max-width: 480px){
+    input{
+        max-width: 80%;
+    }
+    select{
+        max-width: 80%;
+    }
+}
 textarea{
     font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     padding: 10px;

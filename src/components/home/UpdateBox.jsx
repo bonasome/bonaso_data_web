@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/UserAuth';
 
-
 import fetchWithAuth from '../../../services/fetchWithAuth';
+import useWindowWidth from '../../../services/useWindowWidth';
 
 import ComposeAnnouncementModal from '../messages/announcements/ComposeAnnouncementModal';
 import UnopenedMsg from '../messages/UnopenedMsg';
@@ -76,6 +76,7 @@ function AlertCard({ alert, onUpdate }){
 //box with tabs that show differnet lists of messages
 export default function UpdateBox(){
     const { user } = useAuth();
+    const width = useWindowWidth();
     //determine what to display
     const [msgPane, setMsgPane] = useState('announcements');
     //content for different message types
@@ -168,13 +169,13 @@ export default function UpdateBox(){
         <div className={styles.board}>
             <div className={styles.tabs}>
                 <div className={msgPane == 'announcements' ? styles.activeTab : (unreadAnnc ? styles.unreadTab : styles.tab)} onClick={() => setMsgPane('announcements')}>
-                    {unreadAnnc ? <AiFillAlert style={{ marginRight: 10}} /> : <FaClipboardCheck style={{ marginRight: 10}} />}<h4>Announcements</h4>
+                    {width > 550 && (unreadAnnc ? <AiFillAlert style={{ marginRight: 10}} /> : <FaClipboardCheck style={{ marginRight: 10}} />)}<h4>Announcements</h4>
                 </div>
                 <div className={msgPane == 'messages' ? styles.activeTab : (unreadMsg ? styles.unreadTab : styles.tab)} onClick={() => setMsgPane('messages')}>
-                    {unreadMsg ? <BiSolidMessageError style={{ marginRight: 10}} /> : <BiSolidMessageAltCheck style={{ marginRight: 10}} /> }<h4>Messages</h4>
+                    {width > 550 && (unreadMsg ? <BiSolidMessageError style={{ marginRight: 10}} /> : <BiSolidMessageAltCheck style={{ marginRight: 10}} />)}<h4>Messages</h4>
                 </div>
                 <div className={msgPane == 'alerts' ? styles.activeTab : (unreadAlert ? styles.unreadTab : styles.tab)} onClick={() => setMsgPane('alerts')}>
-                    {unreadAlert ? <HiMiniBellAlert style={{ marginRight: 10}} /> : <HiMiniBellSnooze style={{ marginRight: 10}} />}<h4>Alerts</h4>
+                    {width > 550 && (unreadAlert ? <HiMiniBellAlert style={{ marginRight: 10}} /> : <HiMiniBellSnooze style={{ marginRight: 10}} />)}<h4>Alerts</h4>
                 </div>
             </div>
             <Messages errors={errors} />
