@@ -61,9 +61,15 @@ function ProjectCard({ project, callback=null, callbackText }) {
                     <Messages errors={errors} />
                     <i>Lasts from {active.start} to {active.end} {user.role =='admin' && '('+active.status+')'} </i>
                     {active?.client && <h4> For: {project.client.name}</h4>}
-                    <p>{active.description}</p>
-                    <Link to={`/projects/${project.id}`}> <button>Go to Project</button></Link>
-                    {user.role === 'admin' && <Link to={`/projects/${project.id}/edit`}> <button>Edit Details</button></Link>}
+                    <p>{active.description ? active.description : 'No Description'}</p>
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <Link to={`/projects/${active.id}`}>
+                            <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} />
+                        </Link>
+                        {user.role === 'admin' && <Link to={`/projects/${active.id}/edit`}>
+                            <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} />
+                        </Link>}
+                    </div>
                 </div>
             }
         </div>
