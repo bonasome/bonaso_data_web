@@ -72,7 +72,7 @@ export function UserAuth({ children }) {
     }, [baseUrl]);
 
     return (
-        <UserContext.Provider value={{ loggedIn, user, loading, refreshAuth }}>
+        <UserContext.Provider value={{ loggedIn, user, setUser, setLoggedIn, loading, refreshAuth }}>
         {children}
         </UserContext.Provider>
     );
