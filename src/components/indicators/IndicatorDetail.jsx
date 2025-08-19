@@ -166,7 +166,7 @@ export default function IndicatorDetail(){
                 <h1>{indicator?.display_name}</h1>
                 <Messages errors={errors} />
                 
-                <p>{indicator.description}</p>
+                <p>{indicator?.description}</p>
 
                 <p><i>
                     {getLabelFromValue('statuses',indicator?.status)}, {getLabelFromValue('indicator_types',indicator?.indicator_type)}
@@ -174,7 +174,7 @@ export default function IndicatorDetail(){
                     {indicator?.allow_repeat && '(Allows Repeats)'}
                 </i></p>
 
-                {indicator.prerequisites?.length > 0 && <div>
+                {indicator?.prerequisites?.length > 0 && <div>
                     <p>Prerequisites: </p>
                     <ul>
                         {indicator.prerequisites.map((p) => (<li>{p.display_name}</li>))}
@@ -202,8 +202,8 @@ export default function IndicatorDetail(){
                     <Link to={`/indicators/${id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
                     {!del && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt /> } hover={'Delete Indicator'} forDelete={true} />}
                 </div>
-                <UpdateRecord created_by={indicator.created_by} updated_by={indicator.updated_by}
-                    created_at={indicator.created_at} updated_at={indicator.updated_at} /> 
+                <UpdateRecord created_by={indicator?.created_by} updated_by={indicator?.updated_by}
+                    created_at={indicator?.created_at} updated_at={indicator?.updated_at} /> 
             </div>
             
             <div className={styles.section}>
