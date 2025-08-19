@@ -169,13 +169,13 @@ export default function UpdateBox(){
         <div className={styles.board}>
             <div className={styles.tabs}>
                 <div className={msgPane == 'announcements' ? styles.activeTab : (unreadAnnc ? styles.unreadTab : styles.tab)} onClick={() => setMsgPane('announcements')}>
-                    {width > 550 && (unreadAnnc ? <AiFillAlert style={{ marginRight: 10}} /> : <FaClipboardCheck style={{ marginRight: 10}} />)}<h4>Announcements</h4>
+                    {unreadAnnc ? <AiFillAlert style={{ marginRight: 10}} fontSize={18} /> : <FaClipboardCheck style={{ marginRight: 10}} fontSize={18} />}{(width > 550 || msgPane=='announcements') && <h4>Announcements</h4>}
                 </div>
                 <div className={msgPane == 'messages' ? styles.activeTab : (unreadMsg ? styles.unreadTab : styles.tab)} onClick={() => setMsgPane('messages')}>
-                    {width > 550 && (unreadMsg ? <BiSolidMessageError style={{ marginRight: 10}} /> : <BiSolidMessageAltCheck style={{ marginRight: 10}} />)}<h4>Messages</h4>
+                    {unreadMsg ? <BiSolidMessageError style={{ marginRight: 10}} fontSize={18} /> : <BiSolidMessageAltCheck style={{ marginRight: 10}} fontSize={18} />}{(width > 550 || msgPane=='messages') &&<h4>Messages</h4>}
                 </div>
                 <div className={msgPane == 'alerts' ? styles.activeTab : (unreadAlert ? styles.unreadTab : styles.tab)} onClick={() => setMsgPane('alerts')}>
-                    {width > 550 && (unreadAlert ? <HiMiniBellAlert style={{ marginRight: 10}} /> : <HiMiniBellSnooze style={{ marginRight: 10}} />)}<h4>Alerts</h4>
+                    {unreadAlert ? <HiMiniBellAlert style={{ marginRight: 10}} fontSize={18} /> : <HiMiniBellSnooze style={{ marginRight: 10}} fontSize={18} />}{(width > 550 || msgPane=='alerts') &&<h4>Alerts</h4>}
                 </div>
             </div>
             <Messages errors={errors} />

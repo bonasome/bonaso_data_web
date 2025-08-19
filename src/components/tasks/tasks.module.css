@@ -29,7 +29,11 @@
     padding-bottom: 4vh;
     background-color: var(--bonaso-uber-dark-accent);
 }
-
+@media screen and (max-width: 500px){
+    .tasks{
+        padding: 2vh;
+    }
+}
 .cancel {
     margin-right: auto;
 }
