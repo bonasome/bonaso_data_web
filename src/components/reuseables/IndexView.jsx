@@ -1,12 +1,13 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 
+import useWindowWidth from '../../../services/useWindowWidth';
+
 import { GrLinkPrevious, GrLinkNext } from "react-icons/gr";
 import { FaSearch } from "react-icons/fa";
 //index view wrapper that handles setting pages and controlling search inputs
 export default function IndexViewWrapper({ children, page, onSearchChange, onPageChange, entries, filter=null }){
-    const [search, setSearch] = useState('');
-    //const [page, setPage] = useState(1);
+    const width = useWindowWidth();
     const [totalPages, setTotalPages] = useState(1);
     useEffect(() => {
         const pages = Math.ceil(entries / 20) == 0 ? 1 : Math.ceil(entries / 20);
@@ -36,10 +37,10 @@ export default function IndexViewWrapper({ children, page, onSearchChange, onPag
 
             <div>
                 <button type="button" onClick={() => handlePageChange(page - 1)} 
-                    disabled={page === 1}><GrLinkPrevious style={{ marginRight: 5}}/> Previous Page</button>
+                    disabled={page === 1}><GrLinkPrevious style={{ marginRight: 5}}/> {width > 678 && 'Previous Page'}</button>
                     <span>Showing Page {page} of {totalPages}</span>
                 <button type="button" onClick={() => handlePageChange(page + 1)} 
-                    disabled={page === totalPages}>Next Page<GrLinkNext style={{ marginLeft: 5}}/></button>
+                    disabled={page === totalPages}>{width > 678 && 'Next Page'}<GrLinkNext style={{ marginLeft: 5}}/></button>
             </div>
         </div>
     )

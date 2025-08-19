@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/UserAuth';
 
 import fetchWithAuth from '../../../services/fetchWithAuth';
+import useWindowWidth from '../../../services/useWindowWidth';
 
 import Loading from '../reuseables/loading/Loading';
 import ButtonHover from '../reuseables/inputs/ButtonHover';
@@ -19,9 +20,11 @@ import { IoPersonAdd, IoPersonRemove  } from "react-icons/io5";
 import { TiMessages } from "react-icons/ti";
 import UnopenedMsg from './UnopenedMsg';
 
+
 export default function MyMessages(){
     const { id } = useParams(); //optional param that directs to a specific message on load
     const { user } = useAuth();
+    const width = useWindowWidth()
     //list of messages
     const [messages, setMessages] = useState();
     //set main panel to show new compose
@@ -158,7 +161,7 @@ export default function MyMessages(){
                 </div>}
                 {!composing && !toAdmin && (!activeThread || activeThread.length ===0) && <div className={styles.placeholder}>
                     <TiMessages fontSize={180} />
-                    {messages.length > 0 &&<h2>Select a conversation from the sidebar to view, or...</h2>}
+                    {messages.length > 0 && (width > 450 ? <h2>Select a conversation from the sidebar to view, or...</h2> : <h2>Select a conversation from the above to view, or...</h2>)}
                     <h2>Create a new message by clicking the buttons.</h2>
                 </div>}
                 {composing && sendTo.length > 0 && <h2>Starting a new conversation with {sendTo.map((r) => (r.display_name)).join(', ')}</h2>}
