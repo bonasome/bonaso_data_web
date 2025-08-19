@@ -159,7 +159,7 @@ export default function NarrativeReportDownload({ organization, project }) {
                 </Link>}
                 {validFiles.length > 0 ? validFiles.map((report) => (
                     <NarrativeReportCard report={report} onDelete={() => setDeleted(prev => [...prev, report.id])} />
-                )) : <p>No reports yet. Come back later.</p>}
+                )) : <p>No reports yet. Check back later.</p>}
             </IndexViewWrapper>
         </div>
     )
