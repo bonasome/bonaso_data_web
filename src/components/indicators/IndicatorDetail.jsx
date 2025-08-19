@@ -38,7 +38,7 @@ export default function IndicatorDetail(){
 
     //list of projects this indicator is in
     const [projects, setProjects] = useState([]);
-
+    const [tasks, setTasks] = useState([]);
     //get details from server    
     useEffect(() => {
         //get indicator information
@@ -100,11 +100,29 @@ export default function IndicatorDetail(){
             } 
             catch (err) {
                 setErrors(['Something went wrong. Please try again later.']);
-                console.error('Failed to fetch indicator: ', err);
+                console.error('Failed to fetch related projects: ', err);
             } 
         };
         getProjects();
-    }, [indicator])
+    }, [indicator]);
+
+    useEffect(() => {
+        //get a list of projects
+        const getOrgs = async () => {
+            if(!indicator) return;
+            try {
+                console.log('fetching organizations...');
+                const response = await fetchWithAuth(`/api/manage/tasks/?indicator=${indicator.id}`);
+                const data = await response.json();
+                setTasks(data.results);
+            } 
+            catch (err) {
+                setErrors(['Something went wrong. Please try again later.']);
+                console.error('Failed to fetch related organizations: ', err);
+            } 
+        };
+        getOrgs();
+    }, [indicator]);
 
     //function to delete indicator
     const deleteIndicator = async() => {
@@ -166,7 +184,7 @@ export default function IndicatorDetail(){
                 <h1>{indicator?.display_name}</h1>
                 <Messages errors={errors} />
                 
-                <p>{indicator?.description}</p>
+                <p>{indicator?.description ? indicator.description : 'No description yet.'}</p>
 
                 <p><i>
                     {getLabelFromValue('statuses',indicator?.status)}, {getLabelFromValue('indicator_types',indicator?.indicator_type)}
@@ -211,6 +229,15 @@ export default function IndicatorDetail(){
                 {projects && projects.length > 0 && projects.map((p) =>(
                     <div key={p.id} className={styles.card}>
                         <Link to={`/projects/${p.id}`}><h3>{p.name}</h3></Link>
+                    </div>
+                ))}
+                {!projects || projects.length === 0 && <p><i>This indicator is not in any projects.</i></p>}
+            </div>
+            <div className={styles.section}>
+                <h2>Assigned to Organizations</h2>
+                {tasks && tasks.length > 0 && tasks.map((t) =>(
+                    <div key={t.id} className={styles.card}>
+                        <Link to={`/projects/${t.project.id}/organization/${t.organization.id}`}><h3>{t.display_name}</h3></Link>
                     </div>
                 ))}
                 {!projects || projects.length === 0 && <p><i>This indicator is not in any projects.</i></p>}
