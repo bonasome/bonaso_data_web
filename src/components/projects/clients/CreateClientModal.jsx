@@ -101,7 +101,7 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
 
     return(
         <div className={styles.modal} >
-            <h2>{existing ? `Editing ${client.name}` : 'Creating New Client'}</h2>
+            <h2>{existing ? `Editing ${existing?.name}` : 'Creating New Client'}</h2>
              <Messages errors={pageErrors} ref={alertRef} />
 
             <form onSubmit={handleSubmit(onSubmit)}>

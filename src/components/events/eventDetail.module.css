@@ -53,6 +53,7 @@
     background-color: var(--bonaso-uber-dark-accent);
     padding: 2vh;
     margin-bottom: 2vh;
+    overflow-x: scroll;
 }
 
 .countsTable {

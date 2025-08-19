@@ -509,8 +509,8 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                             </ul>
                             {comments[task.id] && <p>{comments[task.id]}</p>}
                         </div>
-                        <button onClick={() => {setCommentsModalActive(true); setModalTask(task)}}><BiSolidCommentAdd /> Add a Comment</button>
-                        <button className={errorStyles.deleteButton} onClick={() => removeItem(task)}><FaTrashAlt /> Remove</button>
+                        <button onClick={() => {setCommentsModalActive(true); setModalTask(task)}}><BiSolidCommentAdd /> {width > 575 && 'Add a Comment'}</button>
+                        <button className={errorStyles.deleteButton} onClick={() => removeItem(task)}><FaTrashAlt /> {width > 575 && 'Add a Comment'}</button>
                     </div>
                 ))}
             </div>

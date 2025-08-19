@@ -246,7 +246,7 @@ export default function ProjectOrganization(){
                         {showTasks ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
-                    {showTasks && <div style={{ margin: 40}}>
+                    {showTasks && <div style={{ margin: '4vh'}}>
                         {hasPerm && <ButtonHover noHover={<MdAssignmentAdd />} hover={'Assign New Task(s)'} callback={() => setAddingTask(true)} />}
                         {addingTask && <AssignTask project={project} organization={organization} 
                             onSave={(data) => {
@@ -267,7 +267,7 @@ export default function ProjectOrganization(){
                         {showTargets ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
-                    {showTargets && <div style={{ margin: 40}}>
+                    {showTargets && <div style={{ margin: '4vh'}}>
                         <Targets organization={organization} project={project} />
                     </div>}
                 </div>
@@ -278,7 +278,7 @@ export default function ProjectOrganization(){
                         {showChildOrgs ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
-                    {showChildOrgs && <div style={{ margin: 20}}>
+                    {showChildOrgs && <div style={{ margin: '4vh'}}>
                         <Messages success={coSuccess} />
                         {((!organization.parent && user.organization_id===organization.id) || user.role === 'admin') && <ButtonHover noHover={<BsFillBuildingsFill />} hover={'Assign New Subgrantee(s)'} callback={() => setAddingChildOrg(true)} />}
                         {addingChildOrg && <AssignChild project={project} organization={organization} 
