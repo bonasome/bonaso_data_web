@@ -296,7 +296,7 @@ export default function EventDetail(){
             <div className={styles.segment}>
                 <h2>Counts</h2>
 
-                {event?.start && new Date(event.start) <= new Date() && <div className={styles.segment}>
+                {event?.start && new Date(event.start) <= new Date() && !['client'].includes(user.role) && <div className={styles.segment}>
                     <h2>Select a task to start adding counts.</h2>
                     {filteredTasks.length > 0 ? <SimpleSelect name={'task'} label={'Select a Task'} 
                         optionValues={filteredTasks.map((t) => (t.id))} 
@@ -306,7 +306,7 @@ export default function EventDetail(){
                     /> : <p>No tasks left! Either edit your existing counts or add a new task.</p>}
                 </div>}
 
-                {event?.event_date && new Date(event.event_date) > new Date() && <p>Looking to add counts? You cannot add counts for events in the future.</p>}
+                {event?.start && new Date(event.start) > new Date() && <p>Looking to add counts? You cannot add counts for events in the future.</p>}
                 
                  {newCount && newTask !== '' && <Counts onSave={() => getEventCounts()} onCancel={() => handleCancel()} 
                     breakdownOptions={breakdowns} event={event} task={event.tasks.find(t => t.id == newTask)} />}
