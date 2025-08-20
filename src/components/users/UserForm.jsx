@@ -272,7 +272,7 @@ export default function UserForm(){
                 {!id && <FormSection fields={pass} control={control} header='Password' />}
                 <FormSection fields={basics} control={control} header='Basic Information'/>
                 {selectedRole === 'admin' && <Messages warnings={['You are about to make this user an admin. Please be sure you trust this person. They will have power to edit and delete anything on the site.']} />}
-                <FormSection fields={role} control={control} header='User Role' />
+                {(user.role == 'admin' || !existing) && <FormSection fields={role} control={control} header='User Role' />}
                 {(selectedRole && !isClient) && <FormSection fields={organization} control={control} header='User Organization' />}
                 {isClient && <FormSection fields={client} control={control} header='User Organization' />}
 
