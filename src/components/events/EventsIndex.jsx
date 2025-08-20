@@ -65,7 +65,7 @@ function EventCard({ event }) {
 
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
-            {!['client'].includes(user.role) && <Link to={`/events/${event.id}`} style={{display:'flex', width:"fit-content"}}><h2>{event.name}</h2></Link>}
+            <Link to={`/events/${event.id}`} style={{display:'flex', width:"fit-content"}}><h2>{event.name}</h2></Link>
             {expanded && loading && <ComponentLoading />}
             {expanded && active && (
                 <div>
@@ -73,14 +73,14 @@ function EventCard({ event }) {
                     <h3>{active.event_type} {active.host && `hosted by ${active.host.name}`}</h3>
                     <p>{active.description}</p>
                     <p>{active.start == active.end ? prettyDates(active.end) : `From ${prettyDates(active.start)} to ${prettyDates(active.end)}`} at {active.location}</p>
-                    <div style={{ display: 'flex', flexDirection: 'row'}}>
+                    {!['client'].includes(user.role) && <div style={{ display: 'flex', flexDirection: 'row'}}>
                         <Link to={`/events/${event.id}`}>
                             <ButtonHover noHover={<GiJumpAcross />} hover='Go to detail page' />
                         </Link>
                         <Link to={`/events/${event.id}/edit`}>
                             <ButtonHover noHover={<ImPencil />} hover='Edit details' />
                         </Link>
-                    </div>
+                    </div>}
                 </div>
             )}
         </div>
