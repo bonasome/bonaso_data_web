@@ -146,6 +146,9 @@ export default function UserForm(){
                     reset();
                     navigate('/profiles/new');
                 }
+                else if(user.role == 'client'){
+                    navigate(`/profiles`);
+                }
                 else{
                     navigate(`/profiles/${returnData.id}`);
                 }
@@ -189,6 +192,14 @@ export default function UserForm(){
         }
     }, [existing]);
 
+    const roleFields = useMemo(() => {
+        if(!profilesMeta?.roles) return [];
+        if(user.role == 'admin') return profilesMeta.roles;
+        if(['meofficer', 'manager'].includes(user.role)) return profilesMeta.roles.filter(r => (!['admin', 'client'].includes(r.value)));
+        if(['client'].includes(user.role)) return profilesMeta.roles.filter(r => (r.value == 'client'));
+        return []
+    }, [user.role, profilesMeta]);
+
     const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
 
     useEffect(() => {
@@ -202,6 +213,7 @@ export default function UserForm(){
 
     const selectedRole = useWatch({ control, name: 'role', defaultValue: null })
     const isClient = useMemo(() => {return selectedRole === 'client'}, [selectedRole])
+
 
     const username = [
         { name: 'username', label: "Username (Required)", type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
@@ -233,11 +245,10 @@ export default function UserForm(){
 
     const role = [
         {name: 'role', label: 'User Role (Required)', type: 'radio',
-            options: profilesMeta?.roles,  rules: { required: "Required" },
+            options: roleFields,  rules: { required: "Required" },
             tooltip: `A user's role determines what they are allowed to do. WARNING: Please be cautious
             assigning users higher level roles (M&E Officer, Manager) as these users will have permission
-            to alter existing data. BE VERY CAREFUL ASSIGNING SITE ADMINISTRATORS!! Site Administrators have 
-            significant power to delete and alter data. Only assign this role to trusted staff!!!`
+            to alter existing data.`
         },
     ]
 
@@ -261,9 +272,9 @@ export default function UserForm(){
                 {!id && <FormSection fields={pass} control={control} header='Password' />}
                 <FormSection fields={basics} control={control} header='Basic Information'/>
                 {selectedRole === 'admin' && <Messages warnings={['You are about to make this user an admin. Please be sure you trust this person. They will have power to edit and delete anything on the site.']} />}
-                {user.role === 'admin' && <FormSection fields={role} control={control} header='User Role' />}
-                {!isClient && <FormSection fields={organization} control={control} header='User Organization' />}
-                {isClient && user.role === 'admin' && <FormSection fields={client} control={control} header='User Organization' />}
+                <FormSection fields={role} control={control} header='User Role' />
+                {(selectedRole && !isClient) && <FormSection fields={organization} control={control} header='User Organization' />}
+                {isClient && <FormSection fields={client} control={control} header='User Organization' />}
 
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>

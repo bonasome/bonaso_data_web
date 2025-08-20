@@ -278,7 +278,7 @@ function Router() {
             }
         >
             <Route index element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <UsersIndex />
                 </RedirectIfNoPerm>
                 }/>
@@ -287,7 +287,7 @@ function Router() {
                 }/>
             
             <Route path='new' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <UserForm />
                 </RedirectIfNoPerm>
                 }/>
