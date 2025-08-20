@@ -144,7 +144,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Task (Required)', type: "number", rules: { 
             min: { value: 1, message: "Must be at least 1" },
             max: { value: 100, message: "Cannot exceed 100" }, 
-            }, placeholder: 'ex. 100%...', tooltip: 'What percentage of acheivement for the related task should be the target (100% for everyone)?'
+            }, placeholder: 'ex. 100...', tooltip: 'What percentage of acheivement for the related task should be the target (100% for everyone)?'
         },
     ]
 
