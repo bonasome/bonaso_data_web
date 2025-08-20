@@ -245,6 +245,7 @@ export default function EventDetail(){
                     </div>
                     {showDetails && <div className={styles.detail}>
                         <h3>Host: {event?.host ? event.host.name : 'No host'}</h3>
+                        <h3>Category: {cleanLabels(event.event_type)}</h3>
                         <i>{prettyDates(event.start)} to {prettyDates(event.end)}, {event.location} ({cleanLabels(event?.status)})</i>
                         <h3>Description</h3>
                         {event.description ? <p>{event.description}</p> : <p>No description.</p>}
