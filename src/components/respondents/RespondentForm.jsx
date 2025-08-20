@@ -15,10 +15,26 @@ import ReturnLink from '../reuseables/ReturnLink';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 
 import styles from '../../styles/form.module.css';
+import modalStyles from '../../styles/modals.module.css';
 
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
+
+function PrivacyModal({ onClose }){
+    return(
+        <div className={modalStyles.modal}>
+            <h2>Privacy Notice</h2>
+            <p>
+                You are about to collect and enter sensitive information about a person into our system.
+                <strong>Please make sure that you have this person's (or their gauardian/caretaker's) express 
+                permission before recording any sensitive information. </strong>
+                If this person does not consent to provide sensitive information, you may mark them as anonymous.
+            </p>
+            <button onClick={onClose}>I understand, and will only record data I have express consent to collect.</button>
+        </div>
+    )
+}
 
 export default function RespondentForm(){
     const navigate = useNavigate();
@@ -36,7 +52,7 @@ export default function RespondentForm(){
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [success, setSuccess] = useState([]);
     const [saving, setSaving] = useState(false);
-
+    const [privacyModal, setPrivacyModal] = useState(false);
     //ref to scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
@@ -45,6 +61,10 @@ export default function RespondentForm(){
         alertRef.current.focus({ preventScroll: true });
         }
     }, [submissionErrors]);
+
+    useEffect(() => {
+        setPrivacyModal(existing ? false : true)
+    }, [existing]);
 
     //fetch the meta
     useEffect(() => {
@@ -284,6 +304,7 @@ export default function RespondentForm(){
     if(loading || !respondentsMeta?.sexs) return <Loading />
     return(
         <div className={styles.form}>
+            {privacyModal && <PrivacyModal onClose={() => setPrivacyModal(false)} />}
             <ReturnLink url={id ? `/respondents/${id}` : '/respondents'} display={id ? 'Return to detail page' : 'Return to respondents overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New Respondent' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
