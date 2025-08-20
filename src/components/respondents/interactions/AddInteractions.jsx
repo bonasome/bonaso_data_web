@@ -117,7 +117,7 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                 <h2>Additional Information Required</h2>
                 <Messages errors={modalErrors} />
                 <label htmlFor='number'>The task {task.indicator.name} requires a numeric component.</label>
-                <input id='number' type='number' value={localNumber || ''} onChange={(e) => setLocalNumber(e.target.value)} />
+                <input id='number' type='number' value={localNumber || ''} onChange={(e) => setLocalNumber(e.target.value)} placeholder='Enter a number...'/>
                 <div>
                     <button onClick={() => closeWindow()}><FaCheck /> Confirm Choices</button>
                     <button onClick={() => cancel()}><FcCancel/> Cancel</button>
@@ -194,7 +194,7 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                         />
                         {localSubcats.filter(c => c.subcategory.id ==cat.id).length > 0 && 
                             task.indicator.require_numeric && <input type="number" onChange={(e) => 
-                                handleNumeric(cat, e.target.value)} 
+                                handleNumeric(cat, e.target.value)} placeholder='Enter a number...' 
                             value={localSubcats.find(c => c.subcategory.id==cat.id).numeric_component || ''} 
                         />}
                     </div>
@@ -492,7 +492,7 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column'}}>
                     <label htmlFor="interaction_location">Interaction Location</label>
-                    <input id='interaction_location' type='text' onChange={(e) => setInteractionLocation(e.target.value)}/>
+                    <input id='interaction_location' type='text' onChange={(e) => setInteractionLocation(e.target.value)} placeholder='ex. Gaborone Clinic' />
                 </div>
             </div>
 
