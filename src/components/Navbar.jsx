@@ -43,6 +43,12 @@ function Dropdown({ name }){
             setUrls(urls)
             setLabels(labels)
         }
+        if(name =='Record' && ['client'].includes(user.role)){
+            let urls = ['/respondents','/events', '/social']
+            let labels = ['Manage Respondents', 'Record Events', 'Record Social Post']
+            setUrls(urls)
+            setLabels(labels)
+        }
         if(name =='Analyze' && ['meofficer', 'manager', 'admin', 'client'].includes(user.role)){
             let urls = ['/analytics', '/analytics/tables', '/analytics/lists', '/flags']
             let labels = ['View Dashboards', 'Pivot Tables', 'Line Lists', 'View Flags']

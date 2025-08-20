@@ -24,6 +24,7 @@ import { GiJumpAcross } from 'react-icons/gi';
 
 function EventCard({ event }) {
     //context
+    const { user } = useAuth();
     const { eventDetails, setEventDetails } = useEvents();
     //event details
     const [active, setActive] = useState(null);
@@ -64,7 +65,7 @@ function EventCard({ event }) {
 
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
-            <Link to={`/events/${event.id}`} style={{display:'flex', width:"fit-content"}}><h2>{event.name}</h2></Link>
+            {!['client'].includes(user.role) && <Link to={`/events/${event.id}`} style={{display:'flex', width:"fit-content"}}><h2>{event.name}</h2></Link>}
             {expanded && loading && <ComponentLoading />}
             {expanded && active && (
                 <div>

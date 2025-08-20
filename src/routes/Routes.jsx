@@ -306,12 +306,12 @@ function Router() {
             }
         >
             <Route index element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <SocialPostsIndex />
                 </RedirectIfNoPerm>
                 }/>
             <Route path=':id' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <SocialPostDetail />
                 </RedirectIfNoPerm>
                 }/>
@@ -375,7 +375,7 @@ function Router() {
                 </RedirectIfNotAuthenticated>
         }>
             <Route index element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <EventsIndex />
                 </RedirectIfNoPerm>
             }/>
@@ -385,7 +385,7 @@ function Router() {
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <EventDetail />
                 </RedirectIfNoPerm>
             }/>

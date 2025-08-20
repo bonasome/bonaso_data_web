@@ -509,13 +509,13 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                             </tbody>
                         </table>
                     }
-                    <div style={{ display: 'flex', flexDirection: 'row'}}>
+                    {user.role != 'client' && <div style={{ display: 'flex', flexDirection: 'row'}}>
                         {editing && !saving && <button onClick={() => saveCount()}><IoIosSave /> Save</button>}
                         {saving && <ButtonLoading />}
                         {editing && <button onClick={() => handleCancel()}><FcCancel /> Cancel</button>}
                         {!editing && existing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover='Edit' /> }
                         {!editing && existing && user.role ==='admin' && !del && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover='Delete Count' forDelete={true} />}
-                    </div>
+                    </div>}
                 </div>
             </div>}
         </div>

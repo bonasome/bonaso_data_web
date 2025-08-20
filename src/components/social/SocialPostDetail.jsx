@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useParams, useNavigate } from "react-router-dom";
 
 import { useSocialPosts } from "../../contexts/SocialPostsContext";
+import { useAuth } from '../../contexts/UserAuth';
 
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import prettyDates from '../../../services/prettyDates';
@@ -30,7 +31,7 @@ export default function SocialPostDetail(){
     const navigate = useNavigate();
     //existing post id param
     const { id } = useParams();
-
+    const { user } = useAuth();
     //context
     const { socialPosts, setSocialPosts } = useSocialPosts();
     //current active post
@@ -246,11 +247,11 @@ export default function SocialPostDetail(){
                     />
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {user.role != 'client' && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <Link to={`/social/${id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Post Information'} /> </Link>
                     <ButtonHover callback={() => setFlagging(true)} noHover={<MdFlag />} hover={'Flag Post'} forWarning={true} />
                     <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Post'} forDelete={true}/>
-                </div>
+                </div>}
 
                 {post.flags.length > 0 && <div className={styles.dropdownSegment}>
                     <div className={styles.toggleDropdown} onClick={() => setShowFlags(!showFlags)}>
@@ -291,7 +292,7 @@ export default function SocialPostDetail(){
                         </tbody>
                     </table>
 
-                    <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Metrics'} />
+                    {user.role != 'client' && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Metrics'} />}
                 
                 </div>}
                 
