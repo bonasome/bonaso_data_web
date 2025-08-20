@@ -7,6 +7,7 @@ import { useEvents } from '../../contexts/EventsContext';
 
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import prettyDates from '../../../services/prettyDates';
+import cleanLabels from '../../../services/cleanLabels';
 import { filterConfig, initial } from './filterConfig';
 
 import IndexViewWrapper from '../reuseables/IndexView';
@@ -70,7 +71,7 @@ function EventCard({ event }) {
             {expanded && active && (
                 <div>
                     <Messages errors={errors} />
-                    <h3>{active.event_type} {active.host && `hosted by ${active.host.name}`}</h3>
+                    <h3>{cleanLabels(active.event_type)} {active.host && `hosted by ${active.host.name}`}</h3>
                     <p>{active.description}</p>
                     <p>{active.start == active.end ? prettyDates(active.end) : `From ${prettyDates(active.start)} to ${prettyDates(active.end)}`} at {active.location}</p>
                     {!['client'].includes(user.role) && <div style={{ display: 'flex', flexDirection: 'row'}}>
