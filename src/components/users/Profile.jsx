@@ -192,8 +192,8 @@ export default function Profile(){
                         {profile.last_login ? <p>{prettyDates(profile.last_login, true)}</p> : <p>Never</p>}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <Link to={`/profiles/${profile?.id}/edit`}> <ButtonHover noHover={<ImPencil />} 
-                            hover={'Edit Profile'} /></Link>
+                        {profile.is_active && <Link to={`/profiles/${profile?.id}/edit`}> <ButtonHover noHover={<ImPencil />} 
+                            hover={'Edit Profile'} /></Link>}
                         {user.role === 'admin' && <ButtonHover callback={() => setChangePass(!changePass)} 
                             noHover={<TbPasswordUser />} hover={changePass ? 'Cancel' : 'Reset User Password'} forWarning={true}/>}
                         {user.role === 'admin' && <div>
