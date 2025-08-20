@@ -65,7 +65,7 @@ function EventCard({ event }) {
 
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
-            {!['client'].includes(user.role) && <Link to={`/events/${event.id}`} style={{display:'flex', width:"fit-content"}}><h2>{event.name}</h2></Link>}
+            <Link to={`/events/${event.id}`} style={{display:'flex', width:"fit-content"}}><h2>{event.name}</h2></Link>
             {expanded && loading && <ComponentLoading />}
             {expanded && active && (
                 <div>
@@ -186,7 +186,7 @@ export default function EventsIndex(){
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter 
                 onFilterChange={setFilters} config={filterConfig(eventsMeta, orgs, (s) => setOrgSearch(s))} initial={initial}  
             />}>
-                <Link to='/events/new'><button> <MdOutlineEvent /> Create a New Event</button></Link>
+                {!['client'].includes(user.role) && <Link to='/events/new'><button> <MdOutlineEvent /> Create a New Event</button></Link>}
                 {events?.length === 0 ? 
                     <p>No events match your criteria.</p> :
                     events?.map(ind => (
