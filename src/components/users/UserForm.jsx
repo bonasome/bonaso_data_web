@@ -200,7 +200,20 @@ export default function UserForm(){
         return []
     }, [user.role, profilesMeta]);
 
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
 
     useEffect(() => {
         if (existing) {
@@ -267,7 +280,7 @@ export default function UserForm(){
             <ReturnLink url={id ? `/profiles/${id}` : '/profiles'} display={id ? 'Return to detail page' : 'Return to profiles overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New User' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={username} control={control} header='Username' />
                 {!id && <FormSection fields={pass} control={control} header='Password' />}
                 <FormSection fields={basics} control={control} header='Basic Information'/>

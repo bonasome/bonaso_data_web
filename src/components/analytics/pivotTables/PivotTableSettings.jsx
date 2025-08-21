@@ -83,7 +83,20 @@ export default function PivotTableSettings({ existing, onClose, onUpdate, meta }
         }
     }, [existing]);
 
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
 
     useEffect(() => {
         if (existing) {
@@ -110,10 +123,11 @@ export default function PivotTableSettings({ existing, onClose, onUpdate, meta }
     }, [ind, meta]);
 
     const basics = [
-        { name: 'name', label: 'Pivot Table Name', type: "text", rules: { maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
-            placeholder: 'ex. My Awesome Pivot Table, Tested Postive by Sex...'
+        { name: 'name', label: 'Pivot Table Name', type: "text", rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
+            placeholder: 'ex. My Awesome Pivot Table, Tested Postive by Sex...',
         },
         { name: 'indicator_id', label: "Indicator", type: "model", IndexComponent: IndicatorsIndex, labelField: 'display_name',
+            rules: {required: "Required"}
         },
     ]
     const params = [
@@ -135,7 +149,7 @@ export default function PivotTableSettings({ existing, onClose, onUpdate, meta }
     return(
         <div className={styles.modal}>
             <h2>Editing Pivot Table Settings</h2>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <Messages errors={submissionErrors} />
                 <FormSection fields={basics} control={control} header='Pivot Table Settings'/>
                 {fields.length > 0 && <FormSection fields={params} control={control} header='Select Breakdowns'/>}

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import fetchWithAuth from '../../../services/fetchWithAuth';
@@ -28,8 +28,17 @@ export default function NarrativeReportUpload() {
 
     //page meta
     const [errors, setErrors] = useState([]);
-    const [success, setSuccess] = useState('');
+    const [success, setSuccess] = useState([]);
     const [uploading, setUploading] = useState(false);
+
+    //ref to scroll to errors
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if ((errors.length > 0 || success.length > 0) && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors, success]);
 
     //helper to upload the file
     const handleChange = (event) => setFile(event.target.files[0]);
@@ -43,7 +52,7 @@ export default function NarrativeReportUpload() {
         e.preventDefault();
         setUploading(true);
         setErrors([]);
-        setSuccess('');
+        setSuccess([]);
 
         let submissionErrors = []
         //user should upload an actual file
@@ -101,7 +110,7 @@ export default function NarrativeReportUpload() {
             
             <h1>Upload a Narrative Report</h1>
 
-            <Messages errors={errors} success={success} />
+            <Messages errors={errors} success={success} ref={alertRef} />
 
             <div className={styles.template}>
                 <form onSubmit={handleSubmit}  noValidate={true}>

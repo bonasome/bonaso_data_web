@@ -114,7 +114,20 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         }
     }, [existing]);
 
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
 
     const targetTask = useWatch({ control, name: 'task_id', defaultValue: null});
     const typeVal = useWatch({ control, name: 'date_type', defaultValue: tryMatchDates(existing?.start, existing?.end, project)?.type});
@@ -122,7 +135,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
     const asP = watch('as_percentage');
 
     const task = [
-        { name: 'task_id', label: 'For Task (Required)', type: "model", IndexComponent: Tasks,
+        { name: 'task_id', label: 'For Task (Required)', type: "model", IndexComponent: Tasks, rules: { required: "Required" },
             labelField: 'display_name',  includeParams: [{field: 'organization', value: organization.id}, {field: 'project', value: project.id}]},
     ]
     const asRelated = [
@@ -137,11 +150,11 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         },
     ]
     const relatedToTask = [
-        { name: 'related_to_id', label: 'Select Related Task (Required)', type: "model", IndexComponent: Tasks, labelField: 'display_name',
+        { name: 'related_to_id', label: 'Select Related Task (Required)', type: "model", IndexComponent: Tasks, labelField: 'display_name', rules: { required: "Required" },
             includeParams: [{field: 'organization', value: organization.id}, {field: 'project', value: project.id}], blacklist: [targetTask?.id],
             tooltip: `This is the task whose achievement should set the target for the task selected above.`
         },
-        { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Task (Required)', type: "number", rules: { 
+        { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Task (Required)', type: "number", rules: { required: "Required",
             min: { value: 1, message: "Must be at least 1" },
             max: { value: 100, message: "Cannot exceed 100" }, 
             }, placeholder: 'ex. 100...', tooltip: 'What percentage of acheivement for the related task should be the target (between 0 and 100)?'
@@ -173,7 +186,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         <div className={modalStyles.modal}>
             <h2>{existing ? `Editing Target` : 'New Target' }</h2>
             <Messages errors={submissionErrors} />
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={task} control={control} header={'Target For'}/>
                 <FormSection fields={asRelated} control={control} header={'Measure as Percentage?'} />
                 {!asP && <FormSection fields={amount} control={control} />}

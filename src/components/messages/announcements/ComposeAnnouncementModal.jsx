@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useForm,  useWatch } from "react-hook-form";
 
 import { useAuth } from '../../../contexts/UserAuth';
@@ -22,6 +22,15 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
     const [saving, setSaving] = useState(false);
     const [pageErrors, setPageErrors] = useState([]);
     
+    //ref to scroll to errors
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (pageErrors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [pageErrors]);
+
     //handle submission 
     const onSubmit = async(data) => {
         setPageErrors([]);
@@ -78,7 +87,21 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
             }
         }, [existing]);
     
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
 
     useEffect(() => {
         if (existing) {
@@ -114,8 +137,8 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
         <div className={modalStyles.modal}>
             <h1>{existing ? `Editing Announcement` : 'New Announcement' }</h1>
             <Messages errors={pageErrors} />
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <FormSection fields={basics} control={control} />
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
+                <FormSection fields={basics} control={control} useRef={alertRef} />
                 {projectID && <FormSection fields={orgs} control={control} />}
                 {user.role === 'admin' && <FormSection fields={admin} control={control} />}
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>

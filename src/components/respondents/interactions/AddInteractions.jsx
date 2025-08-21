@@ -483,7 +483,7 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                 </>
             )}
             <h3>New Interaction</h3>
-            <Messages errors={errors} warnings={warnings} />
+            <Messages errors={errors} warnings={warnings} ref={alertRef} />
             {!active && <i>Start dragging and dropping tasks to begin.</i>}
             <div style={{ display: 'flex', flexDirection: `${width > 500 ? 'row' : 'column'}`}}>
                 <div style={{ display: 'flex', flexDirection: 'column'}}>
@@ -516,8 +516,8 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
             </div>
 
             <div style ={{ display: 'flex', flexDirection: 'row'}}>
-            {active && added.length >0 && !saving && <ButtonHover callback={() => handleSubmit()} noHover={<IoIosSave />} hover={'Save'} />}
-            {active && added.length >0 && !saving && <ButtonHover callback={() => setAdded([])} noHover={<FcCancel />} hover={'Cancel'} />}
+            {active && added.length >0 && !saving && <button onclick={() => handleSubmit()}><IoIosSave /> Save</button>}
+            {active && added.length >0 && !saving && <button onClick={() => {setAdded([]); setErrors([]); setWarnings([]);}}><FcCancel /> Cancel</button>}
             {saving && <ButtonLoading />}
             </div>
         </div>

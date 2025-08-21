@@ -77,7 +77,20 @@ export default function LineListSettings({ existing, onClose, onUpdate, meta }){
         }
     }, [existing]);
 
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
 
     useEffect(() => {
         if (existing) {
@@ -111,7 +124,7 @@ export default function LineListSettings({ existing, onClose, onUpdate, meta }){
     return(
         <div className={styles.modal}>
             <h2>Editing Line List Settings</h2>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <Messages errors={submissionErrors} />
                 <FormSection fields={basics} control={control} header='Line List Settings'/>
                 <FormSection fields={scope} control={control} header='Line List Scope'/>

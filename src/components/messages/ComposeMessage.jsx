@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import fetchWithAuth from '../../../services/fetchWithAuth';
 
@@ -18,9 +18,17 @@ export default function ComposeMessage({ profiles=[], admin=false, reply=false, 
     const [subject, setSubject] = useState('');
     const [body, setBody] = useState('');
     const [sending, setSending] = useState(false);
-    const [success, setSuccess] = useState(false);
     const [recipients, setRecipients] = useState([])
     const [actionable, setActionable] = useState([]);
+
+    //ref to scroll to errors
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if ((errors.length > 0 || warnings.length > 0) && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors, warnings]);
 
     useEffect(() => {
         setBody(existing?.body);
@@ -36,7 +44,6 @@ export default function ComposeMessage({ profiles=[], admin=false, reply=false, 
     }, [profiles, actionable]);
 
     const sendMessage = async() => {
-        setSuccess(false);
         setErrors([]);
         let sbWarnings = []
         if(subject === '' && !reply) sbWarnings.push('Please enter a subject.');
@@ -99,7 +106,7 @@ export default function ComposeMessage({ profiles=[], admin=false, reply=false, 
             {admin && <h2>Write a Message to a Site Administrator</h2>}
             {admin && <p>We'll get back to you as soon as possible!</p>}
 
-            <Messages success={success} warnings={warnings} errors={errors} />
+            <Messages warnings={warnings} errors={errors} ref={alertRef} />
 
             {!reply && <div className={styles.field}>
                 <label htmlFor='subject'>Subject</label>

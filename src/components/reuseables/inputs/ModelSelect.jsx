@@ -10,17 +10,17 @@ import modalStyles from '../../../styles/modals.module.css';
 
 import { FaCheckSquare } from "react-icons/fa";
 
-export default function ModelSelect({ IndexComponent, value, onChange, label,  errors, tooltip=null, callbackText, labelField='name', includeParams=[], excludeParams=[], blacklist=[] }){
+export default function ModelSelect({ name, IndexComponent, value, onChange, label,  errors, tooltip=null, callbackText, labelField='name', includeParams=[], excludeParams=[], blacklist=[] }){
     
     const [selecting, setSelecting] = useState(false);
 
     return(
         <div>
-            <label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <label style={{ display: 'flex', flexDirection: 'row' }}>
                     <p>{label}</p>
                     {tooltip && <Tooltip msg={tooltip} />}
-                </div>
+            </label>
+            <fieldset style={{ border: 'none' }} name={name}>
                 <Messages errors={errors} />
                 <div className={styles.card}>
                     {value ? <p>Selected: <i>{value[labelField]}</i></p> : <p>Nothing selected</p>}
@@ -33,7 +33,7 @@ export default function ModelSelect({ IndexComponent, value, onChange, label,  e
                         <button onClick={() => setSelecting(false)} type='button'><FaCheckSquare /> Done</button>
                     </div>
                 </div>
-            </label>
+            </fieldset>
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import fetchWithAuth from "../../../services/fetchWithAuth";
 
@@ -18,6 +18,15 @@ export default function FlagModal({ model, id, onConfirm, onCancel }){
     const [flagType, setFlagType] = useState('');
     const [errors, setErrors] = useState([]);
     const [meta, setMeta] = useState(null);
+
+    //ref to scroll to errors
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if ((errors.length > 0) && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
 
     //get the meta for the reason types
     useEffect(() => {
@@ -97,7 +106,7 @@ export default function FlagModal({ model, id, onConfirm, onCancel }){
     return(
         <div className={modalStyles.modal}>
             <h2>New Flag</h2>
-            <Messages errors={errors} />
+            <Messages errors={errors} ref={alertRef} />
             <div>
             <RadioButtons name='flag_type' label='Flag Category' options={meta?.flag_reasons} value={flagType} onChange={(val) => setFlagType(val)}/>
             <div style={{display: 'flex', flexDirection: 'column'}}>

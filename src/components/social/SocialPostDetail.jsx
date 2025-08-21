@@ -53,6 +53,7 @@ export default function SocialPostDetail(){
         likes: '',
         views: '',
         comments: '',
+        reach: '',
     })
 
     //ref to scroll to errors automatically
@@ -70,6 +71,7 @@ export default function SocialPostDetail(){
             likes: post?.likes || '',
             views: post?.views || '',
             comments: post?.comments || '',
+            reach: post?.reach || '',
         })
     }, [post]);
 
@@ -114,6 +116,7 @@ export default function SocialPostDetail(){
         if(formData.likes == '') formData.likes = null;
         if(formData.views == '') formData.views = null;
         if(formData.comments == '') formData.comments = null;
+        if(formData.reach == '') formData.reach = null;
         try{
             console.log('submitting changes...', formData)
             setSaving(true);
@@ -214,7 +217,8 @@ export default function SocialPostDetail(){
         let likes = isNaN(parseInt(formData.likes)) ? 0 : parseInt(formData.likes)
         let views = isNaN(parseInt(formData.views)) ? 0 : parseInt(formData.views)
         let comments = isNaN(parseInt(formData.comments)) ? 0 : parseInt(formData.comments)
-        return likes + views + comments;
+        let reach = isNaN(parseInt(formData.reach)) ? 0 : parseInt(formData.reach)
+        return likes + views + comments + reach;
     }
     
     if(loading) return <Loading />
@@ -276,6 +280,7 @@ export default function SocialPostDetail(){
                                 <td>Likes</td>
                                 <td>Views</td>
                                 <td>Comments</td>
+                                <td>Reach</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -283,6 +288,7 @@ export default function SocialPostDetail(){
                                 <td>{formData.likes ==='' ? '-' : formData.likes}</td>
                                 <td>{formData.views === '' ? '-' : formData.views}</td>
                                 <td>{formData.comments === '' ? '-' : formData.comments}</td>
+                                <td>{formData.reach === '' ? '-' : formData.reach}</td>
                             </tr>
                             <tr>
                                 <td>Total Engagement:</td>
@@ -310,6 +316,11 @@ export default function SocialPostDetail(){
                     <div>
                         <label>Comments</label>
                         <input type='number' min='0' value={formData.comments} onChange={(e) => setFormData(prev => ({...prev, comments: e.target.value}))} />
+                    </div>
+
+                    <div>
+                        <label>Reach</label>
+                        <input type='number' min='0' value={formData.reach} onChange={(e) => setFormData(prev => ({...prev, reach: e.target.value}))} />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'row' }} >

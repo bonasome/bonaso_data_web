@@ -224,7 +224,20 @@ export default function RespondentForm(){
         }
     }, [existing]);
 
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
 
     useEffect(() => {
         if (existing) {
@@ -308,7 +321,7 @@ export default function RespondentForm(){
             <ReturnLink url={id ? `/respondents/${id}` : '/respondents'} display={id ? 'Return to detail page' : 'Return to respondents overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New Respondent' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={isAnon} control={control} header={'Respondent Anonymity'} />
                 {anon && <FormSection fields={anonBasic} control={control} header='Basic Information' />}
                 {!anon && <FormSection fields={notAnonBasic} control={control} header='Basic Information' />}

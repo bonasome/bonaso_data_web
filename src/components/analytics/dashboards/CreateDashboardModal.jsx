@@ -73,8 +73,20 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
         }
     }, [existing]);
         
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
-    
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
+
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
@@ -102,7 +114,7 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
         <div className={modalStyles.modal}>
             <h1>{existing ? `Editing Dasbhoard ${existing.name}` : 'New Dashboard' }</h1>
             <Messages errors={submissionErrors} />
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={basics} control={control} />
                 {orgSel && <FormSection fields={org} control={control} />}
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>

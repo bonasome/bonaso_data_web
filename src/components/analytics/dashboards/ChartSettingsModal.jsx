@@ -131,7 +131,21 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
         }
     }, [chart]);
     
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            console.log(firstError, field)
+            if (field && field.scrollIntoView) {
+                field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
 
     useEffect(() => {
         if (chart) {
@@ -220,11 +234,9 @@ export default function ChartSettingsModal({ chart=null, dashboard, onUpdate, on
 
     return(
         <div className={styles.modal} >
-            <h2>Creating New Client</h2>
+            <h2>Chart Settings</h2>
                 <Messages errors={submissionErrors} ref={alertRef} />
-
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <h2>Chart Settings</h2>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={basics} control={control} header={'Basics'}/>
                 {chartType && chartType != 'pie' && <FormSection fields={axis} control={control} header={'Axis'}/>}
                 {inds.length === 1 && inds[0].indicator_type == 'respondent' && chartType == 'bar' && 

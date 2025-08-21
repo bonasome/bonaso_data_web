@@ -7,7 +7,7 @@ import styles from '../../../styles/indexSelect.module.css';
 import modalStyles from '../../../styles/modals.module.css';
 
 //select multiple models from an index component
-export default function ModelMultiSelect({ IndexComponent, value, onChange, label, errors, tooltip=null, callbackText, labelField='display_name', includeParams=[], excludeParams=[], projAdd=false, addRedirect=null, blacklist=[] }){
+export default function ModelMultiSelect({ name, IndexComponent, value, onChange, label, errors, tooltip=null, callbackText, labelField='display_name', includeParams=[], excludeParams=[], projAdd=false, addRedirect=null, blacklist=[] }){
     const [selecting, setSelecting] = useState(false);
     
     
@@ -25,31 +25,36 @@ export default function ModelMultiSelect({ IndexComponent, value, onChange, labe
 
     return(
         <div>
-            <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <p>{label}</p>
+            <label style={{ display: 'flex', flexDirection: 'row' }}>
+                {label}
                 {tooltip && <Tooltip msg={tooltip} />}
-            </div>
-            <Messages errors={errors} />
-            <div className={styles.card}>
-                {value.length > 0 ? 
-                    <div>
-                        {value.map((v) => (<div style={{ display: 'flex', flexDirection: 'row'}}>
-                            <p>{v[labelField]}</p>
-                            <button type="button" onClick = {() => remove(v)} style={{ marginLeft: 'auto'}}>Remove</button>
-                        </div>))}
-                    </div>
-                
-                : <p>Nothing selected</p>}
-                <button type="button" onClick={() => setSelecting(!selecting)}>{selecting ? 'Done' : 'Select'}</button>
-                <button type="button" onClick={() => onChange([])} disabled={(!value || value.length === 0)}>Clear Selection</button>
-                {selecting && <div className={modalStyles.modal}>
-                    <h2>{label}</h2>
-                    <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
-                        <IndexComponent callback={(obj) => handleAdd(obj)} callbackText={callbackText} blacklist={[...selectedVals, ...blacklist]} includeParams={includeParams} excludeParams={excludeParams} projAdd={projAdd} addRedirect={addRedirect} />
-                    </div>
-                    <button onClick={() => setSelecting(false)}>Done</button>
-                </div>}
-            </div>
+            </label>
+            <fieldset style={{ border: 'none' }} name={name}>
+                <div >
+                    
+                </div>
+                <Messages errors={errors} />
+                <div className={styles.card}>
+                    {value.length > 0 ? 
+                        <div>
+                            {value.map((v) => (<div style={{ display: 'flex', flexDirection: 'row'}}>
+                                <p>{v[labelField]}</p>
+                                <button type="button" onClick = {() => remove(v)} style={{ marginLeft: 'auto'}}>Remove</button>
+                            </div>))}
+                        </div>
+                    
+                    : <p>Nothing selected</p>}
+                    <button type="button" onClick={() => setSelecting(!selecting)}>{selecting ? 'Done' : 'Select'}</button>
+                    <button type="button" onClick={() => onChange([])} disabled={(!value || value.length === 0)}>Clear Selection</button>
+                    {selecting && <div className={modalStyles.modal}>
+                        <h2>{label}</h2>
+                        <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
+                            <IndexComponent callback={(obj) => handleAdd(obj)} callbackText={callbackText} blacklist={[...selectedVals, ...blacklist]} includeParams={includeParams} excludeParams={excludeParams} projAdd={projAdd} addRedirect={addRedirect} />
+                        </div>
+                        <button onClick={() => setSelecting(false)}>Done</button>
+                    </div>}
+                </div>
+            </fieldset>
         </div>
     )
 }

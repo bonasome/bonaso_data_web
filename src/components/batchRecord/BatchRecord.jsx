@@ -33,14 +33,14 @@ export default function BatchRecord(){
     const [uploading, setUploading] = useState(false);
     const [gettingFile, setGettingFile] = useState(false);
 
-    //auto scroll to aler
+    //auto scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
-        if (errors.length > 0 && alertRef.current) {
+        if ((errors.length > 0 || success.length > 0 || warnings.length > 0) && alertRef.current) {
         alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         alertRef.current.focus({ preventScroll: true });
         }
-    }, [errors]);
+    }, [errors, success, warnings]);
 
     //function to get a template
     const handleClick = async() => {
@@ -186,7 +186,7 @@ export default function BatchRecord(){
     return(
         <div className={styles.fileUpload}>
             <h1>Batch Uploading</h1>
-            <Messages errors={errors} warnings={warnings} success={success} />
+            <Messages errors={errors} warnings={warnings} success={success} ref={alertRef} />
             {conflict && conflictList.length > 0 && <ConflictManagerModal existing={conflictList} handleClose={()=>setConflict(false)} />}
             
             <div className={styles.template}>

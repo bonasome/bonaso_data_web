@@ -233,7 +233,20 @@ export default function IndicatorForm(){
         }
     }, [existing]);
     console.log(existing)
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, setFocus, watch, formState: { errors } } = useForm({ defaultValues });
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
 
     useEffect(() => {
         if (existing) {
@@ -332,7 +345,7 @@ export default function IndicatorForm(){
             <ReturnLink url={id ? `/indicators/${id}` : '/indicators'} display={id ? 'Return to detail page' : 'Return to indicators overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New Indicator' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={basicInfo} control={control} header={'Basic Information'} />
                 <FormSection fields={meta} control={control} header={'Indicator Type/Status'} />
                 {isRespondent && <FormSection fields={respondent} control={control} header={'Required Information for Collectors'} />}

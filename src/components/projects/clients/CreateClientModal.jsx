@@ -75,7 +75,20 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
             }
         }, [existing]);
     
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
 
     useEffect(() => {
         if (existing) {
@@ -104,7 +117,7 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
             <h2>{existing ? `Editing ${existing?.name}` : 'Creating New Client'}</h2>
              <Messages errors={pageErrors} ref={alertRef} />
 
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={basics} control={control} />
                 
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>

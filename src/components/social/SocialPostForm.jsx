@@ -177,7 +177,20 @@ export default function SocialPostForm(){
         }
     }, [existing]);
 
-    const { register, control, handleSubmit, reset, watch, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
 
     useEffect(() => {
         if (existing) {
@@ -210,7 +223,7 @@ export default function SocialPostForm(){
         },
     ]
     const task = [
-        { name: 'task_ids', label: "Post Associated with Task(s) (Required)", type: "multimodel", IndexComponent: Tasks,
+        { name: 'task_ids', label: "Post Associated with Task(s) (Required)", type: "multimodel", IndexComponent: Tasks, rules: { required: "Required"},
             includeParams: [{field: 'indicator_type', value: 'social'}], tooltip: `What tasks does this post contribute towards?`
         }
     ]
@@ -232,7 +245,7 @@ export default function SocialPostForm(){
             <ReturnLink url={id ? `/social/${id}` : '/social'} display={id ? 'Return to detail page' : 'Return to social overview'} />
             <h1>{id ? `Editing Post ${existing?.name}` : 'New Post' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={basics} control={control} header='Basic Information'/>
                 <FormSection fields={task} control={control} header='Related to Task(s)' />
                 <FormSection fields={platformInfo} control={control} header='Made on Platform'/>
