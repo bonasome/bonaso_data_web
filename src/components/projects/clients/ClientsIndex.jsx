@@ -19,7 +19,7 @@ function ClientCard({ client, callback=null, callbackText }){
     const [expanded, setExpanded] = useState(false);
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
-            <Link to={`/clients/${client.id}`} style={{display:'flex', width:"fit-content"}}><h2>{client.name}</h2></Link>
+            {callback ? <h2>{client.name}</h2> : <Link to={`/clients/${client.id}`} style={{display:'flex', width:"fit-content"}}><h2>{client.name}</h2></Link>}
             {callback && <button type="button" onClick={() => callback(client)}>{callbackText}</button> }
             {expanded &&
                 <div>

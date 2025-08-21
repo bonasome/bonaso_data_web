@@ -167,7 +167,7 @@ export default function SocialPostForm(){
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
-            name: existing?.description ?? '',
+            description: existing?.description ?? '',
             task_ids: existing?.tasks ?? [],
             published_at: existing?.published_at ?? new Date().toISOString().split('T')[0],
 
@@ -197,7 +197,7 @@ export default function SocialPostForm(){
         },
 
         { name: 'description', label: "Post Description", type: "textarea", 
-            placeholder: 'Any information tat you may want to rembmber about this post...'
+            placeholder: 'Any information that you may want to remember about this post...'
         },
 
         { name: 'published_at', label: "Post Made On (Required)", type: "date", rules: { required: "Required" },
@@ -230,7 +230,7 @@ export default function SocialPostForm(){
     return(
         <div className={styles.form}>
             <ReturnLink url={id ? `/social/${id}` : '/social'} display={id ? 'Return to detail page' : 'Return to social overview'} />
-            <h1>{id ? `Editing Post ${existing?.display_name}` : 'New Post' }</h1>
+            <h1>{id ? `Editing Post ${existing?.name}` : 'New Post' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormSection fields={basics} control={control} header='Basic Information'/>

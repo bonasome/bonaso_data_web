@@ -61,7 +61,7 @@ function ProjectCard({ project, callback=null, callbackText }) {
 
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
-            <Link to={`/projects/${project.id}`} style={{display:'flex', width:"fit-content"}}><h2>{project.name}</h2></Link>
+            {callback ? <h2>{project.name}</h2> : <Link to={`/projects/${project.id}`} style={{display:'flex', width:"fit-content"}}><h2>{project.name}</h2></Link>}
             {callback && <button type="button" onClick={() => callback(project)}>{callbackText}</button>}
             {expanded && loading && <ComponentLoading />}
             {expanded && active && 
@@ -70,14 +70,14 @@ function ProjectCard({ project, callback=null, callbackText }) {
                     <i>Lasts from {active.start} to {active.end} {user.role =='admin' && '('+active.status+')'} </i>
                     {active?.client && <h4> For: {project.client.name}</h4>}
                     <p>{active.description ? active.description : 'No Description'}</p>
-                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    {!callback && <div style={{ display: 'flex', flexDirection: 'row' }}>
                         <Link to={`/projects/${active.id}`}>
                             <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} />
                         </Link>
                         {user.role === 'admin' && <Link to={`/projects/${active.id}/edit`}>
                             <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} />
                         </Link>}
-                    </div>
+                    </div>}
                 </div>
             }
         </div>

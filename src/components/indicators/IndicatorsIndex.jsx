@@ -24,6 +24,7 @@ import { GiJumpAcross } from "react-icons/gi";
 
 function IndicatorCard({ indicator, callback = null, callbackText }) {
     //context
+    const { user } = useAuth();
     const { indicatorDetails, setIndicatorDetails } = useIndicators();
     //state that stores the actual full indicator object, not just the highlights passed from the index query
     const [active, setActive] = useState(null);
@@ -64,7 +65,7 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
 
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
-            <Link to={`/indicators/${indicator.id}`} style={{display:'flex', width:"fit-content"}}><h2>{indicator.display_name}</h2></Link>
+            {(!callback && user.role == 'admin') ? <Link to={`/indicators/${indicator.id}`} style={{display:'flex', width:"fit-content"}}><h2>{indicator.display_name}</h2></Link> : <h2>{indicator.display_name}</h2>}
             {callback && (
                 <button type="button" onClick={(e) => { e.stopPropagation(); callback(indicator); }}>
                     {callbackText}
@@ -81,14 +82,14 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
                             {active.prerequisites.map((p) => (<li>{p.display_name}</li>))}
                         </ul>
                     </div>}
-                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    {!callback && user.role =='admin' && <div style={{ display: 'flex', flexDirection: 'row' }}>
                         <Link to={`/indicators/${indicator.id}`}>
                             <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} />
                         </Link>
                         <Link to={`/indicators/${indicator.id}/edit`}>
                             <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} />
                         </Link>
-                    </div>
+                    </div>}
                 </div>
             )}
         </div>

@@ -65,7 +65,7 @@ function OrganizationCard({ org, callback, callbackText }) {
 
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
-            <Link to={`/organizations/${org.id}`} style={{display:'flex', width:"fit-content"}}><h2>{org.name}</h2></Link>
+            {callback ? <h2>{org.name}</h2> : <Link to={`/organizations/${org.id}`} style={{display:'flex', width:"fit-content"}}><h2>{org.name}</h2></Link>}
             {callback && <button type="button" onClick={() => callback(org)}>{callbackText}</button>}
             {expanded && loading && <ComponentLoading />}
             {expanded && active && 
@@ -75,10 +75,10 @@ function OrganizationCard({ org, callback, callbackText }) {
                     {active.description ? <p><i>{active.description}</i></p> :
                         <p><i>No Description</i></p>}
                     {active.executive_director && <p>Executive Director: {active.executive_director}</p>}
-                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    {!callback && <div style={{ display: 'flex', flexDirection: 'row' }}>
                         <Link to={`/organizations/${org.id}`}><ButtonHover noHover={<GiJumpAcross />} hover={'Go to page'} /></Link>
                         <Link to={`/organizations/${org.id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
-                    </div>
+                    </div>}
                 </div>
             }
         </div>
