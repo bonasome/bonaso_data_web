@@ -18,14 +18,24 @@ import { PiFileCsvFill } from "react-icons/pi";
 
 
 export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta }){
-    const [table, setTable] = useState(null);
-    //meta
+    /*
+    Displays a single pivot table with the option to download it as a csv.
+    - id (integer): the id of the pivot table
+    - breakdowns (object): the map of db values and labels to create readable labels
+    - onUpdate (function): handle edits to settings
+    - onDelete (function): handle deleting the table
+    - meta (object): model information
+    */
+
+    const [table, setTable] = useState(null); //information about the pivot table
+    //page meta
     const [editing, setEditing] = useState(false);
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [del, setDel] = useState(false);
-    const [downloading, setDownloading] = useState(false);
+    const [downloading, setDownloading] = useState(false); //a file is downloading
 
+    //get the pivot table details
     const getPT = async() => {
         try {
             console.log('fetching pivot table...');
@@ -46,6 +56,7 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
         } 
     }
 
+    //load details once on init
     useEffect(() => {
         const initialLoad = async() => {
             await getPT();
@@ -54,12 +65,12 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
         initialLoad();
     }, []);
 
-
+    //handle a download to a csv
     const handleDownload = async () => {
         try {
             setDownloading(true);
             const response = await fetchWithAuth(`/api/analysis/tables/${id}/download/`);
-            
+            //file downloading jargon
             const disposition = response.headers.get('Content-Disposition');
             let filename = 'report.csv';
             if (disposition && disposition.includes('filename=')) {
@@ -91,6 +102,7 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
         }
     };
 
+    //delete the pivot table
     const handleDelete = async() => {
         try {
             console.log('deleting pivot table...');
@@ -131,9 +143,13 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
         }
     }
 
+    //get a list of all the row category values
     const rowBDs = table?.data[0].slice(0, table?.params.length - 1);
+    //one breakdown will appear in the headers, so get those values
     const headerBD = table?.params.filter(p => (!rowBDs.includes(p)))[0];
+    //first row is just the headers
     const headers = table?.data[0];
+    //data starts at next row
     const rows = table?.data.slice(1);
 
     if(loading) return <ComponentLoading />

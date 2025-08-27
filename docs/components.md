@@ -25,6 +25,16 @@ This site mostly uses React Hook Forms for collecting information from users. To
 
 - Field ([src/components/reuseables/forms/Field.jsx]): Takes a variety of inputs (such as label, options, IndexComponent, rules, name, etc.) depending on the type of input (see below) and returns an object the user can interact with. The only component that should reference field is FormSection, which should be used to build sets of fields. 
 
+**Note**: A field will accept certain props that depend on the type of input:
+    - name (string, required for all)
+    - label (string, required for all), what will be displayed to the user
+    - rules (object, optional), validation rules (required, email, etc.), passes errors to error prop of input component
+    - options (array, MultiCheckbox, RadioButtons, Select, ImageSelect), the option label and value
+    - IndexComponent (component, required for ModelSelect/ModelMultiSelect), produces the correct index view for selection
+    - Include/Exclude Params (array, optional for ModelSelect/ModelMultiSelect), objects that are passed to the url to explicitly only include or exclude certain items
+    - Blacklist (array, optional for ModelSelect/ModelMultiSelect), object ids that should not be displayed when a user is selecting itmes
+more detailed examples of field construction can be found at [src/components/indicators/IndicatorForm.jsx]
+
 - FormSection ([src/components/reuseables/forms/FormSection.jsx]): Combines a variety of forms into one section that can be displayed or hidden based on watches. Can also optionally be given a header. Meant to be used alongside field.
 
 ---
@@ -41,7 +51,8 @@ Inputs should always be wrapped in our reusable components rather than raw HTML 
 - RadioButtons ([src/components/reuseables/inputs/RadioButtons.jsx]): A custom radio button component with custom icons that allows a user to select a single option.
 
 - Select ([src/components/reuseables/inputs/Select.jsx]): A select component that returns a single value (does not support mutliselect, as MultiCheckbox is preferred for that). RadioButtons are preferred, except with long lists or where space is a concern. 
-
+    - *Note*: For selects with many options, enabling 'search=true' in params will display an input that the user can type into the filter the list (can also be used for selects that pull from paginated APIs)
+    
 - Input ([src/components/reuseables/inputs/Input.jsx]): A basic text input component. Can be passed a type prop that can specify for textarea, numbers, email, or date inputs. 
 
 - SimpleDynamicRows ([src/components/reuseables/inputs/SimpleDynamicRows.jsx]): This component is used for creating dynamic lists of text inputs and returns an array. It is really only used for creating Indicator Subcategories (and has custom deprecation logic for that), but could be expanded if similar needs arise in the future. 

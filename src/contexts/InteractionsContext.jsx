@@ -3,7 +3,8 @@ import { createContext, useContext, useState } from 'react';
 const InteractionsContext = createContext();
 
 export const InteractionsProvider = ({ children }) => {
-    const [interactions, setInteractions] = useState([]);
+    //Context that stores some global variables about interactions
+    const [interactions, setInteractions] = useState([]); //array of interactions
 
     return (
         <InteractionsContext.Provider value={{ interactions, setInteractions }}>

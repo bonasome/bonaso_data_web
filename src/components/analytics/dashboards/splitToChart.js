@@ -1,16 +1,25 @@
 import cleanLabels from '../../../../services/cleanLabels';
 
-export default function splitToChart(data, axis=null, legend=null, stack=null, targets = [], map) {
+export default function splitToChart(data, map, axis=null, legend=null, stack=null, targets = []) {
+    /*
+    Function that helps transform data sent from the backend to a rechart format. 
+    - data (object): the data from the backend
+    - map (object): a map that has labels/values about demographic fields to make human readable labels
+    - axis (string, optional): the selected axis for bar/line charts
+    - legend (string, optional): the selected legend
+    - stack (string, optional): the selected stack for bar charts
+    - targets (array, optional): an array of information about targets associated with this chart
+    */
     const chartMap = {};
-    const keyMeta = {};  // To track each key's subcategory for stacking
+    const keyMeta = {};  // To track each key's breakdowns for stacking
     if(!data) return { dataArray: [], keys: []}
     const arr = Object.values(data);
 
     for (const row of arr) {
-        const period = row.period || 'All-Time';
+        const period = row.period || 'All-Time'; //default if no axis
 
-        const legendVal = row[legend] || 'Total';
-        const stackVal = row[stack] || '';
+        const legendVal = row[legend] || 'Total'; //default if not legend
+        const stackVal = row[stack] || ''; 
 
         // Initialize chartMap row
         if (!chartMap[period]) chartMap[period] = { period };
@@ -18,12 +27,12 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
         let legendValCleaned = legendVal;
         if(legend && (!['subcategory', 'indicator', 'platform', 'organization', 'metric'].includes(legend))){
             legendValCleaned = map[legend][legendVal]
-        }
+        } //try to get the legend value label if map has its value
         let stackValCleaned = stackVal
         if(stack && (!['subcategory', 'indicator', 'platform', 'organization', 'metric'].includes(stack))){
             stackValCleaned = map[stack][stackVal]
-        }
-        const key = stack ? `${legendVal}__${stackVal}` : `${legendVal}`
+        } //try to get the stack value label if map has its value
+        const key = stack ? `${legendVal}__${stackVal}` : `${legendVal}` //create a key for reference
         // Add the value
         chartMap[period][key] = row.count;
         
@@ -33,7 +42,6 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
     }
     
     // Overlay targets (e.g., target lines or bars)
-
     for (const tar of targets) {
         Object.keys(tar).forEach((t) => {
             const period = t;
@@ -48,6 +56,7 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
 
     let dataArray = Object.values(chartMap);
     // Construct keys array (for legends & Recharts <Bar/> components)
+    //sort axis by date
     if(axis==='month'){
         dataArray = dataArray.sort((a, b) => new Date(`1 ${a.period}`) - new Date(`1 ${b.period}`));
     }
@@ -67,10 +76,10 @@ export default function splitToChart(data, axis=null, legend=null, stack=null, t
     const keys = Object.entries(keyMeta).map(([compoundKey, { stackKey, legendKey }]) => ({
         key: compoundKey,
         bar: legendKey ?? '',
-        stackId: stackKey ||  '',
-        label: stack ? `${cleanLabels(legend)}: ${legendKey} - ${cleanLabels(stack)} ${stackKey}` : `${cleanLabels(legendKey)}`,
+        stackId: stackKey ||  '', //for grouping bars into stacks
+        label: stack ? `${cleanLabels(legend)}: ${legendKey} - ${cleanLabels(stack)} ${stackKey}` : `${cleanLabels(legendKey)}`, //the label
         fill: undefined // optional: use a color mapping here
-    })).sort((a, b) => a.label.localeCompare(b.label));
+    })).sort((a, b) => a.label.localeCompare(b.label)); //sort alphabetically by default
 
-    return { dataArray, keys };
+    return { dataArray, keys }; //return both the data and the keys
 }

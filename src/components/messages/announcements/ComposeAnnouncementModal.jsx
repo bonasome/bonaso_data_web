@@ -15,10 +15,16 @@ import modalStyles from '../../../styles/modals.module.css';
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 
-//modal to create/edit announcement
-export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=null, existing=null }){
+export default function ComposeAnnouncementModal({ onUpdate, onClose, projectID=null, existing=null }){
+    /*
+    Modal to create or edit an announcement. 
+    - onUpdate(function): what to do on save
+    - onClose (function): how to close the modal
+    - projectID (integer, optional): the id of the project this announcement is related to
+    - existing (object, optional): if editing the existing annaouncement to edit
+    */
     const { user } = useAuth();
-    //meta
+    //component meta
     const [saving, setSaving] = useState(false);
     const [pageErrors, setPageErrors] = useState([]);
     
@@ -49,8 +55,8 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
             });
             const returnData = await response.json();
             if(response.ok){
-                onUpdate(returnData);
-                onClose();  
+                onUpdate(returnData); //tell the parent the announcement was updated
+                onClose();  //close the modal
             }
             else{
                 const serverResponse = []
@@ -77,6 +83,7 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
 
     }
 
+    //set default values
     const defaultValues = useMemo(() => {
             return {
                 subject: existing?.subject ?? '',
@@ -87,10 +94,11 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
             }
         }, [existing]);
     
+    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
 
-    //scroll to errors
+    //scroll to field errors
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -103,6 +111,7 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
         }
     };
 
+    //wait for existing to load then set default values
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
@@ -127,6 +136,7 @@ export default function ComposeAnnouncementModal({ onClose, onUpdate, projectID=
             Please note that if you have checked the above cascade to children box, you can likely ignore this.`
         },
     ]
+    //only admins can access this
     const admin= [
         {name: 'visible_to_all', label: 'Make Visible to All', type: 'checkbox',
             tooltip: `Checking this box will make this visible to all members${projectID ? ' with access to this project' : ''}.`

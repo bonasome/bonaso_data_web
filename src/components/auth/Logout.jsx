@@ -10,6 +10,9 @@ import bonasoWhite from '../../assets/bonasoWhite.png'
 import styles from './login.module.css';
 
 export default function Logout() {
+    /*
+    Simple display for when a user is logging out before being redirected to the login page
+    */
     const navigate = useNavigate();
     const { setUser, setLoggedIn, refreshAuth } = useAuth();
 
@@ -42,7 +45,7 @@ export default function Logout() {
         logout();
     }, [dns, navigate]);
 
-    //page display in case logout takes a second to register and redirect
+    //page display in case logout takes a second to register and redirect, so display something basic
     return(
             <div>
                 <div className={styles.login}>

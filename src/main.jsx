@@ -10,6 +10,7 @@ import Router from './routes/Routes.jsx'
 
 
 createRoot(document.getElementById('root')).render(
+    //main file for building the site. Do not edit unless you know what you're doing.
     <StrictMode>
         <UserAuth>
             <App />

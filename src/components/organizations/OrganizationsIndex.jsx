@@ -85,7 +85,21 @@ function OrganizationCard({ org, callback, callbackText }) {
     );
 }
 
-export default function OrganizationsIndex( { callback=null, callbackText='Select Organization', includeParams=[], excludeParams=[], updateTrigger=null, projAdd=null, addRedirect=null, blacklist=[] }){
+export default function OrganizationsIndex( { callback=null, callbackText='Select Organization', includeParams=[], excludeParams=[], updateTrigger=null,  blacklist=[], projAdd=null, addRedirect=null, }){
+    /*
+    Expandable card that displays details about particular org for use with an index component
+    - callback (function, optional): a callback function that allows information about this org to be selected and 
+        passed to another component
+    - callbackText (string, optional): text to display on the button that triggers the callback function 
+    - includeParams (array, optional): specify explicitly certain URL param filters
+    - excludeParams (array, optional): specify explicitly certain URL params to not include in the index
+    - updateTrigger (function, optional): provide a variable that will refetch the list of orgs
+    - blacklist (array, optional): provide an array of ids to exclue from the list. 
+    - projAdd (integer): this index is used when users are trying to add organizations to projects, in which case
+        they need access to view orgs they normally should not be able to see. If a value is provided here the backend
+        will use a seperate endpoint. 
+    -addRedirect (object, optional): provide optional params to redirect the user if they create an org
+    */
     //context
     const { user } = useAuth();
     const { organizations, setOrganizations } = useOrganizations();
@@ -103,14 +117,15 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
     const [errors, setErrors] = useState([]);
     
     //ref to scroll to errors automatically
-        const alertRef = useRef(null);
-        useEffect(() => {
-            if (errors.length > 0 && alertRef.current) {
-            alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            alertRef.current.focus({ preventScroll: true });
-            }
-        }, [errors]);
-
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if (errors.length > 0 && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [errors]);
+    
+    //take include/exclude params and conver them to a string for the URL
     const params = useMemo(() => {
         //sepereate from filters, these are passed as params
         const allowedFields = ['project', 'event'];
@@ -130,18 +145,17 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
     useEffect(() => {
         const loadOrgs = async () => {
             try {
+                //convert filter object to a string for the URL
                 const filterQuery = 
                     (filters.project ? `&project=${filters.project}` : '');
                 
+                //if projAdd is selected (and the user is not an admin), use a different endpoint
                 const url = projAdd ? 
                     (user.role == 'admin' ? `/api/organizations/?search=${search}&page=${page}` + filterQuery + params : 
                         `/api/manage/projects/${projAdd}/get-orgs/?search=${search}&page=${page}`) :  
                     `/api/organizations/?search=${search}&page=${page}` + filterQuery + params;
-                console.log(url)
-
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
-                console.log(data)
                 setEntries(data.count);
                 setOrganizations(data.results);
             } 
@@ -156,7 +170,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
         loadOrgs();
     }, [page, search, filters, updateTrigger, params]);
 
-    //load list of projects (for filter select), refresh on  search
+    //load list of projects (for filter select), refresh on projectSearch change
     useEffect(() => {
         const getProjects = async() => {
             try{
@@ -173,13 +187,13 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
         getProjects();
     }, [projectSearch]);
 
-    //if the user came from a project page, redirect them to that, since they may not even have perms to view this org proper
-    //this checks the url params to see if they came from that page
+    //if the user is viewing this while adding subgrantees, redirect them back there if they try to create a new org
     const redirect = useMemo(() => {
         if(!addRedirect) return '/organizations/new'
         return `/organizations/new?to=${addRedirect?.to}&projectID=${addRedirect.projectID}&orgID=${addRedirect.orgID}`
     }, [addRedirect]);
 
+    //filter out any blacklisted IDs
     const filteredOrgs = organizations?.filter(org => !blacklist.includes(org.id));
 
     if(loading) return callback ? <ComponentLoading /> : <Loading />
@@ -188,7 +202,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
             {!callback && <h1>{user.role == 'admin' ? 'All Organizations' : 'My Organizations'}</h1>} 
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
                 filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} initial={initial} 
-                config={filterConfig(projects, setSearch)} 
+                config={filterConfig(projects, (v) => setProjectSearch(v))} 
             />}>
                 {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 

@@ -20,14 +20,22 @@ import { PiFileCsvFill } from "react-icons/pi";
 
 
 export default function LineList({ id, onUpdate, onDelete, breakdowns }){
-    const [list, setList] = useState(null);
+    /*
+    Displays a tablular line list that can be downloaded.
+    - id (integer): The id of the line list to be dispayed
+    - onUpdate (function): Function to handle update to the settings
+    - onDelete (function): What to do when deleting the line list
+    - breakdowns (object): A map of labels/values that is used to convert db values to readable labels
+    */
+    const [list, setList] = useState(null); //the line list object
     //meta
     const [editing, setEditing] = useState(false);
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [del, setDel] = useState(false);
-    const [downloading, setDownloading] = useState(false);
+    const [downloading, setDownloading] = useState(false); //state for managing when a download is ongoing
 
+    //get the line list details
     const getLL = async() => {
         try {
             console.log('fetching line list...');
@@ -35,7 +43,7 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
             const response = await fetchWithAuth(url);
             const data = await response.json();
             if(response.ok){
-                setList(data)
+                setList(data);
             }
             else{
                 console.error(data);
@@ -48,6 +56,7 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
         } 
     }
 
+    //load the line list details once on load
     useEffect(() => {
         const initialLoad = async() => {
             await getLL();
@@ -56,12 +65,13 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
         initialLoad();
     }, []);
 
-
+    //download the line list as a csv file
     const handleDownload = async () => {
         try {
-            setDownloading(true);
+            setDownloading(true); //prevent multiple downloads
             const response = await fetchWithAuth(`/api/analysis/lists/${id}/download/`);
             
+            //jargon for downloading the file
             const disposition = response.headers.get('Content-Disposition');
             let filename = 'list.csv';
             if (disposition && disposition.includes('filename=')) {
@@ -92,6 +102,7 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
         }
     };
 
+    //handle deleting the line list
     const handleDelete = async() => {
         try {
             console.log('deleting line list...');
@@ -99,7 +110,7 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
                 method: 'DELETE',
             });
             if (response.ok) {
-                onDelete(id)
+                onDelete(id); //if ok, run onDelete to update the parent component
             } 
             else {
                 let data = {};
@@ -120,7 +131,7 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
                     serverResponse.push(`${field}: ${data[field]}`);
                     }
                 }
-                setErrors(serverResponse);
+                setErrors(serverResponse); //else alert the user
             }
         } 
         catch (err) {
@@ -132,19 +143,25 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
         }
     }
 
-    console.log(list)
+    //set the headers as the keys for the first list item (since they should all be the same structure)
     const headers = list?.data.length > 0 ? Object.keys(list?.data[0]) : [];
     const rows = list?.data;
 
+    //function for taking a cell and cleaning it
     const cleanCell = (cell, col) => {
+        //these ones are already in good shape
         if(['indicator', 'organization', 'project', 'numeric_component', 'subcategory'].includes(headers[col])) return cell;
+        //clean up dates
         if(['dob', 'interaction_date'].includes(headers[col])) return prettyDates(cell);
+        //get full country name for citizenship (db stores 2 digit code)
         if(headers[col] === 'citizenship'){
             const country = countries.find(c => c.cca2 === cell.toUpperCase());
             return country ? country.name.common : null;
         }
+        //convert booleans
         if(cell === true) return 'True';
         if(cell === false) return 'False';
+        //if an array, join the array in a readable format
         if(Array.isArray(cell)){
             let cat = headers[col]
             if(cat == 'kp_status') cat = 'kp_type';
@@ -152,9 +169,11 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
             return cell.map(c => (breakdowns?.[cat]?.[c] ?? 
                 (typeof(c) === 'string' ? cleanLabels(c) : c))).join(', ')
         }
+        //try to find it in the map
         return breakdowns?.[headers[col]]?.[cell] ?? 
             (typeof(cell) === 'string' ? cleanLabels(cell) : cell)
     }
+
     if(loading) return <ComponentLoading />
     return(
         <div>
@@ -174,6 +193,7 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
             <div className={styles.table}>
             {list?.data?.length > 0 ? <div>
                 <h2>Parameters</h2>
+                {/* Display the users selected filters/params */}
                 {list.start && <p>From {prettyDates(list.start)} {list.end && `to ${prettyDates(list.end)}`}</p>}
                 {list.indicator && <p><strong>Indicator: </strong> {list.indicator.display_name}</p>}
                 {list.project && <p><strong>Project: </strong> {list.project.name}</p>}

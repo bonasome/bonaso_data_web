@@ -22,10 +22,20 @@ import { MdAddToPhotos } from "react-icons/md";
 import { ImPencil } from 'react-icons/im';
 import { GiJumpAcross } from "react-icons/gi";
 
-function IndicatorCard({ indicator, callback = null, callbackText }) {
+function IndicatorCard({ indicator, callback = null, callbackText='Select Indicator' }) {
+    /*
+    Expandable card that displays details about particular indicator for use with an index component
+    - indicator (object): the indicator this card displays information about
+    - callback (function, optional): a callback function that allows information about this indicator to be selected and 
+        passed to another component (passed down from the IndicatorIndex Component).
+    - callbackText (string, optional): text to display on the button that triggers the callback function (passed 
+        down from the IndicatorIndex Component)
+    */
+
     //context
     const { user } = useAuth();
     const { indicatorDetails, setIndicatorDetails } = useIndicators();
+
     //state that stores the actual full indicator object, not just the highlights passed from the index query
     const [active, setActive] = useState(null);
 
@@ -40,7 +50,7 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
         setExpanded(willExpand);
 
         if (!willExpand) return;
-        //try fetching from context
+        //try fetching from context first
         const found = indicatorDetails.find(ind => ind.id === indicator.id);
         if (found) {
             setActive(found);
@@ -98,9 +108,14 @@ function IndicatorCard({ indicator, callback = null, callbackText }) {
 
 export default function IndicatorsIndex({ callback=null, callbackText='Add Indicator', includeParams=[], excludeParams=[], updateTrigger=null, blacklist=[], }){
     /*
-    Callback: A function that can pass the details of a specific entry to another component. Useful for model selects.
-    Callback Text: Text to display on callback button.
-    Update Trigger: Update the query in the event that a param changes (add or remove entries).
+    Expandable card that displays details about particular indicator for use with an index component
+    - callback (function, optional): a callback function that allows information about this indicator to be selected and 
+        passed to another component
+    - callbackText (string, optional): text to display on the button that triggers the callback function 
+    - includeParams (array, optional): specify explicitly certain URL param filters
+    - excludeParams (array, optional): specify explicitly certain URL params to not include in the index
+    - updateTrigger (function, optional): provide a variable that will refetch the list of indicators
+    - blacklist (array, optional): provide an array of ids to exclue from the list. 
     */
     
     //contexts
@@ -111,7 +126,7 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    //information for indexing
+    //information for navigating index view
     const [filters, setFilters] = useState(initial);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -140,16 +155,16 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
             } 
             catch (err) {
                 setErrors(['Something went wrong. Plese try again later.'])
-                console.error('Failed to fetch projects: ', err)
+                console.error('Failed to fetch meta: ', err)
                 setLoading(false)
             }
         }
         getMeta();
     }, []);
 
+    //helper function that converts array of objects in include/exclude params and converts it to a string
     const params = useMemo(() => {
         //sepereate from filters, these are passed as params
-
         const allowedFields = ['project', 'organization'];
         const include = includeParams?.filter(p => allowedFields.includes(p?.field))
         ?.map(p => `&${p?.field}=${p?.value}`)
@@ -163,7 +178,7 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
 
     }, [includeParams, excludeParams]);
 
-    //load the list of indicators, refresh on search/filter/page changes
+    //load the list of indicators, refresh on search/filter/page/params changes
     useEffect(() => {
         const loadIndicators = async () => {
             try {
@@ -174,10 +189,9 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
                     (filters.indicator_type ? `&indicator_type=${filters.indicator_type}` : '');
 
                 const url = `/api/indicators/?search=${search}&page=${page}` + filterQuery + params;
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
-                setEntries(data.count);
+                setEntries(data.count); //total number of entries for page calculation
                 setIndicators(data.results);
             } 
             catch (err) {
@@ -188,6 +202,7 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
         loadIndicators();
     }, [page, search, filters, updateTrigger, params]);
 
+    //filter out blacklisted IDs
     const filteredIndicators = indicators?.filter(ind => !blacklist.includes(ind.id));
 
     if(loading || !indicators) return callback ? <ComponentLoading /> : <Loading /> //on callback don't show full load

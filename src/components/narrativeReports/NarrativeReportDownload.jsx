@@ -16,8 +16,13 @@ import styles from './narrative.module.css';
 
 import { FaCloudDownloadAlt, FaCloudUploadAlt, FaTrashAlt } from "react-icons/fa";
 
-//card that views/downloads a single report
 function NarrativeReportCard({ report, onDelete }){
+    /*
+    Card used to view or download a single report. 
+    - report (object): the report in question
+    - onDelete (function): what to do if the report is deleted
+    */
+
     const { user } = useAuth();
     //page meta
     const [del, setDel] = useState(false);
@@ -25,11 +30,13 @@ function NarrativeReportCard({ report, onDelete }){
     const [errors, setErrors] = useState([]);
     const [downloading, setDownloading] = useState(false); //sets loading state while downloading 
 
-    //fetch and downloa the file
+    //fetch and download the file
     const handleDownload = async (report) => {
         try {
             setDownloading(true);
             const response = await fetchWithAuth(`/api/uploads/narrative-report/${report.id}/download/`);
+
+            //file downloading jargon
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             
@@ -50,6 +57,8 @@ function NarrativeReportCard({ report, onDelete }){
             setDownloading(false);
         }
     };
+
+    //handle file deletion
     const handleDelete = async() => {
         try {
             console.log('deleting organization...');
@@ -57,7 +66,7 @@ function NarrativeReportCard({ report, onDelete }){
                 method: 'DELETE',
             });
             if (response.ok) {
-                onDelete();
+                onDelete(); //tell parent the file was deleted
             } 
             else {
                 let data = {};
@@ -90,6 +99,7 @@ function NarrativeReportCard({ report, onDelete }){
             setDel(false);
         }
     } 
+    //return confirm delete modal as a seperate component since the hover features messes with modal styles
     if(del) return <ConfirmDelete name={`Upload ${report.title}`} onCancel={() => setDel(false)} onConfirm={handleDelete} />
     return(
         <div key={report.id} className={styles.card} onClick={() => setExpanded(!expanded)}>
@@ -111,29 +121,37 @@ function NarrativeReportCard({ report, onDelete }){
     )
 }
 
-//index view for all reports, naturally segmented by project/org, meant to be used as a component within another page
+
 export default function NarrativeReportDownload({ organization, project }) {
+    /*
+    Index view that displays all narative reports for a project/organization pair
+    - organization (object): The organization to get narrative reports about
+    - project (object): the project to get narrative reports about
+    */
     //context
     const { user } = useAuth();
 
-    //related file info
+    //array of reports
     const [files, setFiles] = useState([]);
+
     //index helpers
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
     const [search, setSearch] = useState('');
+
     //page meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [deleted, setDeleted] = useState([]); //temp array to store deleted ids until api is called again
     
-
+    //get the files
     useEffect(() => {
         const getFiles = async () => {
             try {
+                //filter to this project/organization  specifically
                 const response = await fetchWithAuth(`/api/uploads/narrative-report/?project=${project.id}&organization=${organization.id}&search=${search}&page=${page}`);
                 const data = await response.json();
-                setFiles(data.results || []);  // assuming paginated API
+                setFiles(data.results);
                 setEntries(data.count);
             } 
             catch (error) {
@@ -148,7 +166,8 @@ export default function NarrativeReportDownload({ organization, project }) {
     }, [organization, project, search, page]);
 
     if (loading) return <ComponentLoading />;
-    const validFiles = files?.filter(f => (!deleted.includes(f?.id)));
+    const validFiles = files?.filter(f => (!deleted.includes(f?.id))); //filter deleted files until the api is called again
+    
     return (
         <div className={styles.files}>
             <h3>Narrative Reports for {organization.name} during {project.name}</h3>

@@ -1,6 +1,13 @@
 import fetchWithAuth from "./fetchWithAuth";
 
+/*
+A couple of functions to help streamline the repeated process of favoriting/unfavoriting items.
+*/
 export async function checkFavorited(model, id){
+    /*
+    Accepts a appname.modelname str and an id and checks if this item has been favorited by a user (for determining
+    state of the favorite button).
+    */
     try {
         console.log('checking favorite status...')
         const url = `/api/profiles/users/is-favorited/`;
@@ -21,7 +28,7 @@ export async function checkFavorited(model, id){
         const returnData = await response.json();
 
         if (response.ok) {
-            return returnData.favorited
+            return returnData.favorited //boolean
         } 
         else {
             const serverResponse = [];
@@ -45,13 +52,17 @@ export async function checkFavorited(model, id){
     }
 }
 export async function favorite(model, id, unfavorite = false) {
+    /*
+    Accepts a appname.modelname str and an id and favorites that item. If unfavorite is selected, it will 
+    unfavorite.
+    */
     try {
         console.log('favoriting object...')
         const url = unfavorite
-        ? `/api/profiles/users/unfavorite/`
+        ? `/api/profiles/users/unfavorite/` //if unfavorite is true, use the correct url
         : `/api/profiles/users/favorite/`;
 
-        const method = unfavorite ? 'DELETE' : 'POST';
+        const method = unfavorite ? 'DELETE' : 'POST'; //change method if unfavoriting
 
         const response = await fetchWithAuth(url, {
         method,

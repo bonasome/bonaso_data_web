@@ -1,8 +1,13 @@
 import theme from '../theme/theme'
 const getRandomColor = () =>{
-        return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-    }
+    //return a random hex color string
+    return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+}
 export default function getColor(index){
+    /*
+    Accepts an index and returns a color hex string. The first seven digits will return a color preselected 
+    from the theme. Colors thereafter use a random color. 
+    */
     switch (index){
         case 0:
             return '#fff'
@@ -19,6 +24,6 @@ export default function getColor(index){
         case 6:
             return theme.colors.lightGrey
         default:
-            return getRandomColor()
+            return getRandomColor() //at this point start generating random colors
     }
 }

@@ -3,11 +3,13 @@ import { createContext, useContext, useState } from 'react';
 const ProjectsContext = createContext();
 
 export const ProjectProvider = ({ children }) => {
-    const [projects, setProjects] = useState([]);
-    const [projectDetails, setProjectDetails] = useState([]);
-    const [projectsMeta, setProjectsMeta] = useState({});
-    const [clients, setClients] = useState([]);
-    const [tasks, setTasks] = useState({});
+    //Context that stores some global variables about projects
+    const [projects, setProjects] = useState([]); //used for index views
+    const [projectDetails, setProjectDetails] = useState([]); //used for detail views
+    const [projectsMeta, setProjectsMeta] = useState({}); //stores the model meta
+    const [clients, setClients] = useState([]); //stores related information about clients
+    const [tasks, setTasks] = useState({}); //stores related information about tasks
+
     return (
         <ProjectsContext.Provider value={{ projects, setProjects, 
             projectDetails, setProjectDetails, 

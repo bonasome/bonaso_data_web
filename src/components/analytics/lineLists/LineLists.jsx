@@ -14,42 +14,19 @@ import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 import { MdOutlineViewList } from "react-icons/md";
 
 export default function LineLists() {
+    /*
+    Displays a list of all of a users line lists. When one is selected, it will appear on the main panel
+    */
     //page information
-    const [meta, setMeta] = useState({});
-    const [lls, setLLs] = useState([]);
-    const [breakdowns, setBreakdowns] = useState({});
-    //meta
+    const [lls, setLLs] = useState([]); //the line lists
+    const [breakdowns, setBreakdowns] = useState({}); //the breakdown values used to mapping db values to readable labels
+    //page meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const [viewing, setViewing] = useState(null); //controls which dashboard is visible in the main panel
+    const [viewing, setViewing] = useState(null); //controls which list is visible in the main panel
     const [hidden, setHidden] = useState(false); //controls sb visibility
     const [creating, setCreating] = useState(false); //controls visibility of create modal
 
-    useEffect(() => {
-        const getMeta = async() => {
-            try {
-                console.log('fetching meta...');
-                const url = `/api/analysis/dashboards/meta/`
-                const response = await fetchWithAuth(url);
-                const data = await response.json();
-                if(response.ok){
-                    setMeta(data)
-                }
-                else{
-                    console.error(data);
-                    setErrors(['Something went wrong. Please try again later.'])
-                }
-            } 
-            catch (err) {
-                console.error('Failed to get meta:', err);
-                setErrors(['Something went wrong. Please try again later.'])
-            } 
-            finally {
-                setLoading(false);
-            }
-        }
-        getMeta();
-    }, []);
 
     //get options list (basically the meta) for filters/legend/labels
     useEffect(() => {
@@ -70,6 +47,7 @@ export default function LineLists() {
         getEventBreakdowns();
     }, []);
 
+    //get the list of line lists
     useEffect(() => {
         const getLL = async() => {
             try {
@@ -97,18 +75,20 @@ export default function LineLists() {
         getLL();
     }, []);
 
+    //on update to any settings, make sure it reflects in the sidebar
     const handleUpdate = (data) => {
         console.log(data)
         const others = lls.filter((l) => (l.id != data.id));
         setLLs([...others, data]);
     }
 
+    //handle deletion of a line list
     const handleRemove = (id) => {
         setLLs(prev => prev.filter((l) => (l.id != id)));
         setViewing(null);
     }
 
-    if(loading || !meta) return <Loading />
+    if(loading) return <Loading />
     return(
         <div className={hidden ? styles.fullContainer : styles.container}>
             {/* Main Panel */}
@@ -119,7 +99,7 @@ export default function LineLists() {
                 {creating && <LineListSettings onClose={() => setCreating(false)} onUpdate={(data) => handleUpdate(data)} breakdowns={breakdowns} />}
 
                 {/*Show Selected DB */}
-                {viewing && <LineList id={viewing} breakdowns={breakdowns} onUpdate={(data) => handleUpdate(data)} onDelete={(id) => handleRemove(id)} meta={meta} />}
+                {viewing && <LineList id={viewing} breakdowns={breakdowns} onUpdate={(data) => handleUpdate(data)} onDelete={(id) => handleRemove(id)} />}
 
                 {/* Show a placeholder when nothing is selected */}
                 {!viewing && <div className={styles.placeholder}>

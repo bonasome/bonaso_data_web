@@ -13,14 +13,18 @@ import bonasoWhite from '../../assets/bonasoWhite.png';
 const baseUrl = import.meta.env.VITE_API_URL;
 
 export default function Login() {
+    /*
+    Component that dispalys when is not signed in and needs to enter credentials to access the site. Users will
+    always be redirected here if they are not authenticated
+    */
     const navigate = useNavigate();
 
-    const { refreshAuth } = useAuth(); //context
+    const { refreshAuth } = useAuth(); //context for refreshing access token
     //page meta
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
 
-    //login states
+    //login values
     const[username, setUsername] = useState('');
     const[password, setPassword] = useState('');
 
@@ -42,7 +46,7 @@ export default function Login() {
             if (response.ok) {
                 await refreshAuth();
                 console.log('Login Successful!')
-                navigate('/');
+                navigate('/'); //redirect the user on successful login
             } 
             else {
                 const errorData = await response.json();
@@ -57,9 +61,7 @@ export default function Login() {
         }
     };
 
-    if(loading){
-        return <Loading />
-    }
+    if(loading) return <Loading />
     return (
         <div>
             <div className={styles.login}>
@@ -86,7 +88,7 @@ export default function Login() {
     );
 }
 
-//We don't have a mailing system, but once we do we can insert this link
+//We don't have a mailing system, but once we do we can insert this link to allow users to reset their password
 /*
 <Link style={{ textAlign: "center", margin: 10 }} to={'/users/reset-password-get'}>Forgot your password?</Link>
 */

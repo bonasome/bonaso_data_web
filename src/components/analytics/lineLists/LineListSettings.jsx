@@ -15,17 +15,26 @@ import styles from '../../../styles/modals.module.css'
 import { IoIosSave } from "react-icons/io";
 import { FcCancel } from "react-icons/fc";
 
-export default function LineListSettings({ existing, onClose, onUpdate, meta }){
-    const [submissionErrors, setSubmissionErrors] = useState([]);
+export default function LineListSettings({ onClose, onUpdate, existing=null }){
+    /*
+    Modal for creating or editing the settings of a line list.
+    - onClose (function): what to do on modal close
+    - onUpdate(function): handle data edited during submission
+    - existing (object, optional): an existing lists settings to edit
+    */
+    const [submissionErrors, setSubmissionErrors] = useState([]); //server or custom submission logic errors
     const [saving, setSaving] = useState(false);
 
     const onSubmit = async(data) => {
         setSubmissionErrors([]);
+        //model selects return a full object, so convert the object to just the id
         data.indicator_id = data.indicator_id?.id ?? null;
         data.organization_id = data.organization_id?.id ?? null;
         data.project_id = data.project_id?.id ?? null;
+        //the backend will have a panic attack if it gets an empty string for a date, so set these to null if empty
         if(data.start == '') data.start = null;
         if(data.end == '') data.end = null;
+
         try{
             setSaving(true);
             console.log('submitting data...', data);
@@ -39,8 +48,8 @@ export default function LineListSettings({ existing, onClose, onUpdate, meta }){
             });
             const returnData = await response.json();
             if(response.ok){
-                onUpdate(returnData);
-                onClose();
+                onUpdate(returnData); //run the update function so the parent has the updated settings
+                onClose(); //close the modal
             }
             else{
                 const serverResponse = []
@@ -54,7 +63,7 @@ export default function LineListSettings({ existing, onClose, onUpdate, meta }){
                         serverResponse.push(`${returnData[field]}`);
                     }
                 }
-                setSubmissionErrors(serverResponse)
+                setSubmissionErrors(serverResponse);
             }
         }
         catch(err){
@@ -65,6 +74,8 @@ export default function LineListSettings({ existing, onClose, onUpdate, meta }){
             setSaving(false);
         }
     }
+
+    //set the default values
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
@@ -77,9 +88,10 @@ export default function LineListSettings({ existing, onClose, onUpdate, meta }){
         }
     }, [existing]);
 
+    //construct the RHF form
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -92,13 +104,15 @@ export default function LineListSettings({ existing, onClose, onUpdate, meta }){
         }
     };
 
+    //if existing is passed, set default values based on existing once it loads
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
 
-    const projectSel =  watch('project_id');
+    //watches for form logic
+    const projectSel =  watch('project_id'); //watched so that organization select will only include orgs from that project
     const orgSel =  watch('organization_id');
 
     const basics = [
@@ -117,6 +131,7 @@ export default function LineListSettings({ existing, onClose, onUpdate, meta }){
             labelField: 'name', includeParams: projectSel ? [{field: 'project', value: projectSel?.id ?? []}] : [] 
         }
     ]
+    //show option to cascade to orgs subgrantees if an organization is selected
     const org = [
         { name: 'cascade_organization', label: 'Include Subgrantees?', type: 'checkbox', }
     ]

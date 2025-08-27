@@ -11,7 +11,7 @@ export default async function fetchWithAuth(url, options = {}, retry=true) {
     let response = await fetch(baseUrl+url, {
         ...options,
         headers,    
-        credentials: 'include',
+        credentials: 'include', //required for the backend, since our tokens are HTTP only
     });
 
     if (response.status === 401 && retry) {

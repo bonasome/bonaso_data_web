@@ -11,11 +11,20 @@ import modalStyles from '../../styles/modals.module.css';
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 
-//modal for creating a flag
 export default function FlagModal({ model, id, onConfirm, onCancel }){
+    /*
+    Modal used to create new flags for an object, given the object's model and its id.
+    - model (string): the name of the model of the flagged object
+    - id (integer): the id of the flagged object
+    - onConfirm (function): what to do when the flag is created
+    - onCancel (function): what to do when the creation process is cancelled
+    */
+
+    const [flagReason, setFlagReason] = useState(''); //user inputted reason
+    const [flagType, setFlagType] = useState(''); //user selected type
+
+    //page meta
     const [saving, setSaving] = useState(false);
-    const [flagReason, setFlagReason] = useState('');
-    const [flagType, setFlagType] = useState('');
     const [errors, setErrors] = useState([]);
     const [meta, setMeta] = useState(null);
 
@@ -49,6 +58,7 @@ export default function FlagModal({ model, id, onConfirm, onCancel }){
     //function to submit the flag request
     const raiseFlag = async() => {
         setErrors([]);
+        //reason/reason type is required
         const sErrors = []
         if(flagType === ''){
             sErrors.push('You must select a flag type.');
@@ -77,7 +87,7 @@ export default function FlagModal({ model, id, onConfirm, onCancel }){
             });
             const data = await response.json();
             if (response.ok) {
-                onConfirm(data.flag);
+                onConfirm(data.flag); //run function when saved
             } 
             else {
                 const serverResponse = [];

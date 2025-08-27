@@ -16,12 +16,15 @@ import { MdCloudUpload } from "react-icons/md";
 import { IoDocumentTextSharp } from "react-icons/io5";
 
 export default function NarrativeReportUpload() {
-    //params, uses project as root so id is project id and orgID is the specific org.
-    //using parmas lets us avoid forcing the user to manually select
-    const { id, orgID } = useParams();
+    /*
+    Allows the user to upload a narrative report. Requires an organization ID and a project ID to be
+    passed as URL params to give the component the necessary information.
+    */
+    const { id, orgID } = useParams(); //id is project ID
 
-    //uploaded file object
+    //user selected file object
     const [file, setFile] = useState(null);
+
     //aditional file info
     const [title, setTitle] = useState('');
     const [desc, setDesc] = useState('');
@@ -29,7 +32,7 @@ export default function NarrativeReportUpload() {
     //page meta
     const [errors, setErrors] = useState([]);
     const [success, setSuccess] = useState([]);
-    const [uploading, setUploading] = useState(false);
+    const [uploading, setUploading] = useState(false); //user is uploading a file
 
     //ref to scroll to errors
     const alertRef = useRef(null);
@@ -43,11 +46,13 @@ export default function NarrativeReportUpload() {
     //helper to upload the file
     const handleChange = (event) => setFile(event.target.files[0]);
 
+    // trigger hidden file input, so that we can use custom styling
     const fileInputRef = useRef();
     const handleFileSelection = () => {
-        fileInputRef.current.click(); // trigger hidden file input
+        fileInputRef.current.click(); 
     };
 
+    //handle submission of file upload form
     const handleSubmit = async (e) => {
         e.preventDefault();
         setUploading(true);
@@ -69,7 +74,7 @@ export default function NarrativeReportUpload() {
             return 
         }
 
-        //create and append object to a data mat
+        //create and append object to a data map
         const formData = new FormData();
         formData.append('file', file);
         formData.append('organization', orgID);
@@ -133,15 +138,17 @@ export default function NarrativeReportUpload() {
                             value={desc}
                             onChange={(e) => setDesc(e.target.value)}
                         />
+                        
+                        {/* the user sees this buttom, which when clicked triggers the hidden file input */}
                         {!file && <button onClick={handleFileSelection}  type="button" style={{ maxWidth: 140}}>
                             <FaFolderOpen />
                             Upload File
                         </button>}
-
+                        {/* if a file is selected, display the file name */}
                         {file && <button className={styles.selectedFile} type="button">
                             <div className={styles.selectedFileText}> <IoDocumentTextSharp /> {file.name}</div>
                         </button>}
-                        
+                        {/* the actual file input is hidden */}
                         <input 
                             type="file" 
                             ref={fileInputRef} 

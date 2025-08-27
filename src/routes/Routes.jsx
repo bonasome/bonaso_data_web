@@ -75,9 +75,10 @@ import SocialPostForm from '../components/social/SocialPostForm';
 import FunWithFlags from '../components/flags/FunWithFlags';
 
 
-
-
 function Router() {
+    /*
+    Stores information about all URL endpoints and manages page level permissions with Redirects (src/authRedirect)
+    */
     return (
         <Routes>
         <Route

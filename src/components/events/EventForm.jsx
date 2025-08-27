@@ -21,10 +21,14 @@ import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 
-export default function UserForm(){
+export default function EventForm(){
+    /*
+    Form that allows a user to create or edit a form. Passing a valid ID param in the url will fetch an 
+    existing record for editing. 
+    */
     const navigate = useNavigate();
     
-    //param to get indicator (blank if new)
+    //param to get indicator (blank if creating a record)
     const { id } = useParams();
     //context
     const { eventDetails, setEventDetails, eventsMeta, setEventsMeta } = useEvents();
@@ -73,9 +77,10 @@ export default function UserForm(){
         getMeta();
     }, []);
 
+    //get the existing event if an ID param is passed
     useEffect(() => {
         const getEvent = async () => {
-            if(!id) return;
+            if(!id) return; //if not ID do nothing
            const found = eventDetails.find(e => e.id.toString() === id.toString());
             if (found) {
                 setExisting(found);
@@ -87,11 +92,13 @@ export default function UserForm(){
                     const response = await fetchWithAuth(`/api/activities/events/${id}/`);
                     const data = await response.json();
                     if(response.ok){
+                        //update the context
                         setEventDetails(prev => [...prev, data]);
                         console.log(data)
                         setExisting(data);
                     }
                     else{
+                        //if a bad ID is provided, navigate to 404
                         navigate(`/not-found`);
                     }
                 } 
@@ -108,7 +115,9 @@ export default function UserForm(){
     const onSubmit = async(data, e) => {
         setSubmissionErrors([]);
         setSuccess([]);
+        //check action to see if this should redirect back to the detail or create page
         const action = e.nativeEvent.submitter.value;
+        //model selects send objects, so just get the id for the backend
         data.host_id = data.host_id?.id ?? null;
         data.task_ids = data?.task_ids?.map((t) => (t.id)) ?? [];
         data.organization_ids = data?.organization_ids?.map((o) => (o.id)) ?? [];
@@ -129,7 +138,9 @@ export default function UserForm(){
                 setEventDetails(prev => {
                     const others = prev.filter(r => r.id !== returnData.id);
                     return [...others, returnData];
-                });
+                }); //update context
+
+                //depending on the button clicked, redirect the user to the appropriate page
                 if(action === 'create_another'){
                     setExisting(null);
                     reset();
@@ -151,7 +162,7 @@ export default function UserForm(){
                         serverResponse.push(`${returnData[field]}`);
                     }
                 }
-                setSubmissionErrors(serverResponse)
+                setSubmissionErrors(serverResponse); //on server error, alert the user
             }
         }
         catch(err){
@@ -163,6 +174,7 @@ export default function UserForm(){
         }
     }
     
+    //set default values based on existing if an ID is provided
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
@@ -179,9 +191,10 @@ export default function UserForm(){
         }
     }, [existing]);
 
+    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -194,16 +207,19 @@ export default function UserForm(){
         }
     };
 
+    //try to set default values once existing has loaded
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
 
-    const start = watch("start");
-    const hostOrg = watch('host_id');
-    const participantOrgs = watch('organization_ids');
+    //watches to help with form logic
+    const start = watch("start"); //for validating the end date is after the start
+    const hostOrg = watch('host_id'); //for determining validOrgs
+    const participantOrgs = watch('organization_ids'); //for determining validOrgs
     
+    //helper function to only allow the user to select tasks for organizations that are the host or participants
     const validOrgs = useMemo(() => {
         const host_id = hostOrg?.id
         const pos = participantOrgs.map((org) => (org.id));

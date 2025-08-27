@@ -6,11 +6,22 @@ import modalStyles from '../../styles/modals.module.css';
 import { GiExitDoor } from "react-icons/gi";
 
 //similar to a flag component for items that do not have a dedicated page.
-export default function FlagDetailModal({ flags, model, id, displayName=null, onClose }){
-    const [flagging, setFlagging] = useState(false);
+export default function FlagDetailModal({ flags, model, id, onClose, displayName=null }){
+    /*
+    Simple modal that can be used to display an index of flags related to an item if there is no space
+    to do it inline. Uses the FlagCard component.
+    - flags (array): the list of flags to display
+    - model (string): what model does this relate to, so that the user can raise a new flag
+    - id (integer): the id of the object these flags belong to (so the user can raise a new flag)
+    - onClose (function): how to close the modal
+    - displayName (string, optional): name to display at the top of the modal (the object the flags relate to)
+    */
+    const [flagging, setFlagging] = useState(false); //the user is creating a new flag for this object
 
+    //if flagging, return the FlagModal component for creating a flag
     if(flagging) return (<FlagModal model={model} id={id} onConfirm={onClose} onCancel={onClose}/>)
-
+    
+    //if no flags, do not displat any flag cards
     if(!flags || flags.length === 0) return( <div className={modalStyles.modal}>
         <p>No Flags yet!</p>
         <button onClick={() => setFlagging(true)}>Raise one here.</button>

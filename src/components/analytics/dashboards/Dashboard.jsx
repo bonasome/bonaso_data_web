@@ -16,16 +16,25 @@ import { ImPencil } from 'react-icons/im';
 import { MdAddchart } from "react-icons/md";
 import { FaTrashAlt } from 'react-icons/fa';
 
-export default function Dashboard({ id, meta, breakdowns, onUpdate, onRemove }){ 
+export default function Dashboard({ id, meta, breakdowns, onUpdate, onDelete }){ 
+    /*
+    Component for displaying a dashboard, or a collection of charts.
+    - id (integer): the id of the dashboard to be displayed
+    - meta (object): the model meta
+    - breakdowns (array): a list of breakdowns used for setting options when selecting demographic fields
+    - onUpdate (function): what to do when updating dashboard settings.
+    - onDelete (function): what to do when deleting this dashboard
+    */
     const [dashboard, setDashboard] = useState(null); //dashboard data
     const [adding, setAdding] = useState(false); //show chart settings modal
-    //meta
-    const [del, setDel] = useState(false);
+
+    //page meta
+    const [del, setDel] = useState(false); //track attempted delete
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    //handle editing
-    const [editing, setEditing] = useState(false);
+    const [editing, setEditing] = useState(false); //handle editing state
 
+    //get the detailed data about the dashboard, including its charts
     const getData = async () => {
         if(!id) return;
         try {
@@ -50,7 +59,7 @@ export default function Dashboard({ id, meta, breakdowns, onUpdate, onRemove }){
         }
     }
     
-    //get the dashboard information, including charts/data
+    //get the dashboard information once on load
     useEffect(() => {
         const initialLoad = async () => {
             await getData();
@@ -58,6 +67,7 @@ export default function Dashboard({ id, meta, breakdowns, onUpdate, onRemove }){
         initialLoad();
     }, [id]);
 
+    //what to do when a dashboard is deleted
     const handleDelete = async() => {
         try {
             console.log('deleting dashboard...');
@@ -65,7 +75,7 @@ export default function Dashboard({ id, meta, breakdowns, onUpdate, onRemove }){
                 method: 'DELETE',
             });
             if (response.ok) {
-                onRemove(id)
+                onDelete(id); //of successful, run onDelete so that parent component knows the item has been deleted
             } 
             else {
                 let data = {};
@@ -86,7 +96,7 @@ export default function Dashboard({ id, meta, breakdowns, onUpdate, onRemove }){
                     serverResponse.push(`${field}: ${data[field]}`);
                     }
                 }
-                setErrors(serverResponse);
+                setErrors(serverResponse); //if there is an error, alert the user
             }
         } 
         catch (err) {
@@ -97,8 +107,7 @@ export default function Dashboard({ id, meta, breakdowns, onUpdate, onRemove }){
             setDel(false);
         }
     }
-
-
+    
     if(!dashboard || loading) return <ComponentLoading />
     return(
         <div>

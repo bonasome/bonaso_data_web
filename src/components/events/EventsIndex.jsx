@@ -23,31 +23,38 @@ import { MdOutlineEvent } from "react-icons/md";
 import { ImPencil } from 'react-icons/im';
 import { GiJumpAcross } from 'react-icons/gi';
 
-function EventCard({ event, callback=null }) {
+function EventCard({ event, callback=null, callbackText='Select Event' }) {
+    /*
+    A helper component that displays details about an event. Is expandable, and on expansion will fetch additional
+    details from the server.
+    - event (object): the event this card displays information about
+    - callback (function, optional): a callback function that allows information about this event to be selected and 
+        passed to another component (passed down from the EventIndex Component).
+    - callbackText (string, optional): text to display on the button that triggers the callback function (passed 
+        down from the EventIndex Component)
+    */
+
     //context
-    const { user } = useAuth();
+    const { user } = useAuth(); //for managing perms
     const { eventDetails, setEventDetails } = useEvents();
-    //event details
+    //added details about the event currently being viewed
     const [active, setActive] = useState(null);
     //card meta
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
     
-    //load additional details on click
+    //load additional details from the server on click, since the index component uses a list serializer
     const handleClick = async () => {
         const willExpand = !expanded;
         setExpanded(willExpand);
-
         if (!willExpand) return;
-
         const found = eventDetails.find(e => e.id === event.id);
         if (found) {
             setActive(found);
             setLoading(false);
             return;
         }
-
         try {
             setLoading(true);
             const response = await fetchWithAuth(`/api/activities/events/${event.id}/`);
@@ -67,6 +74,7 @@ function EventCard({ event, callback=null }) {
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             {callback ? <h2>{event.name}</h2> : <Link to={`/events/${event.id}`} style={{display:'flex', width:"fit-content"}}><h2>{event.name}</h2></Link>}
+            {callback && <button onClick={() => callback(active)}>{callbackText}</button>}
             {expanded && loading && <ComponentLoading />}
             {expanded && active && (
                 <div>
@@ -88,7 +96,14 @@ function EventCard({ event, callback=null }) {
     );
 }
 
-export default function EventsIndex(){
+export default function EventsIndex({ callback=null, callbackText='Select Event'}){
+    /**
+    Index view that displays a list of events (paginated and searchable). Can be used either as a standalone page
+    or can be used with other components to select an event instance.
+    - callback (function, optional): a callback function that allows information about an event to be selected and 
+        passed to another component
+    - callbackText (string, optional): text to display on the button that triggers the callback function 
+    */
     //context
     const { user } = useAuth();
     const { events, setEvents, eventsMeta, setEventsMeta } = useEvents();
@@ -99,7 +114,7 @@ export default function EventsIndex(){
     const [entries, setEntries] = useState(0);
     const [filters, setFilters] = useState(initial);
     const [orgs, setOrgs] = useState([]); //for filters
-    const [orgSearch, setOrgSearch] = useState('');
+    const [orgSearch, setOrgSearch] = useState(''); //for searching orgs select
 
     //page meta
     const [errors, setErrors] = useState([]);
@@ -121,7 +136,7 @@ export default function EventsIndex(){
                 }
                 catch(err){
                     setErrors(['Something went wrong, Please try again later.']);
-                    console.error('Failed to fetch projects: ', err);
+                    console.error('Failed to fetch events meta: ', err);
                 }
                 finally{
                     setLoading(false);
@@ -135,6 +150,7 @@ export default function EventsIndex(){
     useEffect(() => {
         const loadEvents = async () => {
             try {
+                //construct filter params from filters object
                 const filterQuery = 
                     (filters.start ? `&start=${filters.start}` : '') + 
                     (filters.end ? `&end=${filters.end}` : '') + 
@@ -143,10 +159,9 @@ export default function EventsIndex(){
                     (filters.type ? `&event_type=${filters.type}` : '');
                 
                 const url = `/api/activities/events/?search=${search}&page=${page}` + filterQuery;
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
-                setEntries(data.count);
+                setEntries(data.count); //set the total number of entries so pages can be calculated
                 setEvents(data.results);
                 setLoading(false);
             } 
@@ -159,7 +174,7 @@ export default function EventsIndex(){
         loadEvents();
     }, [page, search, filters]);
 
-    //get orgs (for filter)
+    //get orgs (for host filter)
     useEffect(() => {
         const loadOrgs = async () => {
             try {
@@ -191,7 +206,7 @@ export default function EventsIndex(){
                 {events?.length === 0 ? 
                     <p>No events match your criteria.</p> :
                     events?.map(ind => (
-                        <EventCard key={ind.id}event={ind} />)
+                        <EventCard key={ind.id} event={ind} callback={callback} callbackText={callbackText} />)
                     )
                 }
             </IndexViewWrapper>

@@ -1,4 +1,8 @@
 const theme = {
+    /*
+    Contains all style details that should be consistent across the site. This can be used in JS components
+    if CSS styles are not avaialable. This should match with src/styles/tokens.css
+    */
     colors: {
         bonasoMain: 'rgb(21, 103, 54)',
         bonasoDarkBg: 'rgb(10, 71, 34)',

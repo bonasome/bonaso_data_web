@@ -15,17 +15,25 @@ import { IoIosSave } from 'react-icons/io';
 import { FcCancel } from 'react-icons/fc';
 
 
-export default function CreateDashboardModal({ existing=null, onUpdate, onClose }){
-    const [saving, setSaving] = useState(false);
-    const [submissionErrors, setSubmissionErrors] = useState([]);
+export default function CreateDashboardModal({ onUpdate, onClose, existing=null }){
+    /*
+    Modal that is used for creating/editing dashboards.
+    - onUpdate (function): Function to run on saving
+    - onClose (function): function to close the modal
+    - existing (object, optional): An existing dashboard for editing
+    */
+    const [saving, setSaving] = useState(false); //used to track when the system is trying to save
+    const [submissionErrors, setSubmissionErrors] = useState([]); //used for server errors/custom submission errors
 
     //handle form submission
     const onSubmit = async (data) => {
+        //model select will return full objects, so convert them to just the ID if sent
         if(data.project_id) data.project_id = data?.project_id?.id
         if(data.organization_id) data.organization_id = data?.organization_id?.id
         try{
             console.log('submitting dashboard...', data)
             setSaving(true);
+
             const url = existing ? `/api/analysis/dashboards/${existing.id}/` : '/api/analysis/dashboards/';
             const response = await fetchWithAuth(url, {
                 method: existing ? 'PATCH' : 'POST',
@@ -34,8 +42,10 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
                 },
                 body: JSON.stringify(data)
             });
+
             const returnData = await response.json();
             if(response.ok){
+                //on success, run update function then close the modal
                 onUpdate(returnData);
                 onClose();
             }
@@ -51,7 +61,7 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
                         serverResponse.push(`${field}: ${returnData[field]}`);
                     }
                 }
-                setSubmissionErrors(serverResponse)
+                setSubmissionErrors(serverResponse); //on fail show errors
             }
         }
         catch(err){
@@ -63,6 +73,7 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
         }
     }
 
+    //set the default values
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
@@ -73,8 +84,10 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
         }
     }, [existing]);
         
+    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
-    //scroll to errors
+    
+    //scroll to field errors
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -87,13 +100,15 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
         }
     };
 
+    //if given, use existing to set default values once loaded
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
 
-    const projectSel =  watch('project_id');
+    //watches to help with logic
+    const projectSel =  watch('project_id'); //used to filter organization scope to only orgs in that project
     const orgSel =  watch('organization_id');
 
     const basics = [
@@ -106,6 +121,7 @@ export default function CreateDashboardModal({ existing=null, onUpdate, onClose 
             labelField: 'name', includeParams: projectSel ? [{field: 'project', value: projectSel?.id ?? []}] : [] 
         }
     ]
+    //if an org is selected, give the option to include child orgs/subgrantees as well
     const org = [
         { name: 'cascade_organization', label: 'Include Subgrantees?', type: 'checkbox', }
     ]

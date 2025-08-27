@@ -6,6 +6,9 @@ import errorStyles from '../../../styles/errors.module.css';
 
 
 export default function EnterEmail(){
+    /*
+    Simple form a user can use to enter their email to get a password reset link.
+    */
     //fetch domain from env
     const baseUrl = import.meta.env.VITE_API_URL;
 

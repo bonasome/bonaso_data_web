@@ -3,9 +3,10 @@ import { createContext, useContext, useState } from 'react';
 const IndicatorsContext = createContext();
 
 export const IndicatorsProvider = ({ children }) => {
-    const [indicators, setIndicators] = useState([]);
-    const [indicatorDetails, setIndicatorDetails] = useState([]);
-    const [indicatorsMeta, setIndicatorsMeta] = useState({})
+    //Context that stores some global variables about indicators
+    const [indicators, setIndicators] = useState([]); //information for the index view
+    const [indicatorDetails, setIndicatorDetails] = useState([]); //information for the detail view
+    const [indicatorsMeta, setIndicatorsMeta] = useState({}); //information about the meta
     return (
         <IndicatorsContext.Provider value={{ 
             indicators, setIndicators, 

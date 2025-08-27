@@ -10,8 +10,8 @@ import styles from './home.module.css';
 import modalStyles from '../../styles/modals.module.css';
 
 
-//modal to cover our bases
 function PopUp({ onClose }){
+    //modal to cover our bases
     return(
         <div className={modalStyles.modal}>
             <h1>Welcome!</h1>
@@ -29,9 +29,9 @@ function PopUp({ onClose }){
 }
 
 export default function Home() {
+    //default landing page the user sees when they first log in
     const { user } = useAuth();
-    const [showWarning, setShowWarning] = useState(true);
-
+    const [showWarning, setShowWarning] = useState(true); //manage the PopUp state
 
     return (
         <div className={styles.home}>

@@ -7,6 +7,10 @@ import ButtonLoading from '../../reuseables/loading/ButtonLoading';
 import errorStyles from '../../../styles/errors.module.css';
 
 export default function AdminResetPassword({ id }){
+    /*
+    Component that allows an admin to reset a users password. 
+    - id (integer): The id of the user whose password is being reset
+    */
     //page meta
     const [errors, setErrors] = useState([]);
     const [submitted, setSubmitted] = useState(false);
@@ -57,6 +61,7 @@ export default function AdminResetPassword({ id }){
             setSaving(false)
         }
     }
+    
     return(
         <div>
             {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}

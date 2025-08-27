@@ -14,18 +14,21 @@ import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 import { MdOutlinePivotTableChart } from "react-icons/md";
 
 export default function PivotTables() {
-    const { id } = useParams();
+    /*
+    Displays a list of all of a users pivot tables. On selected, one will appear in the main panel.
+    */
     //page information
     const [meta, setMeta] = useState({});
-    const [pivotTables, setPivotTables] = useState([]);
-    const [breakdowns, setBreakdowns] = useState({});
-    //meta
+    const [pivotTables, setPivotTables] = useState([]); //list of a users pivot tables
+    const [breakdowns, setBreakdowns] = useState({}); //breakdowns that contain information about demogrpahic fields
+    //page meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [viewing, setViewing] = useState(null); //controls which dashboard is visible in the main panel
     const [hidden, setHidden] = useState(false); //controls sb visibility
     const [creating, setCreating] = useState(false); //controls visibility of create modal
 
+    //retrieve the model meta
     useEffect(() => {
         const getMeta = async() => {
             try {
@@ -71,6 +74,7 @@ export default function PivotTables() {
         getEventBreakdowns();
     }, []);
 
+    //get a list of the user's pivot tables
     useEffect(() => {
         const getPT = async() => {
             try {
@@ -98,12 +102,14 @@ export default function PivotTables() {
         getPT();
     }, []);
 
+    //handle a change to settings to make sure it reflects in the sidebar
     const handleUpdate = (data) => {
         console.log(data)
         const others = pivotTables.filter((d) => (d.id != data.id));
         setPivotTables([...others, data]);
     }
 
+    //handle deletion of a pivot table
     const handleRemove = (id) => {
         setPivotTables(prev => prev.filter((d) => (d.id != id)));
         setViewing(null);

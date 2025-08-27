@@ -1,28 +1,33 @@
 import cleanLabels from "../../../../services/cleanLabels";
 import styles from './dashboard.module.css';
 //build a data table based on rechart data
-export default function DataTable({ data, breakdown1, breakdown2, map }) {
-    //data - the data
-    //breakdown 1 -the name of the legend (alternatively indicator/target)
-    //breakdown 2 - the name of the stack
-    //map - the options/labels map to clean up the labels
+export default function DataTable({ data, map, breakdown1=null, breakdown2=null }) {
+    /*
+    Component that displays a data table beneath a chart. Specifically designed to work with data prepared for that chart.
+    - data(array): data from the chart
+    - breakdown 1 (string, optional): the name of the legend category (alternatively indicator/target)
+    - breakdown 2 (string, optional): the name of the stack category
+    - map (object): object containing a map of the options/labels to display readable labels
+    */
     
+
     const getBreakdowns = (key) => key.split("__");
     
+    //get a list of the columns (by going through the data array and picking the labels)
     const columns = Object.keys(data[0] || {})
         .filter((k) => k !== "period")
         .map(getBreakdowns);
 
     
     let uniqueBreakdown1 = [...new Set(columns.map(([b1]) => b1))];
-    let uniqueBreakdown1Labels = [...new Set(columns.map(([b1]) => b1))];
-    if(breakdown1 && breakdown1 != 'subcategory' && breakdown1 != 'indicator' && breakdown1 != 'Target'){
-        uniqueBreakdown1Labels = uniqueBreakdown1.map((val) => (map?.[breakdown1]?.[val] ?? val))
+    let uniqueBreakdown1Labels = [...new Set(columns.map(([b1]) => b1))]; //seperate out labels, since some breakdowns may not have values in map
+    if(breakdown1 && breakdown1 != 'subcategory' && breakdown1 != 'indicator' && breakdown1 != 'Target'){ //these categories will not have values in map
+        uniqueBreakdown1Labels = uniqueBreakdown1.map((val) => (map?.[breakdown1]?.[val] ?? val)) //if applicable, try to find the value in the map and get the label
     }
-    let uniqueBreakdown2 = [...new Set(columns.map(([, b2]) => b2).filter(Boolean))];
+    let uniqueBreakdown2 = [...new Set(columns.map(([, b2]) => b2).filter(Boolean))]; //seperate out labels, since some breakdowns may not have values in map
     let uniqueBreakdown2Labels = [...new Set(columns.map(([, b2]) => b2).filter(Boolean))];
-    if(breakdown2 && breakdown2 != 'subcategory'){
-        uniqueBreakdown2Labels = uniqueBreakdown2.map((val) => (map?.[breakdown2]?.[val] ?? val))
+    if(breakdown2 && breakdown2 != 'subcategory'){ //these categories will not have values in map
+        uniqueBreakdown2Labels = uniqueBreakdown2.map((val) => (map?.[breakdown2]?.[val] ?? val)) //if applicable, try to find the value in the map and get the label
     }
 
     return (

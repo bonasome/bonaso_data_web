@@ -22,6 +22,9 @@ import { ImPencil } from 'react-icons/im';
 import { FaTrashAlt } from 'react-icons/fa';
 
 export default function OrganizationDetail(){
+    /*
+    Displays details about an organization. Takes an ID param in the url to fetch the correct org from the db.
+    */
     const navigate = useNavigate();
     //url param
     const { id } = useParams();
@@ -30,16 +33,17 @@ export default function OrganizationDetail(){
     const { organizationDetails, setOrganizationDetails } = useOrganizations();
     
     //page information
-    const[organization, setActiveOrganization] = useState(null);
-    const [projects, setProjects] = useState([]);
+    const [organization, setActiveOrganization] = useState(null);
+    const [projects, setProjects] = useState([]); //for list of projects
 
     //page meta
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
-    const[loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     //fetch organization details
     useEffect(() => {
+        //check the context first
         const getOrganizationDetails = async () => {
             const found = organizationDetails.find(p => p?.id == id);
             if (found) {
@@ -53,11 +57,12 @@ export default function OrganizationDetail(){
                     const response = await fetchWithAuth(`/api/organizations/${id}/`);
                     const data = await response.json();
                     if(response.ok){
+                        //set the context
                         setOrganizationDetails(prev => [...prev, data]);
                         setActiveOrganization(data);
                     }
                     else{
-                        navigate(`/not-found`);
+                        navigate(`/not-found`); //go to 404 if id is not found
                     }
                     
                 } 
@@ -93,7 +98,7 @@ export default function OrganizationDetail(){
         getProjects();
     }, [organization]);
 
-    //delete an organization
+    //delete the organization
     const deleteOrganization = async() => {
         try {
             console.log('deleting organization...');

@@ -1,33 +1,46 @@
+/*
+Several functions to helping to convert generic foreign key models into readable labels/urls.
+*/
+
 export const contentTypeMap = {
-    'respondents.respondent': { id: 10, label: 'Respondent', url: 'respondents' },
-    'respondents.interaction': { id: 14, label: 'Interaction', url: 'respondents' },
-    'events.demographiccount': { id: 36, label: 'Event Count', url: 'events' },
-    'social.socialmediapost': { id: 63, label: 'Social Media Post', url: 'social' },
-    'events.event': { id: 40, label: 'Event', url: 'events' },
-    'projects.project': { id: 4, label: 'Project', url: 'projects' }
+    /*
+    Reference map of app names with the label that should be used and the url path
+    */
+    'respondents.respondent': { label: 'Respondent', url: 'respondents' },
+    'respondents.interaction': { label: 'Interaction', url: 'respondents' },
+    'events.demographiccount': { label: 'Event Count', url: 'events' },
+    'social.socialmediapost': { label: 'Social Media Post', url: 'social' },
+    'events.event': { label: 'Event', url: 'events' },
+    'projects.project': { label: 'Project', url: 'projects' }
 };
 
-export const getContentTypeString = (id) => {
-    return Object.entries(contentTypeMap).find(([, value]) => value.id === id)?.[0];
+export const getContentTypeLabel = (modelName) => {
+    //Accepts an appname.modelname string and returns the label
+    return contentTypeMap[modelName]?.label ?? `Unknown (${modelName})`;
 };
 
-export const getContentTypeLabel = (id) => {
-    return contentTypeMap[id]?.label ?? `Unknown (${id})`;
-};
-export const getContentTypeURL = (id) => {
-    return contentTypeMap[id]?.url?? ``;
+export const getContentTypeURL = (modelName) => {
+    //Accepts an appname.modelname string and returns the base url
+    return contentTypeMap[modelName]?.url?? ``;
 };
 
-export const generateURL = (id, target) => {
+export const generateURL = (modelName, target) => {
+    //accepts an appname.modelname string and a target prop (sent by the backend)
     const objID = target?.parent ?? target.id
-    return `/${getContentTypeURL(id)}/${objID}`
+    return `/${getContentTypeURL(modelName)}/${objID}`
 }
-export const faveURL = (id, contentType) => {
-    return `/${getContentTypeURL(contentType)}/${id}`
+export const faveURL = (id, modelName) => {
+    //simplified URL constructor for favorites specifically, accepts only an id and an appname.modelname string
+    return `/${getContentTypeURL(modelName)}/${id}`
 }
 
-export const urlBuilder = (app, id, parent = '', otherParent = '') => {
-    const appName = app.toLowerCase();
+export const urlBuilder = (modelName, id, parent = '', otherParent = '') => {
+    /*
+    Slightly more complex URL constructor for the activity page of the profile section which has some more
+    complex url structures. Accepts an appname.modelname string, an object ID, and up to two parent IDs
+    that may be required for fully constructing the URL.
+    */
+    const appName = modelName.toLowerCase();
     let url = '';
 
     if (['events.event'].includes(appName)) {

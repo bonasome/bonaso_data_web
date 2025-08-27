@@ -20,25 +20,27 @@ import { ImPencil } from 'react-icons/im';
 import { FaTrashAlt } from 'react-icons/fa';
 
 export default function IndicatorDetail(){
+    /*
+    Detail component for the indicator. Takes an ID param in the URL.
+    */
     const navigate = useNavigate();
-    //indicator id from url
-    const { id } = useParams();
+    const { id } = useParams(); //indicator id from url
 
     //context
     const { user } = useAuth();
     const { setIndicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
     
-    //detail of the current indicator
-    const[indicator, setIndicator] = useState(null);
+    const[indicator, setIndicator] = useState(null); //detail of the indicator
     
     //page meta
     const[loading, setLoading] = useState(true)
     const [del, setDel] = useState(false);
     const [errors, setErrors] = useState([]);
 
-    //list of projects this indicator is in
+    //for creating a list of projects this indicator is in
     const [projects, setProjects] = useState([]);
     const [tasks, setTasks] = useState([]);
+
     //get details from server    
     useEffect(() => {
         //get indicator information
@@ -48,10 +50,12 @@ export default function IndicatorDetail(){
                 const response = await fetchWithAuth(`/api/indicators/${id}/`);
                 const data = await response.json();
                 if(response.ok){
+                    //update the context
                     setIndicatorDetails(prev => [...prev, data]);
                     setIndicator(data);
                 }
                 else{
+                    //if a bad ID is provided, navigate to 404
                     navigate('/not-found')
                 }
                 
@@ -88,8 +92,8 @@ export default function IndicatorDetail(){
 
     }, [id]);
 
+    //get a list of projects that this indicator is in
     useEffect(() => {
-        //get a list of projects
         const getProjects = async () => {
             if(!indicator) return;
             try {
@@ -106,8 +110,8 @@ export default function IndicatorDetail(){
         getProjects();
     }, [indicator]);
 
+    //get a list of tasks this indicator is a part of (and therefore also a list of organizations)
     useEffect(() => {
-        //get a list of projects
         const getOrgs = async () => {
             if(!indicator) return;
             try {

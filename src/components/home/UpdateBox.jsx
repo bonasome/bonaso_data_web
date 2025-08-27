@@ -21,7 +21,8 @@ import { BiSolidMessageError, BiSolidMessageAltCheck } from "react-icons/bi";
 import { FaClipboardCheck } from "react-icons/fa";
 //simple alert card since these don't show up anywhere else
 function AlertCard({ alert, onUpdate }){
-    const [alr, setAlr] = useState(null);
+    // Component to display an alert's details
+    const [alr, setAlr] = useState(null); //alert details
     const [errors, setErrors] = useState([]);
     const [expanded, setExpanded] = useState(false);
 
@@ -75,25 +76,31 @@ function AlertCard({ alert, onUpdate }){
 
 //box with tabs that show differnet lists of messages
 export default function UpdateBox(){
+    /*
+    Component with switchable tabs that can display a users messages, announcements, and alerts all in 
+    one central location. Can change color for unread materials.
+    */
     const { user } = useAuth();
-    const width = useWindowWidth();
-    //determine what to display
+    const width = useWindowWidth(); //adjust box layout depending on the screen width
+    //determine what tab to display
     const [msgPane, setMsgPane] = useState('announcements');
-    //content for different message types
+
+    //content for different update types
     const [announcements, setAnnouncements] = useState([]);
     const [messages, setMessages] = useState([]);
     const [alerts, setAlerts] = useState([]);
-    //meta
+    //component meta
     const [adding, setAdding] = useState(false);
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
 
-
+    //check if the user has any unread announcements
     const unreadAnnc = useMemo(() => {
         if(!announcements) return []
         return announcements.some((a) => (!a.read));
     }, [announcements]);
 
+    //check if the user has any unread messages
     const unreadMsg = useMemo(() => {
         if(!messages) return []
         return messages.some(msg => 
@@ -104,11 +111,13 @@ export default function UpdateBox(){
         );
     }, [messages, user.id]);
 
+    //check if the user has any unread alerts
     const unreadAlert = useMemo(() => {
         if(!alerts) return []
         return alerts.some((a) => (!a.read));
     }, [alerts]);
 
+    //fetch announcements
     const getAnnouncements = async () => {
         try {
             console.log('fetching announcements...');
@@ -123,6 +132,7 @@ export default function UpdateBox(){
         } 
     };
 
+    //fetch alerts
     const getAlerts = async () => {
         try {
             console.log('fetching alerts...');
@@ -140,30 +150,36 @@ export default function UpdateBox(){
         }
     };
 
-    useEffect(() => {
-        getAnnouncements();
-    
-        const getMessages = async () => {
-            try {
-                console.log('fetching messages...');
-                const url = `/api/messages/dm/`
-                const response = await fetchWithAuth(url);
-                const data = await response.json();
-                setMessages(data.results);
-            } 
-            catch (err) {
-                console.error('Failed to delete organization:', err);
-                setErrors(['Something went wrong. Please try again later.'])
-            } 
-        };
-        getMessages();
+    //get messages
+    const getMessages = async () => {
+        try {
+            console.log('fetching messages...');
+            const url = `/api/messages/dm/`
+            const response = await fetchWithAuth(url);
+            const data = await response.json();
+            setMessages(data.results);
+        } 
+        catch (err) {
+            console.error('Failed to delete organization:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        } 
+    };
 
-        getAlerts();
+    //initially fetch announcements, messages, and alerts
+    useEffect(() => {
+        const initialLoad = async() => {
+            getAnnouncements();
+            getMessages
+            getAlerts();
+        }
+        initialLoad();
     }, []);
 
+    //handle a user creating an announcement
     const handleAdd = (data) => {
         setAnnouncements(prev => [...prev, data])
     };
+
     if(loading) return <ComponentLoading />
     return(
         <div className={styles.board}>
@@ -180,6 +196,7 @@ export default function UpdateBox(){
             </div>
             <Messages errors={errors} />
 
+            {/* displayed content will depend on the currently selected tab */}
             {msgPane == 'announcements' && <div className={styles.msgPane}>
                 {user.role == 'admin' && <ButtonHover callback={() => setAdding(true)} noHover={<GrAnnounce />} hover={'New Announcement'} />}
                 {announcements?.length == 0 && <p className={styles.placeholder}>No announcements yet.</p>}

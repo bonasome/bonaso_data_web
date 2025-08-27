@@ -10,16 +10,28 @@ import styles from './messages.module.css';
 
 import { IoSendSharp, IoPersonAdd, IoPersonRemove } from "react-icons/io5";
 
-export default function ComposeMessage({ profiles=[], admin=false, reply=false, parent=null, onSave, onCancel, existing=null }){
-    
-    //meta
-    const [errors, setErrors] = useState([]);
-    const [warnings, setWarnings] = useState([])
+export default function ComposeMessage({ profiles=[], onUpdate, onCancel, admin=false, reply=false, parent=null, existing=null }){
+    /*
+    Component that allows a user to create a new message thread or reply to a message.
+    - profiles (array): everyone in the thread
+    - onUpdate (function): what to do when the message us updated/created
+    - onCancel (function): what to do on cancel
+    - admin (boolean, optional): is this supposed to be sent to all admins?
+    - reply (boolean, optional): is this a reply
+    - parent (object, optional): if it is a reply, what is the parent/original message
+    - existing (object, optional): if editing, the message to edit
+    */
+
+    const [recipients, setRecipients] = useState([]); //array that adds information to profiles
     const [subject, setSubject] = useState('');
     const [body, setBody] = useState('');
+    const [actionable, setActionable] = useState([]); //is the message actionable
+
+    //page meta
+    const [errors, setErrors] = useState([]);
+    const [warnings, setWarnings] = useState([])
     const [sending, setSending] = useState(false);
-    const [recipients, setRecipients] = useState([])
-    const [actionable, setActionable] = useState([]);
+   
 
     //ref to scroll to errors
     const alertRef = useRef(null);
@@ -30,12 +42,14 @@ export default function ComposeMessage({ profiles=[], admin=false, reply=false, 
         }
     }, [errors, warnings]);
 
+    //set default values once existing loads
     useEffect(() => {
         setBody(existing?.body);
         setSubject(existing?.subject);
         setActionable([]);
     }, [existing]);
 
+    //create the recipients array, which also includes information about who this message is assigned to as a task
     useEffect(() => {
         if(profiles && profiles.length > 0){
             const map = profiles.map((p) => ({'id': p.id, 'actionable': actionable.includes(p.id)}))
@@ -43,9 +57,12 @@ export default function ComposeMessage({ profiles=[], admin=false, reply=false, 
         }
     }, [profiles, actionable]);
 
+    //handle sending the message
     const sendMessage = async() => {
         setErrors([]);
-        let sbWarnings = []
+        let sbWarnings = []; //temp storage for errors
+
+        //require subject if the message is not a reply, always require body
         if(subject === '' && !reply) sbWarnings.push('Please enter a subject.');
         if(body === '') sbWarnings.push('Please enter something in the body.');
         if(sbWarnings.length > 0){
@@ -71,8 +88,8 @@ export default function ComposeMessage({ profiles=[], admin=false, reply=false, 
             const returnData = await response.json();
             if(response.ok){
                 console.log('here')
-                onCancel();
-                onSave();
+                onUpdate(); //let the parent know the message was updated
+                onCancel(); //run onCancel to edit parent states
             }
             else{
                 const serverResponse = []
@@ -86,7 +103,7 @@ export default function ComposeMessage({ profiles=[], admin=false, reply=false, 
                         serverResponse.push(`${field}: ${returnData[field]}`);
                     }
                 }
-                setErrors(serverResponse)
+                setErrors(serverResponse);
             }
         }
         catch(err){

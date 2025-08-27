@@ -3,9 +3,10 @@ import { createContext, useContext, useState } from 'react';
 const EventsContext = createContext();
 
 export const EventsProvider = ({ children }) => {
-    const [events, setEvents] = useState([]);
-    const [eventDetails, setEventDetails] = useState([]);
-    const [eventsMeta, setEventsMeta] = useState({})
+    //Context that stores some global variables about events
+    const [events, setEvents] = useState([]); //used for index views
+    const [eventDetails, setEventDetails] = useState([]); //used for detail views
+    const [eventsMeta, setEventsMeta] = useState({}); //stores the model meta
     return (
         <EventsContext.Provider value={{ 
             events, setEvents, 

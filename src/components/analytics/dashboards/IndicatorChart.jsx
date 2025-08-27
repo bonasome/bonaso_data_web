@@ -20,15 +20,24 @@ import { FaTrashAlt } from 'react-icons/fa';
 import { IoIosArrowDropdownCircle, IoIosArrowDropup } from "react-icons/io";
 import { IoSettingsSharp } from "react-icons/io5";
 
-export default function IndicatorChart({ chartData, dashboard, meta, options, onUpdate, onRemove, pos=0 }) {
-    
+export default function IndicatorChart({ chartData, dashboard, meta, options, onUpdate, onRemove }) {
+    /*
+    Component that displays an individual chart within a dashboard.
+    - chartData (object): the data about the specific chart (found in the dashboard object)
+    - dashboard (object): contains information about the dashboard this chart is a part of
+    - meta (object): the dashboard meta
+    - options (object): The breakdown options used for construcitng legends/filters
+    - onUpdate (function): What to do when the chart is updated so that the data is current
+    - onRemove (function): What to do when the chart is deleted
+    */
+
     const [showFilters, setShowFilters] = useState(false); //toggle filter dropdown
     const [editing, setEditing] = useState(false); //toggle settings modal
     //meta
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
 
-    //handle delete
+    //handle deleting the chart
     const handleRemove = async(id) => {
         try{
             const response = await fetchWithAuth(`/api/analysis/dashboards/${dashboard.id}/remove-chart/${chartData.id}/`, {
@@ -67,17 +76,18 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
     const memoizedChart = useMemo(() => {
         if (!chartData || chartData.chart?.chart_data.length === 0 || !options) return { dataArray: [], keys: [] };
         
+        //if using targets, prepare the targets sent with chartData for use in rechart
         let targets = []
         if (chartData.chart.use_targets && chartData.chart.targets){
             const targetKeys = Object.keys(chartData.chart.targets);
             const targetVals = Object.values(chartData.chart.targets);
             targets = targetKeys.map((key, index) => ({period: key, amount: targetVals[index]}))
         }
-        const legend = chartData.chart.indicators.length > 1 ? 'indicator' : chartData.chart.legend 
-        return splitToChart(chartData.chart.chart_data, chartData.chart.axis, legend, chartData.chart.stack, chartData.chart?.targets ?? [], options);
+        const legend = chartData.chart.indicators.length > 1 ? 'indicator' : chartData.chart.legend //if there is more than one indicator, set the legend to indicator for ease of reference
+        return splitToChart(chartData.chart.chart_data, options, chartData.chart.axis, legend, chartData.chart.stack, chartData.chart?.targets ?? []);
     }, [chartData]);
     
-    const { dataArray, keys } = memoizedChart;
+    const { dataArray, keys } = memoizedChart; //things used to construct the chart
 
     //additional cleaning for pies
     const pieData = useMemo(() => {
@@ -106,7 +116,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
         }
         return null;
     };
-    console.log(chartData)
+
     return(
         <div className={styles.chart}>
             {chartData &&  <div>
@@ -195,30 +205,3 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
         </div>
     )
 }
-
-//at some point we might add a buttom to download the data as a csb
-const download = async () => {
-        const response = await fetchWithAuth(`/api/analysis/download-indicator-aggregate/${indicator.id}/?${paramsQuery}${splitQuery}/`,);
-
-        if (!response.ok) {
-            console.error('Failed to download CSV');
-            return;
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-
-        const link = document.createElement('a');
-        link.href = url;
-
-        // Get filename from Content-Disposition
-        const disposition = response.headers.get('Content-Disposition');
-        const match = disposition && disposition.match(/filename="?([^"]+)"?/);
-        const filename = match ? match[1] : 'aggregates.csv';
-
-        link.setAttribute('download', filename);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-    }

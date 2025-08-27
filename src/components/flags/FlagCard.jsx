@@ -19,24 +19,34 @@ import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 
 export default function FlagCard({ flag, onUpdate=null, index=false }){
+    /*
+    A reuseable flag card component that can be dropped into a detail view or used with the FlagDetailModal
+    component. Allows a user to view details about and resolve a flag. 
+    - flag (object): object containing flag details
+    - onUpdate (function): what to do when the card is updated (or resolved), if there is a dependent parent component
+    - index (boolean, optional): if this is being used in an index view, include a link to the flagged item
+    */
     //context
     const { user } = useAuth();
-    //convert the param to a state so that it can be updated 
-    const [flagDetail, setFlagDetail] = useState(flag);
-    //control resolving information
-    const [resolving, setResolving] = useState(false);
-    const [resolveReason, setResolveReason] = useState('');
-    //meta
+    
+    const [flagDetail, setFlagDetail] = useState(flag); //convert the param to a state so that it can be updated 
+    //store resolve information
+    const [resolving, setResolving] = useState(false); //toggles resolving state
+    const [resolveReason, setResolveReason] = useState(''); //user inputted reason for resolving
+    //page meta
     const [expanded, setExpanded] = useState(false);
     const [errors, setErrors] = useState([]);
     const [saving, setSaving] = useState(false);
     
+    //when flag is passed, set flag detail equal to it
     useEffect(() => {
         setFlagDetail(flag)
     }, [flag]);
+
     //function to resolve flag
     const resolveFlag = async() => {
         setErrors([]);
+        //require a reason
         if(resolveReason === ''){
             setErrors(['You must enter a reason for flagging this respondent.']);
             return
@@ -53,10 +63,10 @@ export default function FlagCard({ flag, onUpdate=null, index=false }){
             });
             const data = await response.json();
             if (response.ok) {
-                setFlagDetail(data.flag);
-                setResolving(false);
+                setFlagDetail(data.flag); //update the state so the card shows the flag is resolved
+                setResolving(false); //cancel the editing state
                 if(onUpdate){
-                    onUpdate(data.flag);
+                    onUpdate(data.flag); //run the update function if provided so the parent can adjust
                 }
             } 
             else {

@@ -19,15 +19,19 @@ import { IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 
 //doubles as a flag index component and a data quality overview
 export default function FunWithFlags(){
+    /*
+    A component which both serves as an index component for a users flags and also displays some metadata about 
+    their flags.
+    */
+
     //contexts
-    const { user } = useAuth();
-    const [flags, setFlags] = useState([]);
-    const [metadata, setMetadata] = useState(null);
-    const [meta, setMeta] = useState(null);
+    const [flags, setFlags] = useState([]); //array of a users flags
+    const [metadata, setMetadata] = useState(null); //meta information about their flags
+    const [meta, setMeta] = useState(null); //model information
     //page meta
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showMetadata, setShowMetadata] = useState(true);
+    const [showMetadata, setShowMetadata] = useState(true); //expand/contract the metadata section
     //information for indexing
     const [filters, setFilters] = useState(initial);
     const [search, setSearch] = useState('');
@@ -35,8 +39,8 @@ export default function FunWithFlags(){
     const [entries, setEntries] = useState(0); //total number of entries for calculating number of pages
 
     //filter helpers
-    const [orgs, setOrgs] = useState([]);
-    const [orgSearch, setOrgSearch] = useState('');
+    const [orgs, setOrgs] = useState([]); //for constructing org filter select
+    const [orgSearch, setOrgSearch] = useState(''); //allows user to search orgs via the api (due to pagination)
 
     //ref to scroll to errors automatically
     const alertRef = useRef(null);
@@ -74,6 +78,7 @@ export default function FunWithFlags(){
         const loadFlags = async () => {
             try {
                 console.log('fetching flags...');
+                //convert filters object to URL params
                 const filterQuery = 
                     (filters.start ? `&start=${filters.start}` : '') + 
                     (filters.end ? `&end=${filters.end}` : '') + 
@@ -88,10 +93,7 @@ export default function FunWithFlags(){
                 const data = await response.json();
                 setEntries(data.count);
                 setFlags(data.results);
-                const urlMeta = `/api/flags/metadata/?search=${search}&page=${page}` + filterQuery;
-                const metaResponse = await fetchWithAuth(urlMeta);
-                const metadataData = await metaResponse.json();
-                setMetadata(metadataData);
+                
             } 
             catch (err) {
                 console.error(err);
@@ -101,11 +103,34 @@ export default function FunWithFlags(){
         loadFlags();
     }, [page, search, filters]);
 
-    const updateFlag = (flag) => {
-        const others = flags.filter((f) => f.id != flag.id);
-        setFlags([...others, flag]);
-    }
+    //fetch the metadata about flags (and have it respond to filters)
+    useEffect(() => {
+        const loadMetadata = async () => {
+            try{
+                console.log('fetching metadata...')
+                //convert filters object to URL params
+                const filterQuery = 
+                    (filters.start ? `&start=${filters.start}` : '') + 
+                    (filters.end ? `&end=${filters.end}` : '') + 
+                    (filters.auto ? `&auto_flagged=${filters.auto}` : '') + 
+                    (filters.resolved ? `&resolved=${filters.resolved}` : '') + 
+                    (filters.model ? `&model=${filters.model}` : '') + 
+                    (filters.reason ? `&reason_type=${filters.reason}` : '') + 
+                    (filters.organization ? `&organization=${filters.organization}` : '');
+                const urlMeta = `/api/flags/metadata/?search=${search}&page=${page}` + filterQuery;
+                const metaResponse = await fetchWithAuth(urlMeta);
+                const metadataData = await metaResponse.json();
+                setMetadata(metadataData);
+            }
+            catch(err){
+                console.error(err);
+                setErrors(['Something went wrong. Please try again later.']);
+            }
+        }
+        loadMetadata();
+    }, [filters]);
 
+    //fetch an array of organizations for the filter
     useEffect(() => {
         const loadOrgs = async () => {
             try {
@@ -125,6 +150,11 @@ export default function FunWithFlags(){
         loadOrgs();
     }, [orgSearch]);
 
+    //what to do when a flag is resolved or updated
+    const updateFlag = (flag) => {
+        const others = flags.filter((f) => f.id != flag.id);
+        setFlags([...others, flag]);
+    }
 
     if(loading || !metadata) return <Loading />
     return(

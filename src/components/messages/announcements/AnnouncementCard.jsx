@@ -15,25 +15,36 @@ import { FaTrashAlt } from "react-icons/fa";
 
 //card displaying announcement details and the like
 export default function AnnouncementCard({ announcement, onUpdate }){
+    /*
+    Displays information about an announcement. 
+    - announcement (object): contains details about the announcement
+    - onUpdate (function): what the parent component should do when the announcement is edited. 
+    */
+
+    const [annc, setAnnc] = useState(announcement); //details about the announcement (state allows for live updates)
+
+    //component meta
     const [expanded, setExpanded] = useState(false);
     const [errors, setErrors] = useState([]);
     const [editing, setEditing] = useState(false);
-    const [annc, setAnnc] = useState(announcement);
     const [del, setDel] = useState(false);
 
+    //set mutable state when announcement loads
     useEffect(() => {
         setAnnc(announcement);
-    }, [announcement])
+    }, [announcement]);
+
+    //set the announcement as read when clicked
     const handleRead = async () => {
-        if(annc.read) return;
+        if(annc.read) return; //return if already read
         try{
             console.log('marking as read...');
             const response = await fetchWithAuth(`/api/messages/announcements/${announcement.id}/read/` , {
                 method: 'PATCH',
             });
             if(response.ok){
-                setAnnc(prev => ({...prev, read: true}));
-                onUpdate();
+                setAnnc(prev => ({...prev, read: true})); //update the state so it reflects as being read
+                onUpdate(); //tell the parent component a change was made
             }
             else{
                 const serverResponse = []
@@ -47,11 +58,11 @@ export default function AnnouncementCard({ announcement, onUpdate }){
                         serverResponse.push(`${field}: ${returnData[field]}`);
                     }
                 }
-                setErrors(serverResponse)
+                setErrors(serverResponse);
             }
         }
         catch(err){
-            console.log('Failed to mark message as read', err);
+            console.log('Failed to mark announcement as read', err);
             setErrors(['Something went wrong. Please try again later.'])
         }
     }
@@ -99,7 +110,7 @@ export default function AnnouncementCard({ announcement, onUpdate }){
     }
 
     if(!annc) return <></>
-
+    //return delete/edit modals as a seperate component since the hovering card messes with the styling
     if(del) return <ConfirmDelete onConfirm={() => handleDelete()} onCancel={() => setDel(false)} name={'this announcement'} />
     if(editing) return <ComposeAnnouncementModal existing={announcement} onUpdate={(data) => {setAnnc(data); onUpdate(data)}} onClose={() => setEditing(false)} />
     

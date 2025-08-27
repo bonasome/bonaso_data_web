@@ -17,11 +17,18 @@ import { MdCloudUpload } from "react-icons/md";
 import { IoDocumentTextSharp } from "react-icons/io5";
 
 export default function BatchRecord(){
+    /*
+    Component for getting/uploading Excel templates for a project/organization that can be filled out and 
+    then uploaded into the system. 
+    */
+
     //org and project for generating template
     const [org, setOrg] = useState(null);
     const [project, setProject] = useState(null);
+
     //the file itself
     const [file, setFile] = useState(null);
+
     //vars to manage conflicts that arrise from files
     const [conflict, setConflict] = useState(false);
     const [conflictList, setConflictList] = useState([]);
@@ -30,8 +37,8 @@ export default function BatchRecord(){
     const [warnings, setWarnings] = useState([]);
     const [errors, setErrors] = useState([]);
     const [success, setSuccess] = useState([]);
-    const [uploading, setUploading] = useState(false);
-    const [gettingFile, setGettingFile] = useState(false);
+    const [uploading, setUploading] = useState(false); //file is being uploaded
+    const [gettingFile, setGettingFile] = useState(false); //template is being downloaded
 
     //auto scroll to errors
     const alertRef = useRef(null);
@@ -47,6 +54,8 @@ export default function BatchRecord(){
         setSuccess([]);
         setWarnings([]);
         setErrors([]);
+
+        //make sure a project/organization is selected
         let getErrors = [];
         if(!project){
             getErrors.push('Please select a project.')
@@ -63,6 +72,7 @@ export default function BatchRecord(){
             setGettingFile(true);
             const response = await fetchWithAuth(`/api/record/interactions/template/?project=${project.id}&organization=${org.id}`);
             if(response.ok){
+                //file download jargon
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -108,17 +118,16 @@ export default function BatchRecord(){
         }
     }
 
-    //set the file
+    //set the file on select
     const handleChange = (event) => {
         setFile(event.target.files[0]);
     };
 
-    //helper ref to click the hiden file input
+    //helper ref to click the hidden file input (so we can restyle it)
     const fileInputRef = useRef();
     const handleFileSelection = () => {
         fileInputRef.current.click(); // trigger hidden file input
     };
-
 
     //function to upload the template
     const handleSubmit = async (e) => {
@@ -131,6 +140,7 @@ export default function BatchRecord(){
             setErrors(['Please select a file!'])
             return;
         }
+
         const formData = new FormData();
         formData.append('file', file);
         try{
@@ -147,6 +157,7 @@ export default function BatchRecord(){
                 }
                 setErrors(data.errors);
                 setWarnings(data.warnings);
+                //if there are conflicts, display the conflict manager modal
                 if(data.conflicts.length > 0) {
                     setConflict(true);
                     setConflictList(data.conflicts);
@@ -187,7 +198,7 @@ export default function BatchRecord(){
         <div className={styles.fileUpload}>
             <h1>Batch Uploading</h1>
             <Messages errors={errors} warnings={warnings} success={success} ref={alertRef} />
-            {conflict && conflictList.length > 0 && <ConflictManagerModal existing={conflictList} handleClose={()=>setConflict(false)} />}
+            {conflict && conflictList.length > 0 && <ConflictManagerModal conflicts={conflictList} onClose={()=>setConflict(false)} />}
             
             <div className={styles.template}>
 

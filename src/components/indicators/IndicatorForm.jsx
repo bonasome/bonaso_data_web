@@ -22,15 +22,19 @@ import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 
 export default function IndicatorForm(){
+    /*
+    Form that allows a user to create/edit an indicator. An optional ID param can be passed in the URL
+    which will cause the form to try and fetch details from the server. 
+    */
     const navigate = useNavigate();
     
-    //param to get indicator (blank if new)
+    //param to get indicator (blank if creating)
     const { id } = useParams();
 
     //context
     const { setIndicatorDetails, indicatorDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
 
-    //existing values to start with
+    //existing value if editing
     const [existing, setExisting] = useState(null);
 
     //page meta
@@ -48,8 +52,8 @@ export default function IndicatorForm(){
         }
     }, [submissionErrors, success]);
 
+    //fetch the meta
     useEffect(() => {
-        //fetch the meta
         const getMeta = async() => {
             if(Object.keys(indicatorsMeta).length != 0){
                 setLoading(false);
@@ -75,8 +79,8 @@ export default function IndicatorForm(){
     //get the existing details if an id is found in the params
     useEffect(() => {
         const getIndicatorDetail = async () => {
-            if(!id) return;
-            
+            if(!id) return; //if no id, do nothing
+            //first check the context
             const found = indicatorDetails.find(o => o.id.toString() === id.toString());
             if (found) {
                 setExisting(found);
@@ -88,10 +92,12 @@ export default function IndicatorForm(){
                     const response = await fetchWithAuth(`/api/indicators/${id}/`);
                     const data = await response.json();
                     if(response.ok){
+                        //update the context
                         setIndicatorDetails(prev => [...prev, data]);
                         setExisting(data);
                     }
                     else{
+                        //if a bad ID is provided, navigate to 404
                         navigate(`/not-found`);
                     }
                 } 
@@ -158,7 +164,7 @@ export default function IndicatorForm(){
         if(!requireSubcats){
             data.subcategory_data = [];
         }
-        const action = e.nativeEvent.submitter.value;
+        const action = e.nativeEvent.submitter.value; //set the action depending on what button was clicked
         try{
             setSaving(true);
             console.log('submitting data...', data);
@@ -177,6 +183,7 @@ export default function IndicatorForm(){
                     const others = prev.filter(r => r.id !== returnData.id);
                     return [...others, returnData];
                 });
+                //depending on the action, navigate to the correct page
                 if(action === 'create_another'){
                     setExisting(null);
                     reset();
@@ -198,7 +205,7 @@ export default function IndicatorForm(){
                         serverResponse.push(`${returnData[field]}`);
                     }
                 }
-                setSubmissionErrors(serverResponse)
+                setSubmissionErrors(serverResponse); //show the user any errors
             }
         }
         catch(err){
@@ -210,6 +217,7 @@ export default function IndicatorForm(){
         }
     }
     
+    //set default values
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
@@ -232,10 +240,11 @@ export default function IndicatorForm(){
             subcategory_data: existing?.subcategories ?? [],
         }
     }, [existing]);
-    console.log(existing)
+
+    //construct RHF form variables
     const { register, control, handleSubmit, reset, setFocus, watch, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -248,6 +257,7 @@ export default function IndicatorForm(){
         }
     };
 
+    //try to set default values once existing loads
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
@@ -255,23 +265,26 @@ export default function IndicatorForm(){
     }, [existing, reset, defaultValues]);
 
     
-
+    //wathces to help with form logic
     const type = useWatch({ control, name: 'indicator_type', defaultValue: 'respondent' })
-    const isRespondent = useMemo(() => {return type==='respondent'}, [type]);
+    const isRespondent = useMemo(() => {return type==='respondent'}, [type]); //most validation applies to respondent types
 
-    const prereqs = useWatch({ control, name: 'prerequisite_ids', defaultValue: [] });
-    const usingMatched = useWatch({ control, name: 'match_subcategories_to', defaultValue: null });
+    const prereqs = useWatch({ control, name: 'prerequisite_ids', defaultValue: [] }); //only show match when using prereqs
+    const usingMatched = useWatch({ control, name: 'match_subcategories_to', defaultValue: null }); //hide subcat creator when matching
     
     const requireSubcats = useWatch({ control, name: 'require_subcategories', defaultValue: false});
 
+    //helper function to determine which prerequisites can be selected to match subcategories to
     const availableSubcats = useMemo(() => {
         return prereqs.filter((p) => (p?.subcategories || 0) > 0);
     }, [prereqs]);
 
+    //helper ref to manage subcategories, since SimpleDynamicRows is not an RHF input
     const rowRefs = useRef({});
     if (!rowRefs.current['subcategory_data']) {
         rowRefs.current['subcategory_data'] = React.createRef();
     }
+
     const basicInfo = [
         { name: "code", label: "Indicator Code (Required)", type: "text", rules: { required: "Required", 
                 maxLength: { value: 10, message: 'Maximum length is 10 characters.'}
@@ -298,6 +311,7 @@ export default function IndicatorForm(){
                 is meant to collect. Trying to track social posts? Check social. 
                 Tracking individual interactions with respondents? Select respondent.` },
     ]
+    //only show for respondent types
     const respondent = [
         {name: 'allow_repeat', label: 'Allow repeat interactions (within 30 days)', type: 'checkbox',
             tooltip: `By default, our system will flag any occasion where a respondent has multiple interactions related
@@ -325,13 +339,14 @@ export default function IndicatorForm(){
             NOTE: If an interaction is had with this indicator, but not its prerequisities, the system will flag it.`
         } 
     ]
+    //only show if valid prereqs are selected
     const matchSubcats = [
         {name: 'match_subcategories_to', label: 'Match Subcategories with a Prerequisite?', type: 'radio', 
             options: availableSubcats, labelField: 'display_name', valueField: 'id',
             tooltip: `Select an indicator that you want this indicator's subcategories to match with exactly.`
         },
     ]
-
+    //only show if not matching
     const subcats = [
         {name: 'require_subcategories', label: 'Require Subcategories?', type: 'checkbox',
             tooltip: `Does this indicator have an "subcategories", or additional information that needs to be collected

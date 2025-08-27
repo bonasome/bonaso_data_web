@@ -9,6 +9,7 @@ import prettyDates from '../../../services/prettyDates';
 import ButtonHover from '../reuseables/inputs/ButtonHover';
 import Messages from '../reuseables/Messages';
 import ComposeMessage from './ComposeMessage';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 
 import styles from './messages.module.css';
 
@@ -18,12 +19,22 @@ import { IoCheckmarkDoneCircle  } from "react-icons/io5";
 import { RiReplyAllFill } from "react-icons/ri";
 
 export default function MessageCard({ message, onUpdate, reply=false, parent=null }){
-    const [errors, setErrors] = useState([])
+    /*
+    Card that displays information about a message, either a toplevel message or a reply.
+    - message (object): information about the message to be displayed
+    - onUpdate (function): what to do when the message is edited
+    - reply (boolean, optional): is this message a reply to another message
+    - parent (object, optional): if it is a reply, what message is it replying to?
+    */
+    //context
     const { user } = useAuth();
+    // component meta
+    const [errors, setErrors] = useState([])
     const [replying, setReplying] = useState(false);
-    const [read, setRead] = useState(false);
+    const [read, setRead] = useState(false); //determines if a user has seen this message before
     const [editing, setEditing] = useState(false);
 
+    //determine who else is in the message thread
     const inThread = useMemo(() => {
         if(!message || !message?.recipients) return;
         const recipients = message?.recipients.map((r) => (r.recipient))
@@ -31,19 +42,24 @@ export default function MessageCard({ message, onUpdate, reply=false, parent=nul
         return recipients.filter(r => r.id !== user.id)
     }, [message])
 
+    //determine if this message was assigned as a task to the user
     const actionable = useMemo(() => {
         if(!message || !message?.recipients) return;
         return message.recipients.filter(r => (r.recipient.id === user.id && r.actionable && !r.completed)).length > 0
     }, [message, onUpdate])
 
+    //function to read the message/replies
     useEffect(() => {
         const handleRead = async() => {
             if(!message || !message?.recipients) return;
             if(read) return;
+            //check for unread status in top message and replies
             const isDirectRecipient = message?.recipients?.some(mr => mr.recipient.id === user.id && !mr.read);
             const isRecipientInAnyReply = message?.replies?.some(r => r.recipients.some(rec => rec.recipient.id === user.id && !rec.read));
-            console.log(isDirectRecipient, !isRecipientInAnyReply)
+            
+            //if nothing is unread, do nothing
             if (!isDirectRecipient && !isRecipientInAnyReply) return;
+            //else, mark the thread as read
             try{
                 console.log('marking as read...')
                 const response = await fetchWithAuth(`/api/messages/dm/${message.id}/read/`, {
@@ -51,8 +67,8 @@ export default function MessageCard({ message, onUpdate, reply=false, parent=nul
                 });
                 const returnData = await response.json();
                 if(response.ok){
-                    onUpdate();
-                    setRead(true)
+                    onUpdate(); //run onUpdate
+                    setRead(true); //set read to true so this isn't run again
                 }
                 else{
                     const serverResponse = []
@@ -71,15 +87,15 @@ export default function MessageCard({ message, onUpdate, reply=false, parent=nul
             }
             catch(err){
                 setErrors(['Something went wrong. Please try again later.'])
-                console.error('Could not record organization: ', err)
+                console.error('Could not read message: ', err)
             }
         }
         handleRead();
     }, []);
     
-
+    //mark a message as completed
     const handleComplete = async(id) => {
-        if(!id) id = message.id
+        if(!id) id = message.id;
         try{
             console.log('updating message status...')
             const response = await fetchWithAuth(`/api/messages/dm/${id}/complete/`, {
@@ -87,7 +103,7 @@ export default function MessageCard({ message, onUpdate, reply=false, parent=nul
             });
             const returnData = await response.json();
             if(response.ok){
-                onUpdate();
+                onUpdate(); //update the message
             }
             else{
                 const serverResponse = []
@@ -109,6 +125,7 @@ export default function MessageCard({ message, onUpdate, reply=false, parent=nul
             console.error('Could not record organization: ', err)
         }
     }
+    //delete this message
     const deleteMessage = async() => {
         try{
             const response = await fetchWithAuth(`/api/messages/dm/${message.id}/`, {
@@ -145,9 +162,7 @@ export default function MessageCard({ message, onUpdate, reply=false, parent=nul
         }
     }   
 
-    console.log(message)
-    if(!message || !inThread) return<></>
-    console.log(inThread)
+    if(!message || !inThread) return <ComponentLoading />
     return(
         <div className={styles.message}>
             {!reply && <h3>with {inThread?.map((r) => (r.display_name)).join(', ')}</h3>}
@@ -180,15 +195,18 @@ export default function MessageCard({ message, onUpdate, reply=false, parent=nul
                 {user.id === message.sender.id && message.recipients.filter(mr => mr.read).length > 0 && <p style={{ fontSize: 14 }}>
                     <i>Read by {message.recipients.filter(mr => mr.read).map((mr) => (mr.recipient.display_name)).join(', ')}</i></p>}
                 
-                {editing && <ComposeMessage profiles={inThread} reply={reply} onSave={() => onUpdate()} onCancel={() => setEditing(false)} existing={message} parent={parent} />}
+                {editing && <ComposeMessage profiles={inThread} reply={reply} onUpdate={() => onUpdate()} onCancel={() => setEditing(false)} existing={message} parent={parent} />}
             </div>
+            
+            {/* Only display reply information for top level message, no recursion */}
             {!reply && message.replies.length > 0 && <h2>Replies</h2>}
             {!reply && message.replies.length > 0 && message.replies.map((r) => (
                 <MessageCard message={r} reply={true} parent={message} onUpdate={onUpdate} />
             ))}
+
             {!reply && <div>
                 {!replying && <button onClick={(e) => {e.stopPropagation(); setReplying(true)}}><RiReplyAllFill /> Reply</button>}
-                {replying && <ComposeMessage profiles={inThread} reply={true} parent={message} onSave={() => onUpdate()} onCancel={() => setReplying(false)}/>}
+                {replying && <ComposeMessage profiles={inThread} reply={true} parent={message} onUpdate={() => onUpdate()} onCancel={() => setReplying(false)}/>}
             </div>}
 
             {!reply && <div className={styles.spacer}></div>}

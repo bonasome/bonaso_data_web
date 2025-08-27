@@ -22,7 +22,16 @@ import { FcCancel } from "react-icons/fc";
 import ButtonHover from "../reuseables/inputs/ButtonHover";
 import { FaTrashAlt } from "react-icons/fa";
 
-function Warn( {onConfirm, onClose }) {
+function Warn( {onConfirm, onCancel }) {
+    /*
+    Warning modal that displays a brief message when a user tries to change the breakdown categories for a count
+    that already has values (since this will remove all existing values). Users edit counts in a tabular format,
+    whose columns/rows will change based on the selected parameters/breakdowns. Each number entered has a "demogrpahic coordinate"
+    that is tied a specific value from one or more of the breakdown categories. 
+
+    - onConfirm (function): what to do when the user agrees to continue
+    - onCancel (function): what to do when the user cancels
+    */
     return(
         <div className={modalStyles.modal}>
             <h1>Warning!</h1>
@@ -36,8 +45,19 @@ function Warn( {onConfirm, onClose }) {
     )
 }
 
-export default function Counts({ event, breakdownOptions, task, onSave, onCancel, onDelete, existing=null}) {
-    const { user } = useAuth(); 
+export default function Counts({ event, breakdownOptions, task, onUpdate, onCancel, onDelete, existing=null}) {
+    /*
+    Component that displays/edits a single count table, related to one task and one event. 
+    - event (object): the event this count is related to
+    - breakdownOptions (object): a list of db values/labels that help create readable labels
+    - task (object): the task this count is related to
+    - onUpdate (function): what to do when this count is changed
+    - onCancel (function): handle a situation where the count editing is canceled without being saved (since this is used for creating)
+    - onDelete (function): handle deleting a count
+    - existing (object, optional): an existing count value to use for viewing/editing
+     */
+
+    const { user } = useAuth(); //for perms check
 
     //determine which params are "actively" being used to create demographic splits
     const [breakdowns, setBreakdowns] = useState({
@@ -64,17 +84,17 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         subcategory_id: {values: [], labels: [], col: 3}
     });
 
-    //table meta
+    //count table meta
     const [editing, setEditing] = useState(existing ? false: true);
     const [del, setDel] = useState(false);
     const [warning, setWarning] = useState(null); //controls warning modal that appears if a breakdown change will wipe counts
     const [errors, setErrors] = useState([]);
     const [saving, setSaving] = useState(false);
-    const [expanded, setExpanded] = useState(existing ? false : true);
+    const [expanded, setExpanded] = useState(existing ? false : true); //collapsed by default, unless you are creating a count for the first time
 
-    const [active, setActive] = useState([]);
-    const [rows, setRows] = useState([]);
-    const [counts, setCounts] = useState({});
+    const [active, setActive] = useState([]); //actively selected breakdowns
+    const [rows, setRows] = useState([]); //a list of all table rows, basically all permutations possible based on the selected params
+    const [counts, setCounts] = useState({}); //the values entered by a user and their demographic coordinates
     
     //existing for edits
     const [existingMap, setExistingMap] = useState([]); //breakdown "keys"
@@ -86,9 +106,18 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
     const [activeFlags, setActiveFlags] = useState(false); //tracker to tell if a count has active flags
     
     const [details, setDetails] = useState(null); // when an individual count is clicked, it sets this state to that info, which is used to build the flag modal
-    const [flagging, setFlagging] = useState(false); //controls flag create modal
 
-    //helper function that creates keys/ids/flags map from existing counts
+    //helper function to determine which breakdowns are checked
+    const checkActive = () => {
+        if(existingMap.length > 0){
+            const fields = Object.keys(existingMap[0]).map((e) => (e))
+            fields.forEach(field => {
+                setBreakdowns(prev => ({...prev, [field]: true}))
+            })
+        }
+    }
+
+    //helper function that creates keys/ids/flags map from existing counts that can then be placed in the correct table position
     const mapExisting = () => {
         let ids = []
         let combos = []
@@ -112,94 +141,11 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             })
             combos.push(groupMap)
         })
-        setExistingIDs(ids)
-        setExistingCounts(countsArray)
-        setExistingFlags(flagsArray)
-        setExistingMap(combos)
-        
+        setExistingIDs(ids); //array of existing count ids
+        setExistingCounts(countsArray); //array of existing count demographic coordinates
+        setExistingFlags(flagsArray); //array of existing count flags
+        setExistingMap(combos); //map of existing keys for comparison
     }
-    //helper function to determine which breakdowns are checked
-    const checkActive = () => {
-        if(existingMap.length > 0){
-            const fields = Object.keys(existingMap[0]).map((e) => (e))
-            fields.forEach(field => {
-                setBreakdowns(prev => ({...prev, [field]: true}))
-            })
-        }
-    }
-    //create a cartesian product
-    function cartesianProduct(arrays) {
-        if (!arrays || arrays.length === 0) return [];
-        return arrays.reduce(
-            (acc, curr) => {
-                if (!Array.isArray(curr)) return acc;
-                return acc.flatMap(d => curr.map(e => [...d, e]));
-            },
-            [[]]
-        );
-    }
-
-    //on change, if there are any values with counts, set a warning, temprarily store the presumptive change
-    const changeBreakdowns = (key, value) => {
-        const warn = Object.keys(counts).some((c) => counts[c].count !== '');
-        if(warn){
-            setWarning({key: key, value: value})
-        }
-        else{
-            confirmChange(key, value)
-        }
-        
-    }
-    //on confirm, apply the change
-    const confirmChange = (key, value) => {
-        if(!key) key = warning.key
-        if(value == null || value == 'undefined') value = warning.value
-        setBreakdowns(prev => ({...prev, [key]: value}))
-        setWarning(null)
-    }  
-
-    //function that sets the breakdowns and runs map existing
-    useEffect(() => {
-        if (task?.indicator.subcategories.length > 0) {
-            setBreakdowns(prev => ({ ...prev, subcategory_id: true }));
-            setBreakdownSplits(prev => ({
-                ...prev,
-                subcategory_id: {
-                    values: task.indicator.subcategories.map(c => c.id),
-                    labels: task.indicator.subcategories.map(c => c.name),
-                }
-            }));
-        }
-        else{
-            setBreakdowns(prev => ({ ...prev, subcategory_id:false }));
-        }
-
-        if (existing) {
-            mapExisting(); // only populate raw data
-        } else {
-            setExistingCounts([]);
-            setExistingMap([]);
-        }
-    }, [existing, task]);
-
-    //recheck active with changes to the existing map
-    useEffect(() => {
-        if (existingMap.length > 0) {
-            checkActive();
-        }
-    }, [existingMap]);
-
-    //create a cartesian product of all active breakdowns to build our data map
-    useEffect(() => {
-        const activeSplits = Object.entries(breakdownSplits)
-            .filter(([key]) => breakdowns[key])
-            .sort(([, a], [, b]) => a.col - b.col);
-        setActive(activeSplits)
-        mapCurrent(activeSplits)
-        let labelsMap = activeSplits.map((a) => (a[1].labels))
-        labelsMap = labelsMap.filter((m, index) => index != 0)
-        setRows(cartesianProduct(labelsMap)) //create list of all possible row combinations (save the first row which will appear in the columns)
-    }, [breakdowns, existingCounts, existingMap])
 
     //check if two keys are equal (compare existing keys to the map above)
     function shallowEqual(obj1, obj2) {
@@ -213,12 +159,11 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
     //based on the key of breakdown fields
     const mapCurrent =(splits) => {
         if(!task) return
-        //if there are no breakdowns (just a number), any exisitng must be the value
+        //if there are no breakdowns (just a number), any existing number must be the value
         if(splits.length == 0) {
             let count = '';
             let flags = []
             let id = null;
-
             if(existing){
                 count = existing[Object.keys(existing)[0]].count
                 flags = existing[Object.keys(existing)[0]].flags
@@ -227,7 +172,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             setCounts({0: {count: count, task_id: task.id, flags: flags, id: id}}); 
             return;
         }
-        //one dimension split, fund the matching value if it exists
+        //one dimension split, find the matching value if it exists
         if(splits.length === 1){
             const map = {}
             const split = splits[0][0]
@@ -252,7 +197,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             })
             setCounts(map)
         }
-        //two dimensions on gets tricky...
+        //two dimensions+ gets tricky...
         const splitMap = splits.map((s) => s[0]) //build a map of the split categories
         const valuesArrays = splits.map((s) => (s[1].values)) //their vals too
         const valuesMap = cartesianProduct(valuesArrays) //create the cartesian product
@@ -267,7 +212,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                 existingMap.forEach((m, index) => {
                     if(shallowEqual(map[i], m)) found = index //try to match key to existing 
                 })
-                if(found !== null){ //if it finds something, populate flags/id/count
+                if(found !== null){ //if it finds something, populate flags/id/count (using the keys in exitingMap to find the index for accessing the information in the other existing arrays)
                     map[i].count = existingCounts[found];
                     map[i].flags = existingFlags[found] 
                     map[i].id = existingIDs[found] 
@@ -286,17 +231,93 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         setCounts(map)
     }
 
-     
-    //upload the count
+    //create a cartesian product based on the inputted arrays
+    function cartesianProduct(arrays) {
+        if (!arrays || arrays.length === 0) return [];
+        return arrays.reduce(
+            (acc, curr) => {
+                if (!Array.isArray(curr)) return acc;
+                return acc.flatMap(d => curr.map(e => [...d, e]));
+            },
+            [[]]
+        );
+    }
+
+    //on change, if there are any values with counts, temprarily store the presumptive change in warning while the system waits for the user to confirm or discard the change
+    const changeBreakdowns = (key, value) => {
+        const warn = Object.keys(counts).some((c) => counts[c].count !== '');
+        if(warn){
+            setWarning({key: key, value: value})
+        }
+        else{
+            confirmChange(key, value)
+        }
+        
+    }
+    //on confirm, apply the change
+    const confirmChange = (key, value) => {
+        if(!key) key = warning.key
+        if(value == null || value == 'undefined') value = warning.value
+        setBreakdowns(prev => ({...prev, [key]: value}))
+        setWarning(null)
+    }  
+
+    //effect that sets the breakdowns and runs map existing
+    useEffect(() => {
+        //if the task's indicator has subcategories, automatically include them
+        if (task?.indicator.subcategories.length > 0) {
+            setBreakdowns(prev => ({ ...prev, subcategory_id: true }));
+            setBreakdownSplits(prev => ({
+                ...prev,
+                subcategory_id: {
+                    values: task.indicator.subcategories.map(c => c.id),
+                    labels: task.indicator.subcategories.map(c => c.name),
+                }
+            }));
+        }
+        else{
+            setBreakdowns(prev => ({ ...prev, subcategory_id: false }));
+        }
+        //if existing values are provided, map them out
+        if (existing) {
+            mapExisting();
+        } 
+        else {
+            setExistingCounts([]);
+            setExistingMap([]);
+        }
+    }, [existing, task]);
+
+    //recheck active with changes to the existing map
+    useEffect(() => {
+        if (existingMap.length > 0) {
+            checkActive();
+        }
+    }, [existingMap]);
+
+    //create a cartesian product of all active breakdowns to build our data map
+    useEffect(() => {
+        const activeSplits = Object.entries(breakdownSplits)
+            .filter(([key]) => breakdowns[key])
+            .sort(([, a], [, b]) => a.col - b.col);
+        setActive(activeSplits)
+        mapCurrent(activeSplits)
+        let labelsMap = activeSplits.map((a) => (a[1].labels))
+        labelsMap = labelsMap.filter((m, index) => index != 0)
+        setRows(cartesianProduct(labelsMap)) //create list of all possible row combinations (save the first row which will appear in the columns)
+    }, [breakdowns, existingCounts, existingMap])
+
+    //upload the count table to the database
     const saveCount = async() => {
         setErrors([])
-        const warn = Object.keys(counts).every((c) => counts[c].count === ''); //filter out empty counts
+        const warn = Object.keys(counts).every((c) => counts[c].count === ''); //filter out empty counts (our db doesn't need them)
+        //if no counts, warn the user to enter something
         if(warn) {
             setErrors(['You must enter at least one value to save a count.']);
             return;
         }
         const data = [];
-        Object.keys(counts).forEach((c) => {if(counts[c].count != '') data.push(counts[c])}); //convert to array and 
+        Object.keys(counts).forEach((c) => {if(counts[c].count != '') data.push(counts[c])}); //convert to an array
         try{
             console.log('submitting data...')
             setSaving(true);
@@ -310,7 +331,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             const returnData = await response.json();
             if(response.ok){
                 setEditing(false);
-                onSave(); //run update function
+                onUpdate(); //run update function to let parent know about the changes
             }
             else{
                 const serverResponse = []
@@ -335,6 +356,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
             setSaving(false);
         }
     }
+
     //delete a count
     const deleteCount = async() => {
         setErrors([])
@@ -344,7 +366,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
                 method: 'DELETE',
             });
             if (response.ok) {
-                onDelete(task.id);
+                onDelete(task.id); //run on Delete (since one task per count, giving the task ID will tell it enough)
             } 
             else {
                 let data = {};
@@ -377,7 +399,7 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
         }
     }
 
-    //calculate a cells position from the iteration (since cols)
+    //calculate a cells position from the iteration (since one breakdown makes the columns)
     const calcCellIndex = (iter, index) => {
         const n = rows.length
         return n*index + iter
@@ -398,14 +420,13 @@ export default function Counts({ event, breakdownOptions, task, onSave, onCancel
     }
 
     if(!task) return <></> //should never happen unless something has gone very wrong
-    
     return(
         <div className={existing ? styles.countSegment : styles.segment}>
             {warning && <Warn onConfirm={() => confirmChange()} onCancel={() => setWarning(null)} />}
 
             {del && <ConfirmDelete name={`Counts for Task: ${task.indicator.name} for for ${task?.organization.name} Event: ${event.name}`} onConfirm={() => deleteCount()} onCancel={() => setDel(false)} />}
             
-            {details && <FlagDetailModal flags={details.flags} model={'events.demographiccount'} id={details.id} onClose={() => {setDetails(null); onSave()}}/>}
+            {details && <FlagDetailModal flags={details.flags} model={'events.demographiccount'} id={details.id} onClose={() => {setDetails(null); onUpdate()}}/>}
             
             <div onClick={() => setExpanded(!expanded)} className={styles.expander}>
                 <h2>Counts for {task?.indicator.name} ({task?.organization.name})</h2>

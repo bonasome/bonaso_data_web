@@ -9,8 +9,7 @@ export default function Select({ name, type, label, onChange, onBlur, value, opt
     const filteredOptions = [
         { value: '', label: '-----' },
         ...options.filter(o =>
-            o.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            o.value.includes(searchTerm)
+            o.label.toLowerCase().includes(searchTerm.toLowerCase())
         )
     ];
     return(
@@ -34,7 +33,7 @@ export default function Select({ name, type, label, onChange, onBlur, value, opt
                 <select
                     id={name}
                     name={name}
-                    onChange={onChange}
+                    onChange={(e) => onChange(event.target.value)}
                     value={value}
                 >
                     {filteredOptions.map(({ value, label }) => (

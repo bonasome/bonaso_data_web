@@ -22,9 +22,15 @@ import UnopenedMsg from './UnopenedMsg';
 
 
 export default function MyMessages(){
+    /*
+    Displays a user's messages. If a message is selected, it will display that in the main panel. An ID
+    param can be provided to optionally preload a message in the main panel. 
+    */
     const { id } = useParams(); //optional param that directs to a specific message on load
     const { user } = useAuth();
-    const width = useWindowWidth()
+
+    const width = useWindowWidth(); //restructure the page for small screens
+
     //list of messages
     const [messages, setMessages] = useState();
     //set main panel to show new compose
@@ -42,7 +48,7 @@ export default function MyMessages(){
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     
-    //for simplicity, keep profile index info seperate
+    //for simplicity, keep profile index helpers seperate
     const [entriesP, setEntriesP] = useState(0)
     const [pageP, setPageP] = useState(1);
     const [searchP, setSearchP] = useState('');
@@ -51,6 +57,7 @@ export default function MyMessages(){
     const [errors, setErrors] = useState([])
     const [loading, setLoading] = useState(true);
     
+    //get the list of messages
     const getMsgs = async () => {
         try {
             console.log('getting messages...')
@@ -71,7 +78,7 @@ export default function MyMessages(){
         }
     };
 
-    //load once on load
+    //load messages on load
     useEffect(() => {
         const initialLoad = async() => {
             await getMsgs();
@@ -113,7 +120,7 @@ export default function MyMessages(){
     if(loading || !messages) return <Loading />
     return(
         <div className={styles.container}>
-
+            {/* If composing, set the sidebar to display a list of possible respondents instead of messages */}
             {composing && <div className={styles.sidebar}>
                 <h2>Start a New Message</h2>
                 <IndexViewWrapper onSearchChange={setSearchP} page={page} onPageChange={setPageP} entries={entriesP} >
@@ -137,7 +144,8 @@ export default function MyMessages(){
                 </IndexViewWrapper>
                 <div className={styles.spacer}></div>
             </div>}
-
+            
+            {/* Default to display messages on the sidebar */}
             {!composing && <div className={styles.sidebar}>
                 <h2>Your Conversations</h2>
                 <div className={styles.actions}>
@@ -153,20 +161,24 @@ export default function MyMessages(){
                     <div className={styles.spacer}></div>
                 </div>
             </div>}
-
+            
             <div className={styles.mainPanel}>
-                {composing && sendTo.length === 0 && <div>
-                    <h2>You can't have a conversation with one person! Add people from the sidebar.</h2>
-                    <button onClick={(e) => {setComposing(false)}}>Cancel</button>
-                </div>}
+                
                 {!composing && !toAdmin && (!activeThread || activeThread.length ===0) && <div className={styles.placeholder}>
                     <TiMessages fontSize={180} />
                     {messages.length > 0 && (width > 450 ? <h2>Select a conversation from the sidebar to view, or...</h2> : <h2>Select a conversation from the above to view, or...</h2>)}
                     <h2>Create a new message by clicking the buttons.</h2>
                 </div>}
+                {/* if composing set the ComposeMessage component in the main panel*/}
+                {composing && sendTo.length === 0 && <div>
+                    <h2>You can't have a conversation with one person! Add people from the sidebar.</h2>
+                    <button onClick={(e) => {setComposing(false)}}>Cancel</button>
+                </div>}
                 {composing && sendTo.length > 0 && <h2>Starting a new conversation with {sendTo.map((r) => (r.display_name)).join(', ')}</h2>}
                 {composing && <ComposeMessage profiles={sendTo} onSave={getMsgs} onCancel={() => setComposing(false)}/>}
                 {toAdmin && <ComposeMessage profiles={[]} admin={true} onSave={getMsgs} onCancel={() => {setToAdmin(false)}} />}
+                
+                {/* if a message is selected, display the message card */}
                 {!composing && !toAdmin && activeThread && <MessageCard message={activeThread} onUpdate={getMsgs} />}
             </div>
 

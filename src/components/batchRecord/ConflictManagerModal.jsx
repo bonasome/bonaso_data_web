@@ -5,18 +5,23 @@ import { useState, useEffect } from 'react';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import cleanLabels from '../../../services/cleanLabels';
 
-export default function ConflictManager({ existing, handleClose }){
-    //
-    const [entries, setEntries] = useState(existing); //total # of conflicts
-    const [active, setActive] = useState(existing[0]); //currently active entry
+export default function ConflictManager({ conflicts, onClose }){
+    /*
+    Simple modal to manage a situation where an uploaded respondent is already in the system and the user
+    needs to make a choice between keeping the database version or updating based on the upload. 
+    - conflicts (array): A list of the conflicting records, which should include both the db and upload values
+    - onClose (function): Close the modal
+    */
+    const [entries, setEntries] = useState(conflicts); //total # of conflicts
+    const [active, setActive] = useState(conflicts[0]); //currently active entry
     const [pos, setPos] = useState(0); //the position of the current entry
-    const [dbVals, setDBVals] = useState([]); //corresponding db value
+    const [dbVals, setDBVals] = useState([]); //db values
     const [uploadVals, setUplaodVals] = useState([]); //upload values
 
     //page meta
     const [errors, setErrors] = useState([]);
     
-    //on override call the api, data should be good to go
+    //on override call the api to edit the respondent, data should be good to go
     const handleOverride = async () => {
         try{
             console.log('submitting override...', active.upload)
@@ -44,7 +49,7 @@ export default function ConflictManager({ existing, handleClose }){
             console.error('File upload failed: ', err);
         }
     }
-    //on skip/keep dv, remove this from entries and shift position
+    //on skip/keep db, remove this from entries and shift position
     const handleSkip = () => {
         const filtered = entries.filter((e, index) => index != pos)
         setEntries(filtered);
@@ -55,14 +60,16 @@ export default function ConflictManager({ existing, handleClose }){
     //auto close when all conflicts are resolved
     useEffect(() => {
         if (entries.length === 0){
-            handleClose()
+            onClose()
         }
     }, [entries])
 
+    //for each value, slightly clean up the values so they display properly
     useEffect(() => {
         const db = [];
         const upload = [];
 
+        //join any arrays and merge object values
         const processValue = (value) => {
             if (Array.isArray(value)) {
                 return value.join(', ');
@@ -74,6 +81,7 @@ export default function ConflictManager({ existing, handleClose }){
                 return value ?? ''; 
             }
         };
+
         Object.entries(active.in_database || {}).forEach(([_, val]) => {
             db.push(processValue(val));
         });
@@ -81,6 +89,7 @@ export default function ConflictManager({ existing, handleClose }){
         Object.entries(active.upload || {}).forEach(([_, val]) => {
             upload.push(processValue(val));
         });
+
         setDBVals(db)
         setUplaodVals(upload)
     }, [active]);
@@ -123,7 +132,7 @@ export default function ConflictManager({ existing, handleClose }){
                 <button onClick={()=>handleOverride()}>Keep Upload and Override Database</button>
             </div>
 
-            <button onClick={() => handleClose()}>Skip all remaining conflicts</button>
+            <button onClick={() => onClose()}>Skip all remaining conflicts</button>
         </div>
     )
 }

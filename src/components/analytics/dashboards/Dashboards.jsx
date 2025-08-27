@@ -16,18 +16,23 @@ import { FaChartPie } from "react-icons/fa6";
 import { FaChartGantt } from "react-icons/fa6";
 
 export default function Dashboards() {
-    const { id } = useParams();
+    /*
+    Displays a list of all of a user's dashboards. If one is selected it will appear in the main panel.
+     */
+
     //page information
     const [meta, setMeta] = useState({});
-    const [dashboards, setDashboards] = useState([]);
-    const [breakdowns, setBreakdowns] = useState({});
-    //meta
+    const [dashboards, setDashboards] = useState([]); //list of all a users dashboards
+    const [breakdowns, setBreakdowns] = useState({}); //breakdowns used for selecting demographic options with charts
+    //page meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [viewing, setViewing] = useState(null); //controls which dashboard is visible in the main panel
     const [hidden, setHidden] = useState(false); //controls sb visibility
     const [creating, setCreating] = useState(false); //controls visibility of create modal
 
+
+    //load the dashboard metea
     useEffect(() => {
         const getMeta = async() => {
             try {
@@ -55,7 +60,7 @@ export default function Dashboards() {
     }, []);
 
 
-
+    //load all of the users dashboards
     useEffect(() => {
         const getDashboards = async() => {
             try {
@@ -102,11 +107,13 @@ export default function Dashboards() {
         getEventBreakdowns();
     }, [])
 
+    //run an update function if a dashboard is edited or created
     const handleUpdate = (data) => {
         const others = dashboards.filter((d) => (d.id != data.id));
         setDashboards([...others, data]);
     }
-    const handleRemove = (id) => {
+    //run a filter function when a dashboard is deleted
+    const handleDelete = (id) => {
         setDashboards(prev => prev.filter((d) => (d.id != id)));
         setViewing(null);
     }
@@ -122,7 +129,7 @@ export default function Dashboards() {
                 {creating && <CreateDashboardModal onClose={() => setCreating(false)} onUpdate={(data) => handleUpdate(data)} />}
 
                 {/*Show Selected DB */}
-                {viewing && <Dashboard id={viewing} meta={meta} breakdowns={breakdowns} onUpdate={(data) => handleUpdate(data)} onRemove={(id) => handleRemove(id)} />}
+                {viewing && <Dashboard id={viewing} meta={meta} breakdowns={breakdowns} onUpdate={(data) => handleUpdate(data)} onDelete={(id) => handleDelete(id)} />}
 
                 {/* Show a placeholder when nothing is selected */}
                 {!viewing && <div className={styles.placeholder}>

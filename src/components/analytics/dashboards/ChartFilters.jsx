@@ -15,8 +15,11 @@ import { IoIosArrowDropdownCircle, IoIosArrowDropup } from "react-icons/io";
 import { FaFilterCircleXmark } from "react-icons/fa6";
 
 function CustomFilterSegment({ type, options, value, callback}){
-    const [expanded, setExpanded] = useState(false);
-    console.log(options)
+    /*
+    Expandable section of a page that reveals a multiselect checkbox of all options when expanded. This 
+    filter design is meant to be a bit more flexible to allow for use with any options.
+    */
+    const [expanded, setExpanded] = useState(false); //controls visiblity of checkboxes
     return(
         <div className={styles.chartSettings}>
             <div className={styles.toggleDropdown} onClick={() => setExpanded(!expanded)}>
@@ -36,9 +39,15 @@ function CustomFilterSegment({ type, options, value, callback}){
     )
 }
 
-//expandable segment to keep section a bit more ui friendly
-function FilterSegment({ options, option, value, callback}){
-    const [expanded, setExpanded] = useState(false);
+
+function BreakdownFilterSegment({ options, option, value, callback}){
+    /*
+    Expandable section of a page that reveals a multiselect checkbox of all options when expanded. This
+    segement is explicitly designed for use with options sent from the breakdowns meta action from the backend
+    (which pulls from the respondent/demogrpahic count TextChoices).If trying to create a custom filter 
+    (subcategories, etc.) use CustomFilterSegment above. 
+    */
+    const [expanded, setExpanded] = useState(false); //controls visiblity of checkboxes
     return(
          <div className={styles.chartSettings}>
             <div className={styles.toggleDropdown} onClick={() => setExpanded(!expanded)}>
@@ -60,14 +69,18 @@ function FilterSegment({ options, option, value, callback}){
     )
 }
 
-//component to set filters
 export default function ChartFilters({ chart, options, dashboard, onUpdate }){
+    /*
+    Component that helps manage the filters that are selected for a particular chart in a particular 
+    dashboard. Also requires a list of options to use as filters and a callback function for what to do 
+    on update. 
+    */
     const [errors, setErrors] = useState([]);
-    const [filters, setFilters] = useState(null);
-    const [saving, setSaving] = useState(false);
-    const { socialPostsMeta, setSocialPostsMeta} = useSocialPosts();
-    console.log(filters)
-    //determine if subcategory filters should be allowed and set the options
+    const [filters, setFilters] = useState(null); //object containing active filters
+    const [saving, setSaving] = useState(false); //variable to prevent inputs while the system is working
+    const { socialPostsMeta, setSocialPostsMeta } = useSocialPosts(); //stores social post meta for use in social filters
+
+    //automatically determine if subcategory filters should be allowed and set the options
     const subcategories = useMemo(() => {
         if(!chart) return []
         return chart.chart.indicators.flatMap(ind => 
@@ -75,6 +88,7 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
         );
     }, [chart]);
 
+    //try to fetch the social posts meta
     useEffect(() => {
         const getMeta = async() => {
             if(Object.keys(socialPostsMeta).length != 0){
@@ -95,6 +109,7 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
         }
         getMeta();
     }, []);
+
     //set the existing filters
     useEffect(() => {
         if (!chart || !options) return;
@@ -112,7 +127,6 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
         setFilters(map);
     }, [chart, options, subcategories]);
 
-    console.log(subcategories)
     //update settings and refresh data on change
     const handleUpdate = async(data) => {
         try{
@@ -128,10 +142,9 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
 
             const returnData = await response.json();
             if(response.ok){
-                onUpdate(returnData.chart_data);
+                onUpdate(returnData.chart_data); //calls the onUpdate passed from the parent to refresh the data
             }
             else{
-                console.log(returnData)
                 const serverResponse = []
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
@@ -140,7 +153,6 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
                         });
                     } 
                     else {
-                        console.log(returnData)
                         serverResponse.push(`${field}: ${returnData[field]}`);
                     }
                 }
@@ -161,7 +173,7 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
         <div className={styles.chartFilters}>
             {chart.chart.indicators[0].indicator_type == 'respondent' && <div>
                 {options && Object.keys(options).map((o) => (
-                <FilterSegment options={options} option={o} value={filters[o]}
+                <BreakdownFilterSegment options={options} option={o} value={filters[o]}
                         callback={(vals) => {const updatedFilters = { ...filters, [o]: vals };
                             setFilters(updatedFilters);
                             handleUpdate(updatedFilters);}}/>
@@ -184,11 +196,6 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
                             setFilters(updatedFilters);
                             handleUpdate(updatedFilters);}}
                 />
-                {/* <CustomFilterSegment options={socialPostsMeta.metrics} type={'metric'} value={filters.metric}
-                        callback={(vals) => {const updatedFilters = { ...filters, metric: vals };
-                            setFilters(updatedFilters);
-                            handleUpdate(updatedFilters);}}
-                />*/}
                 <div style={{ maxWidth: 300 }}>
                     <ButtonHover callback={() => handleUpdate({})} noHover={<FaFilterCircleXmark />} hover={'Clear All Filters'} />
                 </div>
@@ -197,5 +204,4 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
                 <p>You cannot apply filters to this indicator type.</p>}
         </div>
     )
-
 }

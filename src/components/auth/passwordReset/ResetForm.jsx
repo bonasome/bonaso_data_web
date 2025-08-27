@@ -7,6 +7,9 @@ import errorStyles from '../../../styles/errors.module.css';
 
 
 export default function ResetForm(){
+    /*
+    Form that a user will land on when they click an email link to reset their password.
+    */
     //fetch domain name from env
     const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -19,12 +22,12 @@ export default function ResetForm(){
 
     //page meta
     const [errors, setErrors] = useState([]);
-    const [submitted, setSubmitted] = useState(false);
-    const [saving, setSaving] = useState(false);
+    const [submitted, setSubmitted] = useState(false); //on submit, hide inputs and let the user know they're good
+    const [saving, setSaving] = useState(false); //the system is working
 
     //handle submission
     const handleSubmit = async () => {
-        //make sure password is entered and matches
+        //make sure a password is entered and matches the confirm password
         if(password === ''){
             setErrors(['This field is required.']);
             return;
@@ -48,7 +51,7 @@ export default function ResetForm(){
                 },
             });
             if(response.ok){
-                setSubmitted(true);
+                setSubmitted(true); //only set submitted to true if the password is reset since this will hide the inputs
             }
         }
         catch(err){
@@ -67,11 +70,13 @@ export default function ResetForm(){
                 <h2>Enter your new password</h2>
             </div>
             <div>
-                <label htmlFor="password">New Password</label>
-                <input id='password' type='password' value={password} onChange={(e) => setPassword(e.target.value)}/>
+                {!submitted && <div>
+                    <label htmlFor="password">New Password</label>
+                    <input id='password' type='password' value={password} onChange={(e) => setPassword(e.target.value)}/>
 
-                <label htmlFor="password">Confirm Password</label>
-                <input id='confirm_password' type='password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
+                    <label htmlFor="password">Confirm Password</label>
+                    <input id='confirm_password' type='password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
+                </div>}
                 {submitted && <div className={errorStyles.success}>
                     <p>Your password has been reset. You may login again now with your new password.</p>
                     <Link to={'/users/login'} style={{ color: "black"}}>Login</Link>

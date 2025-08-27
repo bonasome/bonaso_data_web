@@ -1,4 +1,11 @@
 export default function prettyDates(uglyDate, time=false, monthOnly=false, long=false, ){
+    /*
+    Function that takes an ISO date or datetime and converts it to a more readable string.
+    - uglyDate: ISO date
+    - time (boolean): include a time component
+    - monthOnly (boolean): do not include the day
+    - long: return the weekday as well.
+    */
     try{
         const dateObject = new Date(uglyDate)
         if(long){

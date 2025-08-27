@@ -20,12 +20,16 @@ import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 
 export default function OrganizationForm(){
+    /*
+    Form that allows a user to edit or create an organization. Takes an optional ID param in the URL if editing
+    an existing instance.
+    */
     const navigate = useNavigate();
     
-    //param to get indicator (blank if new)
+    //param to get organization (blank if new)
     const { id } = useParams();
 
-    //special params for redirecting
+    //special params for redirecting (depending on where the user came from)
     const [searchParams] = useSearchParams();
     const jumpTo = searchParams.get('to');
     const projectID = searchParams.get('projectID');
@@ -34,7 +38,7 @@ export default function OrganizationForm(){
     //context
     const { organizationDetails, setOrganizationDetails } = useOrganizations();
 
-    //existing values to start with
+    //existing value if id param is provided
     const [existing, setExisting] = useState(null);
 
     //page meta
@@ -52,13 +56,14 @@ export default function OrganizationForm(){
         }
     }, [submissionErrors, success]);
 
-    //fetch the meta
+    //fetch existing details if id param is provided
     useEffect(() => {
         const getOrganizationDetails = async () => {
             if(!id) {
                 setLoading(false);
                 return;
             }
+            //check the context first
             const found = organizationDetails.find((o) => o?.id?.toString?.() === id?.toString?.());
             if (found) {
                 setExisting(found);
@@ -76,7 +81,7 @@ export default function OrganizationForm(){
                         setLoading(false);
                     }
                     else{
-                        navigate(`/not-found`);
+                        navigate(`/not-found`); //navigate to 404 if not found
                     }
                     
                 } 
@@ -95,7 +100,8 @@ export default function OrganizationForm(){
         setSubmissionErrors([]);
         setSuccess([]);
 
-        let sErrors = []
+        let sErrors = [];
+        //action to determine what button was pressed
         const action = e.nativeEvent.submitter.value;
         try{
             setSaving(true);
@@ -111,17 +117,20 @@ export default function OrganizationForm(){
             const returnData = await response.json();
             if(response.ok){
                 setSuccess(['Organization created successfuly!']);
+                //update context
                 setOrganizationDetails(prev => {
                     const others = prev.filter(r => r.id !== returnData.id);
                     return [...others, returnData];
                 });
-                if(jumpTo == 'projects' && projectID && orgID){
-                    navigate(`/projects/${projectID}/organizations/${orgID}?adding=true`)
-                }
-                else if(action === 'create_another'){
+                //determine what to do based on the action
+                if(action === 'create_another'){
                     setExisting(null);
                     reset();
                     navigate('/organizations/new');
+                }
+                //if the user came from the project orgnaization page to create a subgrantee, redirect them back there
+                else if(jumpTo == 'projects' && projectID && orgID){
+                    navigate(`/projects/${projectID}/organizations/${orgID}?adding=true`)
                 }
                 else{
                     navigate(`/organizations/${returnData.id}`);
@@ -151,6 +160,7 @@ export default function OrganizationForm(){
         }
     }
     
+    //set default values
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
@@ -167,9 +177,10 @@ export default function OrganizationForm(){
         }
     }, [existing]);
 
+    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -182,6 +193,7 @@ export default function OrganizationForm(){
         }
     };
 
+    //if id param is provided, set default values once existing loads.
     useEffect(() => {
         if (existing) {
             reset(defaultValues);

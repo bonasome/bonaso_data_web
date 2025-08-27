@@ -4,12 +4,17 @@ import { setRefreshAuth } from "../../services/authServices";
 export const UserContext = createContext();
 
 export function UserAuth({ children }) {
-    const baseUrl = import.meta.env.VITE_API_URL;
-    const [loading, setLoading] = useState(true);
-    const [loggedIn, setLoggedIn] = useState(false);
-    const [user, setUser] = useState(null);
-    const [refreshPromise, setRefreshPromise] = useState(null);
+    /*
+    Context that manages a user's authentication status, including their logged in status, their role/org,
+    and their access/refresh tokens.
+    */
+    const baseUrl = import.meta.env.VITE_API_URL; //import the domain name from the .env
+    const [loading, setLoading] = useState(true); //global loading state when working
+    const [loggedIn, setLoggedIn] = useState(false); //determines if a user is logged in or not
+    const [user, setUser] = useState(null); //stores basic information about a user, most importantly their role and organization_id
+    const [refreshPromise, setRefreshPromise] = useState(null); //checks if fetchWithAuth is already trying to get a new access token
 
+    //every four minutes, try to refresh the access token to prevent disruptive loading (access token lifespan is 5 minutes)
     useEffect(() => {
         if (loggedIn) {
             const refreshInterval = setInterval(async () => {
@@ -29,8 +34,9 @@ export function UserAuth({ children }) {
         }
     }, [loggedIn]);
 
+    //try to get a new access token using the refresh token, if present
     const refreshAuth = async () => {
-        if (refreshPromise) return refreshPromise;
+        if (refreshPromise) return refreshPromise; //do not run this there is already a refresh request
 
         const promise = (async () => {
             setLoading(true);
@@ -46,10 +52,7 @@ export function UserAuth({ children }) {
                     if (refreshResponse.status !== 401) {
                         throw new Error('Token refresh failed');
                     }
-                    // If 401, we know it’s “expected” sometimes — just clear state
-                    //setUser(null);
-                    //setLoggedIn(false);
-                    //return; // don't throw, just stop here
+                    // If 401, we know it’s “expected” sometimes
                 }
 
                 // Step 2: Fetch current user info
@@ -85,6 +88,7 @@ export function UserAuth({ children }) {
         return promise;
     };
 
+    //make this function available to fetchWithAuth, which is just a vanilla JS file
     useEffect(() => {
         setRefreshAuth(refreshAuth); // make it available globally
         refreshAuth(); // run on mount
@@ -92,7 +96,7 @@ export function UserAuth({ children }) {
 
     return (
         <UserContext.Provider value={{ loggedIn, user, setUser, setLoggedIn, loading, refreshAuth }}>
-        {children}
+            {children}
         </UserContext.Provider>
     );
 }

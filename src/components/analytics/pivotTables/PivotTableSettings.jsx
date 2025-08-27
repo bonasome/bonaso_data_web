@@ -15,17 +15,28 @@ import styles from '../../../styles/modals.module.css'
 import { IoIosSave } from "react-icons/io";
 import { FcCancel } from "react-icons/fc";
 
-export default function PivotTableSettings({ existing, onClose, onUpdate, meta }){
+export default function PivotTableSettings({ onClose, onUpdate, meta, existing=null }){
+    /*
+    Modal to edit settings of a pivot table.
+    - onClose (function): closes the modal
+    - onUpdate (function): handle submission of new/edited data
+    - meta (object): model meta for constructing options
+    - existing (object, optional): the existing pivot table settings for editing
+    */
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [saving, setSaving] = useState(false);
 
+    //handle form submission
     const onSubmit = async(data) => {
         setSubmissionErrors([]);
+        //model selects pass full objects, so just get the id
         data.indicator_id = data.indicator_id?.id ?? null;
         data.organization_id = data.organization_id?.id ?? null;
         data.project_id = data.project_id?.id ?? null;
+        //backend gets anxious when you send empty strings for dates, so just set them null
         if(data.start == '') data.start = null;
         if(data.end == '') data.end = null;
+        //shouldn't happen, but only accept valid param names the backend is expecting
         if(data.param_names){
             const vals = fields.map(f => (f.value))
             data.param_names = data.param_names.filter(n => (vals.includes(n)));
@@ -43,8 +54,8 @@ export default function PivotTableSettings({ existing, onClose, onUpdate, meta }
             });
             const returnData = await response.json();
             if(response.ok){
-                onUpdate(returnData);
-                onClose();
+                onUpdate(returnData); //tell the parent to update with the new data
+                onClose(); //close the modal
             }
             else{
                 const serverResponse = []
@@ -69,6 +80,8 @@ export default function PivotTableSettings({ existing, onClose, onUpdate, meta }
             setSaving(false);
         }
     }
+
+    //set the default form values
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
@@ -83,9 +96,10 @@ export default function PivotTableSettings({ existing, onClose, onUpdate, meta }
         }
     }, [existing]);
 
+    //construct the RHF form variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -98,17 +112,19 @@ export default function PivotTableSettings({ existing, onClose, onUpdate, meta }
         }
     };
 
+    //if provided, set default values to existing values once loaded
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
 
-    const ind = watch('indicator_id');
-    const projectSel =  watch('project_id');
+    //watches for form logic
+    const ind = watch('indicator_id'); //used to determine what breakdown fields are available
+    const projectSel =  watch('project_id'); //helps filter organization select to only orgs in the project
     const orgSel =  watch('organization_id');
 
-    //helper function to calculate the type of splits (legend/breakdown) that are available
+    //helper function to calculate the type of splits (legend/breakdown) that are available based on the selected indicator
     const fields = useMemo(() => {
         if(!ind) return []
         if(['event_no', 'org_event_no'].includes(ind?.indicator_type)) return []; //only allow org for these
@@ -130,6 +146,7 @@ export default function PivotTableSettings({ existing, onClose, onUpdate, meta }
             rules: {required: "Required"}
         },
     ]
+    //show params based on the indicator details
     const params = [
         { name: 'param_names', label: 'Split Data By', type: 'multiselect', options: fields}
     ]
@@ -141,10 +158,11 @@ export default function PivotTableSettings({ existing, onClose, onUpdate, meta }
             labelField: 'name', includeParams: projectSel ? [{field: 'project', value: projectSel?.id ?? []}] : [] 
         }
     ]
+    //if selected org, allow for data to include their child orgs as well
     const org = [
         { name: 'cascade_organization', label: 'Include Subgrantees?', type: 'checkbox', }
     ]
-    console.log(fields)
+
     if(!meta?.fields) return <></>
     return(
         <div className={styles.modal}>

@@ -11,7 +11,7 @@ The **BONASO Data Portal** enables community health workers and coordinators to 
 
 This document specifically describes the **frontend website**. For additional context, please also read the documentation for:  
 - **Backend:** BONASO Data Portal Server (Django + PostgreSQL)  
-- **Mobile:** BONASO Data Portal Mobile (React Native + Expo)  
+- **Mobile:** BONASO Data Portal Mobile (React + Expo)  
 
 The frontend website provides the user interface for recording and viewing data. It does not store data directly but communicates with the backend through authenticated API requests.
 
@@ -56,9 +56,10 @@ See `sitemap.md` for a full outline of routes and features.
 ---
 
 ## 4. Next Steps
-- [Setup Guide](setup.md)  
-- [Codebase Guide](codebase.md)  
-- [Sitemap](sitemap.md)  
+- Setup: [docs/setup.md]
+- Sitemap: [docs/sitemap.md]
+- Overview of Global Helper Functions: [docs/services.md]
+- Overview of Global Components: [docs/components.md]
 
 ---
 
