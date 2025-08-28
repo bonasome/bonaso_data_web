@@ -49,15 +49,20 @@ export function NumberModal({ onUpdate, onCancel, onClear,  existing='' }){
         onUpdate(number);
         onCancel();
     }
+    const handleClear = () => {
+        onClear();
+        onCancel();
+    }
 
     return(
         <div className={modalStyles.modal}>
             <h2>Additional Information Required</h2>
-            <label htmlFor='number'>The task {task.indicator.name} requires a numeric component.</label>
+            <label htmlFor='number'>This task requires a numeric component.</label>
             <input id='number' type='number' value={number || ''} onChange={(e) => setNumber(e.target.value)} placeholder='Enter a number...'/>
             <div>
                 <button disabled={number==''} onClick={() => handleUpdate()}><FaCheck /> Confirm Choices</button>
-                <button onClick={() => onCancel()}><FcCancel/> Cancel</button>
+                {existing != '' && <button disabled={number==''} onClick={() => onCancel()}><FcCancel/> Cancel</button>}
+                {existing == '' && <button onClick={handleClear}><FcCancel/> Cancel</button>}
             </div>
         </div>
     )

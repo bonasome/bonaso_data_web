@@ -37,9 +37,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
     const [interactionDate, setInteractionDate] = useState('');
     const [interactionLocation, setInteractionLocation] = useState('');
 
-    const [number, setNumber] = useState({}); //stores entered numbers
-    const [subcats, setSubcats] = useState({}); //stores selected subcats (includng numeric attachments)
-    const [comments, setComments] = useState({}); //stores comments related to each interaction
+    const [overwriteError, setOverwriteError] = useState([]);
     const [selected, setSelected] = useState([]); //manages the list of selected tasks
 
     //creation helpers that manage pop up modals for when additional into is required
@@ -114,6 +112,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
     const handleAdd = async (task) => {
         setErrors([]);
         setWarnings([]);
+        setOverwriteError([]);
 
         const date = interactionDateRef.current; //get the current date
         let dropWarnings = [];
@@ -244,6 +243,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
 
     //remove a task from the batch
     const removeItem = (task) => {
+        setOverwriteError([]);
         setSelected(prev => {
             const updated = prev.filter(t => t.id !== task.id);
             onUpdate(updated.map(t => t.id));
@@ -257,6 +257,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
     const handleSubmit = async () => {
         setErrors([]);
         setWarnings([]);
+        setOverwriteError([]);
         //confirm theres a date/location
         let submissionErrors = [];
         if(interactionDate=='' || isNaN(Date.parse(interactionDate)) || new Date(interactionDate) > new Date()){
@@ -338,7 +339,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
         }
     }
 
-    const [overwriteError, setOverwriteError] = useState([]);
+    
     const handleSubcatEdit = (ir, val) => {
         for(const sel of selected){
             if(sel.task.indicator.match_subcategories_to == ir.task.indicator.id){
@@ -380,9 +381,11 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
                         existing={modalTask?.comments ?? ''} />}
                     {numberModalActive && <NumberModal onUpdate={(val) => setSelected(prev =>
                             prev.map(item => item.id === modalTask.id ? { ...item, numeric_component: val } : item)
-                        )} onCancel={() => setNumberModalActive(false)} existing={modalTask?.numeric_component ?? ''} />}
+                        )} 
+                        onClear={() => {removeItem(modalTask)}}
+                        onCancel={() => setNumberModalActive(false)} existing={modalTask?.numeric_component ?? ''} />}
                     {subcatModalActive && <SubcategoryModal onUpdate={(val) => {handleSubcatEdit(modalTask, val)}} 
-                        onClear={() => {() => removeItem(modalTask)}}
+                        onClear={() => {removeItem(modalTask)}}
                         onCancel={() => setSubcatModalActive(false)} existing={modalTask?.subcategories_data ?? []}
                         overwriteError={overwriteError} options={allowedSubcats[modalTask.id]} numeric={modalTask.task.indicator.require_numeric} />}
                 </>
@@ -408,7 +411,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
                     <div className={styles.row} key={ir.id}>
                         <div>
                             <p><b>{ir.task.display_name}</b></p>
-                            {ir.task.indicator.require_numeric && ir?.task?.subcategories?.length == 0 && <div>
+                            {ir.task.indicator.require_numeric && ir?.task?.indicator?.subcategories?.length == 0 && <div>
                                 <button onClick={() => {setNumberModalActive(true); setModalTask(ir)}}><ImPencil /></button>
                                 <li>{ir.numeric_component}</li>
                             </div>}
