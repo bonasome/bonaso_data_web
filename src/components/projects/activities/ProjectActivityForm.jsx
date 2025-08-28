@@ -21,15 +21,19 @@ import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 
 export default function ProjectActivityForm(){
+    /*
+    Form that is used to create/edit a project activity. Requires an ID URL param that is for the related 
+    project and takes an optionally takes an activityID URL param for use when editing. 
+    */
     const navigate = useNavigate();
     
-    //param to get indicator (blank if new)
-    const { id, activityID } = useParams();
+    //URL params
+    const { id, activityID } = useParams(); //id is the ID of the related project
     //context
     const { projectsMeta, setProjectsMeta } = useProjects();
     const { user } = useAuth();
 
-    //existing values to start with
+    //existing values to start with, if activityID is provided
     const [existing, setExisting] = useState(null);
 
     //page meta
@@ -75,7 +79,7 @@ export default function ProjectActivityForm(){
 
     //get the activity details if existing
     useEffect(() => {
-        const fetchProjectActivities = async () => {
+        const fetchProjectActivity = async () => {
             if(!activityID) return;
             try {
                 console.log('fetching project activities...');
@@ -85,7 +89,7 @@ export default function ProjectActivityForm(){
                     setExisting(data);
                 }
                 else{
-                    navigate(`/not-found`);
+                    navigate(`/not-found`); //navigate to 404 if bad ID is provided
                 }
             } 
             catch (err) {
@@ -93,16 +97,17 @@ export default function ProjectActivityForm(){
                 console.error('Failed to fetch project: ', err);
             } 
         }
-        fetchProjectActivities();
+        fetchProjectActivity();
     }, [id]);   
 
     //handle form submission
     const onSubmit = async(data, e) => {
         setSubmissionErrors([]);
         setSuccess([]);
-        data.project_id = id
+
+        data.project_id = id; //automatically set project based on URL param
+        //convert org objects to just the id
         data.organization_ids = data?.organization_ids?.map((org) => (org.id)) ?? [];
-        const action = e.nativeEvent.submitter.value;
         try{
             setSaving(true);
             console.log('submitting data...', data);
@@ -116,6 +121,7 @@ export default function ProjectActivityForm(){
             });
             const returnData = await response.json();
             if(response.ok){
+                //on success redirect back to the detail page
                 setSuccess(['Activity created successfuly!']);
                 navigate(`/projects/${id}`);
             }
@@ -131,7 +137,7 @@ export default function ProjectActivityForm(){
                         serverResponse.push(`${returnData[field]}`);
                     }
                 }
-                setSubmissionErrors(serverResponse)
+                setSubmissionErrors(serverResponse);
             }
         }
         catch(err){
@@ -143,6 +149,7 @@ export default function ProjectActivityForm(){
         }
     }
     
+    //set the default values
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
@@ -158,9 +165,10 @@ export default function ProjectActivityForm(){
         }
     }, [existing]);
 
+    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors on submit
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -173,12 +181,14 @@ export default function ProjectActivityForm(){
         }
     };
 
+    //reset existing once it loads
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
 
+    //watch on start date to make sure it is before the end date
     const start = watch("start");
 
     const basics = [
@@ -214,6 +224,7 @@ export default function ProjectActivityForm(){
             tooltip: 'Check this box to automatically include any subgrantees in this event.'
         }
     ]
+    //only admins can make an item visible to everyone
      const admin= [
         {name: 'visible_to_all', label: 'Make Visible to All Project Members', type: 'checkbox',
             tooltip: 'Make this activity visible to all project members.'

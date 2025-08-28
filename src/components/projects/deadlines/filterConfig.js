@@ -1,4 +1,5 @@
 export const initial = {
+    //default filter values
     start: '',
     end: '',
     visible_to_all: '',
@@ -6,6 +7,11 @@ export const initial = {
 }
 
 export function filterConfig(orgs, searchCallback){
+    /*
+    Config function that tells the filter component (src/components/reuseables/Filter.jsx) what inputs to build
+    - orgs (array): an array of projects that can be selected
+    - searchCallback (function): pass search value from select component to the API.
+    */
     return [
         {name: 'organization', label: 'Involves Organization', type: 'select', constructors: {
             values: orgs.map((o) => (o.id)),

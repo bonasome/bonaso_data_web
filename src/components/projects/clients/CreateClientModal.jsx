@@ -12,7 +12,14 @@ import styles from '../../../styles/modals.module.css';
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 
-export default function CreateClient({ onCreate, onCancel, existing=null }){
+export default function CreateClientModal({ onUpdate, onCancel, existing=null }){
+    /*
+
+    - onUpdate (function): what to do after succesful updating/creating a client object
+    - onCancel (function): how to close the modal
+    - existing (object, optional): the existing object to edit
+    */
+
     //page meta
     const[pageErrors, setPageErrors] = useState([])
     const [saving, setSaving] = useState(false);
@@ -41,8 +48,8 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
             });
             const returnData = await response.json();
             if(response.ok){
-                onCreate(returnData);
-                onCancel();
+                onUpdate(returnData); //tell tha parent component the update was made
+                onCancel(); //close the modal
             }
             else{
                 const serverResponse = []
@@ -68,16 +75,18 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
         }
     }
 
+    //set the default values
     const defaultValues = useMemo(() => {
-            return {
-                name: existing?.name ?? '',
-                full_name: existing?.full_name ?? '',
-            }
-        }, [existing]);
+        return {
+            name: existing?.name ?? '',
+            full_name: existing?.full_name ?? '',
+        }
+    }, [existing]);
     
+    //construct the RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors on submission
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -90,6 +99,7 @@ export default function CreateClient({ onCreate, onCancel, existing=null }){
         }
     };
 
+    //if given, wait for existing to load then set default values based on it
     useEffect(() => {
         if (existing) {
             reset(defaultValues);

@@ -8,34 +8,41 @@ import cleanLabels from '../../../../services/cleanLabels';
 import prettyDates from '../../../../services/prettyDates';
 
 import ComponentLoading from '../../reuseables/loading/ComponentLoading';
-//gantt chart that appears on project hom page. Uses deadlines/activities
 
 export default function ProjectActivityFAGantt({ project }){
-    //transfor the data using a config (ganttBuilder.js)
+    /*
+    Component that builds something resembling a gantt chart using rechart bar chart. The gantt effect is kind of
+    replicated by creating a transparent bar between the start of the project and the start of the activity. 
+    It doesn't look great, but it kind of works, maybe.
+    - project (object): the project to display the gantt chart for
+    */
+
     const [activities, setActivities] = useState([]);
     const [deadlines, setDeadlines] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    //fetch related activities/deadlines for this project (seperate endpoint to avoid pagination and single api request)
     useEffect(() => {
-            const loadActivities = async () => {
-                try {
-                    const url = `/api/manage/projects/${project.id}/get-related/`;
-                    const response = await fetchWithAuth(url);
-                    const data = await response.json();
-                    setDeadlines(data.deadlines);
-                    setActivities(data.activities);
-                    setLoading(false);
-                } 
-                catch (err) {
-                    console.error('Failed to fetch events: ', err);
-                    setLoading(false)
-                }
-            };
-            loadActivities();
-        }, [project]);
+        const loadRelated = async () => {
+            try {
+                const url = `/api/manage/projects/${project.id}/get-related/`;
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setDeadlines(data.deadlines);
+                setActivities(data.activities);
+                setLoading(false);
+            } 
+            catch (err) {
+                console.error('Failed to fetch events: ', err);
+                setLoading(false)
+            }
+        };
+        loadRelated();
+    }, [project]);
 
+    //use [./ganttBuilder] to transform the activity data for use in the gantt chart
     const data = useMemo(() => {
-        return ganttBuilder(project, activities, deadlines)
+        return ganttBuilder(project, activities)
     }, [project, activities]);
 
     //calculate project dates
@@ -53,10 +60,9 @@ export default function ProjectActivityFAGantt({ project }){
         }))
     }, [project, deadlines]);
 
-    //ref/chart width to help place deadline ref lines
+    // get chart width to help place the deadline ref lines
     const ref = useRef();
     const [chartWidth, setChartWidth] = useState(0);
-
     useEffect(() => {
     if (ref.current) {
         setChartWidth(ref.current.offsetWidth);
@@ -119,6 +125,7 @@ export default function ProjectActivityFAGantt({ project }){
             </div>
         );
     };
+    
     if(loading) return <ComponentLoading />
     return(
         <div style={{ backgroundColor: theme.colors.bonasoDarkAccent}} ref={ref}>

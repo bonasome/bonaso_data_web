@@ -17,11 +17,16 @@ import styles from '../../../styles/indexView.module.css';
 
 import { TbTimelineEventPlus } from "react-icons/tb";
 
-export default function ProjectDeadlineIndex({ project, onDelete=null }){
+export default function ProjectDeadlineIndex({ project }){
+    /*
+    Displays a paginated list of all deadline related to a specific project.
+    - project (object): the project the deadlines are related to
+    */
+
     //context
     const { user } = useAuth();
 
-    const [deadlines, setDeadlines] = useState([]);
+    const [deadlines, setDeadlines] = useState([]); //array of deadlines to display
 
     //index helpers
     const [search, setSearch] = useState('');
@@ -29,17 +34,18 @@ export default function ProjectDeadlineIndex({ project, onDelete=null }){
     const [entries, setEntries] = useState(0);
     const [filters, setFilters] = useState(initial);
     const [orgs, setOrgs] = useState([]); //for filters
-    const [orgSearch, setOrgSearch] = useState('');
+    const [orgSearch, setOrgSearch] = useState(''); //for managing orgs filter
 
     //page meta
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deleted, setDeleted] = useState([]);
 
-    //load events
+    //load deadlines
     useEffect(() => {
         const loadDeadlines = async () => {
             try {
+                //turn filter object into string for the URL
                 const filterQuery = 
                     (filters.start ? `&start=${filters.start}` : '') + 
                     (filters.end ? `&end=${filters.end}` : '') + 
@@ -48,7 +54,6 @@ export default function ProjectDeadlineIndex({ project, onDelete=null }){
                     (filters.visible_to_all ? `&visible_to_all=${filters.visible_to_all}` : '');
                 
                 const url = `/api/manage/deadlines/?search=${search}&page=${page}&project=${project.id}` + filterQuery;
-                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count);
@@ -85,6 +90,7 @@ export default function ProjectDeadlineIndex({ project, onDelete=null }){
     }, [orgSearch]);
 
     if(loading) return <ComponentLoading />
+    //filter out any deleted deadlines
     const validDeadlines = deadlines?.filter(d => (!deleted.includes(d?.id)))
     return(
         <div className={styles.index}>

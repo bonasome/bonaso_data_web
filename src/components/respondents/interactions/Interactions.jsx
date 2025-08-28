@@ -12,48 +12,58 @@ import errorStyles from '../../../styles/errors.module.css';
 import styles from '../respondentDetail.module.css';
 
 export default function Interactions({ respondent, meta, onUpdate, setAddingTask, onAdd }){
+    /*
+    Component that displays a list of interactions and gives the user the ability to create new interactions
+    via the AddInteraction component.
+    - respondent (object): the respondent these interactions relate to
+    - meta (object): the respondent model information
+    - onUpdate (object): what to do when a new task is added in the AddInteraction component
+    - setAddingTask (function): helper function to pass a task from respondents to AddInteraction
+    - onAdd (function): what to do when a user submits a new batch of interactions from AddInteraction
+    */
     const { user } = useAuth();
-    const [loading, setLoading] = useState(true);
-
     const { interactions, setInteractions } = useInteractions();
+
+    //page meta
+    const [loading, setLoading] = useState(true);
     const[success, setSuccess] = useState('');
+
+    //index helpers
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-    const [interactionRefresh, setInteractionRefresh] = useState(0);
+
+    const getInteractions = async() => {
+        try {
+            console.log('fetching interactionss...');
+            const response = await fetchWithAuth(`/api/record/interactions/?respondent=${respondent.id}&search=${search}&page=${page}`);
+            const data = await response.json();
+            setEntries(data.count); 
+            setInteractions(data.results);
+            setLoading(false)
+        } 
+        catch (err) {
+            console.error('Failed to fetch respondent: ', err);
+            setLoading(false)
+        }
+    }
 
     //load interactions, also refresh the call on edits/creation of new interactions (avoid stale states)
     useEffect(() => {
-        const getInteractions = async() => {
-            try {
-                console.log('fetching respondent details...');
-                const response = await fetchWithAuth(`/api/record/interactions/?respondent=${respondent.id}&search=${search}&page=${page}`);
-                const data = await response.json();
-                console.log(data.results);
-                setEntries(data.count); 
-                setInteractions(data.results);
-                setLoading(false)
-            } 
-            catch (err) {
-                console.error('Failed to fetch respondent: ', err);
-                setLoading(false)
-            }
+        const initialLoad = async() => {
+            await getInteractions();
         }
-        getInteractions();
-    }, [respondent, search, page, interactionRefresh])
+        initialLoad();
+    }, [respondent, search, page])
 
 
-    //refresh the api on edits to get the latest information (prevent stale states, since this is important info)
+    //refresh the api on creation of new indicators (get from server since flags may have been created/resolved)
     const onFinish = () => {
-        setInteractionRefresh(prev => prev + 1)
-        onAdd()
-    }
-
-    const onEdit = () => {
-        setInteractionRefresh(prev => prev +1)
+        getInteractions(); //refresh the api when new interactions are added
+        onAdd();
     }
     
-    //remove an interaction on delete
+    //remove an interaction on delete (filtering works here)
     const onDelete = (id) => {
         const updated = interactions.filter(inter => inter.id != id)
         setInteractions(updated);
@@ -69,7 +79,7 @@ export default function Interactions({ respondent, meta, onUpdate, setAddingTask
                 <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
                     <h2>Previous Interactions</h2>
                     {interactions.length === 0 && <p>No interactions yet. Be the first to create one!</p>}
-                    {interactions.length > 0 && interactions.map((interaction) => (<InteractionCard key={interaction.id} interaction={interaction} onUpdate={onEdit} onDelete={onDelete}/>))}
+                    {interactions.length > 0 && interactions.map((interaction) => (<InteractionCard key={interaction.id} interaction={interaction} onUpdate={getInteractions} onDelete={onDelete}/>))}
                 </IndexViewWrapper>
         </div>
     )

@@ -19,11 +19,17 @@ import styles from '../../../styles/indexView.module.css';
 import { TbTimelineEventPlus, TbCalendarEvent } from "react-icons/tb";
 
 export default function ProjectActivitiyIndex({ project }){
+    /*
+    Lightweight index component meant to display a paginated list of activities related to a specific
+    project. 
+    - project (object): the project that these activities are related to. 
+    */
+
     //context
     const { user } = useAuth();
     const { projectsMeta, setProjectsMeta } = useProjects();
 
-    const [activities, setActivities] = useState([]);
+    const [activities, setActivities] = useState([]); //list of activities to display
 
     //index helpers
     const [search, setSearch] = useState('');
@@ -37,6 +43,7 @@ export default function ProjectActivitiyIndex({ project }){
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deleted, setDeleted] = useState([]);
+
     //get the meta
     useEffect(() => {
         const getProjectMeta = async () => {
@@ -66,6 +73,7 @@ export default function ProjectActivitiyIndex({ project }){
     useEffect(() => {
         const loadActivities = async () => {
             try {
+                //convert filters object into a string for the URL
                 const filterQuery = 
                     (filters.start ? `&start=${filters.start}` : '') + 
                     (filters.end ? `&end=${filters.end}` : '') + 
@@ -91,7 +99,7 @@ export default function ProjectActivitiyIndex({ project }){
         loadActivities();
     }, [page, search, filters]);
 
-    //get orgs (for filter)
+    //get orgs (for filtering)
     useEffect(() => {
         const loadOrgs = async () => {
             try {
@@ -112,7 +120,8 @@ export default function ProjectActivitiyIndex({ project }){
     }, [orgSearch]);
 
     if(loading) return <ComponentLoading />
-    const validActivities = activities?.filter(a => (!deleted.includes(a?.id)))
+    //filter out any deleted activities
+    const validActivities = activities?.filter(a => (!deleted.includes(a?.id)));
     return(
         <div className={styles.index}>
             <Messages errors={errors} />

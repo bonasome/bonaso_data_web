@@ -20,7 +20,15 @@ import { PiTargetBold } from "react-icons/pi";
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 
-export function TargetCard({ target, project, organization, onUpdate, onCancel }){
+export function TargetCard({ target, project, organization, onUpdate }){
+    /*
+    An expandable card that displays information about a target.
+    - target (object): the target to display information about
+    - project (object): the related project
+    - organization (object): the organization this target is for
+    - onUpdate (function): let the parent component know the target was updated
+    */
+
     //context
     const { user } = useAuth();
     //meta
@@ -36,7 +44,7 @@ export function TargetCard({ target, project, organization, onUpdate, onCancel }
                 method: 'DELETE',
             });
             if (response.ok) {
-                onUpdate();
+                onUpdate(); //tell the parent component about any updates
                 setErrors([]);
             } 
             else {
@@ -72,7 +80,9 @@ export function TargetCard({ target, project, organization, onUpdate, onCancel }
     }
 
     //check if the user should have perms to create/edit targets for the org
+    //assumes everyone on this page is either meofficer/manager, client, or admin
     const hasPerm = useMemo(() => {
+        //either an admin or the parent of the organization
         if((organization?.parent?.id && user.organization_id == organization.parent.id) || user.role == 'admin') return true
         return false
     }, [organization, user]);
@@ -80,8 +90,10 @@ export function TargetCard({ target, project, organization, onUpdate, onCancel }
     
     if(!target || !project || !organization) return <ComponentLoading />
 
+    //when displaying confirm delete/edit modals, hide the card, since the hover features messes with modal styles
     if(editing) return <EditTargetModal existing={target} project={project} organization={organization} onCancel={() => setEditing(false)} onUpdate={() => onUpdate()}/>
     if(del) return <ConfirmDelete name='Target' onConfirm={() => deleteTarget()} onCancel={() => setDel(false)} />
+    
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             <div onClick={() => setExpanded(!expanded)}>
@@ -103,6 +115,11 @@ export function TargetCard({ target, project, organization, onUpdate, onCancel }
 }
 
 export default function Targets({ project, organization}) {
+    /*
+    Displays a paginated list of targets related to a project and an organization.
+    - project (object): the project the targets should be related to
+    - organization (object): the organizaiton
+    */
     //params for project (id) and organizaton (orgID)
     const { id, orgID } = useParams();
     //context
@@ -117,54 +134,41 @@ export default function Targets({ project, organization}) {
     const [search, setSearch] = useState('');
     const [entries, setEntries] = useState(0);
 
-    useEffect(() => {
-        const getTargets = async () => {
-            if(!id || !orgID) return;
-            try {
-                console.log('fetching targets...');
-                const response = await fetchWithAuth(`/api/manage/targets/?task__organization=${orgID}&task__project=${id}&search=${search}`);
-                const data = await response.json();
-                if(response.ok){
-                    setEntries(data.count);
-                    setTargets(data.results);
-                    setLoading(false);
-                }
-            } 
-            catch (err) {
-                setErrors(['Failed to fetch targets. Please try again later.'])
-                console.error('Failed to fetch organization: ', err);
-                setLoading(false)
+    //get the list of targets
+    const getTargets = async () => {
+        if(!id || !orgID) return;
+        try {
+            console.log('fetching targets...');
+            const response = await fetchWithAuth(`/api/manage/targets/?task__organization=${orgID}&task__project=${id}`);
+            const data = await response.json();
+            if(response.ok){
+                setEntries(data.count);
+                setTargets(data.results);
+                setAdding(false);
             }
+            else{
+                navigate(`/not-found`); //navigate to 404 if bad ID is provided
+            }
+            
+        } 
+        catch (err) {
+            setErrors(['Failed to fetch targets. Please try again later.'])
+            console.error('Failed to fetch organization: ', err);
         }
-        getTargets();
+    }
+
+    //load targets on init/search change
+    useEffect(() => {
+        const initialLoad = async() => {
+            await getTargets();
+            setLoading(false);
+        }
+        initialLoad();
     }, [id, orgID, search])
 
-    const handleChange = async () => {
-        const getTargets = async () => {
-            if(!id || !orgID) return;
-            try {
-                console.log('fetching targets...');
-                const response = await fetchWithAuth(`/api/manage/targets/?task__organization=${orgID}&task__project=${id}`);
-                const data = await response.json();
-                if(response.ok){
-                    setEntries(data.count);
-                    setTargets(data.results);
-                    setAdding(false);
-                }
-                else{
-                    navigate(`/not-found`);
-                }
-                
-            } 
-            catch (err) {
-                setErrors(['Failed to fetch targets. Please try again later.'])
-                console.error('Failed to fetch organization: ', err);
-            }
-        }
-        getTargets();
-    }
     //check if the user should have perms to create/edit targets for the org
     const hasPerm = useMemo(() => {
+        //should be an admin or the parent
         if((organization?.parent?.id && user.organization_id == organization.parent.id) || user.role == 'admin') return true
         return false
     }, [organization, user]);
@@ -179,7 +183,7 @@ export default function Targets({ project, organization}) {
                 {(targets && project && organization && targets?.length) == 0 ? 
                     <p>No targets yet. Check back later.</p> :
                     targets?.map(tar => (
-                    <TargetCard key={tar.id} target={tar} organization={organization} project={project} onUpdate={handleChange} />
+                    <TargetCard key={tar.id} target={tar} organization={organization} project={project} onUpdate={getTargets} />
                     ))
                 }
             </IndexViewWrapper>

@@ -22,10 +22,14 @@ import { IoIosSave } from "react-icons/io";
 
 
 export default function ProjectDeadlineForm(){
+    /*
+    Form for editing/creating project deadlines. Requires a URL param for the related project (id) and 
+    accepts an optional deadlineID URL param for when editing an existing value. 
+    */
     const navigate = useNavigate();
     
-    //param to get indicator (blank if new)
-    const { id, deadlineID } = useParams();
+    //params for the project (required) and the deadline (only if editing)
+    const { id, deadlineID } = useParams(); //id is project ID
     //context
     const { projectsMeta, setProjectsMeta } = useProjects();
     const { user } = useAuth();
@@ -85,7 +89,7 @@ export default function ProjectDeadlineForm(){
                     setExisting(data);
                 }
                 else{
-                    navigate(`/not-found`);
+                    navigate(`/not-found`); //navigate to 404 if a bad ID is provided
                 }
             } 
             catch (err) {
@@ -100,9 +104,10 @@ export default function ProjectDeadlineForm(){
     const onSubmit = async(data, e) => {
         setSubmissionErrors([]);
         setSuccess([]);
-        data.project_id = id
+
+        data.project_id = id; //set the related project based on the URL param
+        //these are received as objects but the backend will expect ids
         data.organization_ids = data?.organization_ids?.map((org) => (org.id)) ?? [];
-        const action = e.nativeEvent.submitter.value;
         try{
             setSaving(true);
             console.log('submitting data...', data);
@@ -143,6 +148,7 @@ export default function ProjectDeadlineForm(){
         }
     }
     
+    //set default values
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
@@ -155,9 +161,10 @@ export default function ProjectDeadlineForm(){
         }
     }, [existing]);
 
+    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors on submission
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -170,13 +177,12 @@ export default function ProjectDeadlineForm(){
         }
     };
 
+    //wait for existing to load and then set the default values
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
-
-    const start = watch("start");
 
     const basics = [
         { name: 'name', label: 'Deadline Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
@@ -194,6 +200,7 @@ export default function ProjectDeadlineForm(){
             tooltip: 'Apply this deadline to all your subgrantees'
         }
     ]
+    //should only be visible to admins
     const admin = [
         {name: 'visible_to_all', label: 'Make Visible to All Project Members', type: 'checkbox',
             tooltip: 'Apply this deadline to all project members.'

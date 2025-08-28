@@ -17,6 +17,13 @@ import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 
 export default function ProjectActivityCard({ activity, project, onDelete }) {
+    /*
+    Card that displays information about a project activity. Project Activities do not have detail pages,
+    so this card displays all necessary information.
+    - activity (object): the activity to display details about
+    - project (object): the project that this activity is related to
+    - onDelete (function): what to do if the item is deleted
+    */
     //context
     const { user } = useAuth();
 
@@ -25,15 +32,16 @@ export default function ProjectActivityCard({ activity, project, onDelete }) {
     const [del, setDel] = useState(false);
     const [errors, setErrors] = useState([]);
 
-    //determine if a user has edit perms (their creation or an admin)
+    //determine if a user has edit perms
     const hasPerm = useMemo(() => {
         if(!user || !activity) return false
-        if(user.role === 'admin') return true;
+        if(user.role === 'admin') return true; //admin has perm
+        //otherwise check they are the corredt role and it is for their organization
         if(['meofficer', 'manager'].includes(user.role) && user.organization_id == activity?.created_by.organization.id) return true
         return false
     }, [user, activity]);
 
-    //delete an activity
+    //delete the activity
     const deleteActivity = async () => {
         try {
             console.log('deleting organization...');

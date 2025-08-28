@@ -18,17 +18,25 @@ import styles from '../projectDetail.module.css';
 
 
 export default function ProjectDeadlineCard({ deadline, project, onDelete }) {
+    /*
+    Card that provides details about a project deadline. Project deadlines do not have a detail page, so 
+    this contains all relevent information.
+    - deadline (object): the deadline to display information about
+    - project (object): the related project
+    - onDelete (function): what to do when the deadline is deleted
+    */
     //context
     const { user } = useAuth();
 
-    //deadline info, completed and if its applicable
-    const [completed, setCompleted] = useState(false);
-    const [unrelated, setUnrelated] = useState(true);
+    //check completion status
+    const [completed, setCompleted] = useState(false); //check if deadline was completed
+    const [unrelated, setUnrelated] = useState(true); //check if deadline is assignable (i.e., assigned to another org)
 
     //control card properties
     const [expanded, setExpanded] = useState(false);
     const [del, setDel] = useState(false);
     const [errors, setErrors] = useState([]);
+
     //quick function to determine this organization's deadline status
     useEffect(() => {
         const orgMatch = deadline.organizations?.find(org => org.id === user.organization_id);
@@ -37,7 +45,7 @@ export default function ProjectDeadlineCard({ deadline, project, onDelete }) {
             setCompleted(orgMatch.completed === true);
         } 
         else {
-            setUnrelated(true);  // assuming unrelated means "not in the list"
+            setUnrelated(true);  //unrelated means "not in the list"
         }
     }, [deadline]);
 
@@ -78,7 +86,7 @@ export default function ProjectDeadlineCard({ deadline, project, onDelete }) {
             }
         } 
         catch (err) {
-            console.error('Failed to delete organization:', err);
+            console.error('Failed to mark completed:', err);
             setErrors(['Something went wrong. Please try again later.'])
         }
     }
@@ -124,14 +132,15 @@ export default function ProjectDeadlineCard({ deadline, project, onDelete }) {
         }
     }
 
-    //determine if a user has edit perms (their creation or an admin)
+    //determine if a user has edit perms 
     const hasPerm = useMemo(() => {
         if(!user || !deadline) return false
-        if(user.role === 'admin') return true;
-        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == deadline?.created_by.organization.id) return true
+        if(user.role === 'admin') return true; //admin should have perm
+        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == deadline?.created_by.organization.id) return true //or they have the right role and it was created by their org
         return false
     }, [user, deadline]);
 
+    //return confirm delete modals seperately since the card hover messes with the modal styles
     if(del){
         return(
             <ConfirmDelete name='Deadline' onConfirm={() => deleteDeadline()} onCancel={() => setDel(false)} />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from 'react-router-dom';
+import { useForm,  useWatch } from "react-hook-form";
 
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import prettyDates from '../../../../services/prettyDates';
@@ -15,6 +15,8 @@ import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import UpdateRecord from '../../reuseables/meta/UpdateRecord';
 import FlagModal from '../../flags/FlagModal';
 import FlagDetailModal from "../../flags/FlagDetailModal";
+import FormSection from '../../reuseables/forms/FormSection'
+import Messages from '../../reuseables/Messages';
 
 import styles from '../respondentDetail.module.css';
 import errorStyles from '../../../styles/errors.module.css';
@@ -26,25 +28,24 @@ import { MdFlag } from "react-icons/md";
 import { FcCancel } from "react-icons/fc";
 
 export default function InteractionCard({ interaction, onUpdate, onDelete }){
-    
+    /*
+    Card that displays information about an interaction and also allows for the user to edit this information.
+    - interaction (object): the interaction to display information about
+    - onUpdate (function): what to do when the interaction is edited
+    - onDelete (function): what to do when the interaction is deleted
+    */
     const { user } = useAuth();
-    const [perm, setPerm] = useState(false);
+    const {setInteractions} = useInteractions();
 
     //page meta
-    const [editing, setEditing] = useState(false);
+    const [editing, setEditing] = useState(false); //controls when user is editing the details
     const [expanded, setExpanded] = useState(false);
-    const [errors, setErrors] = useState([]);
+    const [submissionErrors, setSubmissionErrors] = useState([]);
     const [saving, setSaving] = useState(false);
-    const [flagging, setFlagging] = useState(false);
-    const [viewFlags, setViewFlags] = useState(false);
     const [del, setDel] = useState(false);
+    const [flagging, setFlagging] = useState(false); //controls when a user is flagging the interaction
+    const [viewFlags, setViewFlags] = useState(false); //controls when a user is viewing flag information
 
-    //states used when editing
-    const[interactionDate, setInteractionDate] = useState('');
-    const [interactionLocation, setInteractionLocation] = useState('')
-    const[subcats, setSubcats] = useState([]);
-    const[number, setNumber] = useState('');
-    const {setInteractions} = useInteractions();
     
 
     //quick memo to check for an unresolved flag
@@ -54,101 +55,18 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
     }, [interaction])
 
     
-    useEffect(() => {
-        //check if user is the creator if the interaction, a high role at the organization 
-        // that owns the interaction or an admin
-        const permCheck = () => {
-            if(user.role == 'admin'){
-                setPerm(true);
-            }
-            else if (user.role == 'meofficer' || user.role == 'manager'){
-                if(interaction?.task?.organization?.id === user.organization_id){
-                    setPerm(true);
-                }
-            }
-            else if(user?.id == interaction?.created_by?.id){
-                    setPerm(true);
-                
-            }
+    //check if user is the creator if the interaction, a high role at the organization 
+    // that owns the interaction or an admin
+    const hasPerm = useMemo(() => {
+        if(user.role == 'admin') return true;
+        else if (user.role == 'meofficer' || user.role == 'manager'){
+            if(interaction?.task?.organization?.id == user.organization_id || 
+                interaction?.parent_organization == user.organization_id) return true;
         }
-        permCheck();
+        else if(user?.id == interaction?.created_by?.id) return true;
+        return false;
+    }, []);
 
-        //also set a few states that will be used if editing
-        setInteractionLocation(interaction.interaction_location)
-        setInteractionDate(interaction.interaction_date);
-        setSubcats(interaction.subcategories);
-        
-        //not every interaction will have this
-        if(interaction.numeric_component){
-            setNumber(interaction.numeric_component);
-        }
-    }, [user, interaction])
-
-    //handle editing an interaction
-    const handleSubmit = async() =>{
-        console.log(subcats)
-        let submissionErrors = []
-        if(!interactionLocation || interactionLocation == ''){
-            submissionErrors.push('Interaction location is required.');
-        }
-        if(submissionErrors.length > 0){
-            setErrors(submissionErrors)
-            return;
-        }
-        const data={
-            'respondent': interaction.respondent,
-            'task_id': interaction.task.id,
-            'interaction_date': interactionDate,
-            'interaction_location': interactionLocation,
-            'numeric_component': number || null,
-            'subcategories_data': subcats,
-        }
-
-        try{
-            setSaving(true);
-            console.log('submitting edits...')
-            const url = `/api/record/interactions/${interaction.id}/`; 
-            const response = await fetchWithAuth(url, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': "application/json",
-                },
-                body: JSON.stringify(data)
-            });
-            const returnData = await response.json();
-            if(response.ok){
-                setInteractions(prev => {
-                    const others = prev.filter(r => r.id !== interaction.id);
-                    return [...others, returnData];
-                });
-                setEditing(false);
-                onUpdate();
-                setErrors([]);
-            }
-            else{
-                console.log(returnData)
-                const serverResponse = [];
-                for (const field in returnData) {
-                    if (Array.isArray(returnData[field])) {
-                    returnData[field].forEach(msg => {
-                        serverResponse.push(`${msg}`);
-                    });
-                    } 
-                    else {
-                        serverResponse.push(`${returnData[field]}`);
-                    }
-                }
-                setErrors(serverResponse);
-            }
-        }
-        catch(err){
-            console.error('Failed to apply changes to interaction:', err);
-            setErrors(['Something went wrong. Please try again later.'])
-        }
-        finally{
-            setSaving(false);
-        }
-    }
     //handle deleting an interaction
     const deleteInteraction = async() => {
         try {
@@ -158,7 +76,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             });
             if (response.ok) {
                 onDelete(interaction.id)
-                setErrors([]);
+                setSubmissionErrors([]);
             } 
             else {
                 let data = {};
@@ -180,33 +98,129 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                     serverResponse.push(`${field}: ${data[field]}`);
                     }
                 }
-                setErrors(serverResponse);
+                setSubmissionErrors(serverResponse);
             }
         } 
         catch (err) {
             console.error('Failed to delete interaction:', err);
-            setErrors(['Something went wrong. Please try again later.'])
+            setSubmissionErrors(['Something went wrong. Please try again later.'])
         }
         finally{
             setDel(false)
         }
     }
 
+    //handle editing an interaction
+    const onSubmit = async(data) =>{
+        try{
+            setSaving(true);
+            console.log('submitting edits...', data)
+            if(data.numeric_component == '') data.numeric_component = null;
+            const url = `/api/record/interactions/${interaction.id}/`; 
+            const response = await fetchWithAuth(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify(data)
+            });
+            const returnData = await response.json();
+            if(response.ok){
+                setInteractions(prev => {
+                    const others = prev.filter(r => r.id !== interaction.id);
+                    return [...others, returnData];
+                });
+                setEditing(false);
+                onUpdate();
+                setSubmissionErrors([]);
+            }
+            else{
+                const serverResponse = [];
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                    returnData[field].forEach(msg => {
+                        serverResponse.push(`${msg}`);
+                    });
+                    } 
+                    else {
+                        serverResponse.push(`${returnData[field]}`);
+                    }
+                }
+                console.log(returnData)
+                setSubmissionErrors(serverResponse);
+            }
+        }
+        catch(err){
+            console.error('Failed to apply changes to interaction:', err);
+            setSubmissionErrors(['Something went wrong. Please try again later.'])
+        }
+        finally{
+            setSaving(false);
+        }
+    }
+
+    //set default values (for when the user is editing)
+    const defaultValues = useMemo(() => {
+        return {
+            interaction_date: interaction?.interaction_date ?? '',
+            interaction_location: interaction?.interaction_location ?? '',
+            subcategories_data: interaction?.subcategories ?? '',
+            numeric_component: interaction?.numeric_component ?? '',
+        }
+    }, [interaction]);
+
+    //construct RHF variables
+    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+
+    //scroll to errors
+    const onError = (errors) => {
+        const firstError = Object.keys(errors)[0];
+        if (firstError) {
+            setFocus(firstError); // sets cursor into the field
+            // scroll the element into view smoothly
+            const field = document.querySelector(`[name="${firstError}"]`);
+            if (field && field.scrollIntoView) {
+            field.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
+    //load existing values once existing loads, if provided
+    useEffect(() => {
+        if (interaction) {
+            reset(defaultValues);
+        }
+    }, [interaction, reset, defaultValues]);
+
+    const basics = [
+        { name: 'interaction_date', label: 'Date', type: "date", rules: { required: "Required" },
+            tooltip: 'When did this interaction take place.',
+        },
+         { name: 'interaction_location', label: 'Location', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
+            placeholder: 'Gaborone clinic...', tooltip: 'Where did this interaction take place?.',
+        },
+    ]
+
+    const subcats = [
+        { name: 'subcategories_data', label: 'Date', type: `${interaction?.task?.indicator?.require_numeric ? 'multiselectnum' : 'multiselect'}`, 
+            rules: { required: "Required" }, options: interaction?.task?.indicator?.subcategories,
+            tooltip: 'Please select all relvent subcategories that are applicable for this interaction.',
+        },
+    ]
+    const number = [
+        { name: 'numeric_component', label: 'Enter a Number', type: "number", rules: { required: "Required" },
+            tooltip: 'Please enter an associated number.',
+        },
+    ]
+
     if(!interaction.task) return <ComponentLoading />
     //return this separetly if needed since the otherwise the hover features will mess with the modeal styles
     if(del){
         return(
-            <div>
-                {del && <div className={styles.backdrop}></div>}
-                {del && 
-                    <ConfirmDelete 
-                        name={`Interaction related to task ${interaction?.task?.indicator?.name}`} 
-                        statusWarning={'This cannot be undone, and this data will be lost. Consider flagging this instead if you are unsure.'} 
-                        onConfirm={() => deleteInteraction()} onCancel={() => setDel(false)} 
-                />}
-            </div>
+            <ConfirmDelete name={`Interaction ${interaction?.display_name}`} statusWarning={'This cannot be undone, and this data will be lost. Consider flagging this instead if you are unsure.'} 
+                onConfirm={() => deleteInteraction()} onCancel={() => setDel(false)} />
         )
     }
+    
     if(flagging){
         return(
             <FlagModal id={interaction.id} model={'respondents.interaction'} onCancel={() => setFlagging(false)}
@@ -223,7 +237,6 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             <h3>{interaction.task.indicator.code + ' '} {interaction.task.indicator.name}</h3>
-            {errors.length != 0 && <div className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
             {interaction?.flags.length > 0 && <div className={activeFlags ? errorStyles.warnings : errorStyles.success} onClick={() => setViewFlags(true)}>
                 <h3>FLAGS</h3>
             </div>}
@@ -251,8 +264,8 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                 </div>}
 
                 <div style={{ display: 'flex', flexDirection: 'row'}}>
-                    {perm && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} />}
-                    {perm && <ButtonHover callback={() => setFlagging(true)} noHover={<MdFlag />} hover={'Raise New Flag'} forWarning={true} />}
+                    {hasPerm && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} />}
+                    {hasPerm && <ButtonHover callback={() => setFlagging(true)} noHover={<MdFlag />} hover={'Raise New Flag'} forWarning={true} />}
                     {user.role == 'admin' && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Record'} forDelete={true} />}
                     {del && <ButtonLoading forDelete={true} /> }
                 </div>
@@ -262,78 +275,23 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             </div>}
 
             {editing && <div onClick={(e) => e.stopPropagation()}>
-                <label htmlFor='interaction_date'>Date</label>
-                <input type='date' name='interaction_date' id='interaction_date' value={interactionDate} onChange={(e)=>setInteractionDate(e.target.value)}/>
-                <label htmlFor='interaction_location'>Location</label>
-                <input type='text' name='interaction_location' id='interaction_location' value={interactionLocation} onChange={(e)=>setInteractionLocation(e.target.value)}/>
-                {interaction.numeric_component &&
-                    <div>
-                        <label htmlFor='number'>Enter a number.</label>
-                        <input type='number' min="0" id='number' name='number' value={number} onChange={(e)=>setNumber(e.target.value)} />
-                    </div>
-                }
-                {interaction.subcategories.length > 0 &&
-                    interaction.task.indicator.subcategories.map((cat) => (
-                        <div key={cat.id} style={{ display: 'flex', flexDirection: 'row', marginTop: 'auto', marginBottom: 'auto' }}>
-                            <Checkbox key={cat.id}
-                                label={cat.name}
-                                value={subcats.filter(c => c.subcategory.id == cat.id).length > 0}
-                                name={cat.name}
-                                onChange={(checked) => setSubcats(prev =>
-                                    checked ? [...prev, {id: null, subcategory: {id: cat.id, name: cat.name}}] : prev.filter(c => c.subcategory.id !== cat.id)
-                                )}
-                            />
-                            {interaction.task.indicator.require_numeric && subcats.filter(c => c.subcategory.id == cat.id).length > 0 && <div style={{ display: 'flex', flexDirection: 'row'}}>
-                                <input type="number" id={cat.id} onChange={(e) => setSubcats(prev => {
-                                    const others = prev.filter(c => c.subcategory.id !== cat.id);
-                                    return [...others, {id: null, subcategory: {id: cat.id, name: cat.name}, numeric_component: e.target.value}];
-                                })} value={subcats.find(c => c.subcategory.id==cat.id)?.numeric_component || ''} style={{maxWidth: 40}}/>
-                                <label htmlFor={cat.id}>(Enter a Number)</label>
-                            </div>}
-                        </div>))}
-                <div style={{ display: 'flex', flexDirection: 'row'}}>
-                    {saving ? <ButtonLoading /> : <ButtonHover callback={() => handleSubmit()} noHover={<IoIosSave />} hover={'Save Changes'} />}
-                    {!saving && <ButtonHover callback={() => setEditing(false)} noHover={<FcCancel />} hover={'Cancel'} />}
-                </div>
+                 <h2>{`Editing ${interaction?.display_name}`}</h2>
+                <Messages errors={submissionErrors} />
+                <form onSubmit={handleSubmit(onSubmit, onError)}>
+                    <FormSection fields={basics} control={control} header={'Basic Information'} />
+                    <FormSection fields={subcats} control={control} header={'Subcategories'}/>
+                    {interaction.task.indicator.require_numeric && 
+                        !interaction.task.indicator.subcategories.length > 0 &&
+                        <FormSection fields={number} control={control} header={'Numeric Component'} />}
+                    
+                    {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <button type="submit" value='normal'><IoIosSave /> Save</button>
+                        <button type="button" onClick={() => setEditing(false)}><FcCancel /> Cancel</button>
+                    </div>}
+
+                    {saving && <ButtonLoading />}
+                </form>
             </div>}
         </div>
     )
 }
-
-//Deprecated code, since we no longer disallow mismatched subcats. Allow edits to select anything at risk of a flag
-//const [allowedSubcats, setAllowedSubcats] = useState([]);
-    /*
-    const checkPrereqs = async() =>{
-        const prereq = interaction.task.indicator.prerequisite
-        try{
-            const response = await fetchWithAuth(`/api/record/interactions/?respondent=${interaction.respondent}&task_indicator=${prereq.id}&before=${interaction.interaction_date}`);
-            const data = await response.json();
-            if(data.results.length > 0){
-                const validPastInt = data.results.find(inter => inter?.task?.indicator?.id === prereq.id);
-                if (validPastInt && validPastInt.interaction_date <= interactionDate) {
-                    if (validPastInt?.subcategories) {
-                        setAllowedSubcats(validPastInt.subcategories);
-                    }
-                }
-                else{
-                    setAllowedSubcats(interaction.task.indicator.subcategories)
-                }
-            }
-        }
-        catch(err){
-            setErrors(['Something went wrong. Please try again later.'])
-            console.error(err)
-        }   
-    }
-
-        if(interaction.subcategories){
-            setSubcats(interaction.subcategories);
-            if(interaction.task.indicator.prerequisite){
-                checkPrereqs();
-            }
-            else{
-                setAllowedSubcats(interaction.task.indicator.subcategories);
-            }
-        }
-    
-        */

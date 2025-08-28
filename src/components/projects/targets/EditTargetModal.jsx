@@ -22,9 +22,19 @@ import { IoIosSave } from "react-icons/io";
 import { FcCancel } from "react-icons/fc";
 
 export function EditTargetModal({ onUpdate, onCancel, project, organization,  existing=null,  }){
+    /*
+    Modal that is used for creating or editing a target.
+    - onUpdate (function): what to do when the modal is saved
+    - onCancel (function): how to close the modal
+    - project (object): the project this target is related to
+    - organization (object): the organization this target is for
+    - existing (object, optional): if editing a target, provide that target
+    */
     const [saving, setSaving] = useState(false);
     const [submissionErrors, setSubmissionErrors] = useState([]);
 
+    //helper function that converts a selected date/month string to a start and end date
+    //will trim to project dates if necessary
     const handleDates = (data) => {
         if(data.date_type === 'quarter'){
             return getQuarterDatesStr(data.quarter, project);
@@ -35,20 +45,22 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         return {start: data.start, end: data.end}
     }
 
+    //handle submission
     const onSubmit = async(data) => {
-        let submissionErrors = []
+
+        //clear away potentially stale/leftover valies
         if (asP) {
             data.amount = null
-            data.related_to_id = data.related_to_id.id
+            data.related_to_id = data.related_to_id.id; //backend expects the ID only
         } 
         else {
             data.percentage_of_related = null;
             data.related_to_id = null;
         }
         const {start, end} = handleDates(data);
-        data.start = start
-        data.end = end
-        data.task_id = data.task_id.id
+        data.start = start;
+        data.end = end;
+        data.task_id = data.task_id.id; //backend expects the ID only
         try{
             setSaving(true);
             console.log('submitting target...', data)
@@ -62,8 +74,8 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
             });
             const returnData = await response.json();
             if(response.ok){
-                onUpdate();
-                onCancel();
+                onUpdate(); //let the parent know a change was made
+                onCancel(); //close the modal
 
             }
             else{
@@ -90,12 +102,14 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         }
     }
 
+    //get a list of all valid months/quarters occuring within the provided project
     const { monthOptions, quarterOptions } = useMemo(() => {
         if(!project) return {monthOptions: [], quarterOptions: []};
         const options = getWindowsBetween(project.start, project.end)
         return { monthOptions: options.months, quarterOptions: options.quarters}
     }, [project]);
 
+    //set default values
     const defaultValues = useMemo(() => {
         return {
             task_id: existing?.task ?? null,
@@ -104,6 +118,8 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
             related_to_id: existing?.related_to ?? null,
             percentage_of_related: existing?.percentage_of_related ?? '',
             
+            //the backend will just pass start/end, so these functions will try to figure out of those dates
+            //match a quarter/month
             date_type: existing ? tryMatchDates(existing?.start, existing?.end, project)?.type : null,
             quarter: existing ? tryMatchDates(existing?.start, existing?.end, project)?.value : null,
             month: existing ? tryMatchDates(existing?.start, existing?.end, project)?.value : null,
@@ -114,9 +130,10 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         }
     }, [existing]);
 
+    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors on submission
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -129,9 +146,11 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         }
     };
 
-    const targetTask = useWatch({ control, name: 'task_id', defaultValue: null});
-    const typeVal = useWatch({ control, name: 'date_type', defaultValue: tryMatchDates(existing?.start, existing?.end, project)?.type});
 
+    const targetTask = useWatch({ control, name: 'task_id', defaultValue: null}); //use so that a user cannot select the same task for related to
+    //get if this is custom/by quarter/by month
+    const typeVal = useWatch({ control, name: 'date_type', defaultValue: tryMatchDates(existing?.start, existing?.end, project)?.type});
+    //check if this target is measured as a percentage or as a raw number
     const asP = watch('as_percentage');
 
     const task = [
@@ -144,11 +163,13 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
             achievement of another task (for example, 100% of all positive results are referred for further treatment).`
         },
     ]
+    //only show is as related is not checked
     const amount = [
         { name: 'amount', label: 'Target Amount (Required)', type: "number", rules: { required: "Required" },
             placeholder: 'ex. 99...',
         },
     ]
+    //only show if as related is checked
     const relatedToTask = [
         { name: 'related_to_id', label: 'Select Related Task (Required)', type: "model", IndexComponent: Tasks, labelField: 'display_name', rules: { required: "Required" },
             includeParams: [{field: 'organization', value: organization.id}, {field: 'project', value: project.id}], blacklist: [targetTask?.id],
@@ -160,23 +181,26 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
             }, placeholder: 'ex. 100...', tooltip: 'What percentage of acheivement for the related task should be the target (between 0 and 100)?'
         },
     ]
-
+    //select the type of date range to display for start/end
     const dateType = [
         { name: 'date_type', label: "Target Period (Select type) (Required)", type: "radio", rules: { required: "Required" },
             options: [{value: 'month', label: 'By Month'}, {value: 'quarter', label: 'By Quarter'}, {value: 'custom', label: 'Custom'}],
             tooltip: `Select a period type for this target. You can choose to set by quarter, by month, or set a custom range.`
         },
     ]
+    //if quarter, display a list of valid quarters for the project
     const quarter = [
         { name: 'quarter', label: "Select a Quarter (Required)", type: "radio", rules: { required: "Required" },
             options: quarterOptions?.map((q) => ({'value': q, 'label': q}))
         },
     ]
+    //if month, display a list of valid months for the project
     const month = [
         { name: 'month', label: "Select a Month (Required)", type: "radio", rules: { required: "Required" },
             options: monthOptions?.map((month) => ({'value': month, 'label': month}))
         },
     ]
+    //else display start/end input
     const customDates = [
         { name: 'start', label: "Target Starts On (Required)", type: "date", rules: { required: "Required" }},
 

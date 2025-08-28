@@ -22,6 +22,9 @@ import { HiUserAdd } from "react-icons/hi";
 import { IoBulbSharp } from "react-icons/io5";
 
 export default function ClientDetail(){
+    /*
+    Page that displays detail about a client, given an ID URL param. 
+    */
     const navigate = useNavigate();
     //client id from url params
     const { id } = useParams();
@@ -29,9 +32,9 @@ export default function ClientDetail(){
     const {clients, setClients } = useProjects();
     //client details
     const [client, setClient] = useState(null);
-    //related projects/profiles
-    const [projects, setProjects] = useState([]);
-    const [profiles, setProfiles] = useState([]);
+    //related objects
+    const [projects, setProjects] = useState([]); //to show projects
+    const [profiles, setProfiles] = useState([]); //to show users
     const [loading, setLoading] = useState(true);
    
     //page meta
@@ -42,6 +45,7 @@ export default function ClientDetail(){
     //get basic information about the cluent
     useEffect(() => {
         const getClient = async () => {
+            //try context first
             const found = clients.find(p => p.id.toString() === id.toString());
             if (found) {
                 setClient(found);
@@ -159,7 +163,7 @@ export default function ClientDetail(){
                 {client?.full_name && <h3><i>{client.full_name}</i></h3>}
                 <h3>Description</h3>
                 {client?.description ? <p>{client.description}</p> : <p>No description</p>}
-                {editing && <CreateClientModal onCreate={(data) => setClient(data)} onCancel={() => setEditing(false)} existing={client} />}
+                {editing && <CreateClientModal onUpdate={(data) => setClient(data)} onCancel={() => setEditing(false)} existing={client} />}
                 <div style={{ display: 'flex', flexDirection: 'row'}}>
                     <ButtonHover callback = {() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} />
                     <ButtonHover callback = {() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Client'} forDelete={true} />

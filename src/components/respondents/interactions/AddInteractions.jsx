@@ -5,38 +5,50 @@ import { useInteractions} from '../../../contexts/InteractionsContext';
 import fetchWithAuth from "../../../../services/fetchWithAuth";
 import useWindowWidth from '../../../../services/useWindowWidth';
 
-import Checkbox from '../../reuseables/inputs/Checkbox';
-
 import ButtonLoading from '../../reuseables/loading/ButtonLoading';
-import ButtonHover from '../../reuseables/inputs/ButtonHover';
+import { CommentModal, SubcategoryModal, NumberModal } from "./AddInteractionsModals";
 import Messages from '../../reuseables/Messages';
 
+
 import errorStyles from '../../../styles/errors.module.css';
-import modalStyles from '../../../styles/modals.module.css';
 import styles from '../respondentDetail.module.css';
 
 import { FaTrashAlt, FaCheck } from "react-icons/fa";
 import { IoIosSave } from "react-icons/io";
 import { BiSolidCommentAdd } from "react-icons/bi";
 import { FcCancel } from "react-icons/fc";
+import { ImPencil } from "react-icons/im";
+export default function AddInteractions({ respondent, meta, onUpdate, onFinish, setAddingTask }) {
+    /*
+    Component that allows a user to add a task(s) (either from a drag and drop or callback from a parent component)
+    and record it as an interaction or a set of interactions with the same date/location/respondent. 
+    - interactions (array): array of previous existing interactions with the respondent
+    - respondent (object): respondent these interactions relate to
+    - meta (object): model information
+    - onUpdate (function): what to do when the user adds a new task to the list of interactions
+    - onFinish (function): what to do when the user submits the list of interactions
+    - setAddingTask (function): helper function that passes information about a task to this component
+        for processing
+    */
 
-export default function AddInteractions({ interactions, respondent, meta, onUpdate, onFinish, setAddingTask }) {
-    //context
+    //contexts
     const { setInteractions } = useInteractions();
     //fields used for managing creation
     const [interactionDate, setInteractionDate] = useState('');
     const [interactionLocation, setInteractionLocation] = useState('');
-    const [number, setNumber] = useState({});
-    const [subcats, setSubcats] = useState({});
-    const [comments, setComments] = useState({});
-    const [added, setAdded] = useState([]); //manages the list of added tasks
+
+    const [number, setNumber] = useState({}); //stores entered numbers
+    const [subcats, setSubcats] = useState({}); //stores selected subcats (includng numeric attachments)
+    const [comments, setComments] = useState({}); //stores comments related to each interaction
+    const [selected, setSelected] = useState([]); //manages the list of selected tasks
 
     //creation helpers that manage pop up modals for when additional into is required
     const [subcatModalActive, setSubcatModalActive] = useState(false);
     const [numberModalActive, setNumberModalActive] = useState(false);
     const [commentsModalActive, setCommentsModalActive] = useState(false);
-    const [modalTask, setModalTask] = useState(null);
+    const [modalTask, setModalTask] = useState(null); //task that is currently being added and needs modal information
 
+    //state to control whether the user is actively adding tasks to create new interactions
     const [active, setActive] = useState(false);
     
     //helper that controls which subcats are visible if there is a prerequisite condition (can be overwritten on editing at risk of a flag)
@@ -63,153 +75,6 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         interactionDateRef.current = interactionDate;
     }, [interactionDate]);
 
-    //modal for allowing users to enter comments
-    function CommentModal({task}){
-        const [localComment, setLocalComment] = useState('');
-
-
-        const closeWindow = () => {
-            if(localComment[task.id] == ''){
-                setAdded(prev => prev.filter(added => added.id == task.id))
-            }
-            setComments(prev => ({...prev,[task.id]: localComment}))
-            setCommentsModalActive(false);
-        }
-        if(!task) return<></>
-        return(
-            <div className={modalStyles.modal}>
-                <h2>Additional Information Required</h2>
-                <label htmlFor='comments'>Adding a Comment.</label>
-                <textarea id='comments' value={localComment || ''} onChange={(e) => setLocalComment(e.target.value)}/>
-                <div>
-                    <button onClick={() => closeWindow()}><FaCheck /> Save</button>
-                    <button onClick={() => setCommentsModalActive(false)}><FcCancel /> Cancel</button>
-                </div>
-            </div>
-        )
-    }
-
-    //modal for when an indicator requires only a number
-    function NumberModal({task}){
-        const [modalErrors, setModalErrors] = useState('');
-        const [localNumber, setLocalNumber] = useState('');
-
-        //make sure a value is given
-        const closeWindow = () => {
-            if(localNumber === ''){
-                setModalErrors('This field is required.');
-                return;
-            }
-            setNumber(prev => ({...prev,[task.id]: localNumber}))
-            setNumberModalActive(false);
-        }
-        const cancel = () => {
-            setAdded(prev => {
-                const updated = prev.filter(t => t.id !== task.id);
-                onUpdate(updated.map(t => t.id));
-                return updated;
-            });
-            setNumberModalActive(false);
-        }
-
-        return(
-            <div className={modalStyles.modal}>
-                <h2>Additional Information Required</h2>
-                <Messages errors={modalErrors} />
-                <label htmlFor='number'>The task {task.indicator.name} requires a numeric component.</label>
-                <input id='number' type='number' value={localNumber || ''} onChange={(e) => setLocalNumber(e.target.value)} placeholder='Enter a number...'/>
-                <div>
-                    <button onClick={() => closeWindow()}><FaCheck /> Confirm Choices</button>
-                    <button onClick={() => cancel()}><FcCancel/> Cancel</button>
-                </div>
-            </div>
-        )
-    }
-
-    //modal for allowing users to enter subcat information (including numbers as applicable)
-    function SubcategoryModal({ task }) {
-        // localSubcats = [{id: null, subcategory:  {id: 1, name: 'this'}, numeric_component: null}]
-            //subcategory is from the indicator, id/numeric are specific to the interaciton
-
-        const [modalErrors, setModalErrors] = useState('');
-        const [localSubcats, setLocalSubcats] = useState([]); //mirrors higher level state but allows for more rapid editing
-
-        //check/uncheck, compare based on the indicator subcategory
-        const handleCheckbox = (checked, cat) => {
-            setLocalSubcats(prev =>
-                checked ? [...prev, {id: null, subcategory: {id: cat.id, name: cat.name}, numeric_component: ''}] : 
-                    prev.filter(c => c.subcategory.id !== cat.id)
-            );
-        };
-
-        //show/set number inputs if required bu the indoicator
-        const handleNumeric = (cat, value) => {
-            setLocalSubcats(prev => {
-                const others = prev.filter(c => c.subcategory.id !== cat.id);
-                return [...others, {id: null, subcategory: {id: cat.id, name: cat.name}, numeric_component: value}];
-            });
-        }
-        
-        //close on cancel
-        const cancel = () => {
-            setAdded(prev => {
-                const updated = prev.filter(t => t.id !== task.id);
-                onUpdate(updated.map(t => t.id));
-                return updated;
-            });
-            setSubcatModalActive(false);
-        };
-
-        //close window, confirming that there are valid entries for numbers, then updating main subcats and closing
-        const closeWindow = () => {
-            if(task.indicator.require_numeric){
-                let e = []
-                localSubcats.forEach(c => {
-                    if(!c.numeric_component || c.numeric_component === '' || isNaN(c.numeric_component)) e.push(`Category "${c.subcategory.name}" requires a valid number.`)
-                })
-                if(e.length > 0){
-                    setModalErrors(e);
-                    return;
-                }
-            }
-            setSubcats(prev => ({...prev, [task.id]: localSubcats}));
-            setSubcatModalActive(false);
-        };
-        
-        //helper cat that determines if prereqs should be used
-        const taskSubcats = allowedSubcats?.[task.id] || task.indicator.subcategories;
-
-        return (
-            <div className={modalStyles.modal}>
-                <h2>Additional Information Required</h2>
-                <Messages errors={modalErrors} />
-                <p>Please select all relevant subcategories related to {task.indicator.name}.</p>
-                {taskSubcats.map((cat) => (
-                    <div key={cat.id} className={modalStyles.checkbox} style={{display: 'flex', flexDirection: 'row'}}>
-                        <Checkbox key={cat.id}
-                            label={cat.name}
-                            value={localSubcats.filter(c => c.subcategory.id === cat.id).length > 0}
-                            name={cat.name}
-                            onChange={(checked) => handleCheckbox(checked, cat)}
-                        />
-                        {localSubcats.filter(c => c.subcategory.id ==cat.id).length > 0 && 
-                            task.indicator.require_numeric && <input type="number" onChange={(e) => 
-                                handleNumeric(cat, e.target.value)} placeholder='Enter a number...' 
-                            value={localSubcats.find(c => c.subcategory.id==cat.id).numeric_component || ''} 
-                        />}
-                    </div>
-                ))}
-                <div>
-                    <button disabled={localSubcats.length === 0} onClick={closeWindow}>
-                        <FaCheck /> Confirm Choices
-                    </button>
-                    <button onClick={cancel}><FcCancel /> Cancel</button>
-                </div>
-            </div>
-        );
-    }
-
-
     //update the date on changes
     const handleDateChange = (e) => {
         const date = e.target.value;
@@ -218,9 +83,16 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         }
         setInteractionDate(date)
         setWarnings([])
-
     }
-    //drag and drop is supported, if so quicly work the package then pass to the main validation function
+
+    useEffect(() => {
+        setErrors([])
+        setAddingTask(() => handleAdd)
+        if (!active) setTimeout(() => setActive(true), 0);
+    }, [setAddingTask])
+
+
+    //drag and drop is supported, if so quickly parse package then pass to the main validation function
     const handleDrop = async (e) => {
         let dropWarnings = [];
         if(subcatModalActive || numberModalActive){
@@ -232,79 +104,65 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         if (!active) setTimeout(() => setActive(true), 0);
         handleAdd(task);
     }
+
     // Required to allow drop
     const handleDragOver = (e) => {
         e.preventDefault(); 
     };
 
-    useEffect(() => {
-        setErrors([])
-        setAddingTask(() => handleAdd)
-        if (!active) setTimeout(() => setActive(true), 0);
-    }, [setAddingTask])
-
-    const getLabelFromValue = (field, value) => {
-        if(!meta) return null
-        const match = meta[field]?.find(range => range.value === value);
-        return match ? match.label : null;
-    };
-
-    //validation function for when a new task is entered
+    //validation function for when a new task is submitted (either via drag and drop or from the setAddingTask triggered on a button press)
     const handleAdd = async (task) => {
         setErrors([]);
         setWarnings([]);
-        const date = interactionDateRef.current;
+
+        const date = interactionDateRef.current; //get the current date
         let dropWarnings = [];
 
         //verify the task is not already in the included package
-        let addedIDs = added.map((d) => (d.id));
-        if(addedIDs.includes(task.id)){
+        const exists = selected.find(t => t.id == task.id);
+        if(exists){
             dropWarnings.push(`This task is already included in this interaction.`);
             return;
         }
-
-        //show warnings if prerequisites are required
+        if(task.indicator.subcategories.length > 0) setAllowedSubcats(prev => ({...prev, [task.id]: task.indicator.subcategories}));
+        //show warnings if prerequisites are required and not met
+        
         if (task?.indicator?.prerequisites.length > 0) {
             //loop through each prereq if present
             for (const prereq of task.indicator.prerequisites) {
                 if (!prereq || !prereq.id) continue; //gracefully catch bad info
-
                 //see if the required task is added to this batch
-                const inBatch = added.filter(t => t.indicator.id.toString() === prereq.id.toString())
+                const inBatch = selected.find(t => t.task.indicator.id == prereq.id);
                 let found = false //see if a prerequisite is present
 
-                if (inBatch.length > 0) {
+                if (inBatch) {
                     found = true //if in the batch, we're good. 
                     //if subcats are present and supposed to be matched, auto limit them for convenience
                     if(task.indicator.match_subcategories_to === prereq.id){
-                        const interSubcatIDs = subcats[inBatch[0].id]?.map((cat) => (cat?.subcategory?.id))
-                        const interSubcats = task.indicator.subcategories.filter(cat => (interSubcatIDs.includes(cat.id)))
+                        const interSubcatIDs = inBatch.subcategories_data.map((cat) => (cat?.subcategory?.id));
+                        const interSubcats = task.indicator.subcategories.filter(cat => (interSubcatIDs.includes(cat.id)));
                         setAllowedSubcats(prev=> ({...prev, [task.id]: interSubcats}));
                     }
                 } 
-                //else if there are at least some interactions, try to find another record in the db
-                else if (interactions?.length > 0) {
-                    //try to find an interaction that matches the conditions
-                    try{
-                        const response = await fetchWithAuth(`/api/record/interactions/?respondent=${respondent.id}&task_indicator=${prereq.id}&before=${interactionDate}`);
-                        const data = await response.json();
-                        //if something is found
-                        if(data.results.length > 0){
-                            const validPastInt = data.results.find(inter => inter?.task?.indicator?.id == prereq.id);
-                            if (validPastInt && validPastInt.interaction_date <= date) {
-                                console.log(validPastInt)
-                                found=true //if found, we're good. Just like above, set subcats if applicable
-                                if(task.indicator.match_subcategories_to === prereq.id){
-                                    setAllowedSubcats(prev=> ({...prev, [task.id]: validPastInt.subcategories.map((cat) => ({id: cat.subcategory.id, name: cat.subcategory.name}))}));
-                                }
+                //try to find an interaction that matches the conditions from the server
+                try{
+                    const response = await fetchWithAuth(`/api/record/interactions/?respondent=${respondent.id}&task_indicator=${prereq.id}&before=${interactionDate}`);
+                    const data = await response.json();
+                    //if something is found
+                    if(data.results.length > 0){
+                        const validPastInt = data.results.find(inter => inter?.task?.indicator?.id == prereq.id);
+                        if (validPastInt && validPastInt.interaction_date <= date) {
+                            found=true //if found, we're good. Just like above, set subcats if applicable
+                            if(task.indicator.match_subcategories_to === prereq.id){
+                                setAllowedSubcats(prev=> ({...prev, [task.id]: validPastInt.subcategories.map((cat) => ({id: cat.subcategory.id, name: cat.subcategory.name}))}));
                             }
                         }
                     }
-                    catch(err){ //catch a fail
-                        console.error(err);
-                        setErrors(['Something went wrong, please try again later.']);
+                }
+                catch(err){ //catch a fail
+                    console.error(err);
+                    setErrors(['Something went wrong, please try again later.']);
 
-                    }
                 }
                 //if not found, push a warning that it will be flagged.
                 if (!found) {
@@ -319,24 +177,21 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         }
 
         //if allow repeat is not ticked, check for an interaction in the past 30 days, as this will trigger a flag
-        if (interactions?.length > 0 && !task.indicator.allow_repeat) {
+        if (!task.indicator.allow_repeat) {
             try{
-                const response = await fetchWithAuth(`/api/record/interactions/?respondent=${respondent.id}&task_indicator=${task.id}`);
-                const data = await response.json()
-                const pastInt = data.results.filter(inter => inter?.task_detail?.indicator?.id === task.indicator.id);
-                const now = new Date();
-                const oneMonthAgo = new Date();
-                oneMonthAgo.setMonth(now.getMonth() - 1);
-
-                const tooRecent = pastInt.filter(
-                    inter => new Date(inter?.interaction_date) >= oneMonthAgo
-                );
-                if (tooRecent.length > 0) {
+                const response = await fetchWithAuth(`/api/record/interactions/?respondent=${respondent.id}&indicator=${task.indicator.id}`);
+                const data = await response.json();
+                const msInDay = 1000 * 60 * 60 * 24; //convert ms to days
+                // check if any interaction was within the past 30 days of interactionDate
+                const tooRecent = data.results.some(inter => {
+                    const diffInDays = Math.abs(new Date(inter?.interaction_date) - new Date(date)) / msInDay;
+                    return diffInDays <= 30;
+                });
+                if (tooRecent) {
                     dropWarnings.push(
-                        'This respondent has had this interaction in the last month. Please be sure you are not double recording.'
+                        'This respondent has had this another interaction with this task within the past 30 days. Please be sure you are not double recording.'
                     );
                 }
-                
             }
             catch(err){
                 console.error(err);
@@ -346,7 +201,6 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         //if this task requires an attribute, make sure the respondent has it, and send a warning if not
         if(task.indicator.required_attributes?.length > 0){
             for(const attr of task.indicator.required_attributes){
-                console.log(task.indicator.required_attributes)
                 if(!respondent.special_attribute.find(a => a.id == attr.id)){
                     dropWarnings.push(
                         `This task requires that this respondent is a ${getLabelFromValue('special_attributes', attr.name)}, 
@@ -358,30 +212,39 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                 }
             }
         }
-
+        //update the warnings box
         setWarnings(dropWarnings);
+
+        //create a new package containing all the fields the interaction may need
+        const newIr = {id: task.id, task: task, subcategories_data: [], numeric_component: '', comments: ''}
+        const ids = [selected.map(s => s.id), task.id]
         //push this task id to the list of those in the interaction
-        addedIDs.push(task.id) //live var to prevent stale states
-        setAdded(prev => [...prev, task]) //set the state
-        onUpdate(addedIDs); //run the update function that goes back up to interactions --> respondent details --> tasks
+        setSelected(prev => [...prev, newIr]) //update the state
+
+        onUpdate(ids); //run the update function that goes back up to interactions --> respondent details --> tasks
+        
         //remind/warn that a valid date is required
         if(date=='' || isNaN(Date.parse(date)) || new Date(date) > new Date()){
             dropWarnings.push('Interaction date must be a valid date and may not be in the future.');
         }
-        //if additional inforation is required, show the appropriate modal
+        if(location==''){
+            dropWarnings.push('Interaction location is required.');
+        }
+        //if additional information is required, show the appropriate modal
         if(task.indicator.subcategories.length > 0){
             setSubcatModalActive(true);
-            setModalTask(task);
+            setModalTask(newIr);
         }
+        //if it has subcategories and requires numeric, the subcategory modal will handle it
         else if(task.indicator.require_numeric){
             setNumberModalActive(true);
-            setModalTask(task)
+            setModalTask(newIr)
         }
     }
 
     //remove a task from the batch
     const removeItem = (task) => {
-        setAdded(prev => {
+        setSelected(prev => {
             const updated = prev.filter(t => t.id !== task.id);
             onUpdate(updated.map(t => t.id));
             return updated;
@@ -408,12 +271,13 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         }
 
         //parse through each task to create an appropriate package
-        const allTaskData = added.map((task) => ({
-            task_id: task.id,
-            numeric_component: number[task.id] || null,
-            subcategories_data: subcats[task.id] || [],
-            comments: comments[task.id] || null
-        }))
+        const allTaskData = selected.map((ir) => ({
+            task_id: ir.id,
+            numeric_component: ir.numeric_component == '' ? null : ir.numeric_component,
+            subcategories_data: ir.subcategories_data,
+            comments: ir.comments,
+        }));
+
         try{
             setSaving(true)
             console.log('submitting data...')
@@ -433,7 +297,8 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
 
             const returnData = await response.json();
             if(response.ok){
-                let interactions = []
+                //update the context
+                let interactions = [];
                 allTaskData.forEach((task) => {
                     interactions.push({
                         'interaction_date': interactionDate,
@@ -445,7 +310,7 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                     })
                 })
                 setInteractions(prev => [...prev, interactions]);
-                setAdded([]); //reset added
+                setSelected([]); //reset selected tasks
                 onFinish(); //let parent components know that the operation happened
             }
             else{
@@ -460,8 +325,8 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
                         serverResponse.push(`${returnData[field]}`);
                     }
                 }
-                setErrors(serverResponse)
-                console.error(returnData)
+                setErrors(serverResponse);
+                console.error(returnData);
             }
         }
         catch(err){
@@ -473,13 +338,46 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
         }
     }
 
+    const [overwriteError, setOverwriteError] = useState([]);
+    const handleSubcatEdit = (ir, val) => {
+        for(const sel of selected){
+            if(sel.task.indicator.match_subcategories_to == ir.task.indicator.id){
+                const selIDs = sel.subcategories_data.map((cat) => cat?.subcategory?.id);
+                const interSubcatIDs = val.map((cat) => (cat?.subcategory?.id));
+                if(!selIDs.every(id => interSubcatIDs.includes(id))){
+                    setOverwriteError([`Cannot make these changes without invalidating a depending task (${sel.task.display_name}). Please edit that interaction first.`]);
+                    return;
+                }
+                //this works since the subcategories for task and sel.task should be identical
+                const interSubcats = ir.task.indicator.subcategories.filter(cat => (interSubcatIDs.includes(cat.id)));
+                setAllowedSubcats(prev=> ({...prev, [sel.id]: interSubcats}));
+            }
+        }
+        setSelected(prev =>
+            prev.map(item => item.id === modalTask.id ? { ...item, subcategories_data: val } : item)
+        )
+        setSubcatModalActive(false);
+    }
+
+
+    //converts a db value to a corresponding label from the meta
+    const getLabelFromValue = (field, value) => {
+        if(!meta) return null
+        const match = meta[field]?.find(range => range.value === value);
+        return match ? match.label : null;
+    };
     return(
         <div>
             {modalTask && (
                 <>
-                    {commentsModalActive && <CommentModal task={modalTask} />}
-                    {numberModalActive && <NumberModal task={modalTask} />}
-                    {subcatModalActive && <SubcategoryModal task={modalTask} />}
+                    {commentsModalActive && <CommentModal onUpdate={(val) => setSelected(prev =>
+                            prev.map(item => item.id === modalTask.id ? { ...item, comments: val } : item)
+                        )} onCancel={() => setCommentsModalActive(false)} existing={modalTask?.comments ?? ''} />}
+                    {numberModalActive && <NumberModal onUpdate={(val) => setSelected(prev =>
+                            prev.map(item => item.id === modalTask.id ? { ...item, numeric_component: val } : item)
+                        )} onCancel={() => setNumberModalActive(false)} existing={modalTask?.numeric_component ?? ''} />}
+                    {subcatModalActive && <SubcategoryModal onUpdate={(val) => {handleSubcatEdit(modalTask, val)}} onCancel={() => setSubcatModalActive(false)} existing={modalTask?.subcategories_data ?? []}
+                        overwriteError={overwriteError} options={allowedSubcats[modalTask.id]} numeric={modalTask.task.indicator.require_numeric} />}
                 </>
             )}
             <h3>New Interaction</h3>
@@ -497,27 +395,34 @@ export default function AddInteractions({ interactions, respondent, meta, onUpda
             </div>
 
             <div className={styles.dropBox} onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '2px dashed gray' }}>
-                {added.length === 0 && width >=768 && <p>Drag an indicator from the sidebar to start.</p>}
-                {added.length === 0 && width < 768 && <p>Click the "Add to interaction" button on a task below to add it to the interaciton.</p>}
-                {added.length > 0 && added.map((task) => (
-                    <div className={styles.row} key={task.id}>
+                {selected.length === 0 && width >=768 && <p>Drag an indicator from the sidebar to start.</p>}
+                {selected.length === 0 && width < 768 && <p>Click the "Add to interaction" button on a task below to add it to the interaciton.</p>}
+                {selected.length > 0 && selected.map((ir) => (
+                    <div className={styles.row} key={ir.id}>
                         <div>
-                            <p><b>{task.indicator.code + ': '} {task.indicator.name}</b></p>
-                            {number[task.id] && <li>{number[task.id]}</li>}
-                            <ul>
-                                {subcats[task.id]?.length > 0 && subcats[task.id].map((c) => (<li key={c.subcategory.id}>{c.subcategory.name} {c?.numeric_component && `(${c.numeric_component})`}</li>))}
-                            </ul>
-                            {comments[task.id] && <p>{comments[task.id]}</p>}
+                            <p><b>{ir.task.display_name}</b></p>
+                            {ir.task.indicator.require_numeric && ir?.task?.subcategories?.length == 0 && <div>
+                                <button onClick={() => {setNumberModalActive(true); setModalTask(ir)}}><ImPencil /></button>
+                                <li>{ir.numeric_component}</li>
+                            </div>}
+                                {ir.subcategories_data.length > 0 && <div>
+                                    <ul>
+                                        {ir.subcategories_data.map((c) => 
+                                            (<li key={c.subcategory.id}>{c.subcategory.name} {c?.numeric_component && `(${c.numeric_component})`}</li>))}
+                                    </ul>
+                                    <button onClick={() => {setSubcatModalActive(true); setModalTask(ir)}}><ImPencil /></button>
+                                </div>}
+                            {ir.comments != '' && <p>{ir.comments}</p>}
                         </div>
                         <button onClick={() => {setCommentsModalActive(true); setModalTask(task)}}><BiSolidCommentAdd /> {width > 575 && 'Add a Comment'}</button>
-                        <button className={errorStyles.deleteButton} onClick={() => removeItem(task)}><FaTrashAlt /> {width > 575 && 'Remove'}</button>
+                        <button className={errorStyles.deleteButton} onClick={() => removeItem(ir)}><FaTrashAlt /> {width > 575 && 'Remove'}</button>
                     </div>
                 ))}
             </div>
 
             <div style ={{ display: 'flex', flexDirection: 'row'}}>
-            {active && added.length >0 && !saving && <button onclick={() => handleSubmit()}><IoIosSave /> Save</button>}
-            {active && added.length >0 && !saving && <button onClick={() => {setAdded([]); setErrors([]); setWarnings([]);}}><FcCancel /> Cancel</button>}
+            {active && selected.length >0 && !saving && <button onClick={() => handleSubmit()}><IoIosSave /> Save</button>}
+            {active && selected.length >0 && !saving && <button onClick={() => {setSelected([]); setErrors([]); setWarnings([]);}}><FcCancel /> Cancel</button>}
             {saving && <ButtonLoading />}
             </div>
         </div>

@@ -28,19 +28,26 @@ import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 import { IoIosStar, IoIosStarOutline,  IoIosArrowDropup, IoIosArrowDropdownCircle, IoIosCheckbox } from "react-icons/io";
 
-import { BsFillBuildingsFill } from "react-icons/bs";
+import { BsFillBuildingsFill } from "react-icons/bs"; //nice
 
 //card to help manage project orgs
 function ProjectOrgCard({ org, project }){
+    /*
+    Lightweight card that displays an expandable card with very limited org details for use in displaying a
+    project's organizations.
+    - org (object): the organization to display
+    - project (object): the project
+    */
     //control expansion
     const [expanded, setExpanded] = useState(false);
 
-    //return shorter version if no children
+    //return version with no expansion if no children
     if(org.children.length === 0){ return(
         <div className={styles.orgCard}>
             <Link to={`/projects/${project.id}/organizations/${org.id}`}><h3>{org.name}</h3></Link>
         </div>
     )}
+    //else return version that has dropdown for viewing child orgs/subgrantees
     return(
         <div className={styles.orgCard}>
             <div onClick={() => setExpanded(!expanded)} style={{ display: 'flex', flexDirection: 'row'}}>
@@ -58,8 +65,10 @@ function ProjectOrgCard({ org, project }){
     )
 }
 
-//full detail page
 export default function ProjectDetail(){
+    /*
+    Detail page for a project that contains information about a specific project. Takes an id URL param.
+    */
     const navigate = useNavigate();
     //project id
     const { id } = useParams();
@@ -68,16 +77,16 @@ export default function ProjectDetail(){
     const { setProjectDetails } = useProjects();
     //details about the project and related content
     const [project, setProject] = useState();
-    const [activities, setActivities] = useState([]);
-    const [deadlines, setDeadlines] = useState([])
-    //control adding orgaizations
+    //control if the user is adding organizations
     const [addingOrgs, setAddingOrgs] = useState(false);
-    //control dropdowns
+
+    //control expandable sections
     const [showAnnouncements, setShowAnnouncements] = useState(true);
     const [showDetails, setShowDetails] = useState(false);
     const [showActivities, setShowActivities] = useState(false);
     const [showDeadlines, setShowDeadlines] = useState(false);
     const [showOrgs, setShowOrgs] = useState(false);
+
     //page meta
     const [loading, setLoading] = useState(false);
     const [del, setDel] = useState(false);
@@ -94,7 +103,7 @@ export default function ProjectDetail(){
         checkFavStatus();
     }, [project]);
     
-    //function to get the project
+    //function to get the project details from the ID
     const fetchProject = async () => {
         try {
             console.log('fetching project details...');
@@ -116,7 +125,7 @@ export default function ProjectDetail(){
         } 
     }
 
-    //load project on init
+    //load project once on init
     useEffect(() => {
         const getProjectDetails = async () => {
             await fetchProject()
@@ -185,7 +194,7 @@ export default function ProjectDetail(){
 
             <div className={styles.segment}>
                 <h2>Project Roadmap</h2>
-                <ProjectActivityFAGantt project={project} activities={activities} deadlines={deadlines}/> 
+                <ProjectActivityFAGantt project={project} /> 
             </div>
 
             <div className={styles.segment}>
@@ -259,7 +268,7 @@ export default function ProjectDetail(){
                         {!addingOrgs && user.role == 'admin' && 
                             <ButtonHover callback={() => setAddingOrgs(true)} noHover={<BsFillBuildingsFill />} hover={'Add an Organization'} />}
                         {addingOrgs && <button onClick={() => setAddingOrgs(false)}> <IoIosCheckbox /> Done </button>}
-                        {addingOrgs && <AssignOrgToProject onSave={fetchProject} 
+                        {addingOrgs && <AssignOrgToProject onUpdate={fetchProject} 
                             onClose={() => setAddingOrgs(false)} project={project}
                         />}
                         {project.organizations.length > 0 ? project.organizations.map((org) => (

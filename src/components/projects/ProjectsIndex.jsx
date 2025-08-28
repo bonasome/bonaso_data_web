@@ -21,7 +21,16 @@ import { HiLightBulb } from "react-icons/hi";
 import { GiJumpAcross } from 'react-icons/gi';
 import { ImPencil } from 'react-icons/im';
 
-function ProjectCard({ project, callback=null, callbackText }) {
+function ProjectCard({ project, callback=null, callbackText='Select Project' }) {
+    /*
+    Component that displays a paginated list of projects. Can be used either as a standalone component
+    or within a model select component. 
+    - project (object): information about the project to display
+    - callback (function, optional): if being used with a model select, function pass the project's information 
+        to another component.
+    - callbackText (string, optional): text to display on button that triggers the callback function
+    */
+
     //context
     const { user } = useAuth();
     const { projectDetails, setProjectDetails } = useProjects();
@@ -32,12 +41,12 @@ function ProjectCard({ project, callback=null, callbackText }) {
     const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
     
-    //get the project details on click
+    //get the project details on click, since the project object passed is from a lightweight list serializer
     const handleClick = async () => {
-        const willExpand = !expanded;
+        const willExpand = !expanded; //helper var since expanded has changed but the state may not have updated
         setExpanded(willExpand);
 
-        if (!willExpand) return;
+        if (!willExpand) return; //return if collapsing
         const found =  projectDetails.find(p => p.id === project.id); //try using context first
         if (found) {
             setActive(found);
@@ -70,6 +79,7 @@ function ProjectCard({ project, callback=null, callbackText }) {
                     <i>Lasts from {active.start} to {active.end} {user.role =='admin' && '('+active.status+')'} </i>
                     {active?.client && <h4> For: {project.client.name}</h4>}
                     <p>{active.description ? active.description : 'No Description'}</p>
+                    {/* Hide link on callback */}
                     {!callback && <div style={{ display: 'flex', flexDirection: 'row' }}>
                         <Link to={`/projects/${active.id}`}>
                             <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} />
@@ -85,6 +95,12 @@ function ProjectCard({ project, callback=null, callbackText }) {
 }
 
 export default function ProjectsIndex({callback=null, callbackText='Select Project', blacklist=[]}){
+    /*
+    Component that displays a paginated list of projects. 
+    - callback (function, optional): function to pass a project value to another component (i.e., model select)
+    - callbackText (string, optional): text to display on the callback button
+    - blacklist (array, optional): array of IDs to explicitly hide from the index
+    */
     //context
     const { user } = useAuth();
     const { projects, setProjects, setProjectsMeta, projectsMeta } = useProjects();
@@ -111,6 +127,7 @@ export default function ProjectsIndex({callback=null, callbackText='Select Proje
     useEffect(() => {
         const loadProjects = async () => {
             try {
+                //convert filter object to a string for the URL params
                 const filterQuery = 
                     (filters.start ? `&start=${filters.start}` : '') + 
                     (filters.end ? `&end=${filters.end}` : '') + 
@@ -135,6 +152,7 @@ export default function ProjectsIndex({callback=null, callbackText='Select Proje
     //get the meta
     useEffect(() => {
         const getProjectMeta = async () => {
+            //try context first
             if(Object.keys(projectsMeta).length !== 0){
                 return;
             }
@@ -157,6 +175,7 @@ export default function ProjectsIndex({callback=null, callbackText='Select Proje
         getProjectMeta();
     }, []);
 
+    //remove blacklisted IDs
     const filteredProj = projects?.filter(p => !blacklist.includes(p.id));
     if(!projects || loading) return callback ? <ComponentLoading /> :  <Loading />
     return(

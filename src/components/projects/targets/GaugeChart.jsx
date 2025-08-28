@@ -3,7 +3,13 @@ import theme from '../../../../theme/theme';
 import styles from './targets.module.css';
 
 export default function GaugeChart({ target, achievement }){
-    
+    /*
+    Simple gauge chart component for use with a target card that shows progress against the target.
+    - target (integer): the target amount to be achieved
+    - achievement (integer): the current amount achieved
+    */
+
+    //quickly restructure data for rechart
     const data = [
         { name: 'Acheivement', value: achievement },
         { name: 'Remainder', value: target - achievement }
@@ -13,8 +19,9 @@ export default function GaugeChart({ target, achievement }){
             <div className={styles.chart}>
                 <ResponsiveContainer width="100%" height={300}>
                     <PieChart width={500} height={260}>
+                        {/* set angle to 180 and inner radius so it looks like a gauge chart (half circle) */}
                         <Pie
-                            startAngle={180}
+                            startAngle={180} 
                             endAngle={0}
                             innerRadius="55%"
                             data={data}

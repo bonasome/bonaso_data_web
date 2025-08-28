@@ -8,14 +8,21 @@ import IndexViewWrapper from "../../reuseables/IndexView"
 import Loading from "../../reuseables/loading/Loading";
 import ComponentLoading from "../../reuseables/loading/ComponentLoading";
 import CreateClient from "./CreateClientModal";
+import Messages from '../../reuseables/Messages';
 
 import styles from '../../../styles/indexView.module.css';
 
 import { RiGovernmentFill } from "react-icons/ri";
-import Messages from '../../reuseables/Messages';
 
-//little card for each client obj
-function ClientCard({ client, callback=null, callbackText }){
+
+function ClientCard({ client, callback=null, callbackText='Select Client' }){
+    /*
+    Expandable client card that displays within the index component to show detail about a client.
+    - client (object): the client to be displayed
+    - callback (function, optional): if being used with a model select, function pass the client information 
+        to another component.
+    - callbackText (string, optional): text to display on button that triggers the callback function
+    */
     const [expanded, setExpanded] = useState(false);
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
@@ -30,8 +37,15 @@ function ClientCard({ client, callback=null, callbackText }){
     )
 }
 
-//index to display clients
 export default function ClientsIndex({ callback=null, callbackText='Select a Client', blacklist=[] }){
+    /*
+    Component that displays a paginated list of clients. Can be used either as a standalone component
+    or within a model select component. 
+    - callback (function, optional): if being used with a model select, function pass the client information 
+        to another component.
+    - callbackText (string, optional): text to display on button that triggers the callback function
+    - blacklist (array, optional): a list of ids to explictly hide
+    */
     //context
     const { clients, setClients } = useProjects();
 
@@ -71,12 +85,15 @@ export default function ClientsIndex({ callback=null, callbackText='Select a Cli
         getClients();
     }, [search])
 
+    //filter out the blacklisted IDs
     const filteredClients = clients?.filter(c => !blacklist.includes(c.id));
+    
     if(loading) return callback ? <ComponentLoading /> : <Loading />
     return(
         <div className={styles.index}>
             {!callback && <h1>Clients</h1>}
-            {showClientModal && <CreateClient onCreate={(client) => {setClients(prev=> [...prev, client]); setShowClientModal(false)}} onCancel={() => setShowClientModal(false)} /> }
+            <Messages errors={errors} />
+            {showClientModal && <CreateClient onUpdate={(client) => {setClients(prev=> [...prev, client]); setShowClientModal(false)}} onCancel={() => setShowClientModal(false)} /> }
             {!callback && <button onClick={() => setShowClientModal(true)}> <RiGovernmentFill /> Create New Client</button>}
             <IndexViewWrapper entries={entries} page={page} onSearchChange={setSearch} onPageChange={setPage}>
                 {filteredClients?.length > 0 ? 

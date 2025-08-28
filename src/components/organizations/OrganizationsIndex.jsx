@@ -87,7 +87,7 @@ function OrganizationCard({ org, callback, callbackText }) {
 
 export default function OrganizationsIndex( { callback=null, callbackText='Select Organization', includeParams=[], excludeParams=[], updateTrigger=null,  blacklist=[], projAdd=null, addRedirect=null, }){
     /*
-    Expandable card that displays details about particular org for use with an index component
+    Component that displays a paginated list of organizations.
     - callback (function, optional): a callback function that allows information about this org to be selected and 
         passed to another component
     - callbackText (string, optional): text to display on the button that triggers the callback function 

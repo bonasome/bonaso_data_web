@@ -1,4 +1,5 @@
 export const initial = {
+    //initial filter values
     status: '',
     start: '',
     end: '',
@@ -8,6 +9,12 @@ export const initial = {
 }
 
 export function filterConfig(meta, orgs, searchCallback){
+    /*
+    Config function that tells the filter component (src/components/reuseables/Filter.jsx) what inputs to build
+    - meta (object): model information for building options
+    - orgs (array): an array of projects that can be selected
+    - searchCallback (function): pass search value from select component to the API.
+    */
     if(!meta?.statuses) return [];
     return [
         {name: 'status', label: 'Activity Status', type: 'select', constructors: {

@@ -14,7 +14,8 @@ import NarrativeReportDownload from '../narrativeReports/NarrativeReportDownload
 import Targets from "./targets/Targets";
 import Messages from '../reuseables/Messages';
 import ReturnLink from '../reuseables/ReturnLink';
-import { AssignTask, AssignChild } from './AssignModals'; 
+import { AssignTask, AssignChild } from './AssignModals';
+ 
 import styles from './projectDetail.module.css';
 
 import { FaAngleDoubleUp } from "react-icons/fa";
@@ -24,28 +25,32 @@ import { IoIosArrowDropup, IoIosArrowDropdownCircle, IoIosRemoveCircle } from "r
 
 //page for viewing project+organization specific information (tasks, view children, set targets)
 export default function ProjectOrganization(){
+    /*
+    This component displays a page that gives project details that are specific to an organization.
+    It takes an id URL param to identify the project and an orgID param to identify the organization.
+    */
     const navigate = useNavigate();
 
     //params, id=project id, orgID=organization id
     const { id, orgID } = useParams();
     //context
     const { user } = useAuth();
-    const {projectDetails, setProjectDetails} = useProjects();
+    const { setProjectDetails } = useProjects();
     
-    //project/organization details
+    //project  details
     const [project, setProject] = useState();
-    const [loading, setLoading] = useState();
 
     //page meta
     const [taskSuccess, setTaskSuccess] = useState([]);
     const [coSuccess, setCOSuccess] = useState([]);
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
-    const [updateTasks, setUpdateTasks] = useState(0);//trigger to call tasks again
+    const [loading, setLoading] = useState();
+    const [updateTasks, setUpdateTasks] = useState(0);//trigger to call tasks list again
     
     //contorl visibility of index components for adding
-    const [addingTask, setAddingTask] = useState(false); //adding a task
-    const [addingChildOrg, setAddingChildOrg] = useState(false); //adding a subgrantee
+    const [addingTask, setAddingTask] = useState(false); //user is adding a task
+    const [addingChildOrg, setAddingChildOrg] = useState(false); //user is adding a subgrantee
 
     //controls which sections are visible
     const [showTasks, setShowTasks] = useState(false);
@@ -122,8 +127,9 @@ export default function ProjectOrganization(){
         return null;
     }, [project, orgID]);
 
-    //contorl certain components visibility. parents can contorl children and admins can contorl all
-    //orgs cannot control their own page
+    //check permissions for certain actions. parent orgs can contorl children and admins can contorl all
+    //orgs cannot add tasks/targets for their own page, only children
+    //assumes everyone on this page is either meofficer/manager, client, or admin
     const hasPerm = useMemo(() => {
         if(!user || !organization) return false
         if(user.role === 'client') return false;
@@ -132,7 +138,7 @@ export default function ProjectOrganization(){
         return false
     }, [user, organization]);
 
-    //function for admins to make a child org a main project member
+    //function for admins to make a child org a top-level project member
     const promoteChild = async () => {
         setErrors([]);
         try {
@@ -176,6 +182,7 @@ export default function ProjectOrganization(){
         }
     }
 
+    //remove this organization from the project
     const removeOrg = async() => {
         try {
             console.log('deleting organization...');
@@ -249,7 +256,7 @@ export default function ProjectOrganization(){
                     {showTasks && <div style={{ margin: '4vh'}}>
                         {hasPerm && <ButtonHover noHover={<MdAssignmentAdd />} hover={'Assign New Task(s)'} callback={() => setAddingTask(true)} />}
                         {addingTask && <AssignTask project={project} organization={organization} 
-                            onSave={(data) => {
+                            onUpdate={(data) => {
                                 setUpdateTasks(prev => prev+=1); setTaskSuccess([`Successfuly assigned ${data.created.length} new tasks to ${organization.name}!`])
                             }} 
                             onClose={() => setAddingTask(false)}
@@ -282,7 +289,7 @@ export default function ProjectOrganization(){
                         <Messages success={coSuccess} />
                         {((!organization.parent && user.organization_id===organization.id) || user.role === 'admin') && <ButtonHover noHover={<BsFillBuildingsFill />} hover={'Assign New Subgrantee(s)'} callback={() => setAddingChildOrg(true)} />}
                         {addingChildOrg && <AssignChild project={project} organization={organization} 
-                            onSave={(data) => {fetchProject(); setCOSuccess(
+                            onUpdate={(data) => {fetchProject(); setCOSuccess(
                                 [`Successfuly assigned ${data.added.length} new subgrantees. 
                                     ${data.reassigned.length > 0 ? `Reassigned ${data.reassigned.length} organizations.` : ''}`]
                             )}} onClose={() => setAddingChildOrg(false)}/>}
