@@ -372,11 +372,18 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
                 <>
                     {commentsModalActive && <CommentModal onUpdate={(val) => setSelected(prev =>
                             prev.map(item => item.id === modalTask.id ? { ...item, comments: val } : item)
-                        )} onCancel={() => setCommentsModalActive(false)} existing={modalTask?.comments ?? ''} />}
+                        )} 
+                        onCancel={() => setCommentsModalActive(false)} 
+                        onClear={(val) => setSelected(prev =>
+                            prev.map(item => item.id === modalTask.id ? { ...item, comments: '' } : item)
+                        )}
+                        existing={modalTask?.comments ?? ''} />}
                     {numberModalActive && <NumberModal onUpdate={(val) => setSelected(prev =>
                             prev.map(item => item.id === modalTask.id ? { ...item, numeric_component: val } : item)
                         )} onCancel={() => setNumberModalActive(false)} existing={modalTask?.numeric_component ?? ''} />}
-                    {subcatModalActive && <SubcategoryModal onUpdate={(val) => {handleSubcatEdit(modalTask, val)}} onCancel={() => setSubcatModalActive(false)} existing={modalTask?.subcategories_data ?? []}
+                    {subcatModalActive && <SubcategoryModal onUpdate={(val) => {handleSubcatEdit(modalTask, val)}} 
+                        onClear={() => {() => removeItem(modalTask)}}
+                        onCancel={() => setSubcatModalActive(false)} existing={modalTask?.subcategories_data ?? []}
                         overwriteError={overwriteError} options={allowedSubcats[modalTask.id]} numeric={modalTask.task.indicator.require_numeric} />}
                 </>
             )}
@@ -412,9 +419,13 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
                                     </ul>
                                     <button onClick={() => {setSubcatModalActive(true); setModalTask(ir)}}><ImPencil /></button>
                                 </div>}
-                            {ir.comments != '' && <p>{ir.comments}</p>}
+                            <div>
+                                <strong>Comments:</strong>
+                                {ir.comments == '' ? <p><i>No Comments</i></p> : <p>{ir.comments}</p>}
+                            </div>
+                            
                         </div>
-                        <button onClick={() => {setCommentsModalActive(true); setModalTask(task)}}><BiSolidCommentAdd /> {width > 575 && 'Add a Comment'}</button>
+                        <button onClick={() => {setCommentsModalActive(true); setModalTask(ir)}}><BiSolidCommentAdd /> {width > 575 && 'Add a Comment'}</button>
                         <button className={errorStyles.deleteButton} onClick={() => removeItem(ir)}><FaTrashAlt /> {width > 575 && 'Remove'}</button>
                     </div>
                 ))}

@@ -7,7 +7,8 @@ import modalStyles from '../../../styles/modals.module.css';
 
 import { FaCheck } from 'react-icons/fa';
 import { FcCancel } from 'react-icons/fc';
-export function CommentModal({ onUpdate, onCancel, existing='' }){
+import { FaTrashAlt } from 'react-icons/fa';
+export function CommentModal({ onUpdate, onCancel, onClear, existing='' }){
     /*
     Modal that will appear when the user wants to add a comment a specific interaction
     - task (object): the modal task
@@ -21,23 +22,27 @@ export function CommentModal({ onUpdate, onCancel, existing='' }){
         onUpdate(comment);
         onCancel();
     }
+    const handleClear = () => {
+        onClear();
+        onCancel();
+    }
 
-    if(!task) return<></>
     return(
         <div className={modalStyles.modal}>
             <h2>Comment Manager</h2>
             <label htmlFor='comments'>Adding a Comment.</label>
             <textarea id='comments' value={comment || ''} onChange={(e) => setComment(e.target.value)}/>
             <div>
-                <button onClick={() => handleUpdate()}><FaCheck /> Save</button>
+                <button disabled={comment == ''} onClick={() => handleUpdate()}><FaCheck /> Save</button>
                 <button onClick={() => onCancel()}><FcCancel /> Cancel</button>
+                {existing != '' && <button onClick={handleClear}><FaTrashAlt /> Remove</button>}
             </div>
         </div>
     )
 }
 
-export function NumberModal({ onUpdate, onCancel, existing='' }){
-    const [number, setNumber] = useState(''); //store number in a local state while editing
+export function NumberModal({ onUpdate, onCancel, onClear,  existing='' }){
+    const [number, setNumber] = useState(existing); //store number in a local state while editing
 
     //on save, pass the local state to the parent state
     const handleUpdate = () => {
@@ -58,7 +63,7 @@ export function NumberModal({ onUpdate, onCancel, existing='' }){
     )
 }
 
-export function SubcategoryModal({ options, onUpdate, onCancel, numeric=false, existing=[], overwriteError=[] }) {
+export function SubcategoryModal({ options, onUpdate, onCancel, onClear, numeric=false, existing=[], overwriteError=[] }) {
     const [subcats, setSubcats] = useState(existing);
 
     useEffect(() => {
@@ -78,6 +83,10 @@ export function SubcategoryModal({ options, onUpdate, onCancel, numeric=false, e
             onUpdate(subcats);
         }
     }
+    const handleClear = () => {
+        onClear();
+        onCancel();
+    }
     return (
         <div className={modalStyles.modal}>
             <h2>Additional Information Required</h2>
@@ -92,7 +101,8 @@ export function SubcategoryModal({ options, onUpdate, onCancel, numeric=false, e
                 <button disabled={subcats.length === 0} onClick={handleUpdate}>
                     <FaCheck /> Confirm Choices
                 </button>
-                <button onClick={onCancel}><FcCancel /> Cancel</button>
+                {existing.length > 0 && <button disabled={subcats.length ===0} onClick={onCancel}><FcCancel /> Cancel</button>}
+                {existing.length === 0 && <button onClick={handleClear}><FcCancel /> Cancel</button>}
             </div>
         </div>
     );
