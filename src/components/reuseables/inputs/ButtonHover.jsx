@@ -3,8 +3,16 @@ import { useState } from 'react'
 import styles from './buttonHover.module.css';
 
 
-//button that shows more detail on hover
 export default function ButtonHover({ callback, noHover, hover, showBoth=true, forDelete=false, forWarning=false }){
+    /*
+    Button that shows more information on hover, usually an icon that shows textual information on hover.
+    - callback (function): onClick
+    - noHover (child): item/text to display when not hovered
+    - hover (child): item/text to display when hovered over
+    - showBoth (boolean): optionally hide the noHover component on hover
+    - forDelete (boolean): alters the button style if it is meant to be used for a delete/remove function
+    - forWarning (boolean): alters the button style if it is used in a warning capacity (i.e. flags)
+    */
     const [hovered, setHovered] = useState(false);
 
     return (

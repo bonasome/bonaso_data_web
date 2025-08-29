@@ -3,8 +3,13 @@ import bonasoWhite from '../../../assets/bonasoWhite.png'
 import { useState, useEffect } from 'react';
 
 export default function Loading(){
+    /*
+    Whole page loading screen. Only use when you want the entire page to be invisible. Be careful, as using
+    this with certain components might cause brief loading flashes.
+    */
 
-      const messages = [
+    //display a rotating message for if it's taking a texas minute
+    const messages = [
         "Loading data...",
         "Still working...",
         "Hang tight!",
@@ -18,6 +23,7 @@ export default function Loading(){
     const [index, setIndex] = useState(0);
     const [fade, setFade] = useState(true);
 
+    //function to rotate the message every 5 seconds (if you edit duration, also edit the loading.module.css duration)
     useEffect(() => {
         const interval = setInterval(() => {
         // Start fade out
@@ -31,6 +37,7 @@ export default function Loading(){
         }, 3000); // change message every 3 seconds
         return () => clearInterval(interval);
     }, [messages.length]);
+    
     return(
         <div className={styles.loading}>
             <img src={bonasoWhite} className={styles.loadingImage} />

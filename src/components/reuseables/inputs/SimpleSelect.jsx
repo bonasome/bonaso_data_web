@@ -15,6 +15,10 @@ export default function SimpleSelect({
         defaultOption = null,
         required = false,
         }) {
+    /*
+    This component is a huge mess, and mostly deprecated. Its only used in filters since it has the ability
+    to pass a callback function that can reset an API.
+    */
     // Combine values and labels into one array for easier filtering and rendering
     const options = useMemo(() => {
         if (!optionValues || optionValues.length === 0) return [];

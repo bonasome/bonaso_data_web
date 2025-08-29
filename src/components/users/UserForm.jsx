@@ -23,9 +23,13 @@ import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 
 export default function UserForm(){
+    /*
+    Form that allows a user to edit/create another user. Optionally accepts an ID URL param that will
+    fetch and load existing details for editing
+    */
     const navigate = useNavigate();
     
-    //param to get indicator (blank if new)
+    //param to get user (blank if new)
     const { id } = useParams();
     //context
     const { profiles, setProfiles, profilesMeta, setProfilesMeta } = useProfiles();
@@ -75,6 +79,7 @@ export default function UserForm(){
         getMeta();
     }, []);
 
+    //fetch the user/profile details
     useEffect(() => {
         const getProfile = async () => {
             if(!id) return;
@@ -106,22 +111,26 @@ export default function UserForm(){
         setSuccess([]);
 
         let sErrors = []
-        //clear any hidden fields that may have been entered if switched from anon to not anon or vice versa
+        //client ID required for client roles
         if(data.role == 'client' && !data.client_id){
             sErrors.push('Please provide a client organization for this user.')
         }
+        //org ID required for all other roles
         if(data.role != 'client' && !data.organization_id){
             sErrors.push('Organization is required.')
         }
+        //clear any hidden fields that may have been entered if switched from anon to not anon or vice versa
         if(data.role != 'client'){
             data.client_id = null
         }
+        //convert org object to ID
         data.organization_id = data?.organization_id?.id ?? null;
         data.client_id = data?.client_id?.id ?? null
         if(sErrors.length > 0){
             setSubmissionErrors(sErrors);
             return;
         }
+        //get the buttont the user pressed
         const action = e.nativeEvent.submitter.value;
         try{
             setSaving(true);
@@ -141,11 +150,13 @@ export default function UserForm(){
                     const others = prev.filter(r => r.id !== returnData.id);
                     return [...others, returnData];
                 });
+                //use button press to determine next action
                 if(action === 'create_another'){
                     setExisting(null);
                     reset();
                     navigate('/profiles/new');
                 }
+                //client's don't have access to view other client's page, so redirect them to the index
                 else if(user.role == 'client'){
                     navigate(`/profiles`);
                 }
@@ -176,7 +187,8 @@ export default function UserForm(){
             setSaving(false);
         }
     }
-    
+
+    //set default values
     const defaultValues = useMemo(() => {
         return {
             username: existing?.username ?? '',
@@ -192,6 +204,7 @@ export default function UserForm(){
         }
     }, [existing]);
 
+    //filter roles so it displays the appropriate values based on the current user's permission
     const roleFields = useMemo(() => {
         if(!profilesMeta?.roles) return [];
         if(user.role == 'admin') return profilesMeta.roles;
@@ -200,9 +213,10 @@ export default function UserForm(){
         return []
     }, [user.role, profilesMeta]);
 
+    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors on submission
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -215,6 +229,7 @@ export default function UserForm(){
         }
     };
 
+    //if id is provided, wait for existing to load then set default values
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
@@ -222,7 +237,7 @@ export default function UserForm(){
     }, [existing, reset, defaultValues]);
 
     
-    const password = watch("password");
+    const password = watch("password"); //for confirming passwords match
 
     const selectedRole = useWatch({ control, name: 'role', defaultValue: null })
     const isClient = useMemo(() => {return selectedRole === 'client'}, [selectedRole])
@@ -255,7 +270,7 @@ export default function UserForm(){
             message: 'Please enter a valid email.'
         }, maxLength: { value: 255, message: 'Maximum length is 255 characters.'}}},
     ]
-
+    //hide this field if a non-admin is editing (since they may grant user's higher permission than they have been cleared for)
     const role = [
         {name: 'role', label: 'User Role (Required)', type: 'radio',
             options: roleFields,  rules: { required: "Required" },
@@ -264,11 +279,11 @@ export default function UserForm(){
             to alter existing data.`
         },
     ]
-
+    //only show if role is not client
     const organization= [
         { name: 'organization_id', label: "User Organization (Required)", type: "model", IndexComponent: OrganizationsIndex},
     ]
-
+    //only show if role is client
     const client = [
         { name: 'client_id', label: "Client Organization (Required)", type: "model", IndexComponent: ClientsIndex},
     ]

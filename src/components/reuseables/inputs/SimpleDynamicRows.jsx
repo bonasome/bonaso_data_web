@@ -8,9 +8,17 @@ import styles from './simpleDynamicRows.module.css'
 
 // Row component
 function Row({ row, onCollect, onRemove, index, count }) {
-    const [value, setValue] = useState(row.value);
-    const [id, setID] = useState(row?.id || null);
-    const [deprecated, setDeprecated] = useState(false)
+    /*
+    Row with one value and a set of buttons that can remove/deprecate the row.
+    - row (object): information about the row, works like a value
+    - onCollect (function): what to do when its time to collect the information and send it to the parent
+    - onRemove (function): how to remove the row
+    - index (integer): row position (for numbering)
+    - count (integer): number of rows, disable remove if only one row is left
+    */
+    const [value, setValue] = useState(row.value); //text entered by the user
+    const [id, setID] = useState(row?.id || null); //id of the row for tracking
+    const [deprecated, setDeprecated] = useState(false); //is the row marked as deprecated
 
   // Register a collector function with the parent
     useEffect(() => {
@@ -32,18 +40,31 @@ function Row({ row, onCollect, onRemove, index, count }) {
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
             />}
+            {/* this is used for creating indicator subcategories, and 
+                if there is an existing value, we don't want people deleting subcategories
+                since they may be linked to old data, so we deprecate them instead */}
             {id ? <button type="button" onClick={() => setDeprecated(!deprecated)}>{deprecated ? 'Mark as Active' : 'Deprecate'}</button>:
              <button type="button" onClick={() => onRemove(row.key)} disabled={count === 1}>Remove</button>}
         </div>
   );
 }
 
-// Main component with forwardRef to expose collection logic from all row inputs
-const SimpleDynamicRows = forwardRef(({ label, existing=[], header=null, tooltip=null }, ref) => {
-    const [rows, setRows] = useState([{ key: Date.now().toString(), value: "" }]);
-    const [errors, setErrors] = useState([]);
-    const getRow = useRef({});
 
+const SimpleDynamicRows = forwardRef(({ label, existing=[], header=null, tooltip=null }, ref) => {
+    /*
+    ForwardRef componentthat allows a user to add/remove a dynamic number of inputs that are returned as an 
+    array of objects.
+    - label (string): label to display at top of component
+    - existing (array, optional): existing values
+    - header (string, optional): additional header text for more clarity
+    - tooltip (string, optional): display more information in a tooltip
+     */
+    const [rows, setRows] = useState([{ key: Date.now().toString(), value: "" }]); //values the user has typed, stored as an array of objects with a random ID and a value
+    const [errors, setErrors] = useState([]);
+
+    const getRow = useRef({}); //fetches a value from the above Row component
+
+    //populate existing values if provided
     useEffect(() => {
         if(existing.length > 0){
             console.log(existing)
@@ -78,10 +99,12 @@ const SimpleDynamicRows = forwardRef(({ label, existing=[], header=null, tooltip
         },
     }));
 
+    //add a new row by appending a new object to rows
     const addRow = () => {
         setRows(prev => [...prev, { key: Date.now().toString(), value: '' }]);
     };
 
+    //remove a row
     const removeRows = (key) => {
         setRows(prev => prev.filter(row => row.key !== key));
         delete getRow.current[key];

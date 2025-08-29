@@ -7,8 +7,19 @@ import ButtonLoading from './loading/ButtonLoading';
 
 //modal for confirming delete of important data
 export default function ConfirmDelete({ name, onConfirm, onCancel, statusWarning=null, allowEasy=false }){
-    const [deleting, setDeleting] = useState(false);
-    const [confirmDelete, setConfirmDelete] = useState('');
+    /*
+    Modal that will pop up asking a user to confirm they want to delete this thing. Will ask the user
+    to type a value to confirm.
+    - name (string): name of the object the user is trying to delete
+    - onConfirm (function): the user has confirmed they want to delete the item, delete it
+    - onCancel (function): the user changed their mind, do not delete, just close the modal
+    - statusWarning (string, optional): addition text to display if there is a specific message you want
+        to display (like consider marking as deprecated instead)
+    - allowEasy (boolean, optional): by default, the user will have to type "confirm" to delete,
+        but allow easy will just ask them to press the button (for lower stakes items).
+    */
+    const [deleting, setDeleting] = useState(false); //loading state
+    const [confirmDelete, setConfirmDelete] = useState(''); //user confirmation input
 
     return(
         <div className={styles.modal} >

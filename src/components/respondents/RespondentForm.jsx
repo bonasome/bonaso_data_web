@@ -22,6 +22,10 @@ import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 
 function PrivacyModal({ onClose }){
+    /*
+    Modal that shows brief message about data privacy
+    - onClose (function): closes the modal
+    */
     return(
         <div className={modalStyles.modal}>
             <h2>Privacy Notice</h2>
@@ -37,6 +41,11 @@ function PrivacyModal({ onClose }){
 }
 
 export default function RespondentForm(){
+    /*
+    Form that allows a user to create or edit a respondent. Accepts an optional ID url param that will load 
+    existing values.
+    */
+
     const navigate = useNavigate();
     
     //param to get indicator (blank if new)
@@ -52,7 +61,8 @@ export default function RespondentForm(){
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [success, setSuccess] = useState([]);
     const [saving, setSaving] = useState(false);
-    const [privacyModal, setPrivacyModal] = useState(false);
+    const [privacyModal, setPrivacyModal] = useState(false); //controls visibility of the privacy modal
+    
     //ref to scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
@@ -62,6 +72,7 @@ export default function RespondentForm(){
         }
     }, [submissionErrors]);
 
+    //hide prviacy modal by default for existing values
     useEffect(() => {
         setPrivacyModal(existing ? false : true)
     }, [existing]);
@@ -92,6 +103,7 @@ export default function RespondentForm(){
         getMeta();
     }, []);
 
+    //get the respondent details (if id param is provided)
     useEffect(() => {
          const getRespondentDetails = async () => {
             if(!id) return;
@@ -105,7 +117,7 @@ export default function RespondentForm(){
                     
                 }
                 else{
-                    navigate(`/not-found`);
+                    navigate(`/not-found`); //navigate to 404 if bad id is provided
                 }
             } 
             catch (err) {
@@ -135,6 +147,7 @@ export default function RespondentForm(){
             data.phone_number = null,
             data.id_no = null
         }
+        //validate DOB
         else if(!data.is_anonymous){
             data.age_range = null;
             if(data.dob && isNaN(Date.parse(data.dob)) || new Date(data.dob) > new Date()){
@@ -145,6 +158,7 @@ export default function RespondentForm(){
             setSubmissionErrors(sErrors);
             return;
         }
+        //determine what button was pressed
         const action = e.nativeEvent.submitter.value;
         try{
             setSaving(true);
@@ -164,6 +178,7 @@ export default function RespondentForm(){
                     const others = prev.filter(r => r.id !== returnData.id);
                     return [...others, returnData];
                 });
+                //use action to redirect to the correct page
                 if(action === 'create_another'){
                     setExisting(null);
                     reset();
@@ -197,6 +212,7 @@ export default function RespondentForm(){
         }
     }
     
+    //load default values
     const defaultValues = useMemo(() => {
         return {
             is_anonymous: existing?.is_anonymous ?? false,
@@ -224,9 +240,10 @@ export default function RespondentForm(){
         }
     }, [existing]);
 
+    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors on submission
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -239,12 +256,14 @@ export default function RespondentForm(){
         }
     };
 
+    //if id is provided, wait for existing to load then set default values
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
 
+    //create an array of 2 digit codes/names for citizenship select
     const citOptions = countries.map(c => ({
         label: c.name.common,
         value: c.cca2
@@ -252,6 +271,7 @@ export default function RespondentForm(){
 
     const anon = useWatch({ control, name: 'is_anonymous', defaultValue: false })
 
+    //anon toggle
     const isAnon = [
         { name: 'is_anonymous', label: "Does this respondent wish to remain anonymous", 
             type: "checkbox", tooltip: `We encourage respondents to provide us with as much information as possible
@@ -259,6 +279,7 @@ export default function RespondentForm(){
             As such, you can mark a respondent as anonymous, in which case they will not have to give an personally identifying information.`
         }
     ]
+    //show if not anon
     const notAnonBasic= [
         { name: 'id_no', label: "Omang/ID/Passport Number (Required)", type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} } },
         {name: 'first_name', label: 'First Name (Include Middle Name if Applicable) (Required)', type: 'text',
@@ -266,21 +287,25 @@ export default function RespondentForm(){
         {name: 'last_name', label: 'Last Name (Required)', type: 'text',  rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} } },  
         {name: 'dob', label: 'Date of Birth (Required)', type: 'date',  rules: { required: "Required" } },
     ]
+    //show for both
     const basics = [
         {name: 'sex', label: 'Sex (Required)', type: 'radio', options: respondentsMeta?.sexs,  rules: { required: "Required" },
             tooltip: 'Please provide the sex/gender that this person currently identifies as, or select "Non-Binary".'
         }
     ]
+    //show if anon
     const anonBasic = [
         {name: 'age_range', label: 'Respondent Age Range (Required)', type: 'select',
             options: respondentsMeta?.age_ranges,  rules: { required: "Required" } },
     ]
+    //show if not anon (could be considered PII)
     const address = [
         {name: 'plot_no', label: 'Plot Number (or description)', type: 'text', 
             tooltip: 'If you may visit this person again, you may want to record some information about where they live.'
         },
         {name: 'ward', label: 'Kgotlana/Ward', type: 'text', rules: {maxLength: { value: 255, message: 'Maximum length is 255 characters.'}},},
     ]
+    //show for both
     const geo = [
         {name: 'village', label: 'Village/Town/City (Primary Residence) (Required)', type: 'text',  rules: { required: "Required",
             maxLength: { value: 255, message: 'Maximum length is 255 characters.'},
@@ -295,6 +320,7 @@ export default function RespondentForm(){
             options: citOptions, search: true
         },
     ]
+    //show for both
     const special = [
         {name: 'kp_status_names', label: 'Key Population Status (Select all that apply)', type: 'multiselect',  
             options: respondentsMeta?.kp_types},
@@ -303,6 +329,7 @@ export default function RespondentForm(){
         {name: 'special_attribute_names', label: 'Other Special Status (Select all that apply)', type: 'multiselect',  
             options: respondentsMeta?.special_attributes?.filter(a => (!['PLWHIV', 'KP', 'PWD'].includes(a.value)))},
     ]
+    //show if not anon (could be PII)
     const contact = [
         {name: 'email', label: 'Email', type: 'email',  rules: {pattern: {value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
             message: 'Please enter a valid email.',

@@ -17,21 +17,34 @@ import styles from './row.module.css';
 import { ImPencil } from "react-icons/im";
 import { IoIosSave } from "react-icons/io";
 import { FcCancel } from "react-icons/fc";
+
 export default function HIVStatus({ respondent, onUpdate }){
+    /*
+    Small helper component for viewing/displaying HIV status information. 
+    - respondent (object): the respondent to whom this HIV status belongs to
+    - onUpdate (function): what to do when this status is updated
+    */
+   //context
     const { user } = useAuth();
+
+    const [pos, setPos] = useState(respondent?.hiv_status?.hiv_positive || false); //boolean, is HIV positive
+    const [date, setDate] = useState(respondent?.hiv_status?.date_positive || ''); //date they were positive
+
+    //page meta
     const [saving, setSaving] = useState(false);
     const [editing, setEditing] = useState(false);
-    const [pos, setPos] = useState(respondent?.hiv_status?.hiv_positive || false);
-    const [date, setDate] = useState(respondent?.hiv_status?.date_positive || '')
     const [errors, setErrors] = useState([]);
     
+    //submit changes
     const handleSubmit = async() => {
-        setErrors([])
+        setErrors([]);
+
+        //require date if they are HIV positive
         if((!date || date === '') && pos){
             setErrors(['Please enter a date (select today if you are unsure).'])
             return;
         }
-        const useDate = pos ? date : null;
+        const useDate = pos ? date : null; //date is null if person is not positive
         try{
             setSaving(true);
             const data = {'hiv_positive': pos, 'date_positive': useDate}
@@ -45,8 +58,8 @@ export default function HIVStatus({ respondent, onUpdate }){
             });
             const returnData = await response.json();
             if(response.ok){
-                onUpdate(data)
-                setEditing(false);
+                onUpdate(data); //alert the parent component to the change
+                setEditing(false); //revert editing state
             }
             else{
                 const serverResponse = []

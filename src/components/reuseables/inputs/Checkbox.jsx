@@ -6,20 +6,29 @@ import { IoCheckboxSharp } from "react-icons/io5";
 import Messages from '../Messages';
 import Tooltip from '../Tooltip';
 
-//toggle checkbox
 export default function Checkbox({ name, label, value, onChange, onBlur, errors = [], tooltip=null }) {
-  return (
-    <div style={{ borderBottom: 'solid 1px white', borderTop: 'solid 1px white',}}>
-        <label htmlFor={name} className={styles.checkbox}>
-            <input
-                name={name} id={name} type="checkbox" style={{ display: "none" }}
-                checked={value} onChange={e => onChange(e.target.checked)} onBlur={onBlur}
-            />
-            {value ? <IoCheckboxSharp style={{ marginRight: 12}}/> : <GrCheckbox style={{ marginRight: 12}}/>}
-            {label}
-            {tooltip && <Tooltip msg={tooltip} />}
-        </label>
-        <Messages errors={errors} />
-    </div>
-  );
+  /*
+    Toggle checkbox component. Returns a boolean.
+    - name (string): html name/id
+    - label (string): checkbox label
+    - value (boolean): is checkbox checked
+    - onChange (function): what to do when clicked
+    - onBlur (function, optional): what to do onBlur (RHF)
+    - errors (array, optional): field errors to display (RHF)
+    - tooltip (string, optional): text to display in tooltip
+  */
+    return (
+      <div style={{ borderBottom: 'solid 1px white', borderTop: 'solid 1px white',}}>
+          <label htmlFor={name} className={styles.checkbox}>
+              <input
+                  name={name} id={name} type="checkbox" style={{ display: "none" }}
+                  checked={value} onChange={e => onChange(e.target.checked)} onBlur={onBlur}
+              />
+              {value ? <IoCheckboxSharp style={{ marginRight: 12}}/> : <GrCheckbox style={{ marginRight: 12}}/>}
+              {label}
+              {tooltip && <Tooltip msg={tooltip} />}
+          </label>
+          <Messages errors={errors} />
+      </div>
+    );
 }

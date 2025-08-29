@@ -2,10 +2,24 @@ import Messages from '../Messages';
 import Tooltip from '../Tooltip';
 
 //input that generates most keyboard inputs
-export default function Input({ name, type, label, onChange, onBlur, value, errors=[], tooltip=null, placeholder=null }){
+export default function Input({ name, type, label, value, onChange, onBlur, errors=[], tooltip=null, placeholder=null }){
+    /*
+    Input for various types of keyboard inputs
+    - name (string): html name/id
+    - type (string): what type of input should this be (text, date, textarea, number)
+    - label (string): checkbox label
+    - value (boolean): is checkbox checked
+    - onChange (function): what to do when clicked
+    - onBlur (function, optional): what to do onBlur (RHF)
+    - errors (array, optional): field errors to display (RHF)
+    - tooltip (string, optional): text to display in tooltip
+    -placeholder (string, optional): text to display when value is empty
+  */
+    {/* warn if they tried to pass a prop to a date */}
     if(placeholder && !['text', 'number', 'textarea'].includes(type)) console.warn(`Input type ${type} does not support placeholders.`)
     
-        if(type==='textarea'){
+        {/* if textarea return textarea */}
+    if(type==='textarea'){
         return(
             <div>
                 <label htmlFor={name} style={{ display: 'flex', flexDirection: 'row'}}>
@@ -17,7 +31,7 @@ export default function Input({ name, type, label, onChange, onBlur, value, erro
             </div>
         )
     }
-
+    {/* else return input with type prop */}
     return(
         <div>
             <label htmlFor={name} style={{ display: 'flex', flexDirection: 'row'}}>

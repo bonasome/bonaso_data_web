@@ -11,25 +11,45 @@ import ImageSelect from '../inputs/ImageSelect';
 import Select from '../inputs/Select';
 import MultiCheckboxNum from '../inputs/MultiCheckboxNum';
 
-//a singular field/question in a form. can support many different data types
 export default function Field({ field, control }) {
-  const { type, name, rules, label, options, IndexComponent, images, labelField, valueField, includeParams, excludeParams, tooltip, placeholder, search, blacklist } = field;
-    //IndexComponent is the model select component, label/valueField are used to when providing maps (if not names label/valuve)
-    //include/exclude params for filtering model index components
+    /*
+    Singular form field that will represent one input in an RHF setup. Meant to be used with [./FormSection].
+    - field (object): information about the input
+    - control (RHF control): the RHF form control
+    */
+    const { type, name, rules, label, options, IndexComponent, labelField, valueField,  images, includeParams, excludeParams, blacklist, tooltip, placeholder, search } = field;
+    /*
+    Field props:
+    - type (string): what type of data is this collecting (used to determine what type of input to show)
+    - name (string): name the input should use (for html name/id)
+    - label (string): what the user should see
+    - options (array, optional): if creating for radio/checkbox/select/image select, what are the options as an 
+        array of objects with a value and label field
+    - IndexComponent (component, optional): if using a model select to select a foreign key, pass the index component
+        that contains the list of components you want the user to see
+    - labelField (string, optional): used with options/IndexComponent, tells the component what key in 
+        the object to use as the label (default, label)
+    - valueField (string, optional): used with options/IndexComponent, tells the coomponent what key in 
+        the object to use as the value (default, value)
+    - images (array, optional): used with image select to display a list of icons. Expected to be in the same
+         order as the options array
+    - includeParams (array, optional): used with IndexComponent to pass a URL filter to only show values that 
+        meet certain criteria (array of objects like {filed: 'field', value: value})
+    - excludeParams (array, optional): used with IndexComponent to pass a URL filter to hide values that meet 
+        certain criteria (array of objects like {filed: 'field', value: value})
+    - blacklist (array, optional): list of object IDs to hide from an IndexComponent
+    - tooltip (string, optional): text to display when hovering over a tooltip (no tooltip will show if left null)
+    - placeholder (string, optional): placeholder text for blank inputs (for use with text/textarea/number)
+    - search (boolean, optional): for select, allows the option to search the select by the label field
+    */
   return (
-        <Controller
-            name={name}
-            control={control}
-            rules={rules}
-            render={({ field: controllerField, fieldState }) => {
-                const commonProps = {
-                    ...controllerField,
-                    label,
-                    errors: fieldState.error ? [fieldState.error.message] : [],
-                    tooltip,
-                };
-
-                switch (type) {
+        <Controller name={name} control={control} rules={rules}render={({ field: controllerField, fieldState }) => {
+            const commonProps = {...controllerField, label, 
+                errors: fieldState.error ? [fieldState.error.message] : [],
+                tooltip,
+            };
+            {/* switch to correct input type based on the type prop */}
+            switch (type) {
                 case "text":
                 case "email":
                 case "password":
@@ -58,8 +78,7 @@ export default function Field({ field, control }) {
                     
                 default:
                     return <p>Unsupported field type: {type}</p>;
-                }
-            }}
-        />
+            }
+        }}/>
     );
 }

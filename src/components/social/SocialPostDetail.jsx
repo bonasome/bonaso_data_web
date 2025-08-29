@@ -28,11 +28,16 @@ import { IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 import { MdFlag } from 'react-icons/md';
 
 export default function SocialPostDetail(){
+    /*
+    Component that displays detailed information about a social media post. Also allows user to edit the metrics.
+    Requires an ID URL param that is used to fetch the respondent details. 
+    */
     const navigate = useNavigate();
     //existing post id param
     const { id } = useParams();
-    const { user } = useAuth();
+
     //context
+    const { user } = useAuth();
     const { socialPosts, setSocialPosts } = useSocialPosts();
     //current active post
     const [post, setPost] = useState(null);
@@ -95,9 +100,9 @@ export default function SocialPostDetail(){
                         setPost(data);
                     }
                     else{
-                        navigate(`/not-found`);
+                        navigate(`/not-found`); //navigate to 404 if bad ID is provided
                     }
-                    
+
                 } 
                 catch (err) {
                     setErrors(['Something went wrong. Please try again later.'])
@@ -113,6 +118,7 @@ export default function SocialPostDetail(){
 
     //handle a mini submission of engagement metrics
     const handleUpdate = async() => {
+        //convert empty strings to null for the backend's sanity
         if(formData.likes == '') formData.likes = null;
         if(formData.views == '') formData.views = null;
         if(formData.comments == '') formData.comments = null;
@@ -201,7 +207,7 @@ export default function SocialPostDetail(){
         }
     } 
 
-    //update when a flag is created
+    //update data when a flag is created
     const miniFlagUpdate = (data) => {
         setPost(prev => ({ ...prev, flags: [...(prev.flags || []), data] }));
         setFlagging(false);
@@ -212,6 +218,7 @@ export default function SocialPostDetail(){
         const others = post.flags.filter(f => (f.id != data.id));
         setPost(prev => ({ ...prev, flags: [...others, data]}));
     }
+
     //helper function that safely adds all metrics to give total engagement (for what its worth)
     const getEngagement = () => {
         let likes = isNaN(parseInt(formData.likes)) ? 0 : parseInt(formData.likes)
@@ -270,7 +277,7 @@ export default function SocialPostDetail(){
                     </div>}
                 </div>}
             </div>
-            
+            {/* table that allows users to display/edit metrics */}
             <div className={styles.segment}>
                 <h2>Metrics</h2>
                 {!editing && <div className={styles.metricsTable}>

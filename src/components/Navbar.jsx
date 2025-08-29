@@ -3,30 +3,25 @@ import { Link } from 'react-router-dom';
 
 import { useAuth } from '../contexts/UserAuth';
 
+import useWindowWidth from '../../services/useWindowWidth';
+
 import styles from './navbar.module.css';
 import bonasoWhite from '../assets/bonasoWhite.png';
 
 import { TfiMenu } from "react-icons/tfi";
 import { IoMdClose } from "react-icons/io";
 
-function useWindowWidth() {
-    const [width, setWidth] = useState(window.innerWidth);
-
-    useEffect(() => {
-        const handleResize = () => setWidth(window.innerWidth);
-        window.addEventListener("resize", handleResize);
-
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
-    return width;
-}
-
 
 function Dropdown({ name }){
-    const [labels, setLabels] = useState([]);
-    const [urls, setUrls] = useState([]);
+    /*
+    The dropdown component that appears when the user hovers over the tab.
+    - tab (string): name of the tab the user is hovered over. used to determine what URLs to show
+    */
+    const [labels, setLabels] = useState([]); //labels the user sees
+    const [urls, setUrls] = useState([]); //the actual URL the tab will navigate to
     const { user } = useAuth();
+
+    //on hover, calculate what links the user should see based on the tab name and their role
     useEffect(() => {
         if(name =='Projects' && user.role == 'admin'){
             setUrls(['/projects', '/indicators', '/organizations', '/clients'])
@@ -78,8 +73,16 @@ function Dropdown({ name }){
 
 
 function MenuLink({ name, url }) {
+    /*
+    A singular tab that appears within the navbar. When hovered over it will reveal more links.
+    - name (string): the name of the tab, will be used to determine what dropdown links to show
+    - url (string/url): the url that the tab should direct the user to when clicked
+    */
     const { user } = useAuth();
-    const [active, setActive] = useState(false);
+    const [active, setActive] = useState(false); //is being hovered over by the user
+
+    //optionally show/hide tabs entirely based on role. you can control what specific
+    //links are visible on hover in the dropdown component above
     if(name == 'Projects' && !['meofficer', 'manager', 'admin', 'client'].includes(user.role)){
         return <></>
     }
@@ -98,12 +101,19 @@ function MenuLink({ name, url }) {
 }
 
 function ExpandedMenu() {
+    /*
+    Menu that has dropdown tabs for use when a user's screen is large enough
+    */
     const { user } = useAuth();
+    //basic tabs
     const links = ['Analyze', 'Record', 'Projects','Team', `${user.username}`]
+    //default link to go to when that tab is clicked
     const urls = ['/analytics', '/respondents', '/projects', '/profiles', `/profiles/${user.id}`]
 
     return(
         <div className={styles.expandedMenu}>
+            {/* map throuh each link and generate the appropriate menu link component, which will contain 
+            links that appear on hover */}
             {links.map((l, index) => (<MenuLink name={l} url={urls[index]} />))}
         </div>
     )
@@ -136,8 +146,6 @@ function ThinMenu() {
             {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>My Team</Link></div>} 
             {['admin', 'manager', 'meofficer', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles/new'}>Add New User</Link></div>} 
 
-            
-            
             <h2>Profile</h2>
             <div className={styles.menuBar}><Link to={`/profiles/${user.id}`}>Profile</Link></div>
             <div className={styles.menuBar}><Link to={`/messages`}>Messages</Link></div>
@@ -150,15 +158,15 @@ function ThinMenu() {
 
 
 export default function Navbar() {
-    const width = useWindowWidth();
+    /*
+    Navbar that appears at the top of the page. Its content/view will depend on both the user's role
+    and the screen width.
+    */
+    const width = useWindowWidth(); //determine screen size
     const [menuExpanded, setMenuExpanded] = useState(false);
-    const { user } = useAuth();
-    const containerRef = useRef(null);
-    const [hover, setHover] = useState({
-        respondents: false,
-        projects: false,
-        user: false,
-    })
+    const containerRef = useRef(null); //helps hide hamburger menu in small screens
+
+    //if using the thin hamburger menu for small screens, make sure that a click outside the navbar closes it
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -167,10 +175,11 @@ export default function Navbar() {
         };
             document.addEventListener('mousedown', handleClickOutside);
             return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [])
+    }, []);
 
     return(
         <div className={styles.navbar}>
+            { /* slightly alter header icon/text if the screen is small */}
             <div className={width > 1100 ? styles.header : styles.wideHeader}>
                 <Link to='/'><img src={bonasoWhite} className={styles.headerLogo} /></Link>
                 <Link to='/'><div className={styles.headerText}>
@@ -178,12 +187,14 @@ export default function Navbar() {
                     {width > 500 && <h5 className={styles.subheader}>Empowering Botswana's HIV/AIDS Response since 1997</h5>}
                 </div></Link>
             </div>
+                {/* if screen is large, use the Expanded menu component with hoverabel tabs */}
                 {width >= 1100 ?
                     <ExpandedMenu /> :
                 <div className={styles.slimMenu} ref={containerRef}>
                     {menuExpanded ? <IoMdClose className={styles.hamburger} onClick={() => setMenuExpanded(!menuExpanded)}/> :
                         <TfiMenu className={styles.hamburger} onClick={() => setMenuExpanded(!menuExpanded)}/>}
                     {menuExpanded && <ThinMenu />}
+                    {/* otherwise use the collapsable hamburger menu */}
                 </div>
                 }
                 

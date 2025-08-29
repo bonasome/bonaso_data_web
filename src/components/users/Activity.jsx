@@ -5,6 +5,11 @@ import { IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 import { urlBuilder } from '../../../services/modelMap';
 import { Link } from 'react-router-dom';
 function ModelSection({ category, objects }){
+    /*
+    Expandable section that shows all content created/updated by a user
+    - category (string): the name of the model/category of object being displayed
+    - objects (array): the objects that this user has edited/created
+    */
     //control expansion
     const [expanded, setExpanded] = useState(false);
     //replace camal case with spaces
@@ -13,7 +18,7 @@ function ModelSection({ category, objects }){
     }
     //clean up the names 
     const cleanModelName = (modelStr) => {
-        let cleaned = modelStr.split('.')[1]
+        let cleaned = modelStr.split('.')[1] //model name is in appname.modelname format
         let cleaned2 = cleaned;
         let tracker = 0
         for (let i = 0; i < cleaned.length; i++) {
@@ -49,10 +54,14 @@ function ModelSection({ category, objects }){
 }
 
 export default function Activity({ activity }){
-    //create section for each model
+    /* 
+    Component that dispalys all of a users activity (things they created/updated)
+    - activity (object): all of a users acitivity sorted by the model/category of object
+     */
     return(
         <div>
             <h2>Audit Logs</h2>
+            {/* create section for each model */}
             {Object.keys(activity).map((cat) => (
                 <ModelSection key={cat} category={cat} objects = {activity[cat]} />
             ))}

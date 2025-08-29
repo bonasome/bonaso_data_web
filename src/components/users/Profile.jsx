@@ -21,18 +21,18 @@ import { RiUserForbidFill, RiUserFollowFill } from "react-icons/ri";
 import { TbPasswordUser } from "react-icons/tb";
 
 export default function Profile(){
-    //user id
+    /*
+    Displays information about a user. Permissions depend on role. Requires an ID URL param for loading user details.
+    */
+    //user id from params
     const{ id } = useParams();
+
     //context
     const { user } = useAuth();
-    const { profiles, setProfiles, profilesMeta, setProfilesMeta } = useProfiles();
+    const { setProfiles, profilesMeta, setProfilesMeta } = useProfiles();
 
-    //profile/user details
-    const [profile, setProfile] = useState(null);
-    const [activity, setActivity] = useState([]);
-
-    //manager for changing passwords
-    const [changePass, setChangePass] = useState(false);
+    const [profile, setProfile] = useState(null); //user information
+    const [activity, setActivity] = useState([]); //a user's activity (created/updated)
 
     //control section visibility
     const [showDetails, setShowDetails] = useState(true);
@@ -41,6 +41,7 @@ export default function Profile(){
     //page meta
     const[loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
+    const [changePass, setChangePass] = useState(false); //shows/hides password changer
     
     //get profile detials, meta, and activity
     useEffect(() => {
@@ -95,9 +96,9 @@ export default function Profile(){
         getActivity();
     }, [id])
 
-
-    //deactivate/activate user
+    //deactivate/activate user (admin only)
     const changeStatus = async(to) => {
+        //to = activate or deactivate (based on user's current status)
         try{
             console.log('updating user status...')
             const response = await fetchWithAuth(`/api/profiles/users/${id}/`,{
@@ -133,7 +134,8 @@ export default function Profile(){
             console.error('Failed to fetch profile: ', err);
         }
     }
-    //helper to convert labels
+
+    //helper to convert db values to labels
     const getLabelFromValue = (field, value) => {
         if(!profilesMeta) return null
         const match = profilesMeta[field]?.find(range => range.value === value);
@@ -191,6 +193,7 @@ export default function Profile(){
                         <h3>Last Logged in</h3>
                         {profile.last_login ? <p>{prettyDates(profile.last_login, true)}</p> : <p>Never</p>}
                     </div>
+                    {/* For changing passwords */}
                     <div style={{ display: 'flex', flexDirection: 'row' }}>
                         {profile.is_active && <Link to={`/profiles/${profile?.id}/edit`}> <ButtonHover noHover={<ImPencil />} 
                             hover={'Edit Profile'} /></Link>}

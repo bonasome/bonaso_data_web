@@ -34,34 +34,39 @@ import { IoIosStar, IoIosStarOutline, IoIosArrowDropup, IoIosArrowDropdownCircle
 import { MdFlag } from "react-icons/md";
 
 export default function RespondentDetail(){
-    const width = useWindowWidth();
+    /*
+    Component that displays details about a respondent (it also allows a user to create interactions
+    related to that respondent). Accepts a URL id param to find correct details. 
+    */
 
-    const { id } = useParams();
-    const { user } = useAuth();
     const navigate = useNavigate();
+    const { id } = useParams(); //id param to fetch details
+    const { user } = useAuth(); //context
+
+    const width = useWindowWidth();// get width to adjust sidebar for small screens
 
     //respondent info
-    const { respondentDetails, setRespondentDetails, respondentsMeta, setRespondentsMeta } = useRespondents();
-    const[respondent, setRespondent] = useState(null);
+    const { setRespondentDetails, respondentsMeta, setRespondentsMeta } = useRespondents();
+    const[respondent, setRespondent] = useState(null); //state that stores the respondent details
     
     //page meta
     const [loading, setLoading] = useState(true);
     const [del, setDel] = useState(false); //control delete modal
     const [errors, setErrors] = useState([]);
-    const[sbVisible, setSBVisible] = useState(true);
-    const [favorited, setFavorited] = useState(false);
+    const [sbVisible, setSBVisible] = useState(true); //controls sidebar visibility
+    const [favorited, setFavorited] = useState(false); //check if object was favorited
 
     //toggle dropdowns
     const [showDetails, setShowDetails] = useState(true);
     const [showFlags, setShowFlags] = useState(false);
-    const[showHIV, setShowHIV] = useState(false);
+    const [showHIV, setShowHIV] = useState(false);
     const [showPreg, setShowPreg] = useState(false);
     const [showKP, setShowKP] = useState(false);
     const [showDis, setShowDis] = useState(false);
 
     //parent helpers to manage passing information between tasks/interactions
-    const [addingTask, setAddingTask] = useState(() => () => {});
-    const [added, setAdded] = useState([]);
+    const [addingTask, setAddingTask] = useState(() => () => {}); //called when the task callback button is clicked
+    const [added, setAdded] = useState([]); //list of IDs that have already been added and should be blacklisted
 
     //controls flag modal
     const [flagging, setFlagging] = useState(false);
@@ -85,8 +90,8 @@ export default function RespondentDetail(){
         checkFavStatus()
     }, [respondent])
 
+    //get the meta
     useEffect(() => {
-        //get the meta
         const getRespondentMeta = async () => {
             if(Object.keys(respondentsMeta).length !== 0){
                 return;
@@ -105,8 +110,10 @@ export default function RespondentDetail(){
             }
         }
         getRespondentMeta();
-        
-        //fetch the details for this respondent (always have the most up to date data)
+    }, [])
+
+    //fetch the details for this respondent
+    useEffect(() => {
         const getRespondentDetails = async () => {
             try {
                 console.log('fetching respondent details...');
@@ -145,10 +152,11 @@ export default function RespondentDetail(){
         if(user.role ==='client') setSBVisible(false);
     }, []);
 
-    //helper functions that allow tasks/interactions to communicate with each other
+    //helper functions that takes the callback from task and passes it down to interactions
     const handleButtonAdd = (task) => {
         addingTask(task);
     };
+    //update the added state for the blacklist
     const onUpdate = (data) => {
         setAdded(data)
     }
@@ -160,6 +168,7 @@ export default function RespondentDetail(){
     const miniPregUpdate = (data) => {
         setRespondent(prev => ({...prev, pregnancies: data}))
     } 
+    //helper function that updates flags when created/resolved
     const miniFlagUpdate = (data) => {
         setRespondent(prev => ({ ...prev, flags: [...(prev.flags || []), data] }));
     }
@@ -209,6 +218,7 @@ export default function RespondentDetail(){
         setDel(false)
     }
 
+    //converts the two digit country codes to the full name
     function getCountryNameFromCode(code) {
         const country = countries.find(c => c.cca2 === code.toUpperCase());
         return country ? country.name.common : null;
@@ -217,11 +227,13 @@ export default function RespondentDetail(){
     if(loading || !respondent) return <Loading /> 
     return(
         <div className={ sbVisible ? styles.respondentView : styles.respondentViewFull}>
+            {/* main panel that takes up most of the page */}
             <div className={styles.mainPanel}>
                 <div className={styles.respondentDetails}>
                     <ReturnLink url={'/respondents'} display={'Return to respondents overview'} />
                     {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                     
+                    {/* show modals when applicable */}
                     {del && 
                         <ConfirmDelete 
                             name={respondent.is_anonymous ? respondent.uuid : (respondent.first_name + respondent.last_name)} 
@@ -331,13 +343,15 @@ export default function RespondentDetail(){
                 
                 </div>
                 
+                {/* interactions section */}
                 <div className={styles.interactions}>
                     <h2>Interactions</h2>
                     <Interactions id={id} respondent={respondent} meta={respondentsMeta} onUpdate={onUpdate} 
                         setAddingTask={setAddingTask} onAdd={() => setAdded([])}/>
                 </div>
             </div>
-
+            
+            {/* sidebar */}
             {!['client'].includes(user.role) && <div className={styles.sidebar}>
                 {width > 768 && <div className={styles.toggle} onClick={() => setSBVisible(!sbVisible)}>
                     {sbVisible ? <BiSolidHide /> : <BiSolidShow />}

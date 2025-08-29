@@ -55,8 +55,8 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
     }, [interaction])
 
     
-    //check if user is the creator if the interaction, a high role at the organization 
-    // that owns the interaction or an admin
+    //check if user is an meofficer/manager of the organizaiton or their parent org or is an admin
+    //or check if they created the interaction, in which case they can edit
     const hasPerm = useMemo(() => {
         if(user.role == 'admin') return true;
         else if (user.role == 'meofficer' || user.role == 'manager'){
@@ -115,6 +115,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
         try{
             setSaving(true);
             console.log('submitting edits...', data)
+            //the backend will start pouting if this is an empty string, and you know how the backend gets when its angry. 500 city
             if(data.numeric_component == '') data.numeric_component = null;
             const url = `/api/record/interactions/${interaction.id}/`; 
             const response = await fetchWithAuth(url, {
@@ -159,7 +160,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
         }
     }
 
-    //set default values (for when the user is editing)
+    //set default values (this should only ever be used with existing values)
     const defaultValues = useMemo(() => {
         return {
             interaction_date: interaction?.interaction_date ?? '',
@@ -172,7 +173,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
     //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors on submission
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -199,13 +200,14 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             placeholder: 'Gaborone clinic...', tooltip: 'Where did this interaction take place?.',
         },
     ]
-
+    //show only if subcats are required
     const subcats = [
         { name: 'subcategories_data', label: 'Date', type: `${interaction?.task?.indicator?.require_numeric ? 'multiselectnum' : 'multiselect'}`, 
             rules: { required: "Required" }, options: interaction?.task?.indicator?.subcategories,
             tooltip: 'Please select all relvent subcategories that are applicable for this interaction.',
         },
     ]
+    //show only if a number is required by no subcats
     const number = [
         { name: 'numeric_component', label: 'Enter a Number', type: "number", rules: { required: "Required" },
             tooltip: 'Please enter an associated number.',

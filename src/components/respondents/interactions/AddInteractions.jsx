@@ -22,29 +22,28 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
     /*
     Component that allows a user to add a task(s) (either from a drag and drop or callback from a parent component)
     and record it as an interaction or a set of interactions with the same date/location/respondent. 
-    - interactions (array): array of previous existing interactions with the respondent
     - respondent (object): respondent these interactions relate to
     - meta (object): model information
     - onUpdate (function): what to do when the user adds a new task to the list of interactions
     - onFinish (function): what to do when the user submits the list of interactions
     - setAddingTask (function): helper function that passes information about a task to this component
-        for processing
+        for processing when a button-click method is used
     */
 
     //contexts
     const { setInteractions } = useInteractions();
-    //fields used for managing creation
+    //fields used for managing user inputs
     const [interactionDate, setInteractionDate] = useState('');
     const [interactionLocation, setInteractionLocation] = useState('');
 
-    const [overwriteError, setOverwriteError] = useState([]);
-    const [selected, setSelected] = useState([]); //manages the list of selected tasks
+    const [overwriteError, setOverwriteError] = useState([]); //field that tracks error when a user's edits to a parent interaction would invalidate a downstream interaction with matched subcats
+    const [selected, setSelected] = useState([]); //manages the list of selected tasks and associated information
 
     //creation helpers that manage pop up modals for when additional into is required
     const [subcatModalActive, setSubcatModalActive] = useState(false);
     const [numberModalActive, setNumberModalActive] = useState(false);
     const [commentsModalActive, setCommentsModalActive] = useState(false);
-    const [modalTask, setModalTask] = useState(null); //task that is currently being added and needs modal information
+    const [modalTask, setModalTask] = useState(null); //task/interaction that is currently being added and needs modal information
 
     //state to control whether the user is actively adding tasks to create new interactions
     const [active, setActive] = useState(false);
@@ -83,6 +82,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
         setWarnings([])
     }
 
+    //set the state as active when the user clicks a button to add a task
     useEffect(() => {
         setErrors([])
         setAddingTask(() => handleAdd)
@@ -123,9 +123,9 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
             dropWarnings.push(`This task is already included in this interaction.`);
             return;
         }
+        //by default allow all subcategories
         if(task.indicator.subcategories.length > 0) setAllowedSubcats(prev => ({...prev, [task.id]: task.indicator.subcategories}));
         //show warnings if prerequisites are required and not met
-        
         if (task?.indicator?.prerequisites.length > 0) {
             //loop through each prereq if present
             for (const prereq of task.indicator.prerequisites) {
@@ -143,6 +143,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
                         setAllowedSubcats(prev=> ({...prev, [task.id]: interSubcats}));
                     }
                 } 
+
                 //try to find an interaction that matches the conditions from the server
                 try{
                     const response = await fetchWithAuth(`/api/record/interactions/?respondent=${respondent.id}&task_indicator=${prereq.id}&before=${interactionDate}`);
@@ -222,7 +223,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
 
         onUpdate(ids); //run the update function that goes back up to interactions --> respondent details --> tasks
         
-        //remind/warn that a valid date is required
+        //remind/warn that a valid date/location is required
         if(date=='' || isNaN(Date.parse(date)) || new Date(date) > new Date()){
             dropWarnings.push('Interaction date must be a valid date and may not be in the future.');
         }
@@ -271,7 +272,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
             return;
         }
 
-        //parse through each task to create an appropriate package
+        //parse through each item in selected to create an appropriate package
         const allTaskData = selected.map((ir) => ({
             task_id: ir.id,
             numeric_component: ir.numeric_component == '' ? null : ir.numeric_component,
@@ -279,6 +280,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
             comments: ir.comments,
         }));
 
+        //create at the batch interaction endpoint
         try{
             setSaving(true)
             console.log('submitting data...')
@@ -339,21 +341,26 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
         }
     }
 
-    
+    //handle a user changing the number of selected components
     const handleSubcatEdit = (ir, val) => {
+        //check for potetial downstream tasks that rely on this as a parent interaction
         for(const sel of selected){
+            //check if this item uses this as a match subcats
             if(sel.task.indicator.match_subcategories_to == ir.task.indicator.id){
                 const selIDs = sel.subcategories_data.map((cat) => cat?.subcategory?.id);
                 const interSubcatIDs = val.map((cat) => (cat?.subcategory?.id));
+                //check if the new list removes a choice that the downstream interaction was relying on (prevents flags)
                 if(!selIDs.every(id => interSubcatIDs.includes(id))){
                     setOverwriteError([`Cannot make these changes without invalidating a depending task (${sel.task.display_name}). Please edit that interaction first.`]);
                     return;
                 }
+                //if its still a subset, set the downstream tasks allowed subcats to the selected cats
                 //this works since the subcategories for task and sel.task should be identical
                 const interSubcats = ir.task.indicator.subcategories.filter(cat => (interSubcatIDs.includes(cat.id)));
                 setAllowedSubcats(prev=> ({...prev, [sel.id]: interSubcats}));
             }
         }
+        //edit the actual state once verification is complete
         setSelected(prev =>
             prev.map(item => item.id === modalTask.id ? { ...item, subcategories_data: val } : item)
         )
@@ -367,8 +374,10 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
         const match = meta[field]?.find(range => range.value === value);
         return match ? match.label : null;
     };
+
     return(
         <div>
+        {/* Manages the popup modals for additional details */}
             {modalTask && (
                 <>
                     {commentsModalActive && <CommentModal onUpdate={(val) => setSelected(prev =>
@@ -411,10 +420,12 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
                     <div className={styles.row} key={ir.id}>
                         <div>
                             <p><b>{ir.task.display_name}</b></p>
+                            {/* show numeric information/edit buttom if applicable (if it has subcats, the subcat modal will handle it) */}
                             {ir.task.indicator.require_numeric && ir?.task?.indicator?.subcategories?.length == 0 && <div>
                                 <button onClick={() => {setNumberModalActive(true); setModalTask(ir)}}><ImPencil /></button>
                                 <li>{ir.numeric_component}</li>
                             </div>}
+                            {/* show subcat information/edit butto if applicable */}
                                 {ir.subcategories_data.length > 0 && <div>
                                     <ul>
                                         {ir.subcategories_data.map((c) => 
@@ -422,12 +433,14 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
                                     </ul>
                                     <button onClick={() => {setSubcatModalActive(true); setModalTask(ir)}}><ImPencil /></button>
                                 </div>}
+                            {/* show comments */}
                             <div>
                                 <strong>Comments:</strong>
                                 {ir.comments == '' ? <p><i>No Comments</i></p> : <p>{ir.comments}</p>}
                             </div>
                             
                         </div>
+                        {/* butons to remove/comment */}
                         <button onClick={() => {setCommentsModalActive(true); setModalTask(ir)}}><BiSolidCommentAdd /> {width > 575 && 'Add a Comment'}</button>
                         <button className={errorStyles.deleteButton} onClick={() => removeItem(ir)}><FaTrashAlt /> {width > 575 && 'Remove'}</button>
                     </div>

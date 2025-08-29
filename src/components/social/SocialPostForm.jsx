@@ -22,6 +22,10 @@ import { BsDatabaseFillAdd } from "react-icons/bs";
 import { FaFacebookSquare, FaInstagramSquare, FaTiktok, FaTwitter, FaYoutube, FaQuestion } from "react-icons/fa";
 
 export default function SocialPostForm(){
+    /*
+    Form that allows a user to create or edit a social media post. Accepts an optional ID URL param that 
+    will load existing values when editing. 
+    */
     const navigate = useNavigate();
     
     //param to get indicator (blank if new)
@@ -92,9 +96,8 @@ export default function SocialPostForm(){
                         setExisting(data);
                     }
                     else{
-                        navigate(`/not-found`);
+                        navigate(`/not-found`); //navigate to 404 if bad ID is provided
                     }
-                    
                 } 
                 catch (err) {
                     console.error('Failed to fetch post: ', err);
@@ -109,9 +112,11 @@ export default function SocialPostForm(){
     const onSubmit = async(data, e) => {
         setSubmissionErrors([]);
         setSuccess([]);
+        //convert task objects to IDs
         if(data.task_ids.length > 0) {
             data.task_ids = data.task_ids.map(task => (task.id))
         }
+        //action that determines which button was pressed
         const action = e.nativeEvent.submitter.value;
         try{
             setSaving(true);
@@ -164,6 +169,7 @@ export default function SocialPostForm(){
         }
     }
     
+    //set default values
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
@@ -177,9 +183,10 @@ export default function SocialPostForm(){
         }
     }, [existing]);
 
+    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to errors
+    //scroll to field errors on submission
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
@@ -192,14 +199,18 @@ export default function SocialPostForm(){
         }
     };
 
+    //if id is provided, wait for existing to load then set default values
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
 
+
+    //watch platform to possibly display other platform text input
     const platform = watch("platform");
 
+    //list of icons to use for Image select
     const images = [FaFacebookSquare, FaInstagramSquare, FaTiktok, FaTwitter, FaYoutube, FaQuestion];
 
     const basics = [
@@ -222,6 +233,7 @@ export default function SocialPostForm(){
             }}, tooltip: `You can provide a url to this post for your records.`
         },
     ]
+    //these tasks must all be from the same organizaton
     const task = [
         { name: 'task_ids', label: "Post Associated with Task(s) (Required)", type: "multimodel", IndexComponent: Tasks, rules: { required: "Required"},
             includeParams: [{field: 'indicator_type', value: 'social'}], tooltip: `What tasks does this post contribute towards?`
@@ -233,6 +245,7 @@ export default function SocialPostForm(){
             tooltip: `What platform was this post made on? You may only select one per post.`
         },
     ]
+    //only show if selected platform is other
     const other = [
         { name: 'other_platform', label: 'Please Specify the Platform (Required)', type: "text", rules: { required: "Required",
             maxLength: { value: 255, message: 'Maximum length is 255 characters.'}

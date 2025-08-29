@@ -7,7 +7,7 @@ export const initial = {
 export function filterConfig(meta, user){
     /*
     Config function that tells the filter component (src/components/reuseables/Filter.jsx) what inputs to build
-    - meta (object): the events meta for building options
+    - meta (object): the indicators meta for building options
     - user (object): the user for permissions checks
     */
     if(!meta?.indicator_types) return []

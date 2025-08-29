@@ -13,10 +13,18 @@ import { FaFilter } from "react-icons/fa6";
 
 //reuseable filter component that takes a schema and passes an object with selected items
 export default function Filter({ onFilterChange, initial, config }){
-    const [filters, setFilters] = useState(initial || {})
+    /*
+    A filter component that can be used with an index component to take user inputs and convert them to an
+    object a parent component can convert to URL params. 
+    - onFilterChange (function): what to do when the user selects new filters
+    - initial (object): initial/default values to use on load/clear
+    - config (function): returns a list of field objects that tell the filter what inputs to construct
+    */
+
+    const [filters, setFilters] = useState(initial || {}) //object that stores filter values
     const [showFilters, setShowFilters] = useState(false); //determines visibility
 
-    //hide on outside click
+    //close on a click outside the filter box
     const containerRef = useRef(null);
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -28,7 +36,7 @@ export default function Filter({ onFilterChange, initial, config }){
         return () => document.removeEventListener('mousedown', handleClickOutside);
     },[])
 
-    //call callback on change
+    //run callback on change
     useEffect(() => {
         onFilterChange(filters);
     }, [filters]);

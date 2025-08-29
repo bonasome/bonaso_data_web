@@ -1,4 +1,5 @@
 export const initial = {
+    //initial/default filter values
     role: '',
     organization: '',
     client: '',
@@ -6,6 +7,15 @@ export const initial = {
 }
 
 export function filterConfig(meta, orgs, clients, orgSearchCallback, clientSearchCallback, user){
+    /*
+    Config function that tells the filter component (src/components/reuseables/Filter.jsx) what inputs to build
+    - meta (object): information about the user model
+    - orgs (array): list of organizations
+    - clients (array): list of client_organizations
+    - orgSearcgCallback (function): passes search value from select component in Filter to the parent component for searching the org API
+    - psc (function): passes search value from select component in Filter to the parent component for seraching the client org API
+    - user (object): the user, so perms can show/hide certain filters
+    */
     if(!meta?.roles) return [];
     let filters = [
         {name: 'role', label: 'User Role', type: 'select', constructors: {
@@ -19,6 +29,10 @@ export function filterConfig(meta, orgs, clients, orgSearchCallback, clientSearc
             search: true,
             searchCallback: orgSearchCallback,
         }},
+        {name: 'active', label: 'User is Active', type: 'select', constructors: {
+            values: ['true', 'false'],
+            labels: ['Active', 'Inactive'],
+        }},
     ]
     if(user.role == 'admin'){
         filters.push({name: 'client', label: 'User With Client', type: 'select', constructors: {
@@ -26,11 +40,6 @@ export function filterConfig(meta, orgs, clients, orgSearchCallback, clientSearc
             labels: clients?.map((c) => (c.name)),
             search: true,
             searchCallback: clientSearchCallback,
-        }})
-
-        filters.push({name: 'active', label: 'User is Active', type: 'select', constructors: {
-            values: ['true', 'false'],
-            labels: ['Active', 'Inactive'],
         }})
     }
     return filters

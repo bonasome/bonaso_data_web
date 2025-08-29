@@ -33,6 +33,8 @@ export default function Interactions({ respondent, meta, onUpdate, setAddingTask
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
 
+
+    //fetch a paginated list of interactions
     const getInteractions = async() => {
         try {
             console.log('fetching interactionss...');
@@ -48,7 +50,7 @@ export default function Interactions({ respondent, meta, onUpdate, setAddingTask
         }
     }
 
-    //load interactions, also refresh the call on edits/creation of new interactions (avoid stale states)
+    //load interactions on init/search or page change
     useEffect(() => {
         const initialLoad = async() => {
             await getInteractions();
@@ -60,7 +62,7 @@ export default function Interactions({ respondent, meta, onUpdate, setAddingTask
     //refresh the api on creation of new indicators (get from server since flags may have been created/resolved)
     const onFinish = () => {
         getInteractions(); //refresh the api when new interactions are added
-        onAdd();
+        onAdd(); //my parents should know about this (RespondentDetail)
     }
     
     //remove an interaction on delete (filtering works here)

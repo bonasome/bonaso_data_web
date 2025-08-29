@@ -3,7 +3,11 @@ import styles from './tooltip.module.css';
 import { IoInformationCircleSharp } from "react-icons/io5";
 
 
-export default function Tooptip({ msg, style={} }){
+export default function Tooptip({ msg }){
+    /*
+    Small tooltip that shows more info when hovered over
+    - msg (string): what message to display on hover
+    */
     const [hovered, setHovered] = useState(false);
 
     return(

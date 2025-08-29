@@ -4,6 +4,14 @@ import styles from '../../../styles/form.module.css';
 
 //a section of a form. helps with logic/segmenting/styling.
 export default function FormSection({ fields, control, header=null }) {
+    /*
+    Displays a set of related fields (or inputs) in a form. Can be collectively shown/hidden
+    based on form logic. 
+    - fields (array): inputs to display in section, look at [./Field.jsx] and [../../indicators/IndicatorForm.jsx]
+        for examples/details of constructing a form
+    - control (RHF control): RHF control
+    - header (string, optional): show a header value at the top of the section
+    */
     return (
         <div className={styles.formSection}>
             {header && <h3>{header}</h3>}

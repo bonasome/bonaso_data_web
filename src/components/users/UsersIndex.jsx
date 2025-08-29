@@ -21,6 +21,11 @@ import { IoPersonAddSharp } from "react-icons/io5";
 import { GiJumpAcross } from "react-icons/gi";
 
 function ProfileCard({ profile, meta }) {
+    /*
+    Card that displays information about a user's profile. 
+    - profile (object): information about the user to display
+    - meta (object): the user model meta
+    */
     //contorl expansion
     const [expanded, setExpanded] = useState(false);
     
@@ -49,6 +54,10 @@ function ProfileCard({ profile, meta }) {
 }
 
 export default function ProfilesIndex(){
+    /*
+    Paginated index component that dispalys a list of profiles/users. Could be eventually expanded
+    to accept callbacks if needed, (see indicators index).
+    */
     //context
     const { profiles, setProfiles, profilesMeta, setProfilesMeta } = useProfiles();
     const { user } = useAuth();
@@ -97,7 +106,7 @@ export default function ProfilesIndex(){
             } 
             catch (err) {
                 setErrors(['Something went wrong. Please try again later.']);
-                console.error('Failed to fetch projects: ', err)
+                console.error('Failed to fetch profiles: ', err)
             }
             finally{
                 setLoading(false);

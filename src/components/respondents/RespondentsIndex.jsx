@@ -22,6 +22,11 @@ import { IoPersonAddSharp } from "react-icons/io5";
 import { GiJumpAcross } from "react-icons/gi";
 
 function RespondentCard({ respondent, meta }) {
+    /*
+    Component for use with an index component. Displays information about a specific respondent.
+    - repsondent (object): lightweight list serialization of the respondent
+    - meta (object): information about the respondents model
+    */
     //simple card to compartmentalize respondent information
     const [expanded, setExpanded] = useState(false);
 
@@ -49,6 +54,10 @@ function RespondentCard({ respondent, meta }) {
 }
 
 export default function RespondentsIndex(){
+    /*
+    Displays paginated list of respondents. If there is ever a need, this could be updated to include a
+    callback/blacklist system (see indicators/organizations index components), but for now there is no need. 
+    */
     //context
     const { user } = useAuth();
     const { respondents, setRespondents, setRespondentsMeta, respondentsMeta } = useRespondents();

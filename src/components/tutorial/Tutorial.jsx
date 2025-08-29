@@ -3,6 +3,9 @@ import styles from './tutorial.module.css'
 import { Link } from 'react-router-dom'
 
 export default function Tutorial(){
+    /*
+    Basic tutorial component. Shows/hides some sections depending on the user's role. 
+    */
     const { user } = useAuth();
     return(
         <div className={styles.container}>
