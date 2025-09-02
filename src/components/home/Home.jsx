@@ -36,6 +36,7 @@ export default function Home() {
     useEffect(() => {
         const getFiles = async () => {
             try {
+                console.log('fetching tasks')
                 //filter to this project/organization  specifically
                 const response = await fetchWithAuth(`/api/manage/tasks/mobile/`);
                 const data = await response.json();
