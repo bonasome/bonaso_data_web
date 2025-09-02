@@ -1,6 +1,6 @@
 import React from 'react';
-import { useState } from 'react';
-
+import { useState, useEffect } from 'react';
+import fetchWithAuth from '../../../services/fetchWithAuth';
 import { useAuth } from '../../contexts/UserAuth';
 
 import Faves from './Favorites';
@@ -33,6 +33,21 @@ export default function Home() {
     const { user } = useAuth();
     const [showWarning, setShowWarning] = useState(true); //manage the PopUp state
 
+    useEffect(() => {
+        const getFiles = async () => {
+            try {
+                //filter to this project/organization  specifically
+                const response = await fetchWithAuth(`/api/manage/tasks/mobile/`);
+                const data = await response.json();
+                console.log(data)
+            } 
+            catch (error) {
+                setErrors(['Failed to load reports.']);
+                console.error('Fetch failed:', error);
+            } 
+        };
+        getFiles();
+    }, []);
     return (
         <div className={styles.home}>
             {showWarning && <PopUp onClose={() => setShowWarning(false)}/>}
