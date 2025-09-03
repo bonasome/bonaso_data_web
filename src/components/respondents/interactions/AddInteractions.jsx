@@ -146,7 +146,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
 
                 //try to find an interaction that matches the conditions from the server
                 try{
-                    const response = await fetchWithAuth(`/api/record/interactions/?respondent=${respondent.id}&task_indicator=${prereq.id}&before=${interactionDate}`);
+                    const response = await fetchWithAuth(`/api/record/interactions/?respondent=${respondent.id}&indicator=${prereq.id}&end=${interactionDate}`);
                     const data = await response.json();
                     //if something is found
                     if(data.results.length > 0){

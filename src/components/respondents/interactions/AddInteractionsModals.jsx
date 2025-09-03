@@ -28,6 +28,7 @@ export function CommentModal({ onUpdate, onCancel, onClear, existing='' }){
     - onUpdate (function): what to do when changes are made
     - onCancel (function): what to do when closing the modal
     - onClear (function): after adding, allows a user to clear the comment
+    - existing (string, optional): the existing comment value
     */
 
     //store comments in a local state while editing for easier editing/state management
@@ -68,6 +69,7 @@ export function NumberModal({ onUpdate, onCancel, onClear,  existing='' }){
     - onCancel (function): what to do when closing the modal
     - onClear (function): on initial load, allows a user to click cancel to undo the operation of adding the interaction,
         since this field is required to proceed. After initial load, users should remove the interaction
+    - existing (string, optional): the existing number
     */
     const [number, setNumber] = useState(existing); //store number in a local state while editing
 
@@ -101,6 +103,17 @@ export function NumberModal({ onUpdate, onCancel, onClear,  existing='' }){
 }
 
 export function SubcategoryModal({ options, onUpdate, onCancel, onClear, numeric=false, existing=[], overwriteError=[] }) {
+    /*
+    Modal that will appear when ta single numeric input is required. The parent component
+    will manage which interaction is being edited
+    - options (array): array of objects contaning subcategory iptions
+    - onUpdate (function): what to do when changes are made
+    - onCancel (function): what to do when closing the modal
+    - onClear (function): on initial load, allows a user to click cancel to undo the operation of adding the interaction,
+        since this field is required to proceed. After initial load, users should remove the interaction
+    - existing (array, optional): array of existing selected values
+    */
+    
     const [subcats, setSubcats] = useState(existing);
 
     //if the value is not numeric, edit the passed existing prop to a format that MultiCheckbox can read (just the ids)
