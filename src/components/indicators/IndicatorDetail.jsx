@@ -40,7 +40,6 @@ export default function IndicatorDetail(){
     //for creating a list of projects this indicator is in
     const [projects, setProjects] = useState([]);
     const [tasks, setTasks] = useState([]);
-
     //get details from server    
     useEffect(() => {
         //get indicator information

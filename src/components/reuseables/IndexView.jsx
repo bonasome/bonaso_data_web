@@ -14,7 +14,7 @@ export default function IndexViewWrapper({ children, page, onSearchChange, onPag
     - page (integer): the current page the user is on
     - onSearchChange (function): function to run when user types in search bar
     - onPageChange (function): function to run when user clicks a page forward/backward button
-    - entries (integer): total number of entries for cal
+    - entries (integer): total number of entries for calculating total pages
     */
 
     const width = useWindowWidth(); //used to remove page button text on small screens
