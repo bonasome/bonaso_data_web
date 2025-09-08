@@ -55,13 +55,12 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 **Description**: The home page is the default landing page that contains items favorited for easy access and displays important updates for review on login. 
 
 **Main Component**: [Home](/src/components/home/Home.jsx)
-
-**Relies on Components**: 
-- [Favorites](/src/components/home/Favorites.jsx): Box for displaying favorited content for easy access
-- [UpdateBox](/src/components/home/UpdateBox.jsx): Box for displaying messages, announcements, and alerts
-    - **Relies on Components**:
-        - [AnnouncementsIndex](/src/components/messages/announcements/AnnouncementsIndex.jsx): For displaying announcements.
-        - [UnopenedMsg](/src/components/messages/UnopenedMsg.jsx): Displays a card with a link to view messages in more detail. 
+- **Relies on Components**: 
+    - [Favorites](/src/components/home/Favorites.jsx): Box for displaying favorited content for easy access
+    - [UpdateBox](/src/components/home/UpdateBox.jsx): Box for displaying messages, announcements, and alerts
+        - **Relies on Components**:
+            - [AnnouncementsIndex](/src/components/messages/announcements/AnnouncementsIndex.jsx): For displaying announcements.
+            - [UnopenedMsg](/src/components/messages/UnopenedMsg.jsx): Displays a card with a link to view messages in more detail. 
 
 
 ---
@@ -86,10 +85,10 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 
 **Main Component**: [Messages](/src/components/messages/Messages.jsx)
 
-**Relies on Components**:
-- [MessageCard](/src/components/messages/MessageCard.jsx): Displays details about a message, including replies
-- [UnopenedMessage](/src/components/messages/UnopenedMessage.jsx): A small card for use in sidebars that can be clicked to display a message in more detail
-- [ComposeMessage](/src/components/messages/ComposeMessage.jsx): A component for writing/editing a message.
+- **Relies on Components**:
+    - [MessageCard](/src/components/messages/MessageCard.jsx): Displays details about a message, including replies
+    - [UnopenedMessage](/src/components/messages/UnopenedMessage.jsx): A small card for use in sidebars that can be clicked to display a message in more detail
+    - [ComposeMessage](/src/components/messages/ComposeMessage.jsx): A component for writing/editing a message.
 
 **Permissions**: Messages are private between users in a thread. By default users can only message users in their organization network or admins.
 
@@ -106,13 +105,13 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 **Index Component**: [RespondentsIndex](/src/components/respondents/RespondentsIndex.jsx)
 
 **Detail Component**: [RespondentDetail](/src/components/respondents/RespondentDetail.jsx)
+- **Relies on Components**:
+    - [HIVStatus](/src/components/respondents/respondentDetail/HIVStatus.jsx): For displaying/editing a users HIV Status.
+    - [Pregnancies](/src/components/respondents/respondentDetail/Pregnancies.jsx): For displaying/editing a users pregnancy history.
+    - [Tasks](/src/components/tasks/Tasks.jsx): For displaying a users tasks on the sidebar.
+    - [AddInteractions](/src/components/respondents/interactions/AddInteractions.jsx): For creating interactions from the tasks on the sidebar.
+    - [Interactions](/src/components/respondents/interactions/Interactions.jsx): For viewing/editing past interactions.
 
-**Relies on Components**:
-- [HIVStatus](/src/components/respondents/respondentDetail/HIVStatus.jsx): For displaying/editing a users HIV Status.
-- [Pregnancies](/src/components/respondents/respondentDetail/Pregnancies.jsx): For displaying/editing a users pregnancy history.
-- [Tasks](/src/components/tasks/Tasks.jsx): For displaying a users tasks on the sidebar.
-- [AddInteractions](/src/components/respondents/interactions/AddInteractions.jsx): For creating interactions from the tasks on the sidebar.
-- [Interactions](/src/components/respondents/interactions/Interactions.jsx): For viewing/editing past interactions.
 **Create/Edit Component**: [RespondentForm](/src/components/respondents/RespondentForm.jsx)
 
 **Note**: For logistical and privacy reasons, HIV status and pregnancy information is edited in the detail page, not the create/edit form. 
@@ -121,9 +120,8 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 **Description**: Allows a user to select a project/organization to get a template they can use to collect data via Excel and then upload that template into the system.
 
 **Main Component**: [BatchRecord](/src/components/batchRecord/BatchRecord.jsx)
-
-**Relies on Component**:
-- [ConflictManagerModal](/src/components/batchRecord/ConflictManagerModal.jsx): Displays a modal if an uploaded respondent already exists that allows a user to compare the DB information against their upload and decide which one to keep. 
+- **Relies on Component**:
+    - [ConflictManagerModal](/src/components/batchRecord/ConflictManagerModal.jsx): Displays a modal if an uploaded respondent already exists that allows a user to compare the DB information against their upload and decide which one to keep. 
 
 **Permission**: Only M&E Officers/Managers and admins can access this tool.
 
@@ -133,9 +131,9 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 **Index Component**: [EventsIndex](/src/components/events/EventsIndex.jsx)
 
 **Detail Component**: [EventDetail](/src/components/events/EventDetail.jsx)
+- **Relies on Components**:
+    - [Counts](/src/components/events/Counts.jsx): For creating and viewing demographic count tables related to events (displayed in a list with collapsable tables)
 
-**Relies on Components**:
-- [Counts](/src/components/events/Counts.jsx): For creating and viewing demographic count tables related to events (displayed in a list with collapsable tables)
 **Create/Edit Component**: [EventsForm](/src/components/events/EventForm.jsx)
 
 **Permissions**: Available to admins, Clients, and M&E Officers/Managers (though clients cannot create/edit). By default editing is limited to M&E Officers/Managers from the hosting organization, with the only exception being that M&E Officers/Managers from participating child organizations/subgrantees can create/edit counts for their tasks in the event. 
@@ -167,11 +165,10 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 **Index Component**: [ProjectsIndex](/src/components/projects/ProjectsIndex.jsx)
 
 **Detail Component**: [ProjectDetail](/src/components/projects/ProjectDetail.jsx)
-
-**Relies on Components**:
-- [AnnouncementsIndex](/src/components/messages/announcements/AnnouncementsIndex.jsx): For displaying a fitlered list of announcements scoped to the project in question
-- [ProjectActivityFAGantt](/src/components/projects/activities/ProjectActivityFAGanttChart): Creates the gantt chart with activities/deadlines at the top of the detail page.
-- See below sections for activities, deadlines, and organizations
+- **Relies on Components**:
+    - [AnnouncementsIndex](/src/components/messages/announcements/AnnouncementsIndex.jsx): For displaying a fitlered list of announcements scoped to the project in question
+    - [ProjectActivityFAGantt](/src/components/projects/activities/ProjectActivityFAGanttChart): Creates the gantt chart with activities/deadlines at the top of the detail page.
+    - See below sections for activities, deadlines, and organizations
 
 **Create/Edit Component**: [ProjectForm](/src/components/projects/ProjectForm.jsx)
 
@@ -203,11 +200,10 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 **Description**: The Project Organization page is a link that displays and allow users to edit information unique to a specific project and organization (targets, tasks, subgrantees/child organizations, and narrative reports/supporting docuemnts). It is accessible either via a link in the organizations section of a project detail page or via the projects section of an organization's detail page. 
 
 **Main Component**: [ProjectOrganization](/src/components/projects/ProjectOrganization.jsx)
-
-**Relies on Components**:
-- [Tasks](/src/components/tasks/Tasks.jsx): For displaying a list of tasks filtered to the project and organization.
-- [Targets](/src/components/projects/targets/Targets.jsx): For displaying a list of targets (has a related seperate component that displays a create/edit modal ([src/components/projects/targets/EditTargetModal.jsx]))
-- [NarrativeReportDownload](/src/components/narrativeReports/NarrativeReportDownload.jsx): Displays a list of related supporting documents that can be downloaded. Also contains a link to a seperate page for [uploading](/src/components/narrativeReports/NarrativeReportUpload.jsx) narrative reports that accepts the project and organization as params.
+- **Relies on Components**:
+    - [Tasks](/src/components/tasks/Tasks.jsx): For displaying a list of tasks filtered to the project and organization.
+    - [Targets](/src/components/projects/targets/Targets.jsx): For displaying a list of targets (has a related seperate component that displays a create/edit modal ([src/components/projects/targets/EditTargetModal.jsx]))
+    - [NarrativeReportDownload](/src/components/narrativeReports/NarrativeReportDownload.jsx): Displays a list of related supporting documents that can be downloaded. Also contains a link to a seperate page for [uploading](/src/components/narrativeReports/NarrativeReportUpload.jsx) narrative reports that accepts the project and organization as params.
 
 **Permissions**: M&E Officers/Managers can assign tasks and targets for their child organization, but not for their own organization. Admins can assign tasks/targets for anyone. If an organization does not have a prent organization, M&E Officers/Managers and admins can assign subgrantees to them. If they are a subgrantee/child organization, this section will be hidden entirely. 
 
@@ -255,16 +251,15 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 **Description**: A dashboard is a collection of charts that can be scoped to a project/organization. Each chart within a dashboard is scoped to one or more indicators and can be broken down by various demographic or project information. The main component has a side panel listing all of a users dashboards. Clicking on one will reveal its details in the main panel. 
 
 **Main Component**: [Dashboards](/src/components/analytics/dashboards/Dashboards.jsx)
-
-**Relies on Components**:
-- [CreateDashboardModal](/src/components/analytics/dashboards/CreateDashboardModal.jsx): A small modal for creating/editing dashboard settings. 
-- [Dashboard](/src/componenets/analytics/dashboards/Dashboards.jsx): Displays an individual dashboard
-    - **Relies on Components**:
-        - [ChartSettingsModal](/src/components/analytics/dashboards/ChartSettingsModal.jsx): Creates or edits settings for a specific chart within a dashboard
-        - [IndicatorChart](/src/components/analytics/dashboards/IndicatorChart.jsx): Displays an individual chart for a dashboard.
-            - **Relies on Components**:
-                - [DataTable](/src/components/analytics/dashboards/DataTable.jsx): For displaying a data table beneath the chart
-                - [ChartFilters](/src/components/analytics/dashboards/ChartFilters.jsx): For managing chart-level filters.
+- **Relies on Components**:
+    - [CreateDashboardModal](/src/components/analytics/dashboards/CreateDashboardModal.jsx): A small modal for creating/editing dashboard settings. 
+    - [Dashboard](/src/componenets/analytics/dashboards/Dashboards.jsx): Displays an individual dashboard
+        - **Relies on Components**:
+            - [ChartSettingsModal](/src/components/analytics/dashboards/ChartSettingsModal.jsx): Creates or edits settings for a specific chart within a dashboard
+            - [IndicatorChart](/src/components/analytics/dashboards/IndicatorChart.jsx): Displays an individual chart for a dashboard.
+                - **Relies on Components**:
+                    - [DataTable](/src/components/analytics/dashboards/DataTable.jsx): For displaying a data table beneath the chart
+                    - [ChartFilters](/src/components/analytics/dashboards/ChartFilters.jsx): For managing chart-level filters.
 
 **Notes**: Chart data is organized using the [splitToChart](/src/components/analytics/dashboards/splitToChart.js) function.
 
@@ -272,8 +267,7 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 **Description**: Pivot tables display pivot tables for a spcific indicator. They can split by a variety of demogrpahic/indicator level information and filtered by project/organization/date. All of a users pivot tables are displayed on the sidebar, clicking on one will reveal it in the main panel. Users can download pivot tables as a CSV file.
 
 **Main Component**: [PivotTables](/src/components/analytics/pivotTables/PivotTables.jsx)
-
-**Relies on Components**:
+- **Relies on Components**:
     - [PivotTable](/src/components/analytics/pivotTables/PivotTable.jsx): Displays an individual pivot table.
     - [PivotTableSettings](/src/components/analytics/pivotTables/PivotTableSettings.jsx): Displays a modal for creating or editing a pivot table's settings.
 
@@ -281,8 +275,7 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 **Description**: Line Lists display all data from interactions in a list format with respondent-level and interaction-level information. They can be filtered by project/organization/indicator/date. All of a users line lists are displayed on the sidebar, clicking on one will reveal it in the main panel. Users can download a line list as a CSV file.
 
 **Main Component**: [LineLists](/src/components/analytics/lineLists/LineLists.jsx)
-
-**Relies on Components**:
+- **Relies on Components**:
     - [LineList](/src/components/analytics/lineLists/LineList.jsx): Displays an individual line list.
     - [LinelistSettings](/src/components/analytics/lineLists/LineListSettings.jsx): Displays a modal for creating or editing a line table's settings.
 
@@ -290,8 +283,7 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 **Description**: This component is a centralized source where a user can see all flags pertinent to them. They can also view these on individual detail pages, but this is a helpful consolidated source of the information. 
 
 **Main Component**: [FunWithFlags](/src/components/flags/FunWithFlags.jsx)
-
-**Relies on Component** 
+- **Relies on Component** 
     - [Metadata](/src/components/flags/metdata/Metadata.jsx): Contains the first highlight summary section on the page.
         - **Relies on Component**: 
             - [FlagCharts](/src/components/flags/metadata/FlagCharts.jsx): Manages the charts displayed in metadata.
