@@ -7,15 +7,15 @@ This document is intended as a quick reference. For complex logic or specific us
 ---
 ## Contents
 
-[FetchWithAuth](#fetchwithauth)
-[AuthServices](#authservices)
-[CleanLabels](#cleanlabels)
-[DateHelpers](#datehelpers)
-[Favorite](#favorite)
-[GetColor](#getcolor)
-[ModelMap](#modelmap)
-[PrettyDates](#prettydates)
-[UseWindowWidth](#usewindowwidth)
+- [FetchWithAuth](#fetchwithauth)
+- [AuthServices](#authservices)
+- [CleanLabels](#cleanlabels)
+- [DateHelpers](#datehelpers)
+- [Favorite](#favorite)
+- [GetColor](#getcolor)
+- [ModelMap](#modelmap)
+- [PrettyDates](#prettydates)
+- [UseWindowWidth](#usewindowwidth)
 
 ---
 

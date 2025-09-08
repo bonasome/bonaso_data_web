@@ -21,7 +21,7 @@ to install all requirements.
 
 ## 2. Setup .env/.env.production
 ### Development (.env):
-- setup `.env` like this:
+Setup `.env` like this:
 
 ```bash
 NODE_ENV=development
@@ -33,7 +33,7 @@ NODE_ENV tells the system that this is a development environment, and will there
 Setting VITE_API_URL equal to "nothing" makes sure that the API calls are not prefixed with a domain name, since this is managed via the proxy API url. 
 
 ### Production (.env.production):
-- setup `.env.production` like this:
+Setup `.env.production` like this:
 
 ```bash
 VITE_API_URL=https://your-domain.com

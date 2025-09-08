@@ -49,7 +49,7 @@ See [`sitemap.md`](/docs/sitemap.md) for a full outline of routes and features.
 - **/services** – helper and API functions (e.g., authenticated fetch utilities)  
 - **/theme** – style tokens and theme definitions (aligns with `/src/styles/tokens`) 
 
-- [**/App.jsx**](/src/App.jsx) - The central app file, any context wrappers (except UserAuth) must be placed here
+- [**App.jsx**](/src/App.jsx) - The central app file, any context wrappers (except UserAuth) must be placed here
 
 > **Note:** Environment variables for API URLs, keys, etc. should be placed in a `.env` file (see [`setup.md`](/docs/setup.md)).
 
