@@ -46,7 +46,6 @@ Combines a variety of forms into one section that can be displayed or hidden bas
 
 ## Inputs
 Inputs should always be wrapped in our reusable components rather than raw HTML <input>/<select> unless explicitly noted.
-
 - [ButtonHover](/src/components/reuseables/inputs/ButtonHover.jsx]): A button (of type button) that displays additional information when hovered (mostly used to show an icon and then additional text when hovered)
 - [Checkbox](/src/components/reuseables/inputs/Checkbox.jsx): A single toggle checkbox with a custom icon that returns a boolean.
 - [MultiCheckbox](/src/components/reuseables/inputs/MultiCheckbox.jsx): A list of checkboxes that return information as an array.
