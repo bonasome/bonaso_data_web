@@ -1,6 +1,7 @@
 # BONASO Data Portal Website: Setup
 
 This quickstart guide will get the frontend web UI set up. Please make sure to also setup the [server](https://github.com/bonasome/bonaso_data_server) and the [mobile](https://github.com/bonasome/bonaso_data_mobile) app as well. *The web UI will not work if the server is not set up!*
+
 ---
 
 ## 1. Requirements

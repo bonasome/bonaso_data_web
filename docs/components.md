@@ -48,17 +48,61 @@ Combines a variety of forms into one section that can be displayed or hidden bas
 ## Inputs
 Inputs should always be wrapped in our reusable components rather than raw HTML `<input>/<select>` unless explicitly noted.
 
-- [ButtonHover](/src/components/reuseables/inputs/ButtonHover.jsx]): A button (of type button) that displays additional information when hovered (mostly used to show an icon and then additional text when hovered)
+- [ButtonHover](/src/components/reuseables/inputs/ButtonHover.jsx]): A button (of type button) that displays additional information when hovered (mostly used to show an icon and then additional text when hovered).
+```jsx
+<ButtonHover callback={() => doSomething()} noHover={<Icon />} hover={'Click Here'} />
+```
+
 - [Checkbox](/src/components/reuseables/inputs/Checkbox.jsx): A single toggle checkbox with a custom icon that returns a boolean.
+```jsx
+<Checkbox name="isActive" label="Active?" value={state} onChange={(v) => setState(v)} /> //onChange: boolean (true when checked, false when unchecked)
+```
+
 - [MultiCheckbox](/src/components/reuseables/inputs/MultiCheckbox.jsx): A list of checkboxes that return information as an array.
+```jsx
+<MultiCheckbox name="kp_status" label="KP Status" options={[{value: 1, label: 'Option1'}, {value: 2, label: 'Option2'}]} value={state} onChange={(v) => setState(v)} /> //onChange: returns array of values
+```
+
+- [MultiCheckboxNum](/src/components/reuseables/inputs/MultiCheckboxNum.jsx): A list of checkboxes that conditionally show a numeric input if checked. Returns an array of objects with data about the checked item and the number entered. Specifically designed for interactions that need a subcategory and a number, but possibly expandable. 
+```jsx
+<MultiCheckboxNum name="condoms" label="Condoms Received" options={[{id: 1, name: 'Option1'}, {id: 2, name: 'Option2'}]} value={state} onChange={(v) => setState(v)} /> 
+//when check an input will appear allowing the user to type a number associated with that selected option
+//onChange: returns an array of objects [{id: null, subcategory: {id: 1}, numeric_component: 3}]
+```
+
 - [RadioButtons](/src/components/reuseables/inputs/RadioButtons.jsx): A custom radio button component with custom icons that allows a user to select a single option.
+```jsx
+<RadioButtons name="sex" label="Sex" options={[{value: 1, label: 'Option1'}, {value: 2, label: 'Option2'}]} value={state} onChange={(v) => setState(v)} /> //onChange: returns selected value
+```
+
 - [Select](/src/components/reuseables/inputs/Select.jsx): A select component that returns a single value (does not support mutliselect, as MultiCheckbox is preferred for that). RadioButtons are preferred, except with long lists or where space is a concern. 
-- *Note*: For selects with many options, enabling 'search=true' in params will display an input that the user can type into the filter the list (can also be used for selects that pull from paginated APIs)    
+```jsx
+<Select name="age_range" label="Age Range" options={[{value: 1, label: 'Option1'}, {value: 2, label: 'Option2'}]} value={state} onChange={(v) => setState(v)} search={true} /> //onChange: returns selected value
+```
+    - *Note*: For selects with many options, enabling 'search=true' in params will display an input that the user can type into the filter the list (can also be used for selects that pull from paginated APIs)   
+
 - [Input](/src/components/reuseables/inputs/Input.jsx): A basic text input component. Can be passed a type prop that can specify for textarea, numbers, email, or date inputs. 
-- [SimpleDynamicRows](/src/components/reuseables/inputs/SimpleDynamicRows.jsx): This component is used for creating dynamic lists of text inputs and returns an array. It is really only used for creating Indicator Subcategories (and has custom deprecation logic for that), but could be expanded if similar needs arise in the future. 
+```jsx
+<Input name='first_name' label='First name' onChange={(e) => setState(e.target.value)} value={state} type={'text'} /> //returns string of typed value
+```
+
+- [SimpleDynamicRows](/src/components/reuseables/inputs/SimpleDynamicRows.jsx): This component is used for creating dynamic lists of text inputs and returns an array. It is really only used for creating Indicator Subcategories (and has custom deprecation logic for that), but could be expanded if similar needs arise in the future. For example, see [`IndicatorForm.jsx`](/src/components/indicators/IndicatorForm.jsx).
+
 - [ImageSelect](/src/components/reuseables/inputs/ImageSelect.jsx): This component displays a list of icons that, when hovered over, also show text. Can be used to select one or multiple items, and will return a single value or array as specified. Used to add a bit of visual flare.
+```jsx
+<ImageSelect images={[Icon1, Icon2]} options={[{value: 1, label: 'Option1'}, {value: 2, label: 'Option2'}]} value={state} onChange={(v) => setState(v)} search={true} />
+```
 - [ModelSelect](/src/components/reuseables/inputs/ModelMultiSelect.jsx): Allows a user to select another model for foreign key fields.
+```jsx
+<ModelSelect IndexComponent={IndexComponent} onChange={(v) => setState(v)} callbackText='Choose Item' />
+//returns selected object
+```
 - [ModelMultiSelect](/src/components/reuseables/inputs/ModelMultiSelect.jsx): Allows a user to select multiple other model instances for m2m or m2one fields. 
+```jsx
+<ModelMultiSelect IndexComponent={IndexComponent} onChange={(v) => handleUpdate(v)} callbackText='Add Item' />
+//returns an array of the selected objects
+```
+
 **!!Deprecated!!**
 - [SimpleSelect](/src/components/reuseables/inputs/SimpleSelect.jsx): This is an overly complicated version of "Select" that should not be used, but still appears in a few components.
 
@@ -72,7 +116,7 @@ Inputs should always be wrapped in our reusable components rather than raw HTML 
 ---
 
 ## Flags
-The flag system is used for respondents, interactions, social media posts, and event counts (but could be expanded) as a way to note suspiscious entries. The following components help to standardize the process of creating/viewing/resolving flags across different components. 
+The flag system is used for respondents, interactions, social media posts, and event counts (but could be expanded) as a way to note suspiscious entries. The following components help to standardize the process of creating/viewing/resolving flags across different components. You can see examples of these components at [`InteractionCard.jsx`](/src/components/respondents/interactions/InteractionCard.jsx)
 
 - [FlagCard](/src/components/flags/flagCard.jsx): Condenses information about a flag into a single expandable card. This is also where flags are resolved.
 - [FlagDetailModal](/src/components/flags/FlagDetailModal.jsx): If a page/component does not have space to index a list of flag cards, this modal can be used to display them. 
@@ -81,22 +125,44 @@ The flag system is used for respondents, interactions, social media posts, and e
 ## [IndexViewWrapper](/src/components/reuseables/IndexView.jsx)
 A helper wrapper used for index views that automatically includes a search bar and page buttons. It can also optionally accept a filter component. Passes these back to the main Index Component which manages it using entires, search, page, and optionally filters states.
 
+See an example at [`IndicatorsIndex.jsx`](/src/components/indicators/IndicatorsIndex.jsx).
+
 ## [Filter](/src/components/reuseables/Filter.jsx)
 A helper filter that returns an object which values that an index component can use as url params when making API calls. 
 
+See an example at [`FunWithFlags.jsx`](/src//components/flags/FunWithFlags.jsx).
+
 **Note**: Filter requires a filterConfig.js file (usually located in the same folder as the IndexComponent of the app), which has both an array with objects to help build the inputs and an initial value object that sets the initial values for each field. See an example [here](/src/components/flags/filterConfig.js)
 
-## [ConfirmDelete](src/components/reuseables/ConfirmDelete.jsx)
+## [ConfirmDelete](/src/components/reuseables/ConfirmDelete.jsx)
 Displays a modal that will appear when a user tries to delete something to ask for confirmation. By default, it will require the user to type "confirm" to enable the delete function. 
+
+```jsx
+<ConfirmDelete name={'this object'} onConfirm={()=> handleDelete()} onCancel={() => handleClose()} />
+```
 
 ## [ReturnLink](/src/components/reuseables/ReturnLink.jsx)
 The return link displays a small bar at the top of a page with an arrow and a link that is intended to return to the previous page (most commonly used for returning to an index view from a detail view.)
 
+```jsx
+<ReturnLink url={'/random-location'} label={'Return to Index'} />
+```
+
 ## [Messages](/src/components/reuseables/Messages.jsx)
 This component is designed to display all errors, warnings, and success messages. Can optionally accept a ref for automatic scrolling. Any pages that have any API interactions should include this component.
+```jsx
+<Messages errors={errors} warnings={warnings} success={success} /> //with errors, warnings, and success each being an array
+```
 
 ## [Tooltip](/src/components/reuseables/Tooltip.jsx)
 This component displays a small info icon that shows helpful text when hovered over (mostly used with RHF forms to explain inputs).
+```jsx
+<Tooltip msg={'This is confusing!'} />
+```
 
 ## [UpdateRecord](/src/components/reuseables/meta/UpdateRecord.jsx)
 The backend will pass created_by/updated_by features for most items, and this component takes created/updated_by/at information and formats it in a consistent way. Should be used for detail views/components so that users can see a record's history. 
+```jsx
+<UpdateRecord created_by={obj.created_by} created_at={obj.created_at} updated_by={obj.updated_by} updated_at={obj.updated_at} /> 
+//there is some safety if one of these fields does not exist on the object
+```
