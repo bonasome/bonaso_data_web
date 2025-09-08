@@ -7,16 +7,17 @@ For consistency and maintnance, some components are shared across numerous pages
 ---
 
 # Contents
-[Forms](#forms)
-[Inputs](#inputs)
-[Loading](#loading)
-[IndexViewWrapper](#indexviewwrapper)
-[Filter](#filter)
-[ConfirmDelete](#confirm)
-[ReturnLink](#returnlink)
-[Messages](#messages)
-[Tooltip](#tooltip)
-[UpdateRecord](#updaterecord)
+
+- [Forms](#forms)
+- [Inputs](#inputs)
+- [Loading](#loading)
+- [IndexViewWrapper](#indexviewwrapper)
+- [Filter](#filter)
+- [ConfirmDelete](#confirm)
+- [ReturnLink](#returnlink)
+- [Messages](#messages)
+- [Tooltip](#tooltip)
+- [UpdateRecord](#updaterecord)
 
 ---
 
