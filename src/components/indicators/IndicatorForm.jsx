@@ -236,7 +236,7 @@ export default function IndicatorForm(){
             allow_repeat: existing?.allow_repeat ?? false,
             require_numeric: existing?.require_numeric ?? false,
 
-            require_subcategories: existing?.subcategories?.length > 0 ?? false,
+            require_subcategories: existing?.subcategories?.length > 0 ? true : false,
             subcategory_data: existing?.subcategories ?? [],
         }
     }, [existing]);

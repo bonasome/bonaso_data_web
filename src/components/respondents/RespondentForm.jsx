@@ -15,6 +15,7 @@ import ReturnLink from '../reuseables/ReturnLink';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 
 import styles from '../../styles/form.module.css';
+import errorStyles from '../../styles/errors.module.css'
 import modalStyles from '../../styles/modals.module.css';
 
 import { FcCancel } from "react-icons/fc";
@@ -62,7 +63,7 @@ export default function RespondentForm(){
     const [success, setSuccess] = useState([]);
     const [saving, setSaving] = useState(false);
     const [privacyModal, setPrivacyModal] = useState(false); //controls visibility of the privacy modal
-    
+    const [duplicateWarning, setDuplicateWarning] = useState(null); //special error trigger that stores duplicate IDs for navigation
     //ref to scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
@@ -130,6 +131,7 @@ export default function RespondentForm(){
 
     //handle form submission
     const onSubmit = async(data, e) => {
+        setDuplicateWarning(null);
         setSubmissionErrors([]);
         setSuccess([]);
 
@@ -188,12 +190,18 @@ export default function RespondentForm(){
                     navigate(`/respondents/${returnData.id}`);
                 }
             }
+            
+            else if(returnData?.existing_id){
+                setSubmissionErrors(['Duplicate warning!'])
+                setDuplicateWarning(returnData.existing_id);
+            }
+
             else{
-                const serverResponse = []
+                const serverResponse = [];
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
                         returnData[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
+                            serverResponse.push(`${field}: ${msg}`);
                         });
                     } 
                     else {
@@ -348,6 +356,11 @@ export default function RespondentForm(){
             <ReturnLink url={id ? `/respondents/${id}` : '/respondents'} display={id ? 'Return to detail page' : 'Return to respondents overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New Respondent' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
+            {duplicateWarning && <div className={errorStyles.errors} ref={alertRef}>
+                <ul>
+                    <li>This respondent already exists. <Link to={`/respondents/${duplicateWarning}`}>Review them here.</Link></li>
+                </ul>
+            </div>}
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={isAnon} control={control} header={'Respondent Anonymity'} />
                 {anon && <FormSection fields={anonBasic} control={control} header='Basic Information' />}

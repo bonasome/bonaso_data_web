@@ -18,7 +18,7 @@ export default function ButtonHover({ callback, noHover, hover, showBoth=true, f
     return (
         <button className={forDelete ? styles.delete : forWarning ? styles.warning : styles.dynamicButton} onMouseEnter={() => setHovered(true)} 
             onMouseLeave={() => setHovered(false)} type='button'
-            onClick={()=> {callback ? callback() : null}}
+            onClick={()=> {callback ? callback() : null}} aria-label={hover.replace(/\s+/g, '').toLowerCase()}
         >
             <div className={(hovered && hover) ? styles.default : styles.noHoverDefault}>
                 {(!hovered || showBoth) && noHover }
