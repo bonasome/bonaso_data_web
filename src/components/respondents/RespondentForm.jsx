@@ -75,8 +75,8 @@ export default function RespondentForm(){
 
     //hide prviacy modal by default for existing values
     useEffect(() => {
-        setPrivacyModal(existing ? false : true)
-    }, [existing]);
+        setPrivacyModal(id ? false : true)
+    }, [id]);
 
     //fetch the meta
     useEffect(() => {

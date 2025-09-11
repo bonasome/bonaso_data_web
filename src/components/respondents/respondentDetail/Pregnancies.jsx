@@ -123,7 +123,7 @@ function PregnancyRow({ respondent, onError,  onUpdate, onCancel, existing=null,
                     </div>
                 </div>}
                 <div style ={{ marginLeft: 'auto', display: 'flex', flexDirection: 'row' }}>
-                    {existing && !['client'].includes(user.role) && !editing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} /> }
+                    {existing && !['client'].includes(user.role) && !editing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Pregnancy'} /> }
                     {existing && !['client'].includes(user.role) && !editing && <ButtonHover callback={() => handleDelete()} noHover={<FaTrashAlt />} hover={'Delete Pregnancy'} forDelete={true}/>}
                 </div>
             </div>

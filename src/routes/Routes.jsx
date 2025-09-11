@@ -67,6 +67,7 @@ import LineLists from '../components/analytics/lineLists/LineLists';
 import Messages from '../components//messages/Messages';
 import ProjectActivityForm from '../components/projects/activities/ProjectActivityForm';
 import ProjectDeadlineForm from '../components/projects/deadlines/ProjectDeadlineForm';
+import TargetForm from '../components/projects/targets/TargetForm';
 
 import SocialPostsIndex from '../components/social/SocialPostsIndex';
 import SocialPostDetail from '../components/social/SocialPostDetail';
@@ -144,6 +145,16 @@ function Router() {
             <Route path=':id/organizations/:orgID' element = {
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <ProjectOrganization />
+                </RedirectIfNoPerm>
+            } />
+            <Route path=':id/organizations/:orgID/targets/new' element = {
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
+                    <TargetForm />
+                </RedirectIfNoPerm>
+            } />
+            <Route path=':id/organizations/:orgID/:targetID/edit' element = {
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
+                    <TargetForm />
                 </RedirectIfNoPerm>
             } />
             <Route path=':id/organizations/:orgID/upload' element = {

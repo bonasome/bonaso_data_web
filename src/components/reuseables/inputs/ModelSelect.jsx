@@ -52,7 +52,7 @@ export default function ModelSelect({ name, IndexComponent, value, onChange, lab
                 <Messages errors={errors} />
                 <div className={styles.card}>
                     {value ? <p>Selected: <i>{value[labelField]}</i></p> : <p>Nothing selected</p>}
-                    <button type="button" onClick={() => setSelecting(true)}>Choose an new item</button>
+                    <button type="button" onClick={() => setSelecting(true)}>Choose a new item</button>
                     <button type="button" onClick={() => onChange(null)} disabled={!value}>Clear Selection</button>
                     <div className={modalStyles.modal} style={{ display: selecting ? 'block' : 'none' }}>
                         <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>

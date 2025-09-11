@@ -24,7 +24,6 @@ function Row({ row, onCollect, onRemove, index, count }) {
     useEffect(() => {
         onCollect(() => {
         if (value === '') return { error: true };
-        console.log(id, value, deprecated)
         return { id, value, deprecated };
         });
     }, [value, deprecated, id, onCollect]);
@@ -67,7 +66,6 @@ const SimpleDynamicRows = forwardRef(({ label, existing=[], header=null, tooltip
     //populate existing values if provided
     useEffect(() => {
         if(existing.length > 0){
-            console.log(existing)
             const existingRows = existing.map((ex) => ({key: Date.now().toString() + Math.random().toString(), value: ex.name, id: ex.id }));
             setRows(existingRows);
         }
@@ -83,7 +81,7 @@ const SimpleDynamicRows = forwardRef(({ label, existing=[], header=null, tooltip
             const fn = getRow.current[row.key];
             const result = fn ? fn() : null;
             if (!result || result.error) {
-                rowErrors.push(`Row "${row.key}" is invalid`);
+                rowErrors.push(`Row "${row.value}" is invalid`);
             } 
             else {
                 console.log(result)

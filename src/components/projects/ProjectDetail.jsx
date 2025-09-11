@@ -265,9 +265,8 @@ export default function ProjectDetail(){
                     </div>
                         
                     {showOrgs && <div style={{ paddingLeft: '2vh', paddingRight: '2vh'}}>
-                        {!addingOrgs && user.role == 'admin' && 
-                            <ButtonHover callback={() => setAddingOrgs(true)} noHover={<BsFillBuildingsFill />} hover={'Add an Organization'} />}
-                        {addingOrgs && <button onClick={() => setAddingOrgs(false)}> <IoIosCheckbox /> Done </button>}
+                        {!addingOrgs && user.role == 'admin' && !addingOrgs &&
+                            <button onClick={() => setAddingOrgs(true)}><BsFillBuildingsFill /> Add Organization(s)</button>}
                         {addingOrgs && <AssignOrgToProject onUpdate={fetchProject} 
                             onClose={() => setAddingOrgs(false)} project={project}
                         />}

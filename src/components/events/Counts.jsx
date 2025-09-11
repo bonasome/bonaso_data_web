@@ -424,12 +424,12 @@ export default function Counts({ event, breakdownOptions, task, onUpdate, onCanc
         <div className={existing ? styles.countSegment : styles.segment}>
             {warning && <Warn onConfirm={() => confirmChange()} onCancel={() => setWarning(null)} />}
 
-            {del && <ConfirmDelete name={`Counts for Task: ${task.indicator.name} for for ${task?.organization.name} Event: ${event.name}`} onConfirm={() => deleteCount()} onCancel={() => setDel(false)} />}
+            {del && <ConfirmDelete name={`Counts for Task: ${task.display_name} Event: ${event.name}`} onConfirm={() => deleteCount()} onCancel={() => setDel(false)} />}
             
             {details && <FlagDetailModal flags={details.flags} model={'events.demographiccount'} id={details.id} onClose={() => {setDetails(null); onUpdate()}}/>}
             
             <div onClick={() => setExpanded(!expanded)} className={styles.expander}>
-                <h2>Counts for {task?.indicator.name} ({task?.organization.name})</h2>
+                <h2>Counts for {task?.display_name}</h2>
                 {!editing && 
                     <p>By {active.map((a) => (`${cleanLabels(a[0])}`)).join(', ')}</p>
                 }

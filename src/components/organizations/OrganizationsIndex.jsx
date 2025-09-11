@@ -206,7 +206,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
             />}>
                 {errors.length != 0 && <div ref={alertRef} className={errorStyles.errors}><ul>{errors.map((msg)=><li key={msg}>{msg}</li>)}</ul></div>}
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
-                <Link to={redirect || '/organizations/new'}><button><BsBuildingFillAdd /> Add an Organiation</button></Link>}
+                <Link to={redirect || '/organizations/new'}><button><BsBuildingFillAdd /> Add an Organization</button></Link>}
                 {filteredOrgs?.length == 0 ? 
                     <p>No organizations match your criteria.</p> :
                     filteredOrgs?.map(org => (

@@ -1,8 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useForm,  useWatch } from "react-hook-form";
-
-import { useAuth } from '../../../contexts/UserAuth';
 
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import { tryMatchDates, getMonthDatesStr, getQuarterDatesStr, getWindowsBetween } from '../../../../services/dateHelpers';
@@ -12,26 +10,85 @@ import ButtonLoading from '../../reuseables/loading/ButtonLoading';
 import Messages from '../../reuseables/Messages';
 import Tasks from '../../tasks/Tasks';
 import FormSection from '../../reuseables/forms/FormSection';
-import styles from './targets.module.css';
-import modalStyles from '../../../styles/modals.module.css';
+import styles from '../../../styles/form.module.css';
 
-import { PiTargetBold } from "react-icons/pi";
-import { ImPencil } from "react-icons/im";
-import { FaTrashAlt } from "react-icons/fa";
+import { BsDatabaseFillAdd } from "react-icons/bs";
 import { IoIosSave } from "react-icons/io";
 import { FcCancel } from "react-icons/fc";
 
-export function EditTargetModal({ onUpdate, onCancel, project, organization,  existing=null,  }){
+export default function TargetModal(){
     /*
     Modal that is used for creating or editing a target.
-    - onUpdate (function): what to do when the modal is saved
-    - onCancel (function): how to close the modal
-    - project (object): the project this target is related to
-    - organization (object): the organization this target is for
-    - existing (object, optional): if editing a target, provide that target
     */
+   const navigate = useNavigate();
+    const { id, orgID, targetID } = useParams();
+    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [success, setSuccess] = useState([]);
     const [submissionErrors, setSubmissionErrors] = useState([]);
+    const [project, setProject] = useState(null);
+    const [existing, setExisting] = useState(null);
+    
+    //ref to scroll to errors
+    const alertRef = useRef(null);
+    useEffect(() => {
+        if ((submissionErrors.length > 0 || success.length > 0) && alertRef.current) {
+        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        alertRef.current.focus({ preventScroll: true });
+        }
+    }, [submissionErrors, success]);
+
+     //get project once on load
+    useEffect(() => {
+        const fetchProject = async () => {
+            try {
+                console.log('fetching project details...');
+                const response = await fetchWithAuth(`/api/manage/projects/${id}/`);
+                const data = await response.json();
+                if(response.ok){
+                    setProject(data);
+                }
+                else{
+                    navigate(`/not-found`);
+                }
+                
+            } 
+            catch (err) {
+                console.error('Failed to fetch project: ', err);
+                setSubmissionErrors(['Something went wrong. Please try again later.']);
+                
+            } 
+            finally{
+                setLoading(false);
+            }
+        }
+        fetchProject()
+    }, [id]);
+    
+    useEffect(() => {
+        const fetchTarget = async () => {
+            if(!targetID) return;
+            try {
+                console.log('fetching target details...');
+                const response = await fetchWithAuth(`/api/manage/targets/${targetID}/`);
+                const data = await response.json();
+                if(response.ok){
+                    console.log(data)
+                    setExisting(data);
+                }
+                else{
+                    navigate(`/not-found`);
+                }
+            } 
+            catch (err) {
+                console.error('Failed to fetch project: ', err);
+                setSubmissionErrors(['Something went wrong. Please try again later.']);
+                
+            }
+        }
+        fetchTarget()
+    }, [targetID]);
+
 
     //helper function that converts a selected date/month string to a start and end date
     //will trim to project dates if necessary
@@ -46,8 +103,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
     }
 
     //handle submission
-    const onSubmit = async(data) => {
-
+    const onSubmit = async(data, e) => {
         //clear away potentially stale/leftover valies
         if (asP) {
             data.amount = null
@@ -63,6 +119,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         data.task_id = data.task_id.id; //backend expects the ID only
         try{
             setSaving(true);
+            const action = e.nativeEvent.submitter.value;
             console.log('submitting target...', data)
             const url = existing ? `/api/manage/targets/${existing.id}/` : `/api/manage/targets/`;
             const response = await fetchWithAuth(url, {
@@ -74,9 +131,15 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
             });
             const returnData = await response.json();
             if(response.ok){
-                onUpdate(); //let the parent know a change was made
-                onCancel(); //close the modal
-
+                setSuccess(['Project created successfuly!']);
+                if(action === 'create_another'){
+                    setExisting(null);
+                    reset();
+                    navigate(`/projects/${id}/organizations/${orgID}/targets/new`);
+                }
+                else{
+                    navigate(`/projects/${id}/organizations/${orgID}`);
+                }
             }
             else{
                 const serverResponse = []
@@ -95,7 +158,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         }
         catch(err){
             setSubmissionErrors(['Something went wrong. Please try again later.'])
-            console.error('Could not record respondent: ', err)
+            console.error('Could not record target: ', err)
         }
         finally{
             setSaving(false);
@@ -147,6 +210,13 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
     };
 
 
+    //load existing values once existing loads, if provided
+    useEffect(() => {
+        if (existing) {
+            reset(defaultValues);
+        }
+    }, [existing, reset, defaultValues]);
+    
     const targetTask = useWatch({ control, name: 'task_id', defaultValue: null}); //use so that a user cannot select the same task for related to
     //get if this is custom/by quarter/by month
     const typeVal = useWatch({ control, name: 'date_type', defaultValue: tryMatchDates(existing?.start, existing?.end, project)?.type});
@@ -155,7 +225,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
 
     const task = [
         { name: 'task_id', label: 'For Task (Required)', type: "model", IndexComponent: Tasks, rules: { required: "Required" },
-            labelField: 'display_name',  includeParams: [{field: 'organization', value: organization.id}, {field: 'project', value: project.id}]},
+            labelField: 'display_name',  includeParams: [{field: 'organization', value: orgID}, {field: 'project', value: id}]},
     ]
     const asRelated = [
         { name: 'as_percentage', label: 'Measure as a Percentage of Another Task', type: "checkbox", 
@@ -172,7 +242,7 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
     //only show if as related is checked
     const relatedToTask = [
         { name: 'related_to_id', label: 'Select Related Task (Required)', type: "model", IndexComponent: Tasks, labelField: 'display_name', rules: { required: "Required" },
-            includeParams: [{field: 'organization', value: organization.id}, {field: 'project', value: project.id}], blacklist: [targetTask?.id],
+            includeParams: [{field: 'organization', value: orgID}, {field: 'project', value: id}], blacklist: [targetTask?.id],
             tooltip: `This is the task whose achievement should set the target for the task selected above.`
         },
         { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Task (Required)', type: "number", rules: { required: "Required",
@@ -207,9 +277,9 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
         { name: 'end', label: "Target Ends On (Required)", type: "date", rules: { required: "Required" }},
     ]
     return(
-        <div className={modalStyles.modal}>
-            <h2>{existing ? `Editing Target` : 'New Target' }</h2>
-            <Messages errors={submissionErrors} />
+        <div className={styles.form}>
+            <h2>{existing ? `Editing Target` : 'Creating New Target' }</h2>
+            <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={task} control={control} header={'Target For'}/>
                 <FormSection fields={asRelated} control={control} header={'Measure as Percentage?'} />
@@ -221,13 +291,14 @@ export function EditTargetModal({ onUpdate, onCancel, project, organization,  ex
                 {typeVal === 'month' && <FormSection fields={month} control={control} />}
                 {typeVal === 'custom' && <FormSection fields={customDates} control={control} />}
 
-                {!saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+               {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
-                    <button type="button" onClick={() => onCancel()}><FcCancel /> Cancel</button>
+                    {!targetID && <button type="submit" value='create_another'><BsDatabaseFillAdd /> Save and Create Another</button>}
+                    <Link to={`/projects/${id}/organizations/${orgID}`}><button type="button">
+                        <FcCancel /> Cancel
+                    </button></Link>
                 </div>}
-                {saving && <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-                    <ButtonLoading />
-                </div>}
+                {saving && <ButtonLoading />}
             </form>
         </div>
     )

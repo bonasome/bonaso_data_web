@@ -336,7 +336,8 @@ export default function IndicatorForm(){
         {name: 'prerequisite_ids', label: 'Prerequisite Indicators', type: 'multimodel', 
             IndexComponent: IndicatorsIndex, tooltip: `Does this indicator require that a person has had an interaction
             related to another indicator (example: Screened for disease & Referred for further treatment of disease)?
-            NOTE: If an interaction is had with this indicator, but not its prerequisities, the system will flag it.`
+            NOTE: If an interaction is had with this indicator, but not its prerequisities, the system will flag it.`,
+            blacklist: [parseInt(id)],
         } 
     ]
     //only show if valid prereqs are selected

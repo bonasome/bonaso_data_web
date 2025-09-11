@@ -203,6 +203,7 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
     }, [page, search, filters, updateTrigger, params]);
 
     //filter out blacklisted IDs
+
     const filteredIndicators = indicators?.filter(ind => !blacklist.includes(ind.id));
 
     if(loading || !indicators) return callback ? <ComponentLoading /> : <Loading /> //on callback don't show full load

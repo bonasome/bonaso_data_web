@@ -253,11 +253,12 @@ export default function ProjectOrganization(){
                         {showTasks ? <IoIosArrowDropup style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px'}}/> : 
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
+
                     {showTasks && <div style={{ margin: '4vh'}}>
-                        {hasPerm && <ButtonHover noHover={<MdAssignmentAdd />} hover={'Assign New Task(s)'} callback={() => setAddingTask(true)} />}
+                        {hasPerm && !addingTask && <button onClick={() => setAddingTask(true)}><MdAssignmentAdd /> Assign New Task(s)</button>}
                         {addingTask && <AssignTask project={project} organization={organization} 
                             onUpdate={(data) => {
-                                setUpdateTasks(prev => prev+=1); setTaskSuccess([`Successfuly assigned ${data.created.length} new tasks to ${organization.name}!`])
+                                setUpdateTasks(prev => prev+=1); setTaskSuccess([`Successfully assigned ${data.created.length} new tasks to ${organization.name}!`])
                             }} 
                             onClose={() => setAddingTask(false)}
                         />}
@@ -275,6 +276,7 @@ export default function ProjectOrganization(){
                         <IoIosArrowDropdownCircle style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto', fontSize: '25px' }} />}
                     </div>
                     {showTargets && <div style={{ margin: '4vh'}}>
+                        <p><i>Search for targets by indicator or project.</i></p>
                         <Targets organization={organization} project={project} />
                     </div>}
                 </div>
@@ -287,10 +289,10 @@ export default function ProjectOrganization(){
                     </div>
                     {showChildOrgs && <div style={{ margin: '4vh'}}>
                         <Messages success={coSuccess} />
-                        {((!organization.parent && user.organization_id===organization.id) || user.role === 'admin') && <ButtonHover noHover={<BsFillBuildingsFill />} hover={'Assign New Subgrantee(s)'} callback={() => setAddingChildOrg(true)} />}
+                        {((!organization.parent && user.organization_id===organization.id) || user.role === 'admin') && !addingChildOrg && <button onClick={() => setAddingChildOrg(true)}><BsFillBuildingsFill /> Assign New Subgrantee(s)</button>}
                         {addingChildOrg && <AssignChild project={project} organization={organization} 
                             onUpdate={(data) => {fetchProject(); setCOSuccess(
-                                [`Successfuly assigned ${data.added.length} new subgrantees. 
+                                [`Successfully assigned ${data.added.length} new subgrantees. 
                                     ${data.reassigned.length > 0 ? `Reassigned ${data.reassigned.length} organizations.` : ''}`]
                             )}} onClose={() => setAddingChildOrg(false)}/>}
                         {organization.children.map((org) => (<div className={styles.orgCard}>

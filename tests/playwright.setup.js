@@ -6,6 +6,7 @@ export const test = base.extend({
     if (!response.ok()) {
       throw new Error(`DB reset failed: ${response.status()} ${await response.text()}`);
     }
+    console.log('test database reset...')
     await use(null);
   },
 

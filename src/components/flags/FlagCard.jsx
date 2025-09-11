@@ -97,7 +97,7 @@ export default function FlagCard({ flag, onUpdate=null, index=false }){
     return(
         <div className={flagDetail.resolved ? styles.cardResolved : styles.cardActive} onClick={() => setExpanded(!expanded)}>
             {index ? <Link to={generateURL(flagDetail.model_string, flagDetail.target)} style={{ display:'flex', width:"fit-content" }}><h3>Flag on {getContentTypeLabel(flagDetail.model_string)} {flagDetail.target.display} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3></Link> :
-                <h3>Flag on {getContentTypeLabel(flagDetail.model_string)} {flagDetail.target.display} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3>}
+                <h3>Flag on {getContentTypeLabel(flagDetail.model_string)} {flagDetail.target?.display} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3>}
             {expanded && <div onClick={(e) => {resolving ? e.stopPropagation() : null}}>
                 <Messages errors={errors} />
                 <h4>Data Type: {getContentTypeLabel(flag.model_string)}</h4>

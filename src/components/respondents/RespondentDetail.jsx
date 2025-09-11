@@ -111,7 +111,7 @@ export default function RespondentDetail(){
         }
         getRespondentMeta();
     }, [])
-
+    console.log(respondent)
     //fetch the details for this respondent
     useEffect(() => {
         const getRespondentDetails = async () => {

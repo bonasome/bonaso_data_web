@@ -22,6 +22,7 @@ function ImgCard({ value, label, Img, active, callback }) {
             onMouseLeave={() => setHover(false)}
             className={active ? styles.active : styles.passive}
             onClick={() => callback(value)}
+            aria-label={label.replace(/\s+/g, '').toLowerCase()}
         >
             <div>{<Img style={{ fontSize: 50 }} />}</div>
             {hover && <p>{label}</p>}

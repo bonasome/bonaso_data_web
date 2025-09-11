@@ -104,7 +104,7 @@ export default function ProjectForm(){
         setSubmissionErrors([]);
         setSuccess([]);
         const action = e.nativeEvent.submitter.value;
-        data.client_id = data?.client_id.id ?? null;
+        data.client_id = data?.client_id?.id ?? null;
         try{
             setSaving(true);
             console.log('submitting data...', data);
@@ -118,7 +118,7 @@ export default function ProjectForm(){
             });
             const returnData = await response.json();
             if(response.ok){
-                setSuccess(['Project created successfuly!']);
+                setSuccess(['Target created successfuly!']);
                 setProjectDetails(prev => {
                     const others = prev.filter(r => r.id !== returnData.id);
                     return [...others, returnData];

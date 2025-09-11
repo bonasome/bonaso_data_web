@@ -56,7 +56,6 @@ export default function ModelMultiSelect({ name, IndexComponent, value, onChange
 
     //already selected values (so they can be hidden)
     const selectedVals = value?.map((val) => (val.id)) ?? [];
-
     return(
         <div>
             <label style={{ display: 'flex', flexDirection: 'row' }}>
@@ -85,7 +84,7 @@ export default function ModelMultiSelect({ name, IndexComponent, value, onChange
                         <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
                             <IndexComponent callback={(obj) => handleAdd(obj)} callbackText={callbackText} blacklist={[...selectedVals, ...blacklist]} includeParams={includeParams} excludeParams={excludeParams} projAdd={projAdd} addRedirect={addRedirect} />
                         </div>
-                        <button onClick={() => setSelecting(false)}>Done</button>
+                        <button onClick={() => setSelecting(false)}>Done Selecting</button>
                     </div>}
                 </div>
             </fieldset>

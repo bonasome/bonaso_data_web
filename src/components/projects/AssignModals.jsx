@@ -89,8 +89,8 @@ export function AssignChild({ organization, project, onUpdate , onClose}){
         }
     } 
     return(
-        <div className={modalStyles.modal}>
-            <h2>Assigning subgrantees to {organization.name}</h2>
+        <div>
+            <h3>Assigning subgrantees to {organization.name}</h3>
             <Messages errors={errors} />
             <ModelMultiSelect IndexComponent={OrganizationsIndex} projAdd={project.id} 
                 addRedirect={{to: 'projects', projectID: project.id, orgID: organization.id }} labelField='name'
@@ -178,8 +178,8 @@ export function AssignTask({ organization, project, onUpdate, onClose }){
     } 
 
     return(
-        <div className={modalStyles.modal}>
-            <h2>Assigning tasks to {organization.name}</h2>
+        <div>
+            <h3>Assigning tasks to {organization.name}</h3>
             <Messages errors={errors} />
             <ModelMultiSelect IndexComponent={IndicatorsIndex} excludeParams={[
                 {field: 'project', value: project.id}, {field: 'organization', value: organization.id}
@@ -260,8 +260,8 @@ export function AssignOrgToProject({ project, onUpdate, onClose}){
         }
     } 
     return(
-        <div className={modalStyles.modal}>
-            <h2>Assigning organization to {project.name}</h2>
+        <div>
+            <h3>Assigning organization to {project.name}</h3>
             <Messages errors={errors} />
             <ModelMultiSelect IndexComponent={OrganizationsIndex} excludeParams={[{field: 'project', value: project.id}]}
                 labelField='name' onChange={(vals) => setOrgs(vals)} value={orgs} callbackText={`Assign to ${project.name}`}

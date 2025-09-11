@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { useAuth } from '../../../contexts/UserAuth';
 
@@ -12,7 +13,6 @@ import ComponentLoading from '../../reuseables/loading/ComponentLoading';
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import Messages from '../../reuseables/Messages';
 import UpdateRecord from '../../reuseables/meta/UpdateRecord';
-import { EditTargetModal } from './EditTargetModal';
 import GaugeChart from './GaugeChart';
 import styles from './targets.module.css';
 
@@ -91,7 +91,6 @@ export function TargetCard({ target, project, organization, onUpdate }){
     if(!target || !project || !organization) return <ComponentLoading />
 
     //when displaying confirm delete/edit modals, hide the card, since the hover features messes with modal styles
-    if(editing) return <EditTargetModal existing={target} project={project} organization={organization} onCancel={() => setEditing(false)} onUpdate={() => onUpdate()}/>
     if(del) return <ConfirmDelete name='Target' onConfirm={() => deleteTarget()} onCancel={() => setDel(false)} />
     
     return(
@@ -104,7 +103,7 @@ export function TargetCard({ target, project, organization, onUpdate }){
                     <p><i>From {(prettyDates(target?.start))} to {prettyDates(target?.end)}</i></p>
                     
                     <div style={{ display: 'flex', flexDirection: 'row'}}>
-                        {hasPerm && !editing && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit'} />}
+                        {hasPerm && !editing && <Link to={`/projects/${project.id}/organizations/${organization.id}/${target.id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit'} /></Link>}
                         {hasPerm && !editing && !del && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Target'} forDelete={true} />}
                     </div>
                     <UpdateRecord created_by={target.created_by} created_at={target.created_at} updated_by={target.updated_by} updated_at={target.updated_at} />
@@ -177,8 +176,7 @@ export default function Targets({ project, organization}) {
     return (
         <div>
             <Messages errors={errors} />
-            {hasPerm && <ButtonHover callback={() => setAdding(true)} noHover={<PiTargetBold />} hover={'New Target'} />}
-            {adding && <EditTargetModal onUpdate={handleChange} onCancel={() => setAdding(false)} project={project} organization={organization} />}
+            {hasPerm && <Link to={`/projects/${project.id}/organizations/${organization.id}/targets/new`}><button><PiTargetBold /> New Target</button></Link>}
             <IndexViewWrapper entries={entries} onSearchChange={setSearch} page={page} onPageChange={setPage}>
                 {(targets && project && organization && targets?.length) == 0 ? 
                     <p>No targets yet. Check back later.</p> :

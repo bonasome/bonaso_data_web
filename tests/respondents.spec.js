@@ -1,7 +1,7 @@
 import { test } from './playwright.setup'; 
 import { expect } from '@playwright/test'; 
 
-test('respondent flow', async ({ authToken: page }) => {
+test('respondent flow', async ({ authToken: page, resetDB }) => {
     await page.goto('http://localhost:5173/respondents');
     await page.waitForSelector('h1');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Respondents');
@@ -22,7 +22,7 @@ test('respondent flow', async ({ authToken: page }) => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('New Respondent');
 
     // Fill form
-    await page.fill('#id_no', `${new Date().toLocaleTimeString()}`);
+    await page.fill('#id_no', `TT1`);
     await page.fill('#first_name', '');
     await page.fill('#last_name', 'Testersonne');
     await page.fill('#dob', '2000-01-01');
@@ -79,5 +79,31 @@ test('respondent flow', async ({ authToken: page }) => {
     await page.fill('#term_began', '2024-01-01');
     await page.fill('#term_ended', '2024-09-01');
     await page.locator('button[aria-label="save"]').click();
-    await expect(page.getByText(/Pregnant from January 1, 2024 to September 1, 2024/i)).toBeVisible();
+    await expect(page.getByText(/Pregnancy started on January 1, 2024 ended on September 1, 2024/i)).toBeVisible();
+    await page.locator('button[aria-label="deletepregnancy"]').click();
+
+    await expect(page.getByText('No recorded pregnancies.')).toBeVisible();
+
+    await page.locator('button[aria-label="recordnewpregnancy"]').click();
+    await page.fill('#term_began', '2025-01-01');
+    await page.locator('button[aria-label="save"]').click();
+    await expect(page.getByText(/Pregnancy started on January 1, 2025/i)).toBeVisible();
+    
+    await page.getByText('Flags', { exact: true }).click();
+    const active = page.getByText('(ACTIVE)'); 
+    await expect(active).toHaveCount(3);
+
+    await page.locator('button[aria-label="editrespondent"]').click();
+    await page.waitForSelector('h1');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Editing Test Testersonne');
+    await page.fill('#id_no', '000010000');
+    await page.click('button[type=submit]'),
+    
+    await page.waitForURL(/\/respondents\/\d+$/),
+    await page.waitForSelector('h1');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Test Testersonne');
+
+    await page.getByText('Flags', { exact: true }).click();
+    const resolved = page.getByText('(RESOLVED)'); 
+    await expect(resolved).toHaveCount(3);
 });
