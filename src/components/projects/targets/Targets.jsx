@@ -96,7 +96,7 @@ export function TargetCard({ target, project, organization, onUpdate }){
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             <div onClick={() => setExpanded(!expanded)}>
-                <h3>Target for {target.display_name}</h3>
+                <h3>{target.display_name}</h3>
                 {expanded && <div>
                     <GaugeChart achievement={target.achievement} target={target.related_to ? target.related_as_number :  target.amount} />
                     {target.related_to && <p><i>Measured as {target.percentage_of_related}% of {' ' + target.related_to?.display_name}</i></p>}

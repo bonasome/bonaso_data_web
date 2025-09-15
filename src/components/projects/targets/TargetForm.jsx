@@ -216,7 +216,7 @@ export default function TargetModal(){
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
-    
+
     const targetTask = useWatch({ control, name: 'task_id', defaultValue: null}); //use so that a user cannot select the same task for related to
     //get if this is custom/by quarter/by month
     const typeVal = useWatch({ control, name: 'date_type', defaultValue: tryMatchDates(existing?.start, existing?.end, project)?.type});
@@ -278,7 +278,7 @@ export default function TargetModal(){
     ]
     return(
         <div className={styles.form}>
-            <h2>{existing ? `Editing Target` : 'Creating New Target' }</h2>
+            <h2>{existing ? `Editing Target` : 'New Target' }</h2>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={task} control={control} header={'Target For'}/>
