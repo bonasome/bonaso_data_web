@@ -240,7 +240,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             <h3>{interaction.display_name}</h3>
             {interaction?.flags.length > 0 && <div className={activeFlags ? errorStyles.warnings : errorStyles.success} onClick={() => setViewFlags(true)}>
-                {interaction?.flags.filter(f => !f.resolved).length > 0 ? <h3>This interaction has active flags</h3> : <h3>This interacion previously had flags.</h3>}
+                {interaction?.flags.filter(f => !f.resolved).length > 0 ? <h3>This interaction has active flags.</h3> : <h3>This interacion previously had flags.</h3>}
             </div>}
             {!editing && <div>
                 <p>{prettyDates(interaction.interaction_date)}</p>
