@@ -65,7 +65,7 @@ export default function RespondentDetail(){
     const [showDis, setShowDis] = useState(false);
 
     //parent helpers to manage passing information between tasks/interactions
-    const [addingTask, setAddingTask] = useState(() => () => {}); //called when the task callback button is clicked
+    const [addingTask, setAddingTask] = useState(null); //called when the task callback button is clicked
     const [added, setAdded] = useState([]); //list of IDs that have already been added and should be blacklisted
 
     //controls flag modal
@@ -111,7 +111,7 @@ export default function RespondentDetail(){
         }
         getRespondentMeta();
     }, [])
-    console.log(respondent)
+
     //fetch the details for this respondent
     useEffect(() => {
         const getRespondentDetails = async () => {
@@ -154,11 +154,13 @@ export default function RespondentDetail(){
 
     //helper functions that takes the callback from task and passes it down to interactions
     const handleButtonAdd = (task) => {
-        addingTask(task);
+        setAddingTask(task);
     };
+
     //update the added state for the blacklist
     const onUpdate = (data) => {
-        setAdded(data)
+        setAddingTask(null);
+        setAdded(data);
     }
 
     //helper functions that call the api to update hiv/pregnancy status on update
@@ -223,7 +225,7 @@ export default function RespondentDetail(){
         const country = countries.find(c => c.cca2 === code.toUpperCase());
         return country ? country.name.common : null;
     }
-
+    console.log(added)
     if(loading || !respondent) return <Loading /> 
     return(
         <div className={ sbVisible ? styles.respondentView : styles.respondentViewFull}>
@@ -347,7 +349,7 @@ export default function RespondentDetail(){
                 <div className={styles.interactions}>
                     <h2>Interactions</h2>
                     <Interactions id={id} respondent={respondent} meta={respondentsMeta} onUpdate={onUpdate} 
-                        setAddingTask={setAddingTask} onAdd={() => setAdded([])}/>
+                        buttonAdd={addingTask} onAdd={() => setAdded([])}/>
                 </div>
             </div>
             

@@ -17,7 +17,7 @@ import styles from './tasks.module.css';
 import { FaTrashAlt } from "react-icons/fa";
 
 //card that holds task details
-function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, onDelete=null, callback=null, callbackText='Select Task' }) {
+function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, onDelete=null, callback=null }) {
     /*
     Card that displays details about a Task
     - task (object): information about the task
@@ -27,7 +27,6 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
     - canDelete (boolean, optional): should this view show the delete button
     - onDelete (function, optional): what to do when this task is deleted
     - callback (function, optional): callback function that, when triggered, will pass this task to another component
-    - callbackText (string, optional): text to display on button that triggers callback function
     */
     //component meta
     const [errors, setErrors] = useState([]);
@@ -119,7 +118,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
             <h3>{task.display_name}</h3>
 
             {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button">
-                {callbackText}
+                Select {task.display_name}
             </button>}
             
             {expanded && (

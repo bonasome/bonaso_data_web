@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+import cleanLabels from '../../../../services/cleanLabels';
+
 import Messages from '../Messages';
 import Tooltip from '../Tooltip';
 
@@ -10,7 +12,7 @@ import modalStyles from '../../../styles/modals.module.css';
 
 import { FaCheckSquare } from "react-icons/fa";
 
-export default function ModelSelect({ name, IndexComponent, value, onChange, label,  errors, tooltip=null, callbackText, labelField='name', includeParams=[], excludeParams=[], blacklist=[] }){
+export default function ModelSelect({ name, IndexComponent, value, onChange, label,  errors, tooltip=null, labelField='name', includeParams=[], excludeParams=[], blacklist=[] }){
     /*
     Allows a user to select a single model instances for a foreign key field. Displays a modal 
     while the user is selecting and hides it once a value is selected. 
@@ -52,11 +54,11 @@ export default function ModelSelect({ name, IndexComponent, value, onChange, lab
                 <Messages errors={errors} />
                 <div className={styles.card}>
                     {value ? <p>Selected: <i>{value[labelField]}</i></p> : <p>Nothing selected</p>}
-                    <button type="button" onClick={() => setSelecting(true)}>Choose a new item</button>
+                    <button type="button" onClick={() => setSelecting(true)}>Choose a new {cleanLabels(name)}</button>
                     <button type="button" onClick={() => onChange(null)} disabled={!value}>Clear Selection</button>
                     <div className={modalStyles.modal} style={{ display: selecting ? 'block' : 'none' }}>
                         <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
-                            <IndexComponent callback={(obj) => {onChange(obj); setSelecting(false)}} callbackText={callbackText} includeParams={includeParams} excludeParams={excludeParams} blacklist={blacklist}/>
+                            <IndexComponent callback={(obj) => {onChange(obj); setSelecting(false)}} includeParams={includeParams} excludeParams={excludeParams} blacklist={blacklist}/>
                         </div>
                         <button onClick={() => setSelecting(false)} type='button'><FaCheckSquare /> Done</button>
                     </div>

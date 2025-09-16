@@ -18,7 +18,7 @@ import { IoIosSave } from "react-icons/io";
 import { BiSolidCommentAdd } from "react-icons/bi";
 import { FcCancel } from "react-icons/fc";
 import { ImPencil } from "react-icons/im";
-export default function AddInteractions({ respondent, meta, onUpdate, onFinish, setAddingTask }) {
+export default function AddInteractions({ respondent, meta, onUpdate, onFinish, buttonAdd }) {
     /*
     Component that allows a user to add a task(s) (either from a drag and drop or callback from a parent component)
     and record it as an interaction or a set of interactions with the same date/location/respondent. 
@@ -44,9 +44,6 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
     const [numberModalActive, setNumberModalActive] = useState(false);
     const [commentsModalActive, setCommentsModalActive] = useState(false);
     const [modalTask, setModalTask] = useState(null); //task/interaction that is currently being added and needs modal information
-
-    //state to control whether the user is actively adding tasks to create new interactions
-    const [active, setActive] = useState(false);
     
     //helper that controls which subcats are visible if there is a prerequisite condition (can be overwritten on editing at risk of a flag)
     const [allowedSubcats, setAllowedSubcats] = useState({});
@@ -79,15 +76,18 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
             setWarnings(['Please enter a valid interaction date.'])
         }
         setInteractionDate(date)
-        setWarnings([])
+        setWarnings([]);
     }
 
-    //set the state as active when the user clicks a button to add a task
+    //if a new task prop is passed from the parent component (signalling a button add) run the function
     useEffect(() => {
-        setErrors([])
-        setAddingTask(() => handleAdd)
-        if (!active) setTimeout(() => setActive(true), 0);
-    }, [setAddingTask])
+        const handleButton = async() => {
+            if(!buttonAdd) return;
+            setErrors([]);
+            await handleAdd(buttonAdd);
+        }
+        handleButton();
+    }, [buttonAdd])
 
 
     //drag and drop is supported, if so quickly parse package then pass to the main validation function
@@ -99,15 +99,14 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
         }
         e.preventDefault();
         const task = JSON.parse(e.dataTransfer.getData('application/json'));
-        if (!active) setTimeout(() => setActive(true), 0);
-        handleAdd(task);
+        await handleAdd(task);
     }
 
     // Required to allow drop
     const handleDragOver = (e) => {
         e.preventDefault(); 
     };
-
+    
     //validation function for when a new task is submitted (either via drag and drop or from the setAddingTask triggered on a button press)
     const handleAdd = async (task) => {
         setErrors([]);
@@ -137,7 +136,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
                 if (inBatch) {
                     found = true //if in the batch, we're good. 
                     //if subcats are present and supposed to be matched, auto limit them for convenience
-                    if(task.indicator.match_subcategories_to === prereq.id){
+                    if(task.indicator.match_subcategories_to == prereq.id){
                         const interSubcatIDs = inBatch.subcategories_data.map((cat) => (cat?.subcategory?.id));
                         const interSubcats = task.indicator.subcategories.filter(cat => (interSubcatIDs.includes(cat.id)));
                         setAllowedSubcats(prev=> ({...prev, [task.id]: interSubcats}));
@@ -167,10 +166,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
                 //if not found, push a warning that it will be flagged.
                 if (!found) {
                     dropWarnings.push(
-                        `This indicator requires this respondent to have had an interaction associated with 
-                        task ${prereq.display_name}, however, we could not find a prior record of this interaction. 
-                        If you record this interaction, it wil be flagged for further review.
-                        (HINT: Make sure you have a date set.)`
+                        `This indicator requires this respondent to have had an interaction associated with task ${prereq.display_name}, however, we could not find a prior record of this interaction. If you record this interaction, it wil be flagged for further review. (HINT: Make sure you have a date set.)`
                     );
                 }
             }
@@ -217,7 +213,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
 
         //create a new package containing all the fields the interaction may need
         const newIr = {id: task.id, task: task, subcategories_data: [], numeric_component: '', comments: ''}
-        const ids = [selected.map(s => s.id), task.id]
+        const ids = [...selected.map(s => s.id), task.id];
         //push this task id to the list of those in the interaction
         setSelected(prev => [...prev, newIr]) //update the state
 
@@ -401,7 +397,7 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
             )}
             <h3>New Interaction</h3>
             <Messages errors={errors} warnings={warnings} ref={alertRef} />
-            {!active && <i>Start dragging and dropping tasks to begin.</i>}
+            {selected?.length === 0 && <i>Start dragging and dropping tasks to begin.</i>}
             <div style={{ display: 'flex', flexDirection: `${width > 500 ? 'row' : 'column'}`}}>
                 <div style={{ display: 'flex', flexDirection: 'column'}}>
                     <label htmlFor="interaction_date">Interaction Date</label>
@@ -448,8 +444,8 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
             </div>
 
             <div style ={{ display: 'flex', flexDirection: 'row'}}>
-            {active && selected.length >0 && !saving && <button onClick={() => handleSubmit()}><IoIosSave /> Save</button>}
-            {active && selected.length >0 && !saving && <button onClick={() => {setSelected([]); setErrors([]); setWarnings([]);}}><FcCancel /> Cancel</button>}
+            {selected.length >0 && !saving && <button onClick={() => handleSubmit()}><IoIosSave /> Save</button>}
+            {selected.length >0 && !saving && <button onClick={() => {setSelected([]); setErrors([]); setWarnings([]);}}><FcCancel /> Cancel</button>}
             {saving && <ButtonLoading />}
             </div>
         </div>

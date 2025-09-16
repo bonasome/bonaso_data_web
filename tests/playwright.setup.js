@@ -10,10 +10,13 @@ export const test = base.extend({
     await use(null);
   },
 
-  authToken: async ({ page }, use) => {
+  authPage: async ({ page }, use, testInfo) => {
+    const username = testInfo.project.metadata?.user || 'admin';
+    const password = testInfo.project.metadata?.password || 'testpass123';
+
     await page.goto('http://localhost:5173/login');
-    await page.fill('#username', 'admin');
-    await page.fill('#password', 'testpass123');
+    await page.fill('#username', username);
+    await page.fill('#password', password);
     await page.click('button[type=submit]');
 
     // Wait for either dashboard heading OR consent modal

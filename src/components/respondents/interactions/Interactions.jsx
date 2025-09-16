@@ -11,7 +11,7 @@ import errorStyles from '../../../styles/errors.module.css';
 
 import styles from '../respondentDetail.module.css';
 
-export default function Interactions({ respondent, meta, onUpdate, setAddingTask, onAdd }){
+export default function Interactions({ respondent, meta, onUpdate, buttonAdd, onAdd }){
     /*
     Component that displays a list of interactions and gives the user the ability to create new interactions
     via the AddInteraction component.
@@ -77,12 +77,14 @@ export default function Interactions({ respondent, meta, onUpdate, setAddingTask
     return(
         <div>
                 {success && <div className={errorStyles.success}>{success}</div>}
-                {!['client'].includes(user.role) && <AddInteractions meta={meta} respondent={respondent} interactions={interactions} onUpdate={onUpdate} onFinish={onFinish} setAddingTask={setAddingTask}/>}
+                {!['client'].includes(user.role) && <AddInteractions meta={meta} respondent={respondent} interactions={interactions} onUpdate={onUpdate} onFinish={onFinish} buttonAdd={buttonAdd}/>}
+                <div id={'previous-interactions'}>
                 <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
                     <h2>Previous Interactions</h2>
                     {interactions.length === 0 && <p>No interactions yet. Be the first to create one!</p>}
                     {interactions.length > 0 && interactions.map((interaction) => (<InteractionCard key={interaction.id} interaction={interaction} onUpdate={getInteractions} onDelete={onDelete}/>))}
                 </IndexViewWrapper>
+                </div>
         </div>
     )
 }

@@ -15,19 +15,18 @@ import styles from '../../../styles/indexView.module.css';
 import { RiGovernmentFill } from "react-icons/ri";
 
 
-function ClientCard({ client, callback=null, callbackText='Select Client' }){
+function ClientCard({ client, callback=null }){
     /*
     Expandable client card that displays within the index component to show detail about a client.
     - client (object): the client to be displayed
     - callback (function, optional): if being used with a model select, function pass the client information 
         to another component.
-    - callbackText (string, optional): text to display on button that triggers the callback function
     */
     const [expanded, setExpanded] = useState(false);
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             {callback ? <h2>{client.name}</h2> : <Link to={`/clients/${client.id}`} style={{display:'flex', width:"fit-content"}}><h2>{client.name}</h2></Link>}
-            {callback && <button type="button" onClick={() => callback(client)}>{callbackText}</button> }
+            {callback && <button type="button" onClick={() => callback(client)}>Select {client.name}</button> }
             {expanded &&
                 <div>
                     {client.full_name && <p>{client.full_name}</p>}
@@ -37,13 +36,12 @@ function ClientCard({ client, callback=null, callbackText='Select Client' }){
     )
 }
 
-export default function ClientsIndex({ callback=null, callbackText='Select a Client', blacklist=[] }){
+export default function ClientsIndex({ callback=null, blacklist=[] }){
     /*
     Component that displays a paginated list of clients. Can be used either as a standalone component
     or within a model select component. 
     - callback (function, optional): if being used with a model select, function pass the client information 
         to another component.
-    - callbackText (string, optional): text to display on button that triggers the callback function
     - blacklist (array, optional): a list of ids to explictly hide
     */
     //context
@@ -98,7 +96,7 @@ export default function ClientsIndex({ callback=null, callbackText='Select a Cli
             <IndexViewWrapper entries={entries} page={page} onSearchChange={setSearch} onPageChange={setPage}>
                 {filteredClients?.length > 0 ? 
                     filteredClients.map((c) => (
-                        <ClientCard key={c.id} client={c} callback={callback ? callback : null} callbackText={callbackText}/>
+                        <ClientCard key={c.id} client={c} callback={callback ? callback : null}/>
                     )) :
                     <p>No clients yet!</p>
                 }

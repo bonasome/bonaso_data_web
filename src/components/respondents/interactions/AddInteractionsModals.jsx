@@ -142,7 +142,7 @@ export function SubcategoryModal({ options, onUpdate, onCancel, onClear, numeric
         onCancel();
     }
     return (
-        <div className={modalStyles.modal}>
+        <div className={modalStyles.modal} id='subcat-select'>
             <h2>Additional Information Required</h2>
             <Messages errors={overwriteError} />
             {/* check if a numeric value is required, and if so pass a specialized checkbox comp to handle it */}

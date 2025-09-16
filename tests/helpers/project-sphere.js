@@ -19,8 +19,10 @@ export async function createOrg(page, name = 'Test Org') {
     await clickWhenVisible(page.getByRole('button', { name: 'Save', exact: true }));
 
     await expect(page.getByRole('heading', { name })).toBeVisible();
-    console.log('Organization created.')
-    return name;
+    console.log('Organization created.');
+    const url = page.url();
+    const id = url.match(/\/organizations\/(\d+)/)?.[1];
+    return { id, name };
 }
 
 export async function createIndicator(page, code = 'T101', name = 'Test Indicator', type = 'respondent', numeric = false, subcats = true, prereq = '', matchSubcats = false, throwError = false) {
@@ -76,7 +78,7 @@ export async function createClient(page, name='Test Client') {
     await expect(page.getByRole('heading', { name: /Clients/i })).toBeVisible();
 
     await clickWhenVisible(page.getByText('Create New Client', { exact: true }));
-    await expect(page.getByText('Creating New Client')).toBeVisible();
+    await expect(page.getByRole('heading', { name: `Creating New Client` })).toBeVisible();
 
     await fillWhenVisible(page.locator('#name'), name);
     await fillWhenVisible(page.locator('#description'), 'This is a test.');
@@ -129,8 +131,8 @@ export async function createProjectActivity(page, name='Test Activity', status='
     await clickWhenVisible(page.getByRole('button', { name: 'Save', exact: true }));
     await page.waitForURL(/\/projects\/\d+$/);
 
-    await clickWhenVisible(page.getByText('Activities', { exact: true }));
-    await expect(page.getByText(name)).toBeVisible();
+    await clickWhenVisible(page.getByRole('heading', { name: 'Activities' }));
+    await expect(page.getByRole('heading', { name: name })).toBeVisible();
     console.log('Project Activity created.')
     return name;
 }
@@ -147,28 +149,26 @@ export async function createProjectDeadline(page, name='Test Deadline', status='
     await clickWhenVisible(page.getByRole('button', { name: 'Save', exact: true }));
     await page.waitForURL(/\/projects\/\d+$/);
 
-    await clickWhenVisible(page.getByText('Deadlines', { exact: true }));
+    await clickWhenVisible(page.getByRole('heading', { name: 'Deadlines' }));
     await expect(page.getByRole('heading', { name: name })).toBeVisible();
-    await expect(page.getByText(name)).toBeVisible();
     console.log('Deadline Created')
     return name;
 }
 
 export async function assignOrg(page, orgName='Test Org', projName='Test Project') {
-    await page.getByText('Organizations', { exact: true }).click();
-    await clickWhenVisible(page.getByText('Add Organization(s)'));
+    await clickWhenVisible(page.getByRole('button', { name: 'Organizations' }));
+    await clickWhenVisible(page.getByRole('button', { name:'Add Organization(s)' }));
 
-    await page.getByText('Select', { exact: true }).click();
+    await clickWhenVisible(page.getByRole('button', { name: 'Select' }))
 
     // Wait for org to appear before clicking
-    await page.getByRole('heading', { name: orgName })
+    await clickWhenVisible(page.getByRole('heading', { name: orgName })
         .locator('..') // parent container
-        .getByRole('button', { name: `Assign to ${projName}` })
-        .click();
+        .getByRole('button', { name: `Assign to ${projName}` }));
 
-    await page.getByText('Done Selecting', { exact: true }).click();
+    await clickWhenVisible(page.getByRole('button', { name: 'Select' }))
 
-    await clickWhenVisible(page.getByText(/Confirm Selection & Assign Organizations/i));
+    await clickWhenVisible(page.getByRole('button', { name: 'Confirm Selection & Assign Organizations' }));
 
     const link = page.getByRole('link', { name: orgName });
     await expect(link).toBeVisible();
@@ -184,16 +184,15 @@ export async function createTask(page, indicator='T101: Test Indicator') {
     await clickWhenVisible(page.getByText('Assign New Task(s)'));
     await expect(page.getByRole('heading', { name: /Assigning tasks/i })).toBeVisible();
 
-    await clickWhenVisible(page.getByText('Select', { exact: true }));
-    await expect(page.getByText(indicator)).toBeVisible();
+    await clickWhenVisible(page.getByRole('button', { name: 'Select' }));
+    await expect(page.getByRole('heading', { name: indicator })).toBeVisible();
 
-    await page.getByRole('heading', { name: indicator })
+    await clickWhenVisible(page.getByRole('heading', { name: indicator })
         .locator('..') // parent container
-        .getByRole('button', { name: `Assign as Task` })
-        .click(); //F
+        .getByRole('button', { name: `Assign as Task` }))
 
-    await clickWhenVisible(page.getByText('Done Selecting', { exact: true }));
-    await clickWhenVisible(page.getByText(/Confirm Selection & Assign Tasks/i));
+    await clickWhenVisible(page.getByRole('button', { name: 'Done Selecting' }));
+    await clickWhenVisible(page.getByRole('button', { name: 'Confirm Selection & Assign Tasks' }));
     await expect(page.getByText(/Successfully assigned 1 new tasks/i)).toBeVisible();
 
     console.log('Task created')
@@ -212,10 +211,9 @@ export async function createTarget(page, task='T101: Test Indicator (Test Org, T
 
     // Choose task
     await clickWhenVisible(page.getByRole('button', { name: 'Choose a new item' }));
-    await page.getByRole('heading', { name: indicator })
+    await clickWhenVisible(page.getByRole('heading', { name: indicator })
         .locator('..') // parent container
-        .getByRole('button', { name: 'Select Task' })
-        .click();
+        .getByRole('button', { name: 'Select Task' }));
 
     // Related target case
     if (related) {
@@ -224,7 +222,7 @@ export async function createTarget(page, task='T101: Test Indicator (Test Org, T
 
         const relatedRow = page.locator('div', { has: page.getByRole('heading', { name: related }) });
         await expect(relatedRow).toBeVisible();
-        await relatedRow.getByRole('button', { name: 'Select Task' }).click();
+        await clickWhenVisible(relatedRow.getByRole('button', { name: 'Select Task' }))
 
         await fillWhenVisible(page.locator('#percentage_of_related'), '100');
     } 
@@ -273,10 +271,9 @@ export async function assignSubgrantee(page, name='Test Org Jr.') {
     await expect(page.getByText(/Assigning subgrantees/i)).toBeVisible();
     await clickWhenVisible(page.getByRole('button', { name: 'Select' }));
     await expect(page.getByText(name)).toBeVisible();
-    await page.getByRole('heading', { name: name })
+    await clickWhenVisible(page.getByRole('heading', { name: name })
         .locator('..') // parent container
-        .getByRole('button', { name: `Assign as Subgrantee` })
-        .click();
+        .getByRole('button', { name: `Assign as Subgrantee` }))
     await clickWhenVisible(page.getByText('Done Selecting', { exact: true }));
     await clickWhenVisible(page.getByText(/Confirm Selection/i));
     await expect(page.getByText(/Successfully assigned 1 new subgrantees/i)).toBeVisible();

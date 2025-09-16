@@ -78,7 +78,7 @@ function IndicatorCard({ indicator, callback = null, callbackText='Select Indica
             {(!callback && user.role == 'admin') ? <Link to={`/indicators/${indicator.id}`} style={{display:'flex', width:"fit-content"}}><h2>{indicator.display_name}</h2></Link> : <h2>{indicator.display_name}</h2>}
             {callback && (
                 <button type="button" onClick={(e) => { e.stopPropagation(); callback(indicator); }}>
-                    {callbackText}
+                    Select {indicator.display_name}
                 </button>
             )}
             {expanded && loading && <ComponentLoading />}
@@ -106,7 +106,7 @@ function IndicatorCard({ indicator, callback = null, callbackText='Select Indica
     );
 }
 
-export default function IndicatorsIndex({ callback=null, callbackText='Add Indicator', includeParams=[], excludeParams=[], updateTrigger=null, blacklist=[], }){
+export default function IndicatorsIndex({ callback=null, includeParams=[], excludeParams=[], updateTrigger=null, blacklist=[], }){
     /*
     Expandable card that displays details about particular indicator for use with an index component
     - callback (function, optional): a callback function that allows information about this indicator to be selected and 
@@ -220,7 +220,7 @@ export default function IndicatorsIndex({ callback=null, callbackText='Add Indic
                 {filteredIndicators.length === 0 ? 
                     <p>No indicators match your criteria.</p> :
                     filteredIndicators.map(ind => (
-                        <IndicatorCard key={ind.id} indicator={ind} callback={callback ? (indicator)=> callback(indicator) : null} callbackText={callbackText} />)
+                        <IndicatorCard key={ind.id} indicator={ind} callback={callback ? (indicator)=> callback(indicator) : null} />)
                     )
                 }
             </IndexViewWrapper>

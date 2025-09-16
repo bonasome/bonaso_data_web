@@ -151,7 +151,7 @@ The return link displays a small bar at the top of a page with an arrow and a li
 ## [Messages](/src/components/reuseables/Messages.jsx)
 This component is designed to display all errors, warnings, and success messages. Can optionally accept a ref for automatic scrolling. Any pages that have any API interactions should include this component.
 ```jsx
-<Messages errors={errors} warnings={warnings} success={success} /> //with errors, warnings, and success each being an array
+<Messages errors={errors} warnings={warnings} success={success} ref={alertRef} /> //with errors, warnings, and success each being an array
 ```
 
 ## [Tooltip](/src/components/reuseables/Tooltip.jsx)

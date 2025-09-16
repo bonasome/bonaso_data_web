@@ -7,7 +7,7 @@ import styles from '../../../styles/indexSelect.module.css';
 import modalStyles from '../../../styles/modals.module.css';
 
 //select multiple models from an index component
-export default function ModelMultiSelect({ name, IndexComponent, value, onChange, label, errors=[], tooltip=null, callbackText, labelField='display_name', includeParams=[], excludeParams=[], projAdd=false, addRedirect=null, blacklist=[] }){
+export default function ModelMultiSelect({ name, IndexComponent, value, onChange, label, errors=[], tooltip=null, labelField='display_name', includeParams=[], excludeParams=[], projAdd=false, addRedirect=null, blacklist=[] }){
     /*
     Allows a user to select multiple model instances for m2m or many-to-one fields. Displays a modal 
     while the user is selecting. Utilizes an IndexComponent and its callback feature.
@@ -77,12 +77,12 @@ export default function ModelMultiSelect({ name, IndexComponent, value, onChange
                         </div>
                     
                     : <p>Nothing selected</p>}
-                    <button type="button" onClick={() => setSelecting(!selecting)}>{selecting ? 'Done' : 'Select'}</button>
+                    <button type="button" onClick={() => setSelecting(true)}>Select new items for {label}</button>
                     <button type="button" onClick={() => onChange([])} disabled={(!value || value.length === 0)}>Clear Selection</button>
                     {selecting && <div className={modalStyles.modal}>
                         <h2>{label}</h2>
                         <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
-                            <IndexComponent callback={(obj) => handleAdd(obj)} callbackText={callbackText} blacklist={[...selectedVals, ...blacklist]} includeParams={includeParams} excludeParams={excludeParams} projAdd={projAdd} addRedirect={addRedirect} />
+                            <IndexComponent callback={(obj) => handleAdd(obj)} blacklist={[...selectedVals, ...blacklist]} includeParams={includeParams} excludeParams={excludeParams} projAdd={projAdd} addRedirect={addRedirect} />
                         </div>
                         <button onClick={() => setSelecting(false)}>Done Selecting</button>
                     </div>}

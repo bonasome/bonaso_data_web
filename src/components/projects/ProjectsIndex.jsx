@@ -21,7 +21,7 @@ import { HiLightBulb } from "react-icons/hi";
 import { GiJumpAcross } from 'react-icons/gi';
 import { ImPencil } from 'react-icons/im';
 
-function ProjectCard({ project, callback=null, callbackText='Select Project' }) {
+function ProjectCard({ project, callback=null }) {
     /*
     Component that displays a paginated list of projects. Can be used either as a standalone component
     or within a model select component. 
@@ -71,7 +71,7 @@ function ProjectCard({ project, callback=null, callbackText='Select Project' }) 
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             {callback ? <h2>{project.name}</h2> : <Link to={`/projects/${project.id}`} style={{display:'flex', width:"fit-content"}}><h2>{project.name}</h2></Link>}
-            {callback && <button type="button" onClick={() => callback(project)}>{callbackText}</button>}
+            {callback && <button type="button" onClick={() => callback(project)}>{project.name}</button>}
             {expanded && loading && <ComponentLoading />}
             {expanded && active && 
                 <div>

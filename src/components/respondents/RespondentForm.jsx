@@ -109,6 +109,7 @@ export default function RespondentForm(){
          const getRespondentDetails = async () => {
             if(!id) return;
             try {
+                setLoading(true);
                 console.log('fetching respondent details...');
                 const response = await fetchWithAuth(`/api/record/respondents/${id}/`);
                 const data = await response.json();
@@ -125,6 +126,9 @@ export default function RespondentForm(){
                 setSubmissionErrors(['Something went wrong. Please try again later.'])
                 console.error('Failed to fetch respondent: ', err);
             } 
+            finally{
+                setLoading(false);
+            }
         };
         getRespondentDetails();
     }, [id]);   

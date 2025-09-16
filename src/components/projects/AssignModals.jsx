@@ -92,12 +92,12 @@ export function AssignChild({ organization, project, onUpdate , onClose}){
         <div>
             <h3>Assigning subgrantees to {organization.name}</h3>
             <Messages errors={errors} />
-            <ModelMultiSelect IndexComponent={OrganizationsIndex} projAdd={project.id} 
+            <ModelMultiSelect IndexComponent={OrganizationsIndex} projAdd={project.id} name={organization.name} label={organization.name}
                 addRedirect={{to: 'projects', projectID: project.id, orgID: organization.id }} labelField='name'
-                onChange={(vals) => setOrgs(vals)} value={orgs} callbackText='Assign as Subgrantee' 
+                onChange={(vals) => setOrgs(vals)} value={orgs} 
             />
             {!saving && <div style={{ display: 'flex', flexDirection: 'row'}}>
-                <button onClick={() => assignChild()}><IoIosSave /> Confirm Selection & Assign Subgrantees</button>
+                <button onClick={() => assignChild()}><IoIosSave /> Confirm Selection & Assign Subgrantee(s)</button>
                 <button onClick={() => onClose()}><FcCancel /> Cancel</button>
             </div>}
             {saving && <ButtonLoading />}
@@ -181,11 +181,11 @@ export function AssignTask({ organization, project, onUpdate, onClose }){
         <div>
             <h3>Assigning tasks to {organization.name}</h3>
             <Messages errors={errors} />
-            <ModelMultiSelect IndexComponent={IndicatorsIndex} excludeParams={[
+            <ModelMultiSelect label={organization.name} IndexComponent={IndicatorsIndex} excludeParams={[
                 {field: 'project', value: project.id}, {field: 'organization', value: organization.id}
             ]} onChange={(vals) => setIndicators(vals)} value={indicators} callbackText='Assign as Task' />
             {!saving && <div style={{ display: 'flex', flexDirection: 'row'}}>
-                <button onClick={() => addTask()}> <IoIosSave /> Confirm Selection & Assign Tasks</button>
+                <button onClick={() => addTask()}> <IoIosSave /> Confirm Selection & Assign Task(s)</button>
                 <button onClick={() => onClose()}> <FcCancel /> Cancel</button>
             </div>}
             {saving && <ButtonLoading />}
@@ -263,11 +263,12 @@ export function AssignOrgToProject({ project, onUpdate, onClose}){
         <div>
             <h3>Assigning organization to {project.name}</h3>
             <Messages errors={errors} />
-            <ModelMultiSelect IndexComponent={OrganizationsIndex} excludeParams={[{field: 'project', value: project.id}]}
+            <ModelMultiSelect name={project.name} label={project.name}
+                IndexComponent={OrganizationsIndex} excludeParams={[{field: 'project', value: project.id}]}
                 labelField='name' onChange={(vals) => setOrgs(vals)} value={orgs} callbackText={`Assign to ${project.name}`}
             />
             {!saving && <div style={{ display: 'flex', flexDirection: 'row'}}>
-                <button onClick={() => assignOrg()}><IoIosSave /> Confirm Selection & Assign Organizations</button>
+                <button onClick={() => assignOrg()}><IoIosSave /> Confirm Selection & Assign Organization(s)</button>
                 <button onClick={() => onClose()}><FcCancel /> Cancel</button>
             </div>}
             {saving && <ButtonLoading />}

@@ -22,7 +22,7 @@ import { ImPencil } from 'react-icons/im';
 import { GiJumpAcross } from 'react-icons/gi';
 import { BsBuildingFillAdd } from "react-icons/bs";
 
-function OrganizationCard({ org, callback, callbackText }) {
+function OrganizationCard({ org, callback }) {
     //context
     const { organizationDetails, setOrganizationDetails } = useOrganizations();
 
@@ -66,7 +66,7 @@ function OrganizationCard({ org, callback, callbackText }) {
     return (
         <div className={expanded ? styles.expandedCard : styles.card} onClick={handleClick}>
             {callback ? <h2>{org.name}</h2> : <Link to={`/organizations/${org.id}`} style={{display:'flex', width:"fit-content"}}><h2>{org.name}</h2></Link>}
-            {callback && <button type="button" onClick={() => callback(org)}>{callbackText}</button>}
+            {callback && <button type="button" onClick={() => callback(org)}>Select {org.name}</button>}
             {expanded && loading && <ComponentLoading />}
             {expanded && active && 
                 <div>
@@ -85,12 +85,11 @@ function OrganizationCard({ org, callback, callbackText }) {
     );
 }
 
-export default function OrganizationsIndex( { callback=null, callbackText='Select Organization', includeParams=[], excludeParams=[], updateTrigger=null,  blacklist=[], projAdd=null, addRedirect=null, }){
+export default function OrganizationsIndex( { callback=null, includeParams=[], excludeParams=[], updateTrigger=null,  blacklist=[], projAdd=null, addRedirect=null, }){
     /*
     Component that displays a paginated list of organizations.
     - callback (function, optional): a callback function that allows information about this org to be selected and 
-        passed to another component
-    - callbackText (string, optional): text to display on the button that triggers the callback function 
+        passed to another component 
     - includeParams (array, optional): specify explicitly certain URL param filters
     - excludeParams (array, optional): specify explicitly certain URL params to not include in the index
     - updateTrigger (function, optional): provide a variable that will refetch the list of orgs
@@ -210,7 +209,7 @@ export default function OrganizationsIndex( { callback=null, callbackText='Selec
                 {filteredOrgs?.length == 0 ? 
                     <p>No organizations match your criteria.</p> :
                     filteredOrgs?.map(org => (
-                        <OrganizationCard key={org.id} org={org} callback={callback ? callback : null} callbackText={callbackText} />
+                        <OrganizationCard key={org.id} org={org} callback={callback ? callback : null} />
                     ))
                 }
             </IndexViewWrapper>
