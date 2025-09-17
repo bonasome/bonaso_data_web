@@ -225,7 +225,7 @@ export default function RespondentDetail(){
         const country = countries.find(c => c.cca2 === code.toUpperCase());
         return country ? country.name.common : null;
     }
-    console.log(added)
+
     if(loading || !respondent) return <Loading /> 
     return(
         <div className={ sbVisible ? styles.respondentView : styles.respondentViewFull}>

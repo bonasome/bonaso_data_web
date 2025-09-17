@@ -128,7 +128,7 @@ export default function ProjectActivitiyIndex({ project }){
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter 
                 onFilterChange={setFilters} config={filterConfig(projectsMeta, orgs, (s) => setOrgSearch(s))} initial={initial}  
             />}>
-                {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/activities/new`}><ButtonHover  noHover={<TbCalendarEvent />} hover={'New Activity'} /></Link>}
+                {!['client'].includes(user.role) && <Link to={`/projects/${project.id}/activities/new`}><button> <TbCalendarEvent /> New Activity </button></Link>}
                 {validActivities?.length === 0 ? 
                     <p>No activities match your criteria.</p> :
                     validActivities?.map(act => (

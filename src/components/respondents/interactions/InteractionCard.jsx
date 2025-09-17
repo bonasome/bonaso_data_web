@@ -116,6 +116,9 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             setSaving(true);
             console.log('submitting edits...', data)
             //the backend will start pouting if this is an empty string, and you know how the backend gets when its angry. 500 city
+            if(data.subcategories_data.length > 0 && !interaction?.task?.indicator?.require_numeric){
+                data.subcategories_data = data.subcategories_data.map(sc => ({id: null, subcategory: {id: sc}}))
+            }
             if(data.numeric_component == '') data.numeric_component = null;
             const url = `/api/record/interactions/${interaction.id}/`; 
             const response = await fetchWithAuth(url, {
@@ -165,7 +168,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
         return {
             interaction_date: interaction?.interaction_date ?? '',
             interaction_location: interaction?.interaction_location ?? '',
-            subcategories_data: interaction?.subcategories ?? '',
+            subcategories_data: (interaction?.task?.indicator?.require_numeric ? interaction?.subcategories : interaction?.subcategories?.map(ir => ir?.subcategory?.id)) ?? '',
             numeric_component: interaction?.numeric_component ?? '',
         }
     }, [interaction]);
@@ -203,7 +206,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
     //show only if subcats are required
     const subcats = [
         { name: 'subcategories_data', label: 'Date', type: `${interaction?.task?.indicator?.require_numeric ? 'multiselectnum' : 'multiselect'}`, 
-            rules: { required: "Required" }, options: interaction?.task?.indicator?.subcategories,
+            rules: { required: "Required" }, options: interaction?.task?.indicator?.subcategories, valueField: 'id', labelField: 'name',
             tooltip: 'Please select all relvent subcategories that are applicable for this interaction.',
         },
     ]
@@ -266,7 +269,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                 </div>}
 
                 <div style={{ display: 'flex', flexDirection: 'row'}}>
-                    {hasPerm && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} />}
+                    {hasPerm && <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={`Edit Details`} />}
                     {hasPerm && <ButtonHover callback={() => setFlagging(true)} noHover={<MdFlag />} hover={'Raise New Flag'} forWarning={true} />}
                     {user.role == 'admin' && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Record'} forDelete={true} />}
                     {del && <ButtonLoading forDelete={true} /> }

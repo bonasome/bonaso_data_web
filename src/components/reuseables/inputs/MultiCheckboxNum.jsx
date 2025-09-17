@@ -52,18 +52,18 @@ export default function MultiCheckboxNum({ options, name, value, label, onChange
                     <div className={styles.checkbox}>
                         <input
                             type="checkbox"
-                            name={item.id}
+                            name={`subcats-${item.id}`}
                             checked={checked}
                             onChange={() => toggleValue(item)}
-                            id={`${item.id}`}
+                            id={`subcats-${item.id}`}
                             style={{ display: "none" }}
                         />
-                        <label htmlFor={`${item.id}`}>
+                        <label htmlFor={`subcats-${item.id}`}>
                             {checked ? <IoCheckboxSharp style={{ marginRight: 12}} /> : 
                                 <GrCheckbox style={{ marginRight: 12}}/>}
                             {item.name}
                         </label>
-                        {checked && <input type="number" value={number} onChange={(e) => changeNumber(item, e.target.value)} />}
+                        {checked && <input name={`number-${item.id}`} id={`number-${item.id}`} aria-label={`number-${item.id}`} type="number" value={number} onChange={(e) => changeNumber(item, e.target.value)} />}
                     </div>
                 )
 

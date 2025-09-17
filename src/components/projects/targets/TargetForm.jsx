@@ -131,7 +131,7 @@ export default function TargetModal(){
             });
             const returnData = await response.json();
             if(response.ok){
-                setSuccess(['Project created successfuly!']);
+                setSuccess(['Target created successfuly!']);
                 if(action === 'create_another'){
                     setExisting(null);
                     reset();

@@ -67,7 +67,7 @@ export default function AnnouncementsIndex({ project=null }){
         <div className={styles.index}>
             <Messages errors={errors} />
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} >
-                {!['client'].includes(user.role) && <ButtonHover callback={() => setComposing(true)} noHover={<GrAnnounce />} hover={'New Announcement'} />}
+                {!['client'].includes(user.role) && <button onClick={() => setComposing(true)}><GrAnnounce /> New Announcement</button>}
                 {composing && <ComposeAnnouncementModal projectID={project.id} onUpdate={(data) => setAnnouncements(prev => [...prev, data])} onClose={() => setComposing(false)} />}
                 {announcements?.length === 0 ? 
                     <p>No announcements match your criteria.</p> :

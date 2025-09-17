@@ -174,7 +174,7 @@ export default function Targets({ project, organization}) {
     
     if (loading) return <ComponentLoading />
     return (
-        <div>
+        <div id='targets'>
             <Messages errors={errors} />
             {hasPerm && <Link to={`/projects/${project.id}/organizations/${organization.id}/targets/new`}><button><PiTargetBold /> New Target</button></Link>}
             <IndexViewWrapper entries={entries} onSearchChange={setSearch} page={page} onPageChange={setPage}>

@@ -157,7 +157,6 @@ export default function EventDetail(){
             console.error('Failed to fetch event: ', err);
         } 
     };
-
     //load event counts once on load
     useEffect(() => {
         const initialLoad = async () => {
@@ -224,7 +223,6 @@ export default function EventDetail(){
         setNewCount(false)
         setNewTask('')
     }
-    console.log(newTask)
     //check if a user has permissions to edit event details
     const hasPerm = useMemo(() => {
         if(!event) return false
@@ -238,7 +236,8 @@ export default function EventDetail(){
         const countKeys = Object.keys(eventCounts);
         return event?.tasks?.filter((t) => !countKeys.includes(t.id.toString()))
             .map((ts) => ({value: ts.id, label: ts.display_name})) ?? [];
-    }, [event]);
+    }, [eventCounts]);
+
     if(loading || !event || !breakdowns) return <Loading />
     return(
         <div>

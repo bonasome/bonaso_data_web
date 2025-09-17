@@ -421,7 +421,7 @@ export default function Counts({ event, breakdownOptions, task, onUpdate, onCanc
 
     if(!task) return <></> //should never happen unless something has gone very wrong
     return(
-        <div className={existing ? styles.countSegment : styles.segment}>
+        <div className={existing ? styles.countSegment : styles.segment} id={task.display_name.replace(/\s+/g, '').toLowerCase()}>
             {warning && <Warn onConfirm={() => confirmChange()} onCancel={() => setWarning(null)} />}
 
             {del && <ConfirmDelete name={`Counts for Task: ${task.display_name} Event: ${event.name}`} onConfirm={() => deleteCount()} onCancel={() => setDel(false)} />}

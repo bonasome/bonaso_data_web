@@ -311,7 +311,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
 
     if(loading) return <ComponentLoading />
     return (
-        <div className={styles.tasks}>
+        <div className={styles.tasks} id={'tasks'}>
             <Messages errors={errors} success={success} ref={alertRef} />
             
             <p><i>Search your tasks by name, organization, or project.</i></p>
