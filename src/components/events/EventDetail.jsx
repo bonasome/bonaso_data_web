@@ -138,6 +138,7 @@ export default function EventDetail(){
         await sleep(1000);
         try {
             console.log('fetching event details...');
+            setLoading(true);
             const response = await fetchWithAuth(`/api/activities/events/${id}/get-counts/`);
             const data = await response.json();
             if(response.ok){
@@ -156,6 +157,9 @@ export default function EventDetail(){
         catch (err) {
             console.error('Failed to fetch event: ', err);
         } 
+        finally{
+            setLoading(false);
+        }
     };
     //load event counts once on load
     useEffect(() => {

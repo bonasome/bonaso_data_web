@@ -138,10 +138,10 @@ export default function LineListSettings({ onClose, onUpdate, existing=null }){
 
     return(
         <div className={styles.modal}>
-            <h2>Editing Line List Settings</h2>
+            <h2>Line List Settings</h2>
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <Messages errors={submissionErrors} />
-                <FormSection fields={basics} control={control} header='Line List Settings'/>
+                <FormSection fields={basics} control={control} header='Basic Settings'/>
                 <FormSection fields={scope} control={control} header='Line List Scope'/>
                 {orgSel && <FormSection fields={org} control={control} header='Cascade to Subgrantees?'/>}
 

@@ -30,6 +30,7 @@ function CustomFilterSegment({ type, options, value, callback}){
 
             {expanded && <div className={styles.chartFilters}>
                 <MultiCheckbox label={cleanLabels(type)} 
+                    name={type}
                     options={options} 
                     onChange={(vals) => callback(vals)}
                     value={value}
@@ -61,6 +62,7 @@ function BreakdownFilterSegment({ options, option, value, callback}){
                     options={
                         Object.keys(options[option]).map(val => ({'value': val, 'label': options[option][val]}))
                     } 
+                    name={option}
                     onChange={(vals) => callback(vals)}
                     value={value}
                 />

@@ -166,10 +166,10 @@ export default function PivotTableSettings({ onClose, onUpdate, meta, existing=n
     if(!meta?.fields) return <></>
     return(
         <div className={styles.modal}>
-            <h2>Editing Pivot Table Settings</h2>
+            <h2>Pivot Table Settings</h2>
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <Messages errors={submissionErrors} />
-                <FormSection fields={basics} control={control} header='Pivot Table Settings'/>
+                <FormSection fields={basics} control={control} header='Basic Settings'/>
                 {fields.length > 0 && <FormSection fields={params} control={control} header='Select Breakdowns'/>}
                 <FormSection fields={scope} control={control} header='Pivot Table Scope'/>
                 {orgSel && <FormSection fields={org} control={control} header='Cascade to Subgrantees?'/>}

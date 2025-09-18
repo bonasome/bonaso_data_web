@@ -118,7 +118,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
     };
 
     return(
-        <div className={styles.chart}>
+        <div className={styles.chart} id={chartData.chart.display_name.replace(/\s+/g, '').toLowerCase()}>
             {chartData &&  <div>
                 {del && <ConfirmDelete onCancel={() => setDel(false)} onConfirm={handleRemove} allowEasy={true} name={'this beautiful chart'} />}
                 

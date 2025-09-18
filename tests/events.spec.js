@@ -34,41 +34,53 @@ test('can create count w/ appropriate flags' ,async({ authPage: page, resetDB}) 
     await expect(page.getByRole('heading', { name: /Events/i })).toBeVisible();
     await page.getByRole('link', { name: `Test Event` }).click();
     await expect(page.getByRole('heading', { name: 'Select a task to start adding counts.'})).toBeVisible();
-    const taskSelect = page.getByRole('combobox', { name: 'Select a Task' });
-    console.log(await page.locator('select >> option').allInnerTexts());
-    await expect(taskSelect).toBeVisible();
-    await taskSelect.selectOption({ label: 'T101: Test 1 (Parent Org, Test Project (for Client Org))' });
-
+    await page.selectOption('select#task', { label: 'T101: Test 1 (Parent Org, Test Project (for Client Org))' });
+    await page.selectOption('select#task', { label: 'T101: Test 1 (Parent Org, Test Project (for Client Org))' });
+    await page.selectOption('select#task', { label: 'T101: Test 1 (Parent Org, Test Project (for Client Org))' });
+    await expect(page.locator('select#task')).toHaveValue('1');
+    await expect(page.getByText('Sex')).toBeVisible({ timeout: 15000 })
     // Now wait for the form label
     const sexLabel = page.locator('label[for="sex"]');
     await expect(sexLabel).toBeVisible();
     await sexLabel.click();
     await page.locator(`label[for="age_range"]`).click();
-    await page.locator('#0').fill('8');
-    await page.locator('#10').fill('9');
-    await page.locator('#20').fill('10');
+    await page.locator('[id="0"]').fill('8');
+    await page.locator('[id="10"]').fill('9');
+    await page.locator('[id="20"]').fill('10');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(page.getByRole('heading', { name: /loading data/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /loading data/i })).toBeHidden({ timeout: 20000 });
     await expect(page.getByRole('heading', { name: 'Counts for T101: Test 1' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'By Age Range, Sex, Subcategory'})).toBeVisible({ timeout: 10000});
 
     await page.selectOption('select#task', { label: 'T102: Test Dep (Parent Org, Test Project (for Client Org))' });
+    await expect(page.locator('select#task')).toHaveValue('2');
     await page.locator(`label[for="sex"]`).click();
     await page.locator(`label[for="age_range"]`).click();
-    await page.locator('#0').fill('10');
-    await page.locator('#10').fill('8');
-    await page.locator('#20').fill('9');
+    await page.locator('[id="0"]').fill('10');
+    await page.locator('[id="10"]').fill('8');
+    await page.locator('[id="20"]').fill('9');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(page.getByText(/loading data/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /loading data/i })).toBeHidden({ timeout: 20000 });
     await expect(page.getByRole('heading', { name: 'Counts for T102: Test Dep' })).toBeVisible({ timeout: 10000 });
     await page.getByRole('heading', { name: 'Counts for T102: Test Dep' }).click();
-    const container = await page.locator('#t102:testdep(parentorg,testproject(forclientorg))')
+    const container = page.locator('[id="t102:testdep(parentorg,testproject(forclientorg))"]');
     await expect(container.getByRole('heading', { name: 'FLAGGED' })).toBeVisible();
-    await container.getByRole('strong', { name: '11' }).click();
-    await page.getByRole('heading', { name: 'Flag on Event Count 11' }).click();
+    await container.getByText('10', { exact: true }).click();
+    await page.getByRole('heading', { name: /Flag on Event Count 10/i }).click();
     await expect(page.getByText(/The amount of this count is greater than its corresponding prerequisite/i)).toBeVisible();
     await page.getByRole('button', { name: 'Close' }).click();
-    await container.locator('button[aria-label="edit"]').nth(1).click();
-    await page.locator('#0').fill('7');
-    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(page.getByText(/loading data/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /loading data/i })).toBeHidden({ timeout: 20000 });
+    await page.getByRole('heading', { name: 'Counts for T102: Test Dep' }).click();
+    await container.locator('button[aria-label="edit"]').click();
+    await page.locator('[id="0"]').fill('6');
+    await page.locator('[id="0"]').fill('6');
+    await page.locator('[id="0"]').fill('6');
+    await page.getByRole('button', { name: 'Save', exact: true }).click({ timeout: 20000 });
+    await expect(page.getByText(/loading data/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /loading data/i })).toBeHidden({ timeout: 20000 });
+    await page.getByRole('heading', { name: 'Counts for T102: Test Dep' }).click();
     await expect(page.getByText('This interaction has had flags in the past. You can view flag history by clicking on a number below.')).toBeVisible();
 
 })

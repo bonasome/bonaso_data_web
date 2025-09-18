@@ -196,6 +196,15 @@ export default function ChartSettingsModal({ dashboard, onUpdate, onClose, meta,
         if (hasSubcats) return meta.fields.filter(f => (!['platform', 'metric'].includes(f.value)));
         return meta.fields.filter(f => (!['subcategory', 'platform', 'metric'].includes(f.value)));
     }, [inds, meta]);
+    
+    const { images, chartTs } = useMemo(() => {
+        if (inds.length > 1) {
+            return { images: [FaChartLine, FaChartBar], chartTs: meta.chart_types.filter(c => c.value !== 'pie') };
+        } 
+        else {
+            return { images: [FaChartPie, FaChartLine, FaChartBar], chartTs: meta.chart_types };
+        }
+    }, [inds, meta]);
 
     //construct the fields
     const basics = [
@@ -206,7 +215,7 @@ export default function ChartSettingsModal({ dashboard, onUpdate, onClose, meta,
             not work very well either.`
         }, 
         { name: 'chart_type', label: 'Chart Type (Required)', type: "image", rules: { required: "Required" },
-            options: meta.chart_types, images: [FaChartPie, FaChartLine,FaChartBar],
+            options: chartTs, images: images,
             tooltip: `What type of chart do you need? Line charts work well when viewing over time,
             pie charts are good for viewing overall percentage breakdowns. If in doubt, start with a bar.`
         },

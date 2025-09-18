@@ -11,6 +11,7 @@ import ButtonLoading from "../reuseables/loading/ButtonLoading";
 import Messages from '../reuseables/Messages';
 import FlagDetailModal from '../flags/FlagDetailModal';
 import Tooltip from '../reuseables/Tooltip';
+import ComponentLoading from '../reuseables/loading/ComponentLoading';
 
 import styles from './eventDetail.module.css';
 import modalStyles from '../../styles/modals.module.css'
@@ -419,6 +420,7 @@ export default function Counts({ event, breakdownOptions, task, onUpdate, onCanc
         return false
     }
 
+    if(saving) return <ComponentLoading />
     if(!task) return <></> //should never happen unless something has gone very wrong
     return(
         <div className={existing ? styles.countSegment : styles.segment} id={task.display_name.replace(/\s+/g, '').toLowerCase()}>

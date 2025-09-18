@@ -312,22 +312,22 @@ export default function SocialPostDetail(){
                 {editing && <div>
                     <div>
                         <label>Likes</label>
-                        <input type='number' min='0' value={formData.likes} onChange={(e) => setFormData(prev => ({...prev, likes: e.target.value}))} />
+                        <input id='likes' type='number' min='0' value={formData.likes} onChange={(e) => setFormData(prev => ({...prev, likes: e.target.value}))} />
                     </div>
 
                     <div>
                         <label>Views</label>
-                        <input type='number' min='0' value={formData.views} onChange={(e) => setFormData(prev => ({...prev, views: e.target.value}))} />
+                        <input id='views' type='number' min='0' value={formData.views} onChange={(e) => setFormData(prev => ({...prev, views: e.target.value}))} />
                     </div>
 
                     <div>
                         <label>Comments</label>
-                        <input type='number' min='0' value={formData.comments} onChange={(e) => setFormData(prev => ({...prev, comments: e.target.value}))} />
+                        <input id='comments' type='number' min='0' value={formData.comments} onChange={(e) => setFormData(prev => ({...prev, comments: e.target.value}))} />
                     </div>
 
                     <div>
                         <label>Reach</label>
-                        <input type='number' min='0' value={formData.reach} onChange={(e) => setFormData(prev => ({...prev, reach: e.target.value}))} />
+                        <input id='reach' type='number' min='0' value={formData.reach} onChange={(e) => setFormData(prev => ({...prev, reach: e.target.value}))} />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'row' }} >
