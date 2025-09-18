@@ -47,6 +47,7 @@ See [`sitemap.md`](/docs/sitemap.md) for a full outline of routes and features.
   - **/routes** – frontend route definitions (not the same as backend API routes)  
   - **/styles** – CSS styles shared across components  
 - **/services** – helper and API functions (e.g., authenticated fetch utilities)  
+- **/tests** – contains Playwright e2e integration tests
 - **/theme** – style tokens and theme definitions (aligns with `/src/styles/tokens`) 
 
 - [**App.jsx**](/src/App.jsx) - The central app file, any context wrappers (except UserAuth) must be placed here

@@ -1,6 +1,13 @@
 import { test as base } from '@playwright/test';
-
+/*
+Helper functions that run before playwright tests
+*/
 export const test = base.extend({
+  /*
+  Resets the database and prepopulates some basse context information before a test (for a clean slate)
+  Will only work assuming a local dev server is launched with --settings=bonaso_data_server.test_settings 
+  and a local DB entitled bonaso_test_db is present.
+  */
   resetDB: async ({ request }, use) => {
     const response = await request.post('http://localhost:8000/api/tests/reset-db-DANGER/');
     if (!response.ok()) {
@@ -11,6 +18,9 @@ export const test = base.extend({
   },
 
   authPage: async ({ page }, use, testInfo) => {
+    /*
+    Navigates the login page and ensures the user is logged in when starting the test.
+    */
     const username = testInfo.project.metadata?.user || 'admin';
     const password = testInfo.project.metadata?.password || 'testpass123';
 

@@ -1,6 +1,7 @@
 // global-setup.js
 import { request } from '@playwright/test';
 
+//arguably not currently used
 export default async function globalSetup(config) {
     // login once and save auth state
     const { chromium } = await import('@playwright/test');
