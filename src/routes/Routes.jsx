@@ -63,6 +63,7 @@ import EventsIndex from '../components/events/EventsIndex';
 import Dashboards from '../components/analytics/dashboards/Dashboards';
 import PivotTables from '../components/analytics/pivotTables/PivotTables';
 import LineLists from '../components/analytics/lineLists/LineLists';
+import SiteAnalytics from '../components/analytics/siteAnalytics/SiteAnalytics';
 
 import Messages from '../components//messages/Messages';
 import ProjectActivityForm from '../components/projects/activities/ProjectActivityForm';
@@ -432,7 +433,13 @@ function Router() {
                     <LineLists />
                 </RedirectIfNoPerm>
             }/>
+            <Route path='site' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <SiteAnalytics />
+                </RedirectIfNoPerm>
+            }/>
         </Route>
+        
         
         <Route 
             path='/help' 
@@ -448,7 +455,7 @@ function Router() {
                 }/>
         </Route>
 
-
+            
 
         <Route
             path='/viewer'
