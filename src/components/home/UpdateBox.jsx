@@ -198,7 +198,7 @@ export default function UpdateBox(){
 
             {/* displayed content will depend on the currently selected tab */}
             {msgPane == 'announcements' && <div className={styles.msgPane}>
-                {user.role == 'admin' && <ButtonHover callback={() => setAdding(true)} noHover={<GrAnnounce />} hover={'New Announcement'} />}
+                {user.role == 'admin' && <button onClick={() => setAdding(true)}><GrAnnounce /> New Announcement</button> }
                 {announcements?.length == 0 && <p className={styles.placeholder}>No announcements yet.</p>}
                 {announcements?.map((a) => (<AnnouncementCard key={a.id} announcement={a} onUpdate={getAnnouncements}/>))}
 

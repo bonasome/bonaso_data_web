@@ -162,8 +162,6 @@ function ThinMenu() {
     )
 }
 
-
-
 export default function Navbar() {
     /*
     Navbar that appears at the top of the page. Its content/view will depend on both the user's role

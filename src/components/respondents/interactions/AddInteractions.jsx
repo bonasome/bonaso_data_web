@@ -397,7 +397,6 @@ export default function AddInteractions({ respondent, meta, onUpdate, onFinish, 
             )}
             <h3>New Interaction</h3>
             <Messages errors={errors} warnings={warnings} ref={alertRef} />
-            {selected?.length === 0 && <i>Start dragging and dropping tasks to begin.</i>}
             <div style={{ display: 'flex', flexDirection: `${width > 500 ? 'row' : 'column'}`}}>
                 <div style={{ display: 'flex', flexDirection: 'column'}}>
                     <label htmlFor="interaction_date">Interaction Date</label>

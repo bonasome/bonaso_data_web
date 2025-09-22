@@ -72,7 +72,7 @@ export default function AnnouncementsIndex({ project=null }){
                 {announcements?.length === 0 ? 
                     <p>No announcements match your criteria.</p> :
                     announcements?.map(annc => (
-                        <AnnouncementCard key={annc.id} project={project.id} announcement={annc}  onUpdate={loadAnncs}/>)
+                        <AnnouncementCard key={annc.id} project={project ? project.id : null} announcement={annc}  onUpdate={loadAnncs}/>)
                     )
                 }
             </IndexViewWrapper>
