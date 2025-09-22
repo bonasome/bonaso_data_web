@@ -35,14 +35,14 @@ export function AvgTimeChart({ data }) {
     };
     if(chartData.length === 0) return <p>No data yet!</p>
     return (
-        <div>
+        <div style={{ margin: '2vh', padding: '5vh', backgroundColor: theme.colors.bonasoUberDarkAccent}}>
             <h3>Average Time to Complete Request (ms)</h3>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData} layout="vertical">
-                    <XAxis  type="number"/>
-                    <YAxis dataKey="path" type="category"/>
+                    <XAxis  type="number" tick={{ fill: "white"}}/>
+                    <YAxis dataKey="path" type="category" tick={{ fill: "white"}} width={200}/>
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="avgResponseTime" fill="#8884d8" />
+                    <Bar dataKey="avgResponseTime" fill={theme.colors.bonasoLightAccent} />
                 </BarChart>
             </ResponsiveContainer>
         </div>
@@ -50,16 +50,18 @@ export function AvgTimeChart({ data }) {
 }
 
 export function AvgTimeChart7d({ data }) {
-    const [paths, setPaths] = useState([]);
+
+    let paths = []
     const grouped = data.reduce((acc, log) => {
         const date = new Date(log.timestamp).toISOString().split("T")[0]; // e.g. "2025-09-19"
         const key = `${log.path}|${date}`; // use a delimiter unlikely to appear in path
-
+        
         if (!acc[key]) acc[key] = [];
         acc[key].push(log.response_time_ms);
-        if(!paths.includes(log.path)) setPaths([...paths, log.path])
+        if(!paths.includes(log.path)) paths.push(log.path);
         return acc;
     }, {});
+    
 
     function pivotForRecharts(data) {
         const byDate = {};
@@ -83,12 +85,12 @@ export function AvgTimeChart7d({ data }) {
     
     if(chartData.length === 0) return <p>No data yet!</p>
     return (
-        <div>
+        <div style={{ margin: '2vh', padding: '5vh', backgroundColor: theme.colors.bonasoUberDarkAccent}}>
             <h3>Average Time to Complete Request (ms)</h3>
             <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={pivotForRecharts(chartData)}>
-                    <XAxis dataKey="date" />
-                    <YAxis />
+                    <XAxis dataKey="date" tick={{ fill: "white"}} />
+                    <YAxis tick={{ fill: "white"}}/>
                     <Tooltip />
                     <Legend />
                     {paths.map((path, i) => (
@@ -125,14 +127,14 @@ export function MostRequested7d({ data }) {
 
     if(chartData.length === 0) return <p>No data yet!</p>
     return (
-        <div>
+        <div style={{ margin: '2vh', padding: '5vh', backgroundColor: theme.colors.bonasoUberDarkAccent}}>
             <h3>Most Requested Endpoints (7 days)</h3>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData} layout="vertical">
-                    <XAxis type="number" />
-                    <YAxis type="category" dataKey="path" />
+                    <XAxis type="number" tick={{ fill: "white"}}/>
+                    <YAxis type="category" dataKey="path" tick={{ fill: "white"}} width={200} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="count" fill="#8884d8" />
+                    <Bar dataKey="count" fill={theme.colors.bonasoLightAccent} />
                 </BarChart>
             </ResponsiveContainer>
         </div>

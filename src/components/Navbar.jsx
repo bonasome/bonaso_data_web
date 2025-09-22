@@ -44,11 +44,17 @@ function Dropdown({ name }){
             setUrls(urls)
             setLabels(labels)
         }
-        if(name =='Analyze' && ['meofficer', 'manager', 'admin', 'client'].includes(user.role)){
+        if(name =='Analyze' && ['meofficer', 'manager', 'client'].includes(user.role)){
             let urls = ['/analytics', '/analytics/tables', '/analytics/lists', '/flags']
             let labels = ['View Dashboards', 'Pivot Tables', 'Line Lists', 'View Flags']
             setUrls(urls)
             setLabels(labels)
+        }
+        if(name=='Analyze' && user.role == 'admin'){
+            let urls = ['/analytics', '/analytics/tables', '/analytics/lists', '/flags', '/analytics/site']
+            let labels = ['View Dashboards', 'Pivot Tables', 'Line Lists', 'View Flags', 'Site Analytics']
+            setUrls(urls);
+            setLabels(labels);
         }
         if(name=='Team'){
             setUrls(['/profiles', '/profiles/new'])
@@ -131,16 +137,17 @@ function ThinMenu() {
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/events'}>Events</Link></div>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/social'}>Social</Link></div>}
             
-            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h2>Analyze</h2>}
-            {['admin', 'manager', 'meofficer', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics'}>Dashboards</Link></div>} 
-            {['admin', 'manager', 'meofficer', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics/tables'}>Pivot Tables</Link></div>} 
-            {['admin', 'manager', 'meofficer', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics/lists'}>Line Lists</Link></div>} 
-            
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h2>Projects</h2>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/organizations'}>Organizations</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/indicators'}>Indicators</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/clients'}>Clients</Link></div>}
+
+            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h2>Analyze</h2>}
+            {['admin', 'manager', 'meofficer', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics'}>Dashboards</Link></div>} 
+            {['admin', 'manager', 'meofficer', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics/tables'}>Pivot Tables</Link></div>} 
+            {['admin', 'manager', 'meofficer', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics/lists'}>Line Lists</Link></div>} 
+            {user.role == 'admin' && <div className={styles.menuBar}><Link to={'/analytics/site'}>Site Analytics</Link></div>}
 
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h2>Team</h2>}
             {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>My Team</Link></div>} 

@@ -117,7 +117,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
         >
             <h3>{task.display_name}</h3>
 
-            {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button">
+            {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button" style={{ maxHeight: 'fit-content' }}>
                 Select {task.display_name}
             </button>}
             
