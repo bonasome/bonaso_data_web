@@ -23,8 +23,8 @@ coverage/
 *.njsproj
 *.sln
 *.sw?
-*.env
-*.env.production
+/.env
+/.env.production
 
 # Playwright
 /test-results/
