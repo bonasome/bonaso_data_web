@@ -63,6 +63,9 @@ See [`sitemap.md`](/docs/sitemap.md) for a full outline of routes and features.
 - [HelperFunctions](/docs/services.md)
 - [Components](/docs/components.md)
 
+For local development, follow the instructions in this repository.  
+
+For production builds with Docker, see [bonaso_data_portal](https://github.com/bonasome/bonaso_data_portal), which combines the frontend and backend.
 ---
 
 ## Quick Start (Development)
