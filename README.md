@@ -40,6 +40,7 @@ See [`sitemap.md`](/docs/sitemap.md) for a full outline of routes and features.
 ---
 
 ## 3. Important Folders
+- **/nginx** – contains an nginx.conf file (used for Docker builds, see the [bonaso_data_portal](https://github.com/bonasome/bonaso_data_portal) repository for more information on Docker builds). Can be ignored for dev/non-docker builds.
 - **/src** – main code for the website:
   - **/assets** – images and static resources  
   - **/components** – reusable UI components  

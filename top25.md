@@ -1,29 +1,29 @@
 Miami
 Ohio State
-Georgia
-Florida State
 Oregon
+Ole Miss
 Texas A&M
 Oklahoma
-LSU
-Vanderbilt
 Indiana
+Vanderbilt
 Texas Tech
-Georgia Tech
-Ole Miss
 Iowa State
+Florida State
+Alabama
+Georgia
 Tennessee
-Penn State
+LSU
+Georgia Tech
 Missouri
-USC
-Texas
 State
-TCU
-USF
+Arizona State
+Penn State
+Texas
+Illinois
 Memphis
 Michigan
-UNT
+Notre Dame
 
-On Deck: Houston, BYU, Syracuse, UNLV, Auburn, Navy, Kansas, Arizona, Arizona State, Maryland, Notre Dame, Alabama
+On Deck: Houston, BYU, Syracuse, UNLV, Auburn, Navy, Kansas, Maryland
 
-Trending Down: Illinois, Utah, Cal, Clemson
+Trending Down: USC, Utah, Cal, Clemson
