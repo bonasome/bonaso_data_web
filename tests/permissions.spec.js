@@ -11,7 +11,7 @@ const changeAccounts = async (page, username='manager', password='testpass123') 
     await page.fill('#password', password);
     await page.getByRole('button', {name: 'Login'}).click({ timeout: 20000 });
 
-    await page.getByRole('button', { name: /I understand/i }).click({ timeout: 25000 });
+    await page.getByRole('button', { name: /I understand/i }).click({ timeout: 30000 });
 }
 
 test('test m&e/manager user creation', async({ resetDB, authPage: page }) => {
@@ -131,4 +131,22 @@ test('test m&e/manager subgrantee project view + assign target', async({ resetDB
     const container = page.locator('#targets');
     //it should contain targets for two new tasks
     await expect(container).toContainText(/T101: Test 1/i);
+});
+
+test('test m&e/manager interaction view', async ({ resetDB, authPage: page }) => {
+    await changeAccounts(page, 'manager');
+    await page.goto('/respondents');
+
+    await page.getByRole('heading', { name: 'Anonymous' }).click();
+    const container = page.locator('#previous-interactions');
+    await container.getByText('T102: Test Dep').click();
+    const card = await page.locator('div', { hasText: 'T102: Test Dep' })
+    //click edit button
+    const edit = await card.locator('button[aria-label="editdetails"]');
+    await edit.click();
+    //add a subcategory that us not selected in the prereq
+    await page.locator('label[for="subcategories_data-2"]').click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    //expect a flag to be created
+    await expect(container).toContainText('This interaction has active flags.', { timeout: 10000 });
 });
