@@ -109,6 +109,15 @@ export default function AnnouncementCard({ announcement, onUpdate }){
         }
     }
 
+    //determine if a user has edit perms
+    const hasPerm = useMemo(() => {
+        if(!user || !announcement) return false
+        if(user.role === 'admin') return true; //admin has perm
+        //otherwise check they are the corredt role and it is for their organization
+        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == announcement?.created_by.organization.id) return true
+        return false
+    }, [user, announcement]);
+
     if(!annc) return <></>
     //return delete/edit modals as a seperate component since the hovering card messes with the styling
     if(del) return <ConfirmDelete onConfirm={() => handleDelete()} onCancel={() => setDel(false)} name={'this announcement'} />
@@ -121,10 +130,10 @@ export default function AnnouncementCard({ announcement, onUpdate }){
                 <Messages errors={errors} />
                 <p>{annc.body}</p>
                 <p><i>Sent by {annc.sent_by.display_name} on {prettyDates(annc.sent_on)}</i></p>
-                <div style={{ display: 'flex', flexDirection: 'row'}}>
+                {hasPerm && <div style={{ display: 'flex', flexDirection: 'row'}}>
                     <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover={'Edit Details'} />
                     <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Announcement'} forDelete={true} />
-                </div>
+                </div>}
                 {annc.read && <p></p>}
             </div>}
         </div>
