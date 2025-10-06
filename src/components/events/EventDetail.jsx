@@ -349,6 +349,9 @@ export default function EventDetail(){
                         return null;
                     })}
                 </div>}
+                {eventCounts && Object.keys(eventCounts).length === 0 && <div>
+                    <p><i>No counts for this event... for now at least.</i></p>    
+                </div>}
             </div>
             <div className={styles.spacer}>
                 <p></p>
