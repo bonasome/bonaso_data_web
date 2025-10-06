@@ -56,7 +56,7 @@ export default function RespondentForm(){
 
     //existing values to start with
     const [existing, setExisting] = useState(null);
-
+    const [omangWarning, setOmangWarning] = useState([]);
     //page meta
     const [loading, setLoading] = useState(true);
     const [submissionErrors, setSubmissionErrors] = useState([]);
@@ -253,7 +253,7 @@ export default function RespondentForm(){
     }, [existing]);
 
     //construct RHF variables
-    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
+    const { register, control, handleSubmit, reset, watch, setFocus, setValue, formState: { errors } } = useForm({ defaultValues });
 
     //scroll to field errors on submission
     const onError = (errors) => {
@@ -281,7 +281,37 @@ export default function RespondentForm(){
         value: c.cca2
     }));    
 
-    const anon = useWatch({ control, name: 'is_anonymous', defaultValue: false })
+    const anon = useWatch({ control, name: 'is_anonymous', defaultValue: false });
+    const omang = useWatch({ control, name: 'id_no', defaultValue: ''});
+    const citizenship = useWatch({ control, name: 'citizenship', defaultValue: 'BW'});
+    const sex = useWatch({ control, name: 'sex', defaultValue: null});
+
+    const omangValid = useMemo(() => {
+        let war = [];
+        if(anon || citizenship != 'BW') {
+            setOmangWarning(war);
+            return;
+        };
+        if(omang != '' && omang.length != 9 ){
+            war.push('Omang for Botswana citizens must be 9 digits.');
+        }
+        if(omang.length > 5){
+            const digit = omang[4];
+            if(!['1', '2'].includes(digit)){
+                war.push('Fifth digit for citizens must be either "1" or "2".');
+            }
+            if(!sex){
+                if(digit === '1'){
+                    setValue('sex', 'M');
+                }
+                if(digit === '2'){
+                    setValue('sex', 'F')
+                }
+                
+            }
+        }
+        setOmangWarning(war);
+    }, [omang, citizenship, anon]);
 
     //anon toggle
     const isAnon = [
@@ -368,6 +398,7 @@ export default function RespondentForm(){
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={isAnon} control={control} header={'Respondent Anonymity'} />
                 {anon && <FormSection fields={anonBasic} control={control} header='Basic Information' />}
+                {!anon && <Messages warnings={omangWarning} />}
                 {!anon && <FormSection fields={notAnonBasic} control={control} header='Basic Information' />}
                 <FormSection fields={basics} control={control} header='Sex' />
                 {!anon && <FormSection fields={address} control={control} header='Address'/>}
