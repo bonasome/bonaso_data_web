@@ -109,7 +109,7 @@ export default function AnnouncementCard({ announcement, onUpdate }){
             setDel(false);
         }
     }
-    console.log(annc)
+
     //determine if a user has edit perms
     const hasPerm = useMemo(() => {
         if(!user || !annc) return false

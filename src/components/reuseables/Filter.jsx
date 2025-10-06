@@ -50,7 +50,7 @@ export default function Filter({ onFilterChange, initial, config }){
     if(!initial || !config ) return <ComponentLoading />
     return (
         <div className={styles.filterContainer} ref={containerRef}>
-            <ButtonHover callback={() => setShowFilters(!showFilters)} noHover={<FaFilter />} hover={'Filter Results'} />
+            <button onClick={() => setShowFilters(!showFilters)} aria-label='showfilter'><FaFilter /></button>
             {showFilters && (
                 <div className={styles.filters}>
                         {config.map((field) => {
