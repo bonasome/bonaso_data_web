@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import prettyDates from '../../../../services/prettyDates';
