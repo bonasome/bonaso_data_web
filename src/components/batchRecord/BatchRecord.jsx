@@ -202,7 +202,7 @@ export default function BatchRecord(){
             
             <div className={styles.template}>
 
-                <i>1. Select your organization and the project to get a ready to use template for recording data. There are directions and examples in the template for your reference.</i>
+                <i>1. Select your organization and the project to get a ready-to-use template for recording data. There are directions and examples in the template for your reference.</i>
                     <ModelSelect IndexComponent={OrganizationsIndex} value={org} callbackText={'Choose Organization'}
                          onChange={setOrg} label={'Select an Organization'} labelField={'name'} />
 

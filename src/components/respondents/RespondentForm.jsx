@@ -334,11 +334,11 @@ export default function RespondentForm(){
     ]
     //show for both
     const special = [
-        {name: 'kp_status_names', label: 'Key Population Status (Select all that apply)', type: 'multiselect',  
+        {name: 'kp_status_names', label: 'Key Population Status', type: 'multiselect',  
             options: respondentsMeta?.kp_types},
-        {name: 'disability_status_names', label: 'Disability Status (Select all that apply)', type: 'multiselect',  
+        {name: 'disability_status_names', label: 'Disability Status', type: 'multiselect',  
             options: respondentsMeta?.disability_types},
-        {name: 'special_attribute_names', label: 'Other Special Status (Select all that apply)', type: 'multiselect',  
+        {name: 'special_attribute_names', label: 'Other Special Status', type: 'multiselect',  
             options: respondentsMeta?.special_attributes?.filter(a => (!['PLWHIV', 'KP', 'PWD'].includes(a.value)))},
     ]
     //show if not anon (could be PII)

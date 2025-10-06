@@ -125,8 +125,6 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
                 <div>
                     {/* Display additional information about this tasks indicator for the user to reference */}
                     <p><strong>Indicator Description:</strong> {task.indicator.description ? task.indicator.description : 'No description.'}</p>
-
-                    <p>{task.indicator.description}</p>
                     <p><i>Data Type: {getLabelFromValue('indicator_types', task.indicator.indicator_type)}</i></p>
                     {task.indicator.prerequisites.length > 0 && <div>
                         <p>Prerequisites: </p>

@@ -129,7 +129,7 @@ export default function MyMessages(){
                         {sendTo.some(im => im.id === p.id) ? (
                             <ButtonHover
                                 callback={() => setSendTo(sendTo.filter(im => im.id !== p.id))}
-                                noHover={<IoPersonRemove />} forDelete={true}
+                                noHover={<IoPersonRemove />} forDelete={true} hover={'Send to'}
                             />
                             ) : (
                             <ButtonHover
@@ -137,7 +137,7 @@ export default function MyMessages(){
                                     if (prev.some(im => im.id === p.id)) return prev;  // already added
                                     return [...prev, p];  // safe to add
                                 })}
-                                noHover={<IoPersonAdd />}
+                                noHover={<IoPersonAdd />} hover={'Remove'}
                             />
                         )}
                     </div>)) : <p>No possible recipients.</p>}
