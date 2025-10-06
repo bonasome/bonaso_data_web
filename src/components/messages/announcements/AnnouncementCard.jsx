@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from 'react';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import prettyDates from '../../../../services/prettyDates';
 
+import { useAuth } from '../../../contexts/UserAuth';
 import Messages from '../../reuseables/Messages';
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import ComposeAnnouncementModal from './ComposeAnnouncementModal';
@@ -20,7 +21,7 @@ export default function AnnouncementCard({ announcement, onUpdate }){
     - announcement (object): contains details about the announcement
     - onUpdate (function): what the parent component should do when the announcement is edited. 
     */
-
+    const { user } = useAuth();
     const [annc, setAnnc] = useState(announcement); //details about the announcement (state allows for live updates)
 
     //component meta
