@@ -115,7 +115,7 @@ export default function AnnouncementCard({ announcement, onUpdate }){
         if(!user || !announcement) return false
         if(user.role === 'admin') return true; //admin has perm
         //otherwise check they are the corredt role and it is for their organization
-        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == announcement?.created_by.organization.id) return true
+        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == announcement?.created_by?.organization.id) return true
         return false
     }, [user, announcement]);
 
