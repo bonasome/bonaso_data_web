@@ -109,15 +109,15 @@ export default function AnnouncementCard({ announcement, onUpdate }){
             setDel(false);
         }
     }
-
+    console.log(annc)
     //determine if a user has edit perms
     const hasPerm = useMemo(() => {
-        if(!user || !announcement) return false
+        if(!user || !annc) return false
         if(user.role === 'admin') return true; //admin has perm
         //otherwise check they are the corredt role and it is for their organization
-        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == announcement?.created_by?.organization.id) return true
+        if(['meofficer', 'manager'].includes(user.role) && user.organization_id == annc?.sent_by?.organization.id) return true
         return false
-    }, [user, announcement]);
+    }, [user, annc]);
 
     if(!annc) return <></>
     //return delete/edit modals as a seperate component since the hovering card messes with the styling
