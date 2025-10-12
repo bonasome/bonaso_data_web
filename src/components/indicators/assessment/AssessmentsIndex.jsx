@@ -177,6 +177,7 @@ export default function AssessmentsIndex({ callback=null, includeParams=[], excl
             try {
                 console.log('fetching assessments...');
                 const url = `/api/indicators/assessments?search=${search}&page=${page}` + params;
+                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count); //total number of entries for page calculation
@@ -193,7 +194,7 @@ export default function AssessmentsIndex({ callback=null, includeParams=[], excl
 
     //filter out blacklisted IDs
 
-    const filteredAssessments = assessments?.filter(ind => !blacklist.includes(ind.id));
+    const filteredAssessments = assessments?.filter(ass => !blacklist.includes(ass.id));
 
     if(loading || !assessments) return callback ? <ComponentLoading /> : <Loading /> //on callback don't show full load
     return(

@@ -15,6 +15,7 @@ import styles from '../../../styles/form.module.css';
 import { BsDatabaseFillAdd } from "react-icons/bs";
 import { IoIosSave } from "react-icons/io";
 import { FcCancel } from "react-icons/fc";
+import IndicatorsIndex from '../../indicators/IndicatorsIndex';
 
 export default function TargetModal(){
     /*
@@ -105,6 +106,8 @@ export default function TargetModal(){
     //handle submission
     const onSubmit = async(data, e) => {
         //clear away potentially stale/leftover valies
+        data.organization_id = orgID;
+        data.project_id = id;
         if (asP) {
             data.amount = null
             data.related_to_id = data.related_to_id.id; //backend expects the ID only
@@ -116,7 +119,7 @@ export default function TargetModal(){
         const {start, end} = handleDates(data);
         data.start = start;
         data.end = end;
-        data.task_id = data.task_id.id; //backend expects the ID only
+        data.indicator_id = data.indicator_id.id; //backend expects the ID only
         try{
             setSaving(true);
             const action = e.nativeEvent.submitter.value;
@@ -175,7 +178,7 @@ export default function TargetModal(){
     //set default values
     const defaultValues = useMemo(() => {
         return {
-            task_id: existing?.task ?? null,
+            indicator_id: existing?.indicator ?? null,
             amount: existing?.amount ?? '',
             as_percentage: existing?.related_to?.id ?? false,
             related_to_id: existing?.related_to ?? null,
@@ -217,14 +220,14 @@ export default function TargetModal(){
         }
     }, [existing, reset, defaultValues]);
 
-    const targetTask = useWatch({ control, name: 'task_id', defaultValue: null}); //use so that a user cannot select the same task for related to
+    const targetInd = useWatch({ control, name: 'indicator_id', defaultValue: null}); //use so that a user cannot select the same task for related to
     //get if this is custom/by quarter/by month
     const typeVal = useWatch({ control, name: 'date_type', defaultValue: tryMatchDates(existing?.start, existing?.end, project)?.type});
     //check if this target is measured as a percentage or as a raw number
     const asP = watch('as_percentage');
 
-    const task = [
-        { name: 'task_id', label: 'For Task (Required)', type: "model", IndexComponent: Tasks, rules: { required: "Required" },
+    const indicator= [
+        { name: 'indicator_id', label: 'For Indicator (Required)', type: "model", IndexComponent: IndicatorsIndex, rules: { required: "Required" },
             labelField: 'display_name',  includeParams: [{field: 'organization', value: orgID}, {field: 'project', value: id}]},
     ]
     const asRelated = [
@@ -240,9 +243,9 @@ export default function TargetModal(){
         },
     ]
     //only show if as related is checked
-    const relatedToTask = [
-        { name: 'related_to_id', label: 'Select Related Task (Required)', type: "model", IndexComponent: Tasks, labelField: 'display_name', rules: { required: "Required" },
-            includeParams: [{field: 'organization', value: orgID}, {field: 'project', value: id}], blacklist: [targetTask?.id],
+    const relatedToInd = [
+        { name: 'related_to_id', label: 'Select Related Task (Required)', type: "model", IndexComponent: IndicatorsIndex, labelField: 'display_name', rules: { required: "Required" },
+            includeParams: [{field: 'organization', value: orgID}, {field: 'project', value: id}], blacklist: [targetInd?.id],
             tooltip: `This is the task whose achievement should set the target for the task selected above.`
         },
         { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Task (Required)', type: "number", rules: { required: "Required",
@@ -281,10 +284,10 @@ export default function TargetModal(){
             <h2>{existing ? `Editing Target` : 'New Target' }</h2>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit, onError)}>
-                <FormSection fields={task} control={control} header={'Target For'}/>
+                <FormSection fields={indicator} control={control} header={'Target For'}/>
                 <FormSection fields={asRelated} control={control} header={'Measure as Percentage?'} />
                 {!asP && <FormSection fields={amount} control={control} />}
-                {asP && <FormSection fields={relatedToTask} control={control} />}
+                {asP && <FormSection fields={relatedToInd} control={control} />}
 
                 <FormSection fields={dateType} control={control} />
                 {typeVal === 'quarter' && <FormSection fields={quarter} control={control} />}

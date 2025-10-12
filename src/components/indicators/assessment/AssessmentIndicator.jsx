@@ -2,10 +2,10 @@ import React from 'react';
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useForm,  useWatch, FormProvider } from "react-hook-form";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
-import { useProjects } from '../../../contexts/ProjectsContext';
-import { useAuth } from '../../../contexts/UserAuth';
-
+import theme from '../../../../theme/theme';
 import fetchWithAuth from "../../../../services/fetchWithAuth";
 
 import Loading from '../../reuseables/loading/Loading';
@@ -21,6 +21,11 @@ import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import ComponentLoading from '../../reuseables/loading/ComponentLoading';
 import LogicBuilder from './LogicBuilder';
+import ButtonHover from '../../reuseables/inputs/ButtonHover';
+import { ImPencil } from 'react-icons/im';
+import { FaTrashAlt } from 'react-icons/fa';
+import ConfirmDelete from '../../reuseables/ConfirmDelete';
+import { BsArrowBarDown, BsArrowBarUp } from 'react-icons/bs';
 
 
 export default function AssessmentIndicator({ meta, assessment, onUpdate, existing=null, onCancel=null}){
@@ -30,10 +35,13 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     */
 
     //page meta
-    const [editing, setEditing] = useState(existing ? false : true)
+    const [editing, setEditing] = useState(existing ? false : true);
+    const [del, setDel] = useState(false);
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [saving, setSaving] = useState(false);
 
+     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id:existing?.id });
+     
     //ref to scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
@@ -42,6 +50,90 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         alertRef.current.focus({ preventScroll: true });
         }
     }, [submissionErrors]);  
+
+
+    //delete the organization
+    const handleDelete = async() => {
+        if(!existing?.id) return;
+        try {
+            console.log('deleting organization...');
+            const response = await fetchWithAuth(`/api/indicators/manage/${existing?.id}/`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                onUpdate();
+            } 
+            else {
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch {
+                    // no JSON body or invalid JSON
+                    data = { detail: 'Unknown error occurred' };
+                }
+
+                const serverResponse = [];
+                for (const field in data) {
+                    if (Array.isArray(data[field])) {
+                    data[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                    });
+                    } else {
+                    serverResponse.push(`${field}: ${data[field]}`);
+                    }
+                }
+                setSubmissionErrors(serverResponse);
+            }
+        } 
+        catch (err) {
+            setSubmissionErrors(['Something went wrong. Please try again later.'])
+            console.error('Failed to delete organization:', err);
+        }
+        finally{
+            setDel(false);
+        }
+    } 
+
+    const reorder = async(pos) => {
+        if(!existing) return;
+        if(pos < 0 || pos >= assessment.indicators.length){
+            setSubmissionErrors(['Cannot shift this position.'])
+            return;
+        }
+        try{
+            console.log('submitting data...', pos);
+            const url = `/api/indicators/manage/${existing.id}/change-order/`;
+            const response = await fetchWithAuth(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify({position: pos})
+            });
+            const returnData = await response.json();
+            if(response.ok){
+                onUpdate();
+            }
+            else{
+                const serverResponse = []
+                for (const field in returnData) {
+                    if (Array.isArray(returnData[field])) {
+                        returnData[field].forEach(msg => {
+                        serverResponse.push(`${field}: ${msg}`);
+                        });
+                    } 
+                    else {
+                        serverResponse.push(`${returnData[field]}`);
+                    }
+                }
+                setSubmissionErrors(serverResponse)
+            }
+        }
+        catch(err){
+            setSubmissionErrors(['Something went wrong. Please try again later.']);
+            console.error('Could not record indicator: ', err)
+        }
+    }
 
     //handle form submission
     const onSubmit = async(data, e) => {
@@ -118,7 +210,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             type: existing?.type ?? 'text',
             match_options: existing?.match_options ?? null,
             options_data: existing?.options_data ?? [],
-            include_logic: existing?.logic?.conditions?.length == 0 ?? false,
+            include_logic: existing?.logic?.conditions?.length > 0 ?? false,
             logic_data: {
                 group_operator: existing?.logic?.group_operator ?? "AND",
                 conditions: existing?.logic?.conditions ?? [],  
@@ -178,35 +270,55 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     ]
 
     if(!meta?.type) return <ComponentLoading />
-    return(
-        <div className={styles.form}>
-            <Messages errors={submissionErrors} ref={alertRef} />
-            {!editing && (existing ? <div>
-                <p>{existing?.order}. {existing?.name}</p>
-                <i>{existing?.type}</i>
-            </div> : <ComponentLoading />)}
-            {!existing && <h2>New Indicator</h2>}
-            {editing && 
-            <FormProvider {...methods}>
-                <form onSubmit={handleSubmit(onSubmit, onError)}>
-                    <FormSection fields={basics} control={control} header='Basic Information'/>
-                    {(type=='single' || type=='multi') && assessment.indicators.length > 0 && 
-                        <FormSection fields={match} control={control} header='Match Options'/>}
-                    {(type=='single' || type=='multi') && !usingMatched && 
-                        <SimpleDynamicRows ref={rowRefs.current['options_data']} label={'Options'}
-                            tooltip={`Enter the name of each option. You may add or remove rows using the buttons. 
-                                ${existing ? ' If you are trying to remove an option from an existing question, mark it as deprecated.' : '' }`}
-                            existing={existing?.options ?? []} header={'Options'}/>
-                    }
-                    <FormSection fields={logic} control={control} header='Logic'/>
-                    {usingLogic && <LogicBuilder control={control} meta={meta} order={existing?.order ?? assessment.indicators.length} assessment={assessment} />}
-                    {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <button type="submit" value='normal'><IoIosSave /> Save</button>
-                        <button type="button" onClick={() => {existing ? setEditing(false) : onCancel()}}><FcCancel /> Cancel</button>
-                    </div>}
-                    {saving && <ButtonLoading />}
-                </form>
-            </FormProvider>}
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        margin: 40,
+        padding: 8,
+        backgroundColor: theme.colors.bonasoDarkAccent,
+    };
+    if(!editing && existing){
+        return (
+            <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+                <Messages errors={submissionErrors} ref={alertRef} />
+                {del && <ConfirmDelete onCancel={() => setDel(false)} onConfirm={handleDelete} name={'this indicator'} />}
+                {!editing && (existing ? <div>
+                    <p>{existing?.order + 1}. {existing?.name}</p>
+                    <i>{existing?.type}</i>
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover='Edit Indicator' />
+                        <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover='Delete Indicator' forDelete={true} />
+                    </div>
+                    <button onClick={() => reorder(existing.order - 1)}><BsArrowBarUp fontSize={20}/></button>
+                    <button onClick={() => reorder(existing.order + 1)}><BsArrowBarDown fontSize={20}/></button>
+                </div> : <ComponentLoading />)}
+            </div>
+        )
+    }
+    else {
+        return(
+            <div className={styles.form}>
+                <h2>{existing ? `Editing ${existing.name}` : 'New Indicator'}</h2>
+                <FormProvider {...methods}>
+                    <form onSubmit={handleSubmit(onSubmit, onError)}>
+                        <FormSection fields={basics} control={control} header='Basic Information'/>
+                        {(type=='single' || type=='multi') && assessment.indicators.length > 0 && 
+                            <FormSection fields={match} control={control} header='Match Options'/>}
+                        {(type=='single' || type=='multi') && !usingMatched && 
+                            <SimpleDynamicRows ref={rowRefs.current['options_data']} label={'Options'}
+                                tooltip={`Enter the name of each option. You may add or remove rows using the buttons. 
+                                    ${existing ? ' If you are trying to remove an option from an existing question, mark it as deprecated.' : '' }`}
+                                existing={existing?.options ?? []} header={'Options'}/>
+                        }
+                        <FormSection fields={logic} control={control} header='Logic'/>
+                        {usingLogic && <LogicBuilder control={control} meta={meta} order={existing?.order ?? assessment.indicators.length} assessment={assessment} />}
+                        {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            <button type="submit" value='normal'><IoIosSave /> Save</button>
+                            <button type="button" onClick={() => {existing ? setEditing(false) : onCancel()}}><FcCancel /> Cancel</button>
+                        </div>}
+                        {saving && <ButtonLoading />}
+                    </form>
+                </FormProvider>
         </div>
-    )
+    )}
 }

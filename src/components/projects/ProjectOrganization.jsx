@@ -49,7 +49,8 @@ export default function ProjectOrganization(){
     const [updateTasks, setUpdateTasks] = useState(0);//trigger to call tasks list again
     
     //contorl visibility of index components for adding
-    const [addingTask, setAddingTask] = useState(false); //user is adding a task
+    const [addingIndTask, setAddingIndTask] = useState(false); //user is adding a standalone indicator task
+    const [addingAssTask, setAddingAssTask] = useState(false); //user is adding an assessment task
     const [addingChildOrg, setAddingChildOrg] = useState(false); //user is adding a subgrantee
 
     //controls which sections are visible
@@ -255,12 +256,12 @@ export default function ProjectOrganization(){
                     </div>
 
                     {showTasks && <div style={{ margin: '4vh'}}>
-                        {hasPerm && !addingTask && <button onClick={() => setAddingTask(true)}><MdAssignmentAdd /> Assign New Task(s)</button>}
-                        {addingTask && <AssignTask project={project} organization={organization} 
+                        {hasPerm && !addingAssTask && <button onClick={() => setAddingAssTask(true)}><MdAssignmentAdd /> Assign New Assessment(s)</button>}
+                        {addingAssTask && <AssignTask project={project} type={'assessment'} organization={organization} 
                             onUpdate={(data) => {
                                 setUpdateTasks(prev => prev+=1); setTaskSuccess([`Successfully assigned ${data.created.length} new tasks to ${organization.name}!`])
                             }} 
-                            onClose={() => setAddingTask(false)}
+                            onClose={() => setAddingAssTask(false)}
                         />}
                         <Messages success={taskSuccess} />
                         <Tasks includeParams={[{field: 'organization', value: orgID}, {field: 'project', value: id}]} 

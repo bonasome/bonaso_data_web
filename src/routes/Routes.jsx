@@ -76,7 +76,7 @@ import SocialPostDetail from '../components/social/SocialPostDetail';
 import SocialPostForm from '../components/social/SocialPostForm';
 
 import FunWithFlags from '../components/flags/FunWithFlags';
-import AssessmentsIndex from '../components/indicators/assessment/AssessmentIndex';
+import AssessmentsIndex from '../components/indicators/assessment/AssessmentsIndex';
 
 
 function Router() {

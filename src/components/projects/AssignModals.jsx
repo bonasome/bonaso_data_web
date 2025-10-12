@@ -5,6 +5,8 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import ModelMultiSelect from '../reuseables/inputs/ModelMultiSelect';
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
 import IndicatorsIndex from '../indicators/IndicatorsIndex';
+import AssessmentsIndex from '../indicators/assessment/AssessmentsIndex';
+
 import Messages from '../reuseables/Messages';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 
@@ -106,7 +108,7 @@ export function AssignChild({ organization, project, onUpdate , onClose}){
 }
 
 
-export function AssignTask({ organization, project, onUpdate, onClose }){
+export function AssignTask({ organization, project, onUpdate, onClose, type='assessment' }){
     /*
     Modal that allows a user to assign one or more indicators as a task to an organization for a project
     - organization (object): the organization that the indicators are being assigned to
@@ -125,11 +127,11 @@ export function AssignTask({ organization, project, onUpdate, onClose }){
     const addTask = async () => {
         setErrors([]);
         if(indicators.length === 0) {
-            setErrors(['Please select at least one indicator.']);
+            setErrors([`Please select at least one ${type}.`]);
             return;
         }
         //convert indicator objects to ids
-        const indicator_ids = indicators.map((ind) => (ind.id));
+        const ids = indicators.map((ind) => (ind.id));
         try {
             console.log('assigning task...');
             setSaving(true);
@@ -138,11 +140,17 @@ export function AssignTask({ organization, project, onUpdate, onClose }){
                 headers: {
                     'Content-Type': "application/json",
                 },
-                body: JSON.stringify({
-                    'organization_id': organization.id,
-                    'indicator_ids': indicator_ids,
-                    'project_id': project.id,
-                })
+                body: JSON.stringify(type == 'assessment' ? 
+                    {
+                        'organization_id': organization.id,
+                        'assessment_ids': ids,
+                        'project_id': project.id,
+                    } : 
+                    {
+                        'organization_id': organization.id,
+                        'indicator_ids': ids,
+                        'project_id': project.id,
+                    })
             });
             const returnData = await response.json();
             if(response.ok){
@@ -181,7 +189,7 @@ export function AssignTask({ organization, project, onUpdate, onClose }){
         <div>
             <h3>Assigning tasks to {organization.name}</h3>
             <Messages errors={errors} />
-            <ModelMultiSelect label={organization.name} IndexComponent={IndicatorsIndex} excludeParams={[
+            <ModelMultiSelect label={organization.name} IndexComponent={type == 'assessment' ? AssessmentsIndex : IndicatorsIndex} excludeParams={[
                 {field: 'project', value: project.id}, {field: 'organization', value: organization.id}
             ]} onChange={(vals) => setIndicators(vals)} value={indicators} callbackText='Assign as Task' />
             {!saving && <div style={{ display: 'flex', flexDirection: 'row'}}>

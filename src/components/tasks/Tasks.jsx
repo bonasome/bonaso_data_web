@@ -38,6 +38,9 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
         e.dataTransfer.setData('application/json', JSON.stringify(task));
     };
 
+    const type = task?.assessment ? 'assessment' : 'indicator';
+    const typeLabel = task?.assessment ? 'Assessment' : 'Indicator';
+
     //pass errors up to parent if they arrise
     useEffect(() => {
         if(errors.length > 0){
@@ -102,7 +105,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
                 {del && <div className={styles.backdrop}></div>}
                 {del && 
                     <ConfirmDelete 
-                        name={'Task ' + task.indicator.name + ' for' + task.organization.name } 
+                        name={'Task ' + task.display_name + ' for' + task.organization.name } 
                         statusWarning={'If this task has any interactions associated with it, you will not be able to delete it.'} 
                         onConfirm={() => removeTask()} onCancel={() => setDel(false)} 
                 />}
@@ -124,26 +127,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
             {expanded && (
                 <div>
                     {/* Display additional information about this tasks indicator for the user to reference */}
-                    <p><strong>Indicator Description:</strong> {task.indicator.description ? task.indicator.description : 'No description.'}</p>
-                    <p><i>Data Type: {getLabelFromValue('indicator_types', task.indicator.indicator_type)}</i></p>
-                    {task.indicator.prerequisites.length > 0 && <div>
-                        <p>Prerequisites: </p>
-                        <ul>
-                            {task.indicator.prerequisites.map((p) => (<li>{p.display_name}</li>))}
-                        </ul>
-                    </div>}
-                    
-                    {task.indicator.subcategories && task.indicator.subcategories.length > 0 && <div>
-                        <p>Subcategories:</p>
-                        <ul>
-                            {task.indicator.subcategories.map((cat, index) => (
-                                <li key={index}>{cat.name}</li>
-                            ))}
-                        </ul>
-                    </div>}
-
-                    {task.indicator.require_numeric && <p><i>Requires a Number</i></p>}
-
+                    <p><strong>{typeLabel} Description:</strong> {task[type].description ? task[type].description : 'No description.'}</p>
                     {canDelete && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Remove Task'} forDelete={true} />}
                 </div>
             )}
@@ -246,7 +230,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
             try {
                 console.log('fetching meta...');
                 //run the filters
-                const url = `/api/indicators/meta/`;
+                const url = `/api/indicators/manage/meta/`;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setIndicatorsMeta(data)

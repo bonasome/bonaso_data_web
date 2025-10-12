@@ -10,7 +10,7 @@ export default function LogicBuilder({ order, meta, assessment }) {
         control,
         name: `logic_data.conditions`,
     });
-
+    console.log(fields)
     const logicConditions = useWatch({
         control,
         name: "logic_data.conditions",
