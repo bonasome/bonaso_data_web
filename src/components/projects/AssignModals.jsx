@@ -184,14 +184,16 @@ export function AssignTask({ organization, project, onUpdate, onClose, type='ass
             setSaving(false);
         }
     } 
-
+    let params = [{field: 'project', value: project.id}, {field: 'organization', value: organization.id}]
+    if(type == 'indicator'){
+        params.push({field: 'category', value: 'assessment'})
+    }
+    console.log(params)
     return(
         <div>
-            <h3>Assigning tasks to {organization.name}</h3>
+            <h3>Assigning {type}s to {organization.name}</h3>
             <Messages errors={errors} />
-            <ModelMultiSelect label={organization.name} IndexComponent={type == 'assessment' ? AssessmentsIndex : IndicatorsIndex} excludeParams={[
-                {field: 'project', value: project.id}, {field: 'organization', value: organization.id}
-            ]} onChange={(vals) => setIndicators(vals)} value={indicators} callbackText='Assign as Task' />
+            <ModelMultiSelect label={organization.name} IndexComponent={type == 'assessment' ? AssessmentsIndex : IndicatorsIndex} excludeParams={params} onChange={(vals) => setIndicators(vals)} value={indicators} callbackText='Assign as Task' />
             {!saving && <div style={{ display: 'flex', flexDirection: 'row'}}>
                 <button onClick={() => addTask()}> <IoIosSave /> Confirm Selection & Assign Task(s)</button>
                 <button onClick={() => onClose()}> <FcCancel /> Cancel</button>

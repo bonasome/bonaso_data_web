@@ -185,7 +185,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
 
     //construct URL param strings from include/exclude param props
     const params = useMemo(() => {
-        const allowedFields = ['organization', 'organizations', 'project', 'event', 'indicator_type'];
+        const allowedFields = ['organization', 'organizations', 'project', 'event', 'category'];
         const include = includeParams?.filter(p => allowedFields.includes(p?.field))
         ?.map(p => `&${p?.field}=${p?.value}`)
         .join('') ?? '';
@@ -207,6 +207,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
                     (filters.organization ? `&organization=${filters.organization}` : '');
                 //run the filters
                 const url = `/api/manage/tasks/?search=${search}&page=${page}` + filterQuery + params;
+                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
 

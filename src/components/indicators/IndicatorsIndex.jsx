@@ -150,7 +150,6 @@ export default function IndicatorsIndex({ callback=null, includeParams=[], exclu
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setIndicatorsMeta(data);
-                console.log(data)
                 setLoading(false);
             } 
             catch (err) {
@@ -165,7 +164,7 @@ export default function IndicatorsIndex({ callback=null, includeParams=[], exclu
     //helper function that converts array of objects in include/exclude params and converts it to a string
     const params = useMemo(() => {
         //sepereate from filters, these are passed as params
-        const allowedFields = ['project', 'organization'];
+        const allowedFields = ['project', 'organization', 'category'];
         const include = includeParams?.filter(p => allowedFields.includes(p?.field))
         ?.map(p => `&${p?.field}=${p?.value}`)
         .join('') ?? '';
@@ -173,7 +172,7 @@ export default function IndicatorsIndex({ callback=null, includeParams=[], exclu
         const exclude = excludeParams?.filter(p => allowedFields.includes(p?.field))
         ?.map(p => `&exclude_${p?.field}=${p?.value}`)
         .join('') ?? '';
-
+        console.log(excludeParams)
         return include + exclude
 
     }, [includeParams, excludeParams]);
@@ -189,6 +188,7 @@ export default function IndicatorsIndex({ callback=null, includeParams=[], exclu
                     (filters.indicator_type ? `&indicator_type=${filters.indicator_type}` : '');
 
                 const url = `/api/indicators/manage?search=${search}&page=${page}` + filterQuery + params;
+                console.log(url);
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count); //total number of entries for page calculation

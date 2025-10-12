@@ -360,8 +360,8 @@ export default function RespondentDetail(){
                 </div>}
                 
                 {sbVisible && <div>
-                    <h2 style={{ marginTop: 30, textAlign: 'center'}}>My Tasks</h2>
-                    <Tasks isDraggable={true} callback={(t) => handleButtonAdd(t)} blacklist={added} includeParams={[{field: 'category', value:'assessment'}]} />
+                    <h2 style={{ marginTop: 30, textAlign: 'center'}}>Start Assessment for this Respondent</h2>
+                    <Tasks isDraggable={true} callback={(t) => navigate(`/respondents/${id}/assessment/${t.assessment.id}`)} blacklist={added} includeParams={[{field: 'category', value:'assessment'}]} />
                 </div>}
             </div>}
         </div>

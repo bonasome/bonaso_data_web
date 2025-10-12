@@ -46,7 +46,7 @@ export default function IndicatorDetail(){
         const getIndicatorDetails = async () => {
             try {
                 console.log('fetching indicator details...');
-                const response = await fetchWithAuth(`/api/indicators/${id}/`);
+                const response = await fetchWithAuth(`/api/indicators/manage/${id}/`);
                 const data = await response.json();
                 if(response.ok){
                     //update the context
@@ -75,7 +75,7 @@ export default function IndicatorDetail(){
             else{
                 try{
                     console.log('fetching model info...')
-                    const response = await fetchWithAuth(`/api/indicators/meta/`);
+                    const response = await fetchWithAuth(`/api/indicators/manage/meta/`);
                     const data = await response.json();
                     setIndicatorsMeta(data);
                     setLoading(false);
@@ -131,7 +131,7 @@ export default function IndicatorDetail(){
     const deleteIndicator = async() => {
         try {
             console.log('deleting indicator...');
-            const response = await fetchWithAuth(`/api/indicators/${id}/`, {
+            const response = await fetchWithAuth(`/api/indicators/manage/${id}/`, {
                 method: 'DELETE',
             });
             if (response.ok) {
@@ -190,34 +190,8 @@ export default function IndicatorDetail(){
                 <p>{indicator?.description ? indicator.description : 'No description yet.'}</p>
 
                 <p><i>
-                    {getLabelFromValue('statuses',indicator?.status)}, {getLabelFromValue('indicator_types',indicator?.indicator_type)}
-                    {indicator?.require_numeric && ', Requires a number'} 
-                    {indicator?.allow_repeat && '(Allows Repeats)'}
+                    {getLabelFromValue('category',indicator?.category)}
                 </i></p>
-
-                {indicator?.prerequisites?.length > 0 && <div>
-                    <p>Prerequisites: </p>
-                    <ul>
-                        {indicator.prerequisites.map((p) => (<li>{p.display_name}</li>))}
-                    </ul>
-                </div>}
-
-                {indicator?.required_attributes.length > 0 && <div>
-                    <p>Requires Special Respondent Attributes:</p>
-                    <ul>{indicator.required_attributes?.map((a) => (<li key={a.name}>{getLabelFromValue('required_attributes', a.name)}</li>))}</ul>
-                </div>}
-
-                {indicator?.governs_attribute && <p><i>Controls Respondent Attribute: {getLabelFromValue('required_attributes', indicator.governs_attribute)}</i></p> }
-                
-                {indicator?.subcategories.length > 0 && <div>
-                    {indicator.match_subcategories_to ? <h4>Subcategories (matched with {indicator.prerequisites.find(p => p.id === indicator.match_subcategories_to)?.display_name ?? 'Unknown'})</h4> : 
-                    <h4>Subcategories</h4>}
-                    <ul>
-                        {indicator.subcategories.map((cat) => (
-                            <li key={cat.id}>{cat.name}</li>
-                        ))}
-                    </ul>
-                </div>}
                 
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <Link to={`/indicators/${id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>

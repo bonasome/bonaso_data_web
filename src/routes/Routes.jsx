@@ -21,6 +21,7 @@ import RespondentsLayout from '../layouts/RespondentLayout';
 import RespondentsIndex from '../components/respondents/RespondentsIndex';
 import RespondentForm from '../components/respondents/RespondentForm';
 import RespondentDetail from '../components/respondents/RespondentDetail';
+import AssessmentForm from '../components/respondents/AssessmentForm';
 
 //projects
 import ProjectLayout from '../layouts/ProjectLayout';
@@ -47,7 +48,7 @@ import OrganizationForm from '../components/organizations/OrganizationForm';
 import IndicatorsIndex from '../components/indicators/IndicatorsIndex';
 import IndicatorDetail from '../components/indicators/IndicatorDetail';
 import IndicatorForm from '../components/indicators/IndicatorForm'
-import AssessmentForm from '../components/indicators/assessment/AssessmentForm';
+import AssessmentBuilder from '../components/indicators/assessment/AssessmentBuilder';
 
 import Tutorial from '../components/tutorial/Tutorial';
 import NotFound from '../components/redirects/NotFound';
@@ -108,6 +109,7 @@ function Router() {
             <Route path=':id' element={<RespondentDetail />} />
             <Route path='new' element={<RespondentForm />} />
             <Route path=':id/edit' element={<RespondentForm />} />
+            <Route path=':id/assessment/:assID' element={<AssessmentForm />} />
         </Route>
         
         <Route 
@@ -293,7 +295,7 @@ function Router() {
                 }/>
             <Route path='assessments/:id/edit' element={
                 <RedirectIfNoPerm level={['admin']}>
-                    <AssessmentForm />
+                    <AssessmentBuilder />
                 </RedirectIfNoPerm>
                 }/>
         </Route>

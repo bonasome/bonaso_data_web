@@ -263,6 +263,14 @@ export default function ProjectOrganization(){
                             }} 
                             onClose={() => setAddingAssTask(false)}
                         />}
+
+                        {hasPerm && !addingIndTask && <button onClick={() => setAddingIndTask(true)}><MdAssignmentAdd /> Assign New Standalone Indicator(s)</button>}
+                        {addingIndTask && <AssignTask project={project} type={'indicator'} organization={organization} 
+                            onUpdate={(data) => {
+                                setUpdateTasks(prev => prev+=1); setTaskSuccess([`Successfully assigned ${data.created.length} new tasks to ${organization.name}!`])
+                            }} 
+                            onClose={() => setAddingIndTask(false)}
+                        />}
                         <Messages success={taskSuccess} />
                         <Tasks includeParams={[{field: 'organization', value: orgID}, {field: 'project', value: id}]} 
                             canDelete={hasPerm} updateTrigger={updateTasks}

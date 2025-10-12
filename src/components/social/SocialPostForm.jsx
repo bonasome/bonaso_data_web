@@ -236,7 +236,7 @@ export default function SocialPostForm(){
     //these tasks must all be from the same organizaton
     const task = [
         { name: 'task_ids', label: "Post Associated with Task(s) (Required)", type: "multimodel", IndexComponent: Tasks, rules: { required: "Required"},
-            includeParams: [{field: 'indicator_type', value: 'social'}], tooltip: `What tasks does this post contribute towards?`
+            includeParams: [{field: 'category', value: 'social'}], tooltip: `What tasks does this post contribute towards?`
         }
     ]
     const platformInfo = [
