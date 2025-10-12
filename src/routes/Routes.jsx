@@ -47,6 +47,7 @@ import OrganizationForm from '../components/organizations/OrganizationForm';
 import IndicatorsIndex from '../components/indicators/IndicatorsIndex';
 import IndicatorDetail from '../components/indicators/IndicatorDetail';
 import IndicatorForm from '../components/indicators/IndicatorForm'
+import AssessmentForm from '../components/indicators/assessment/AssessmentForm';
 
 import Tutorial from '../components/tutorial/Tutorial';
 import NotFound from '../components/redirects/NotFound';
@@ -75,6 +76,7 @@ import SocialPostDetail from '../components/social/SocialPostDetail';
 import SocialPostForm from '../components/social/SocialPostForm';
 
 import FunWithFlags from '../components/flags/FunWithFlags';
+import AssessmentsIndex from '../components/indicators/assessment/AssessmentIndex';
 
 
 function Router() {
@@ -277,6 +279,21 @@ function Router() {
             <Route path=':id/edit' element={
                 <RedirectIfNoPerm level={['admin']}>
                     <IndicatorForm />
+                </RedirectIfNoPerm>
+                }/>
+            <Route path='assessments' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <AssessmentsIndex />
+                </RedirectIfNoPerm>
+                }/>
+            <Route path='assessments/new' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <AssessmentForm />
+                </RedirectIfNoPerm>
+                }/>
+            <Route path='assessments/:id/edit' element={
+                <RedirectIfNoPerm level={['admin']}>
+                    <AssessmentForm />
                 </RedirectIfNoPerm>
                 }/>
         </Route>

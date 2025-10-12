@@ -7,11 +7,15 @@ export const IndicatorsProvider = ({ children }) => {
     const [indicators, setIndicators] = useState([]); //information for the index view
     const [indicatorDetails, setIndicatorDetails] = useState([]); //information for the detail view
     const [indicatorsMeta, setIndicatorsMeta] = useState({}); //information about the meta
+    const [assessments, setAssessments] = useState([]);
+    const [assessmentDetails, setAssessmentDetails] = useState([]);
     return (
         <IndicatorsContext.Provider value={{ 
             indicators, setIndicators, 
             indicatorDetails,setIndicatorDetails, 
-            indicatorsMeta, setIndicatorsMeta
+            indicatorsMeta, setIndicatorsMeta,
+            assessments, setAssessments,
+            assessmentDetails, setAssessmentDetails,
         }}>
             {children}
         </IndicatorsContext.Provider>
