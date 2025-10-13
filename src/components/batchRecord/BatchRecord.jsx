@@ -161,6 +161,7 @@ export default function BatchRecord(){
                 body: formData,
             });
             const data = await response.json();
+            console.log(data)
             if(response.ok){
                 if(data.errors.length == 0 && data.warnings.length ==0){
                     setSuccess(['Uploaded with no errors. Great work!']);
@@ -174,10 +175,9 @@ export default function BatchRecord(){
                 }
             }
             else {
-                let data = {};
                 try {
-                    data = await response.json();
-                    console.log(data)
+                    console.error(data);
+                    setErrors(data?.errors);
                 } 
                 catch {
                     // no JSON body or invalid JSON
