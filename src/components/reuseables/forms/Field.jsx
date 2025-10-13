@@ -11,7 +11,7 @@ import ImageSelect from '../inputs/ImageSelect';
 import Select from '../inputs/Select';
 import MultiCheckboxNum from '../inputs/MultiCheckboxNum';
 
-export default function Field({ field, control }) {
+export default function Field({ field, control, flexOverride=false }) {
     /*
     Singular form field that will represent one input in an RHF setup. Meant to be used with [./FormSection].
     - field (object): information about the input
@@ -42,11 +42,19 @@ export default function Field({ field, control }) {
     - placeholder (string, optional): placeholder text for blank inputs (for use with text/textarea/number)
     - search (boolean, optional): for select, allows the option to search the select by the label field
     */
-  return (
+    const customOnChange = field.onChange;
+    return (
         <Controller name={name} control={control} rules={rules}render={({ field: controllerField, fieldState }) => {
             const commonProps = {...controllerField, label, 
                 errors: fieldState.error ? [fieldState.error.message] : [],
                 tooltip,
+                onChange: (value) => {
+                    // first call custom handler if it exists
+                    if (customOnChange) value = customOnChange(value);
+
+                    // then call RHF's controller onChange to update form state
+                    controllerField.onChange(value);
+                }
             };
             {/* switch to correct input type based on the type prop */}
             switch (type) {
@@ -56,7 +64,7 @@ export default function Field({ field, control }) {
                 case "date":
                 case "number":
                 case "textarea":
-                    return <Input type={type} {...commonProps} placeholder={placeholder} />;
+                    return <Input type={type} {...commonProps} placeholder={placeholder} flexOverride={flexOverride} />;
                 case 'select': //single select, radio is preferred unless the options are many
                     return <Select options={options} {...commonProps} search={search} />;
                 case "radio": //single select from list

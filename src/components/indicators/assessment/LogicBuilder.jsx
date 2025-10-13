@@ -10,7 +10,6 @@ export default function LogicBuilder({ order, meta, assessment }) {
         control,
         name: `logic_data.conditions`,
     });
-    console.log(fields)
     const logicConditions = useWatch({
         control,
         name: "logic_data.conditions",
@@ -58,28 +57,41 @@ export default function LogicBuilder({ order, meta, assessment }) {
                             <Field control={control} field={{ name: `logic_data.conditions.${index}.operator`, 
                                 label: 'Operator...', type: "select", rules: { required: "Required"},
                                 options: (selectedIndicator?.type === 'single' || 
-                                    selectedIndicator?.type === 'multiple' ||
+                                    selectedIndicator?.type === 'multi' ||
                                     selectedIndicator?.type === 'boolean') ? 
                                     meta.operators.filter(o => (o.value == '=' || o.value == '!=')) :
                                     meta.operators
                             }} />
                             
                             {/* Value Logic */}
-                            {condition?.source_type === "assessment" && (selectedIndicator?.type === 'single' || selectedIndicator?.type === 'multiple') &&
-                                <Field control={control} field={{ name: `logic_data.conditions.${index}.value_option`, 
+                            {condition?.source_type === "assessment" && (selectedIndicator?.type === 'single' || selectedIndicator?.type === 'multi') && <div>
+                                {!condition?.condition_type && <Field control={control} field={{ name: `logic_data.conditions.${index}.value_option`, 
                                     label: 'Value...', type: "select", rules: { required: "Required"},
                                     options: selectedIndicator?.options?.map((o) => ({
                                         value: o.id,
                                         label: o.name
                                     })) || [],
-                                }} />
-                            }
+                                }} />}
+                                {(condition?.value_option == '' || !condition?.value_option ) &&
+                                    <Field control={control} field={{ 
+                                        name: `logic_data.conditions.${index}.condition_type`, 
+                                        type: 'radio', 
+                                        label: 'Or if...', 
+                                        options: meta.condition_types.filter(o => {
+                                            if (selectedIndicator.type === 'single' && o.value === 'all') return false;
+                                            if (!selectedIndicator.allow_none && o.value === 'none') return false;
+                                            return true;
+                                        })
+                                    }} />}
+                            </div>}
+
                             {condition?.source_type === "assessment" && selectedIndicator?.type === 'boolean' &&
                                 <Field control={control} field={{ name: `logic_data.conditions.${index}.value_boolean`, 
                                     label: 'Value...', type: "radio",
                                     options: [{label: 'Yes', value: true}, {label: 'No', value: false}],
                                 }} />
                             } 
+
                             {condition?.source_type === "assessment" && (selectedIndicator?.type === 'text' || selectedIndicator?.type === 'number') &&
                                 <Field control={control} field={{ name: `logic_data.conditions.${index}.value_text`, 
                                     label: 'Value...', type: "text", rules: { required: "Required"},

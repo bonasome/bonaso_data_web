@@ -51,13 +51,14 @@ export default function MultiCheckbox({ name, label, options, value, onChange, o
 
     //what to do when a MultiCheckboxItem updates (add or remove from value array)
     const toggleValue = (val) => {
-        if (value.includes(val)) {
+        if (value?.includes(val)) {
             onChange(value.filter(v => v !== val));
         } 
         else {
             onChange([...value, val]);
         }
     };
+    if(!options || options.length ==0) return <></>
 
     return (
         <div>
@@ -69,7 +70,7 @@ export default function MultiCheckbox({ name, label, options, value, onChange, o
             {options.map((o) => {
                 const optionValue = o[valueField];
                 const optionLabel = o[labelField];
-                const valueStr = value.map((v) => v.toString());
+                const valueStr = value?.map((v) => v.toString());
                 {/* map each item in options as its own checkbox, then use its checked state to add or 
                     remove it from the value array */}
                 return <MultiCheckboxItem
@@ -77,7 +78,7 @@ export default function MultiCheckbox({ name, label, options, value, onChange, o
                     name={name}
                     label={optionLabel}
                     value={optionValue}
-                    checked={valueStr.includes(optionValue.toString())}
+                    checked={valueStr?.includes(optionValue?.toString())}
                     onChange={toggleValue}
                     onBlur={onBlur}
                 />

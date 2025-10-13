@@ -21,7 +21,7 @@ import RespondentsLayout from '../layouts/RespondentLayout';
 import RespondentsIndex from '../components/respondents/RespondentsIndex';
 import RespondentForm from '../components/respondents/RespondentForm';
 import RespondentDetail from '../components/respondents/RespondentDetail';
-import AssessmentForm from '../components/respondents/AssessmentForm';
+import AssessmentForm from '../components/respondents/assessments/AssessmentForm';
 
 //projects
 import ProjectLayout from '../layouts/ProjectLayout';
@@ -109,7 +109,7 @@ function Router() {
             <Route path=':id' element={<RespondentDetail />} />
             <Route path='new' element={<RespondentForm />} />
             <Route path=':id/edit' element={<RespondentForm />} />
-            <Route path=':id/assessment/:assID' element={<AssessmentForm />} />
+            <Route path=':id/assessment/:taskID/new' element={<AssessmentForm />} />
         </Route>
         
         <Route 

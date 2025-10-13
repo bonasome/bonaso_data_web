@@ -26,6 +26,7 @@ import { ImPencil } from 'react-icons/im';
 import { FaTrashAlt } from 'react-icons/fa';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import { BsArrowBarDown, BsArrowBarUp } from 'react-icons/bs';
+import OptionsBuilder from './OptionsBuilder';
 
 
 export default function AssessmentIndicator({ meta, assessment, onUpdate, existing=null, onCancel=null}){
@@ -56,7 +57,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     const handleDelete = async() => {
         if(!existing?.id) return;
         try {
-            console.log('deleting organization...');
+            console.log('deleting indicator...');
             const response = await fetchWithAuth(`/api/indicators/manage/${existing?.id}/`, {
                 method: 'DELETE',
             });
@@ -138,20 +139,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     //handle form submission
     const onSubmit = async(data, e) => {
         let submitErrors = []
-        setSubmissionErrors([]);
-
         data.assessment_id = assessment.id; //set the related project based on the URL param
-        const ref = rowRefs.current['options_data'];
-        if (ref?.current?.collect) {
-            const collected = ref.current.collect();
-            if (collected === null) {
-                submitErrors.push(`Please double check your options.`);
-            } 
-            else {
-                data['options_data'] = collected;
-            }
-        }
-        console.log(data);
         if(data.type != 'multi' && data.type != 'single' && !data.match_options){
             data.options_data = []
         }
@@ -163,6 +151,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             return;
         }
         try{
+            setSubmissionErrors([]);
             setSaving(true);
             console.log('submitting data...', data);
             const url = existing ? `/api/indicators/manage/${existing.id}/` : `/api/indicators/manage/`;
@@ -179,18 +168,20 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                 onUpdate(returnData);
             }
             else{
-                const serverResponse = []
+                const serverResponse = [];
+                console.log(returnData)
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
                         returnData[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
+                        serverResponse.push(`${msg}`);
                         });
                     } 
                     else {
                         serverResponse.push(`${returnData[field]}`);
                     }
                 }
-                setSubmissionErrors(serverResponse)
+                console.log(serverResponse)
+                setSubmissionErrors(serverResponse);
             }
         }
         catch(err){
@@ -201,15 +192,16 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             setSaving(false);
         }
     }
-    
+    console.log(submissionErrors);
     //set default values
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
             required: existing?.required ?? true,
             type: existing?.type ?? 'text',
-            match_options: existing?.match_options ?? null,
-            options_data: existing?.options_data ?? [],
+            match_options_id: existing?.match_options ?? null,
+            options_data: existing?.options ?? [{name: ''}],
+            allow_none: existing?.allow_none ?? false,
             include_logic: existing?.logic?.conditions?.length > 0 ?? false,
             logic_data: {
                 group_operator: existing?.logic?.group_operator ?? "AND",
@@ -217,12 +209,6 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             }
         }
     }, [existing]);
-
-    //helper ref to manage subcategories, since SimpleDynamicRows is not an RHF input
-    const rowRefs = useRef({});
-    if (!rowRefs.current['options_data']) {
-        rowRefs.current['options_data'] = React.createRef();
-    }
 
     //construct RHF variables
     const methods = useForm({ defaultValues });
@@ -248,7 +234,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         }
     }, [existing, reset, defaultValues]);
     const type = useWatch({ control, name: 'type', defaultValue: 'text' });
-    const usingMatched = useWatch({ control, name: 'match_options', defaultValue: false });
+    const usingMatched = useWatch({ control, name: 'match_options_id', defaultValue: false });
     const usingLogic= useWatch({ control, name: 'include_logic', defaultValue: false });
     const basics = [
         { name: 'name', label: 'Name (Required)', type: "textarea", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
@@ -264,6 +250,9 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             options: assessment.indicators.map((ind) => ({value: ind.id, label: ind.name}))
         },
     ]
+    const noneOption = [
+        { name: 'allow_none', label: 'Add "None" option', type: "checkbox" },
+    ]
     const logic = [
         { name: 'include_logic', label: "Add logic", type: "checkbox",
         },
@@ -277,6 +266,8 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         padding: 8,
         backgroundColor: theme.colors.bonasoDarkAccent,
     };
+    const order = existing?.order ?? assessment.indicators.length
+
     if(!editing && existing){
         return (
             <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
@@ -295,21 +286,21 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             </div>
         )
     }
+
     else {
         return(
             <div className={styles.form}>
                 <h2>{existing ? `Editing ${existing.name}` : 'New Indicator'}</h2>
+                <Messages errors={submissionErrors} ref={alertRef} />
                 <FormProvider {...methods}>
                     <form onSubmit={handleSubmit(onSubmit, onError)}>
                         <FormSection fields={basics} control={control} header='Basic Information'/>
-                        {(type=='single' || type=='multi') && assessment.indicators.length > 0 && 
+                        {(type=='single' || type=='multi') && assessment.indicators.filter((i => i.order < order)).length > 0 && 
                             <FormSection fields={match} control={control} header='Match Options'/>}
                         {(type=='single' || type=='multi') && !usingMatched && 
-                            <SimpleDynamicRows ref={rowRefs.current['options_data']} label={'Options'}
-                                tooltip={`Enter the name of each option. You may add or remove rows using the buttons. 
-                                    ${existing ? ' If you are trying to remove an option from an existing question, mark it as deprecated.' : '' }`}
-                                existing={existing?.options ?? []} header={'Options'}/>
+                            <OptionsBuilder />
                         }
+                        {(type=='single' || type=='multi') && <FormSection control={control} fields={noneOption} header={'Add None Option?'} />}
                         <FormSection fields={logic} control={control} header='Logic'/>
                         {usingLogic && <LogicBuilder control={control} meta={meta} order={existing?.order ?? assessment.indicators.length} assessment={assessment} />}
                         {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
