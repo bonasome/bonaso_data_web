@@ -22,7 +22,7 @@ import Messages from "../../reuseables/Messages";
 export default function AssessmentForm(){
     const navigate = useNavigate();
 
-    const { id, taskID} = useParams();
+    const { id, taskID, irID } = useParams();
     const { setAssessmentDetails } = useIndicators();
     const { setRespondentDetails} = useRespondents();
 
@@ -71,6 +71,33 @@ export default function AssessmentForm(){
         getAssessmentDetail();
     }, [taskID]);
 
+    useEffect(() => {
+        const getInteraction = async () => {
+            if(!irID) return;
+            try {
+                console.log('fetching indicator details...');
+                const response = await fetchWithAuth(`/api/record/interactions/${irID}/`);
+                const data = await response.json();
+                if(response.ok){
+                    //update the context
+                    console.log(data)
+                    setExisting(data);
+                }
+                else{
+                    //if a bad ID is provided, navigate to 404
+                    navigate(`/not-found`);
+                }
+            } 
+            catch (err) {
+                console.error('Failed to fetch interaction: ', err);
+                setSubmissionErrors(['Something went wrong. Please try again later.'])
+            } 
+            finally {
+                setLoading(false);
+            }
+        }
+        getInteraction();
+    }, [irID]);
 
     useEffect(() => {
         const getRespondentDetails = async () => {
@@ -137,7 +164,7 @@ export default function AssessmentForm(){
             setSaving(false);
         }
     }
-
+    
     const defaultValues = useMemo(() => {
         return {
             interaction_date: existing?.interaction_date ?? '',

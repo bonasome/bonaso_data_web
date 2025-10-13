@@ -25,7 +25,7 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
                 case 'any':
                     return prereqVal;
                 case 'none':
-                    return prereqVal == null || prereqVal == '';
+                    return prereqVal == 'none';
                 case 'all':
                     return false; // impossible
             }
@@ -68,23 +68,28 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
 export const calcDefault = (assessment, existing=null) => {
     if(!assessment) return {}
     let map = {}
+    
     assessment.indicators.forEach((ind) => {
         if(ind.type == 'multi'){
-            const val = existing?.responses?.[ind.id]?.value ?? [];
+            const val =  (existing && ind.allow_none) ? (existing?.responses?.filter(r => r.indicator.id == ind.id)?.map(r => (r.response_option.id)).length > 0 ? 
+                existing?.responses?.filter(r => r.indicator.id == ind.id)?.map(r => (r.response_option.id)) : ['none']) : 
+                existing?.responses?.filter(r => r.indicator.id == ind.id)?.map(r => (r.response_option.id)) ?? [];
             map[ind.id] = { value: val }
         } 
         else if(ind.type == 'single'){
-            const val = existing?.responses?.[ind.id]?.value ?? null;
+            const val = (ind.allow_none && existing) ? (existing?.responses?.find(r => r.indicator.id == ind.id)?.response_option ?? 'none'): 
+                existing?.responses?.find(r => r.indicator.id == ind.id)?.response_option ?? null;
             map[ind.id] = { value: val }
         }
         else if(ind.type == 'boolean'){
-            const val = existing?.responses?.[ind.id]?.value ?? false;
+            const val = existing?.responses.find(r => r.indicator.id == ind.id)?.response_boolean ?? false;
             map[ind.id] = { value: val }
         }
         else {
-            const val = existing?.responses?.[ind.id]?.value ?? '';
+            const val = existing?.responses?.find(r => r.indicator.id == ind.id)?.response_value ?? '';
             map[ind.id] = { value: val }
         }
     });
+    console.log(map)
     return map;
 }

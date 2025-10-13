@@ -110,6 +110,7 @@ function Router() {
             <Route path='new' element={<RespondentForm />} />
             <Route path=':id/edit' element={<RespondentForm />} />
             <Route path=':id/assessment/:taskID/new' element={<AssessmentForm />} />
+            <Route path=':id/assessment/:taskID/edit/:irID' element={<AssessmentForm />} />
         </Route>
         
         <Route 

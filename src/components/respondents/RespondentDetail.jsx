@@ -32,6 +32,7 @@ import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 import { IoIosStar, IoIosStarOutline, IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 import { MdFlag } from "react-icons/md";
+import AssessmentHistory from './assessments/AssessmentHistory';
 
 export default function RespondentDetail(){
     /*
@@ -348,8 +349,7 @@ export default function RespondentDetail(){
                 {/* interactions section */}
                 <div className={styles.interactions}>
                     <h2>Interactions</h2>
-                    <Interactions id={id} respondent={respondent} meta={respondentsMeta} onUpdate={onUpdate} 
-                        buttonAdd={addingTask} onAdd={() => setAdded([])}/>
+                    <AssessmentHistory id={id} respondent={respondent} meta={respondentsMeta} />
                 </div>
             </div>
             

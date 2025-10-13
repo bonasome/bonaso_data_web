@@ -5,8 +5,9 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import ConflictManagerModal from './ConflictManagerModal'
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import ModelSelect from '../reuseables/inputs/ModelSelect';
+import ModelMultiSelect from '../reuseables/inputs/ModelMultiSelect';
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
-import ProjectsIndex from '../projects/ProjectsIndex';
+import Tasks from '../tasks/Tasks';
 import Messages from '../reuseables/Messages';
 
 import styles from './batchRecord.module.css';
@@ -24,7 +25,7 @@ export default function BatchRecord(){
 
     //org and project for generating template
     const [org, setOrg] = useState(null);
-    const [project, setProject] = useState(null);
+    const [tasks, setTasks] = useState([]);
 
     //the file itself
     const [file, setFile] = useState(null);
@@ -57,7 +58,7 @@ export default function BatchRecord(){
 
         //make sure a project/organization is selected
         let getErrors = [];
-        if(!project){
+        if(!tasks){
             getErrors.push('Please select a project.')
         }
         if(!org){
@@ -70,7 +71,16 @@ export default function BatchRecord(){
         try{
             console.log('fetching template...');
             setGettingFile(true);
-            const response = await fetchWithAuth(`/api/record/interactions/template/?project=${project.id}&organization=${org.id}`);
+            const response = await fetchWithAuth(`/api/record/interactions/template/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                body: JSON.stringify({
+                    'organization_id': org.id,
+                    'task_ids': tasks.map(t => t.id),
+                })
+            });
             if(response.ok){
                 //file download jargon
                 const blob = await response.blob();
@@ -167,6 +177,7 @@ export default function BatchRecord(){
                 let data = {};
                 try {
                     data = await response.json();
+                    console.log(data)
                 } 
                 catch {
                     // no JSON body or invalid JSON
@@ -206,8 +217,8 @@ export default function BatchRecord(){
                     <ModelSelect IndexComponent={OrganizationsIndex} value={org} callbackText={'Choose Organization'}
                          onChange={setOrg} label={'Select an Organization'} labelField={'name'} />
 
-                    <ModelSelect IndexComponent={ProjectsIndex} value={project} onChange={setProject}
-                        label={'Select a Project'} callbackText={'Choose Project'}/>
+                    {org && <ModelMultiSelect IndexComponent={Tasks} value={tasks} onChange={setTasks}
+                        label={'Select a Project'} callbackText={'Choose Project'} includeParams={[{field: 'organization', value: org?.id}, {field: 'category', value: 'assessment' }]}/>}
                 
                 {gettingFile ? <ButtonLoading /> : 
                      <button onClick={() => handleClick()}><FaFileDownload /> Get my file!</button>}
