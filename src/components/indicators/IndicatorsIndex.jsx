@@ -164,7 +164,7 @@ export default function IndicatorsIndex({ callback=null, includeParams=[], exclu
     //helper function that converts array of objects in include/exclude params and converts it to a string
     const params = useMemo(() => {
         //sepereate from filters, these are passed as params
-        const allowedFields = ['project', 'organization', 'category'];
+        const allowedFields = ['project', 'organization', 'category', 'allow_aggregate'];
         const include = includeParams?.filter(p => allowedFields.includes(p?.field))
         ?.map(p => `&${p?.field}=${p?.value}`)
         .join('') ?? '';
@@ -172,7 +172,6 @@ export default function IndicatorsIndex({ callback=null, includeParams=[], exclu
         const exclude = excludeParams?.filter(p => allowedFields.includes(p?.field))
         ?.map(p => `&exclude_${p?.field}=${p?.value}`)
         .join('') ?? '';
-        console.log(excludeParams)
         return include + exclude
 
     }, [includeParams, excludeParams]);

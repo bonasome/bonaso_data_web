@@ -79,6 +79,8 @@ import SocialPostForm from '../components/social/SocialPostForm';
 import FunWithFlags from '../components/flags/FunWithFlags';
 import AssessmentsIndex from '../components/indicators/assessment/AssessmentsIndex';
 
+import AggregateForm from '../components/aggregates/AggregateForm';
+
 
 function Router() {
     /*
@@ -125,6 +127,22 @@ function Router() {
             <Route index element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
                     <BatchRecord />
+                </RedirectIfNoPerm>
+                }/>
+        </Route>
+        
+        <Route 
+            path='/aggregates' 
+            element = {
+                <RedirectIfNotAuthenticated>
+                    <Navbar />
+                    <RespondentsLayout />
+                </RedirectIfNotAuthenticated>
+            }
+        >
+            <Route index element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <AggregateForm />
                 </RedirectIfNoPerm>
                 }/>
         </Route>

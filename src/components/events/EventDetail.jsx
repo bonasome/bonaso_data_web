@@ -10,7 +10,6 @@ import cleanLabels from "../../../services/cleanLabels";
 import { favorite, checkFavorited } from "../../../services/favorite";
 
 import Loading from "../reuseables/loading/Loading";
-import Counts from "./Counts";
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ButtonHover from "../reuseables/inputs/ButtonHover";
 import Messages from '../reuseables/Messages';
