@@ -198,7 +198,7 @@ export default function IndicatorForm(){
         }
     }, [existing, reset, defaultValues]);
 
-
+    const cat = useWatch({ control, name: 'category', defaultValue: 'misc' });
 
     const basicInfo = [
         { name: "name", label: "Indicator Name (Required)", type: "text", rules: { required: "Required", 
@@ -214,7 +214,10 @@ export default function IndicatorForm(){
              rules: { required: "Required" }, tooltip: `The type determines what kind of data this indicator 
                 is meant to collect. Trying to track social posts? Check social. 
                 Tracking individual interactions with respondents? Select respondent.` },
-        
+    ]
+    const allowAggies = [
+        { name: 'allow_aggregate', label: 'Allow for Aggregates Reporting', type: "checkbox",
+        },
     ]
 
 
@@ -225,9 +228,10 @@ export default function IndicatorForm(){
             <ReturnLink url={id ? `/indicators/${id}` : '/indicators'} display={id ? 'Return to detail page' : 'Return to indicators overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New Indicator' }</h1>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
+            
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={basicInfo} control={control} header={'Basic Information'} />
-
+                {['misc'].includes(cat) && <FormSection fields={allowAggies} control={control} header='Aggregates'/> }
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     {!id && <button type="submit" value='create_another'><BsDatabaseFillAdd /> Save and Create Another</button>}

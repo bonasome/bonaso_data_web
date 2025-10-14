@@ -245,6 +245,10 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         },
         { name: 'type', label: "Type", type: "radio", options: meta?.type, rules: { required: "Required" }}, 
     ]
+    const allowAggies = [
+        { name: 'allow_aggregate', label: 'Allow for Aggregates Reporting', type: "checkbox",
+        },
+    ]
     const match = [
         { name: 'match_options_id', label: "Match Options", type: "select",
             options: assessment.indicators.map((ind) => ({value: ind.id, label: ind.name}))
@@ -295,6 +299,8 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                 <FormProvider {...methods}>
                     <form onSubmit={handleSubmit(onSubmit, onError)}>
                         <FormSection fields={basics} control={control} header='Basic Information'/>
+                        {['single', 'multi', 'integer', 'boolean'].includes(type) && 
+                             <FormSection fields={allowAggies} control={control} header='Aggregates'/>}
                         {(type=='single' || type=='multi') && assessment.indicators.filter((i => i.order < order)).length > 0 && 
                             <FormSection fields={match} control={control} header='Match Options'/>}
                         {(type=='single' || type=='multi') && !usingMatched && 
