@@ -146,6 +146,11 @@ function Router() {
                     <Aggregates />
                 </RedirectIfNoPerm>
             }/>
+            <Route path=':id' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <Aggregates />
+                </RedirectIfNoPerm>
+            }/>
             <Route path='new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
                     <AggregateForm />

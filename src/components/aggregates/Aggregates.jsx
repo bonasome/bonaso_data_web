@@ -18,12 +18,15 @@ export default function Aggregates() {
     Displays a list of all aggregates. On selected, one will appear in the main panel.
     */
     //page information
-    const [meta, setMeta] = useState({});
-    const [aggies, setAggies] = useState([]); //list of a users pivot tables
+
+    const { id } = useParams(); //optional param to load with a specfic aggie in view
+
+    const [meta, setMeta] = useState({}); //load meta (breakdown options)
+    const [aggies, setAggies] = useState([]); //list of aggregates
     //page meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
-    const [viewing, setViewing] = useState(null); //controls which dashboard is visible in the main panel
+    const [viewing, setViewing] = useState(null); //controls which aggie is visible in the main panel
     const [hidden, setHidden] = useState(false); //controls sb visibility
 
     //retrieve the model meta
@@ -53,7 +56,7 @@ export default function Aggregates() {
         getMeta();
     }, []);
 
-    //get a list of the user's pivot tables
+    //get a lightweight list of aggregates
     useEffect(() => {
         const getAggies = async() => {
             try {
@@ -81,6 +84,12 @@ export default function Aggregates() {
         getAggies();
     }, []);
 
+    //if an id param was passed, set viewing to that aggie (if it exists)
+    useEffect(() => {
+        if(!id) return;
+        setViewing(aggies.filter(a => a.id == id)?.id ?? null);
+    }, [id, aggies]);
+
     if(loading || !meta) return <Loading />
     return(
         <div className={hidden ? styles.fullContainer : styles.container}>
@@ -88,7 +97,7 @@ export default function Aggregates() {
             <div className={styles.mainPanel}>
                 <Messages errors={errors} />
 
-                {/*Show Selected count*/}
+                {/*Show Selected aggregate*/}
                 {viewing && <AggregateTable id={viewing} />}
 
                 {/* Show a placeholder when nothing is selected */}
