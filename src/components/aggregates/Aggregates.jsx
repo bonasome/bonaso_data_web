@@ -1,18 +1,17 @@
-import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
+import { useParams, Link } from 'react-router-dom';
 
-import fetchWithAuth from '../../../../services/fetchWithAuth';
+import fetchWithAuth from '../../../services/fetchWithAuth';
 
-import Loading from '../../reuseables/loading/Loading';
-import Messages from '../../reuseables/Messages';
-import PivotTable from './PivotTable';
-import PivotTableSettings from './PivotTableSettings';
+import Loading from '../reuseables/loading/Loading';
+import Messages from '../reuseables/Messages';
+import AggregateTable from './AggregateTable';
 
-import styles from '../dashboards/dashboard.module.css';
+import styles from '../analytics/dashboards/dashboard.module.css';
 
 import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 import { MdOutlinePivotTableChart } from "react-icons/md";
-import Counts from './Counts';
+import prettyDates from '../../../services/prettyDates';
 
 export default function Aggregates() {
     /*
@@ -21,13 +20,11 @@ export default function Aggregates() {
     //page information
     const [meta, setMeta] = useState({});
     const [aggies, setAggies] = useState([]); //list of a users pivot tables
-    const [breakdowns, setBreakdowns] = useState({}); //breakdowns that contain information about demogrpahic fields
     //page meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [viewing, setViewing] = useState(null); //controls which dashboard is visible in the main panel
     const [hidden, setHidden] = useState(false); //controls sb visibility
-    const [creating, setCreating] = useState(false); //controls visibility of create modal
 
     //retrieve the model meta
     useEffect(() => {
@@ -84,19 +81,6 @@ export default function Aggregates() {
         getAggies();
     }, []);
 
-    //handle a change to settings to make sure it reflects in the sidebar
-    const handleUpdate = (data) => {
-        console.log(data)
-        const others = aggies.filter((d) => (d.id != data.id));
-        setAggies([...others, data]);
-    }
-
-    //handle deletion of a pivot table
-    const handleRemove = (id) => {
-        setAggies(prev => prev.filter((d) => (d.id != id)));
-        setViewing(null);
-    }
-
     if(loading || !meta) return <Loading />
     return(
         <div className={hidden ? styles.fullContainer : styles.container}>
@@ -104,11 +88,8 @@ export default function Aggregates() {
             <div className={styles.mainPanel}>
                 <Messages errors={errors} />
 
-                {/* Show create modal */}
-                {creating && <Counts />}
-
                 {/*Show Selected count*/}
-                {viewing && <Counts />}
+                {viewing && <AggregateTable id={viewing} />}
 
                 {/* Show a placeholder when nothing is selected */}
                 {!viewing && <div className={styles.placeholder}>
@@ -126,10 +107,11 @@ export default function Aggregates() {
                 </div>
                 {!hidden && <div>
                     <h2>Your Aggregates</h2>
-                    <button onClick={() => setCreating(true)}> <MdOutlinePivotTableChart /> Create a New Aggreate</button>
-                    {aggies.length > 0 && aggies.map((pt) => (
-                        <div onClick={() => setViewing(pt.id)} className={styles.dbCard}>
-                            <h3>{pt.display_name}</h3>
+                    <Link to={'/aggregates/new'}><button><MdOutlinePivotTableChart /> Create a New Aggreate</button></Link>
+                    {aggies.length > 0 && aggies.map((ag) => (
+                        <div onClick={() => setViewing(ag.id)} className={styles.dbCard}>
+                            <h3>{ag.indicator.name}</h3>
+                            <p><i>{prettyDates(ag.start)} - {prettyDates(ag.end)}</i></p>
                         </div>
                     ))}
                 </div>}

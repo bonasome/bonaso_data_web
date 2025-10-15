@@ -79,6 +79,7 @@ import SocialPostForm from '../components/social/SocialPostForm';
 import FunWithFlags from '../components/flags/FunWithFlags';
 import AssessmentsIndex from '../components/indicators/assessment/AssessmentsIndex';
 
+import Aggregates from '../components/aggregates/Aggregates';
 import AggregateForm from '../components/aggregates/AggregateForm';
 
 
@@ -142,9 +143,19 @@ function Router() {
         >
             <Route index element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <Aggregates />
+                </RedirectIfNoPerm>
+            }/>
+            <Route path='new' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
                     <AggregateForm />
                 </RedirectIfNoPerm>
-                }/>
+            }/>
+            <Route path=':id/edit' element={
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                    <AggregateForm />
+                </RedirectIfNoPerm>
+            }/>
         </Route>
 
         <Route 

@@ -3,6 +3,7 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import cleanLabels from '../../../services/cleanLabels';
+import { getDynamicKeys } from './helpers';
 
 import FormSection from '../reuseables/forms/FormSection';
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
@@ -18,42 +19,18 @@ import { BsDatabaseFillAdd } from "react-icons/bs";
 
 // Helper: cartesian product for breakdown values
 function cartesianProduct(keys, valuesMap) {
-  if (!keys.length) return [{}];
-  const [first, ...rest] = keys;
-  const firstList = valuesMap[first] || [];
-  const restProd = cartesianProduct(rest, valuesMap);
-  const out = [];
-  for (const v of firstList) {
-    for (const r of restProd) {
-      out.push({ [first]: v.value, ...r });
+    if (!keys.length) return [{}];
+    const [first, ...rest] = keys;
+    const firstList = valuesMap[first] || [];
+    const restProd = cartesianProduct(rest, valuesMap);
+    const out = [];
+    for (const v of firstList) {
+        for (const r of restProd) {
+        out.push({ [first]: v.value, ...r });
+        }
     }
-  }
-  return out;
-}
-
-// Build rows using indicatorOptions (array) and selected breakdowns (array of keys)
-// dimValuesMap: { sex: [{value,label}, ...], ... }
-export function buildRowsForOptions(indicatorOptions = [{}], breakdowns = [], dimValuesMap = {}) {
-    // If no indicator options, create a single empty base
-    const bases = indicatorOptions.length ? indicatorOptions : [{}];
-    const rows = [];
-
-    // produce combos of breakdown values
-    const combos = breakdowns.length ? cartesianProduct(breakdowns, dimValuesMap) : [{}];
-
-    for (const base of bases) {
-        const optionId = base.id ?? null;
-        const optionLabel = base.name ?? base.label ?? (optionId ? String(optionId) : '');
-        for (const c of combos) {
-        const row = { option_id: optionId, option_label: optionLabel, value: '' };
-        // attach each breakdown field (string values)
-        for (const b of breakdowns) {
-            row[b] = c[b] ?? '';
-        }
-        rows.push(row);
-        }
-  }
-  return rows;
+    console.log(out)
+    return out;
 }
 
 export default function AggregateBuilder() {
@@ -76,22 +53,21 @@ export default function AggregateBuilder() {
 
     // fetch meta on mount (meta contains dimension lists keyed by name: { sex: [{value,label}, ...], age_range: [...] })
     useEffect(() => {
-        let mounted = true;
-        async function getMeta() {
-        try {
-            const res = await fetchWithAuth('/api/aggregates/meta/');
-            const data = await res.json();
-            if (!mounted) return;
-            setMeta(data);
-        } catch (err) {
-            console.error('Failed to fetch meta', err);
-            setSubmissionErrors(['Failed to load metadata']);
-        } finally {
-            if (mounted) setLoading(false);
-        }
+        const getMeta = async() => {
+            try {
+                const res = await fetchWithAuth('/api/aggregates/meta/');
+                const data = await res.json();
+                setMeta(data);
+            } 
+            catch (err) {
+                console.error('Failed to fetch meta', err);
+                setSubmissionErrors(['Failed to load metadata']);
+            } 
+            finally {
+                setLoading(false);
+            }
         }
         getMeta();
-        return () => { mounted = false; };
     }, []);
 
     // fetch meta on mount (meta contains dimension lists keyed by name: { sex: [{value,label}, ...], age_range: [...] })
@@ -99,20 +75,20 @@ export default function AggregateBuilder() {
         const getGroup = async() => {
             if(!id) return;
             try {
-                const res = await fetchWithAuth('/api/aggregates/meta/');
+                const res = await fetchWithAuth(`/api/aggregates/${id}/`);
                 const data = await res.json();
                 setExisting(data);
             } 
             catch (err) {
                 console.error('Failed to fetch meta', err);
-                setSubmissionErrors(['Failed to load metadata']);
+                setSubmissionErrors(['Failed to fetch details']);
             } 
             finally {
-                if (mounted) setLoading(false);
+                setLoading(false);
             }
         }
         getGroup();
-    }, []);
+    }, [id]);
 
     // form
     const defaultValues = useMemo(() => ({
@@ -121,13 +97,13 @@ export default function AggregateBuilder() {
         project_id: existing?.project ?? null,
         start: existing?.start ?? '',
         end: existing?.end ?? '',
-        breakdowns: existing?.counts?.length? Object.keys(existing.counts[0]) : [],
-        counts_data: existing?.counts ?? [],
-    }), []);
-
+        breakdowns: existing?.counts?.length > 0 ? getDynamicKeys(existing?.counts[0]) : [],
+        counts_data: []
+    }), [existing]);
 
     const { control, handleSubmit, reset, watch, setValue, setFocus } = useForm({ defaultValues });
     const { fields, replace } = useFieldArray({ control, name: 'counts_data' });
+
 
     //if provided, set default values to existing values once loaded
     useEffect(() => {
@@ -136,61 +112,62 @@ export default function AggregateBuilder() {
         }
     }, [existing, reset, defaultValues]);
 
-    // map of dimension values: { sex: [{value,label}, ...] }
-    const dimValuesMap = useMemo(() => {
-        if (!meta) return {};
-        const map = {};
-        for (const k of Object.keys(meta)) {
-            map[k] = meta[k]?.map(v => ({ value: v.value, label: v.label })) || [];
-        }
-        return map;
-    }, [meta]);
-
     // watch relevant fields
     const selectedIndicator = watch('indicator_id');
     const breakdowns = watch('breakdowns') || [];
 
-    // indicator options: do not mutate meta; derive separately
-    const indicatorOptions = useMemo(() => {
-        if (!selectedIndicator) return [];
-        if (typeof selectedIndicator === 'object' && selectedIndicator?.options) {
-            return selectedIndicator.options.map(o => ({ id: o.id, name: o.name }));
+    function cartesianProduct(obj) {
+        const keys = Object.keys(obj);
+        if (!keys.length) return [{}];
+
+        return keys.reduce((acc, key) => {
+            const values = obj[key];
+            const temp = [];
+            acc.forEach(existing => {
+            values.forEach(v => {
+                temp.push({ ...existing, [key]: v });
+            });
+            });
+            return temp;
+        }, [{}]);
+    }
+
+    const buildRows = useMemo(() => {
+        if(!meta || !selectedIndicator) return;
+        let existingVals = [];
+
+        if(existing?.counts?.length > 0){
+            existingVals = existing.counts.reduce((acc, c) => {
+                const key = `${getDynamicKeys(existing?.counts[0]).map(d => d == 'option' ? `${d}__${c[d]?.id}` : `${d}__${c[d]}`).join('___')}`;
+                acc[key] = c.value;
+                return acc;
+            }, {})
         }
-        // fallback: try to find options on meta.indicators if present
-        if (meta && meta.indicators) {
-            const found = meta.indicators.find(i => String(i.id) === String(selectedIndicator));
-            return found?.options?.map(o => ({ id: o.id, name: o.name })) || [];
-        }
+        console.log(existingVals)
+        let all = breakdowns || [];
+        if(selectedIndicator?.options.length > 0 && !all.includes('option')) all.push('option');
+        let cleanedMeta = {}
+        if(all.length == 0) return 'index'
+        all.forEach((bd) => {
+            if(bd == 'option') cleanedMeta[bd] = selectedIndicator.options.map((o => o.id));
+            else cleanedMeta[bd] = meta[bd]?.map(v => v.value);
+        })
+        const keys = cartesianProduct(cleanedMeta).map(r => (
+            Object.keys(r).map(k => `${k}__${r[k]}`).join('___')
+        ))
+        console.log(keys);
+        const rows = []
+        keys.forEach(r => {
+            const val = existingVals?.[r] ?? '';
+            rows[r] = val;
+            setValue(`counts_data.${r}`, val)
+            rows.push({ key: r, value: val})
+        })
+        replace(rows)
+        return rows
+    }, [breakdowns, existing]);
 
-        return [];
-    }, [selectedIndicator, meta]);
-
-    // build derived rows (full grid) whenever indicatorOptions or breakdowns change
-    const rows = useMemo(() => {
-        return buildRowsForOptions(indicatorOptions.length ? indicatorOptions : [{}], breakdowns, dimValuesMap);
-    }, [indicatorOptions, breakdowns, dimValuesMap]);
-
-    // track previous breakdowns for warning / revert
-    const previousBreakdownsRef = useRef(breakdowns);
-
-    useEffect(() => {
-        // if user removed breakdowns and there is data entered, warn and possibly revert
-        const hadValues = fields.some(f => f.value !== '' && f.value !== null && f.value !== undefined);
-        const prev = previousBreakdownsRef.current || [];
-        if (hadValues && breakdowns.length < prev.length) {
-            const ok = window.confirm('Removing breakdowns will clear entered values. Continue?');
-            if (!ok) {
-                // revert
-                setValue('breakdowns', prev, { shouldDirty: true });
-                return;
-            }
-        }
-        // otherwise accept and replace rows in the form
-        replace(rows);
-        previousBreakdownsRef.current = breakdowns;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [rows]);
-
+    console.log(fields)
     // transform and submit
     const onSubmit = async (data, e) => {
         const payload = {
@@ -200,20 +177,23 @@ export default function AggregateBuilder() {
             start: data.start,
             end: data.end,
             counts_data: (data.counts_data || []).map(c => {
-                const out = { option_id: c.option_id ?? null, value: Number(c.value) || 0 };
-                for (const dim of (data.breakdowns || [])) {
-                    // send raw value (string) for each breakdown
-                    if (c[dim] !== undefined && c[dim] !== null && c[dim] !== '') out[dim] = c[dim];
-                }
-                return out;
+                let count = {};
+                c.key.split('___').map((k) => {
+                    console.log(k.split('__'))
+                    const key = k.split('__')[0] == 'option' ? 'option_id' : k.split('__')[0];
+                    count[key]  = k.split('__')[1]
+                })
+                count['value'] = c.value;
+                return count;
             })
         };
         console.log(payload);
         const action = e.nativeEvent.submitter.value;
         try {
             setSaving(true);
-            const response = await fetchWithAuth('/api/aggregates/', {
-                method: 'POST',
+            const url = id ? `/api/aggregates/${id}/` : '/api/aggregates/'
+            const response = await fetchWithAuth(url, {
+                method: id ? 'PATCH' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
         });
@@ -307,13 +287,12 @@ export default function AggregateBuilder() {
             <div className="mb-4">
                 <h3 className="font-medium mb-2">Data entry</h3>
 
-                {fields.length === 0 && <div className="text-sm text-gray-500">No rows. Select dimensions and ensure indicator is selected.</div>}
+                {fields.length === 0 && <div>No rows. Select dimensions and ensure indicator is selected.</div>}
 
                 <div className="overflow-auto border rounded">
                 <table className="min-w-full table-fixed">
                     <thead>
                     <tr className="bg-gray-100">
-                        {selectedIndicator.options.length > 0 &&  <th className="p-2">Option</th>}
                         {breakdowns.map(d => (
                         <th key={d} className="p-2 capitalize">{cleanLabels(d)}</th>
                         ))}
@@ -323,26 +302,12 @@ export default function AggregateBuilder() {
                     <tbody>
                     {fields.map((row, idx) => (
                         <tr key={row.id} className="border-t">
-                        {selectedIndicator.options.length > 0 && <td className="p-2 text-sm">{row.option_label}</td>}
-                        {breakdowns.map(d => (
-                            <td key={d} className="p-2">
-                                {/* Show text only */}
-                                <span className="text-sm">
-                                    {dimValuesMap[d]?.find(v => v.value === row[d])?.label || ''}
-                                </span>
-
-                                {/* Hidden field so RHF still submits it */}
-                                <Controller
-                                    name={`counts_data.${idx}.${d}`}
-                                    control={control}
-                                    defaultValue={row[d]}  // Pre-fill the value
-                                    render={({ field }) => (
-                                    <input type="hidden" {...field} value={row[d]} />
-                                    )}
-                                />
+                        {row.key.split('___').map(d => (
+                            <td key={d}>
+                                {d.split('__')[0] == 'option' ? selectedIndicator.options.find(o => o.id == d.split('__')[1])?.name :
+                                 <p>{meta[d.split('__')[0]]?.find(v => v.value === d.split('__')[1])?.label || ''}</p>}
                             </td>
                         ))}
-
                         <td className="p-2">
                             <Controller
                             name={`counts_data.${idx}.value`}

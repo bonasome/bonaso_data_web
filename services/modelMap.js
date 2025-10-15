@@ -8,7 +8,7 @@ export const contentTypeMap = {
     */
     'respondents.respondent': { label: 'Respondent', url: 'respondents' },
     'respondents.interaction': { label: 'Interaction', url: 'respondents' },
-    'events.demographiccount': { label: 'Event Count', url: 'events' },
+    'aggregates.aggregatecount': { label: 'Aggregate Count', url: 'aggregate' },
     'social.socialmediapost': { label: 'Social Media Post', url: 'social' },
     'events.event': { label: 'Event', url: 'events' },
     'projects.project': { label: 'Project', url: 'projects' }
@@ -45,8 +45,8 @@ export const urlBuilder = (modelName, id, parent = '', otherParent = '') => {
 
     if (['events.event'].includes(appName)) {
         url = `/events/${id}`;
-    } else if (['events.demographicount'].includes(appName)) {
-        url = `/events/${parent}`;
+    } else if (['aggregates.aggregatecount'].includes(appName)) {
+        url = `/aggregates/${parent}`;
     } else if (['flags.flag'].includes(appName)) {
         url = `/flags`;
     } else if (['indicators.indicator'].includes(appName)) {
