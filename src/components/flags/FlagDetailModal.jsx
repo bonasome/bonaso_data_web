@@ -32,6 +32,7 @@ export default function FlagDetailModal({ flags, model, id, onClose, displayName
         <div className={modalStyles.modal}>
             {displayName ? <h3>Flags for {displayName}</h3> : <h3>Flags</h3>}
             {flags.map((flag) => <FlagCard flag={flag} />)}
+            <button onClick={() => setFlagging(true)}>Raise New Flag.</button>
             <button onClick={() => onClose()}><GiExitDoor /> Close</button>
         </div>
     )

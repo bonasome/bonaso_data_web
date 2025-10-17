@@ -1,4 +1,4 @@
-const META_KEYS = new Set(['id', 'value', 'created_at', 'created_by', 'updated_at', 'updated_by']);
+const META_KEYS = new Set(['id', 'value', 'created_at', 'created_by', 'updated_at', 'updated_by', 'flags']);
 
 //gets list of dimension keys (sex)
 export function getDynamicKeys(count) {
@@ -51,13 +51,11 @@ export function normalizeVal(v) {
     return String(v);
 }
 export function buildColHeaderTree(colDims, uniquesByKey) {
-    console.log(uniquesByKey)
     if (!colDims.length) return { headerRows: [], colKeys: [''] };
     const lists = colDims.map(k => uniquesByKey[k]);
     const combos = cartesian(lists);
     const colKeys = combos.map(c => c.join('||'));
 
-    console.log(lists, combos, colKeys)
     // headerRows: for each dimension level, an array of { label, colSpan }
     const headerRows = colDims.map((dim, level) => {
         const row = [];
@@ -100,8 +98,8 @@ export function buildCells(counts, rowDims, colDims) {
         const colKey = colParts.join('||');
         const v = Number(item.value ?? 0) || 0;
         if (!cells[rowKey]) cells[rowKey] = {};
-        if (!cells[rowKey][colKey]) cells[rowKey][colKey] = 0;
-        cells[rowKey][colKey] += v;
+        if (!cells[rowKey][colKey]) cells[rowKey][colKey] = {id: item?.id, value: 0};
+        cells[rowKey][colKey].value += v;
     });
     return cells;
 }

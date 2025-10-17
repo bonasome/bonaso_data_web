@@ -4,11 +4,17 @@ import { useForm,  useWatch, useController, useFormContext, FormProvider } from 
 import { checkLogic } from "./helpers";
 
 import Field from "../../reuseables/forms/Field";
+import styles from '../../../styles/form.module.css';
+import { FaArrowAltCircleDown, FaArrowAltCircleUp, FaArrowCircleDown } from "react-icons/fa";
 
 export default function ResponseField ({ indicator, assessment, respondent, responseInfo }){
+    const [expanded, setExpanded] = useState(false);
+
+
     const { field } = useController({ name: `response_data.${indicator.id}.value` });
     const { control, setValue, getValues } = useFormContext();
 
+    
     const shouldShow = useMemo(() => {
         if(!indicator || !assessment ||!respondent) return false;
         const logic = indicator.logic;
@@ -85,7 +91,7 @@ export default function ResponseField ({ indicator, assessment, respondent, resp
 
     let fieldConfig = {type: convertType(indicator.type), 
         name: `response_data.${indicator.id}.value`, 
-        label: indicator.name, 
+        label: `${indicator.order + 1}. ${indicator.name}`, 
         options: options, 
         onChange: indicator.type === 'multi' ? handleMultiSelectChange : undefined,}
 
@@ -93,10 +99,17 @@ export default function ResponseField ({ indicator, assessment, respondent, resp
     
     if(!shouldShow) return <></>
     return(
-        <div>
-            <Field control={control} field={fieldConfig} />
-            <Field control={control} field={{ name: `response_data.${indicator.id}.date`, label: 'Date', type: "date" }} />
-            <Field control={control} field={{ name: `response_data.${indicator.id}.location`, label: 'Response Location', type: "text" }} />
+        <div className={styles.formSection}>
+            <div style={{display: 'flex', flexDirection: 'row'}}>
+                <Field control={control} field={fieldConfig} />
+                <div style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto' }} onClick={() => setExpanded(!expanded)}>
+                    {expanded ? <FaArrowAltCircleUp fontSize={30} /> : <FaArrowAltCircleDown fontSize={30} />}
+                </div>
+            </div>
+            {expanded && <div>
+                <Field control={control} field={{ name: `response_data.${indicator.id}.date`, label: 'Date', type: "date" }} />
+                <Field control={control} field={{ name: `response_data.${indicator.id}.location`, label: 'Response Location', type: "text" }} />
+            </div>}
         </div>
     )
 }

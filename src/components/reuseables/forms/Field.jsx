@@ -11,7 +11,7 @@ import ImageSelect from '../inputs/ImageSelect';
 import Select from '../inputs/Select';
 import MultiCheckboxNum from '../inputs/MultiCheckboxNum';
 
-export default function Field({ field, control, flexOverride=false }) {
+export default function Field({ field, control, style={} }) {
     /*
     Singular form field that will represent one input in an RHF setup. Meant to be used with [./FormSection].
     - field (object): information about the input
@@ -64,7 +64,7 @@ export default function Field({ field, control, flexOverride=false }) {
                 case "date":
                 case "number":
                 case "textarea":
-                    return <Input type={type} {...commonProps} placeholder={placeholder} flexOverride={flexOverride} />;
+                    return <Input type={type} {...commonProps} placeholder={placeholder} style={style} />;
                 case 'select': //single select, radio is preferred unless the options are many
                     return <Select options={options} {...commonProps} search={search} />;
                 case "radio": //single select from list

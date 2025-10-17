@@ -10,6 +10,8 @@ import fetchWithAuth from "../../../../services/fetchWithAuth";
 
 import Loading from '../../reuseables/loading/Loading';
 import AssessmentIndicator from './AssessmentIndicator';
+import Messages from '../../reuseables/Messages';
+import UpdateRecord from '../../reuseables/meta/UpdateRecord';
 import styles from '../../../styles/form.module.css';
 
 import { ImPencil } from 'react-icons/im';
@@ -19,6 +21,8 @@ import Input from '../../reuseables/inputs/Input';
 import Select from '../../reuseables/inputs/Select';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import { FaTrashAlt } from 'react-icons/fa';
+import { FcAddRow } from 'react-icons/fc';
+import theme from '../../../../theme/theme';
 
 
 
@@ -207,22 +211,25 @@ export default function AssessmentForm(){
             <div className={styles.form}>
                 {editing && <AssessmentDetailsModal onUpdate={(d) => setAssessment(d)} onCancel={() => setEditing(false)} existing={assessment} />}
                 <h1>{assessment.name}</h1>
-                <p>{assessment.description}</p>
-                <div style={{ display: 'flex', flexDirection: 'row'}}>
+                <Messages errors={submissionErrors} ref={alertRef} />
+                {assessment.description ? <p>{assessment.description}</p> : <p><i>No Description.</i></p>}
+                <UpdateRecord created_at={assessment.created_at} created_by={assessment.created_by} updated_at={assessment.updated_at} updated_by={assessment.updated_by} />
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} callback={() => setEditing(true)} />
                     <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover='Delete Indicator' forDelete={true} />
                 </div>
             </div>
             {del && <ConfirmDelete onCancel={() => setDel(false)} onConfirm={handleDelete} name={`the assessment "${assessment.display_name}"`} />}
-            <div>
+            <div style={{ margin: '5vh', padding: '2vh', backgroundColor: theme.colors.bonasoDarkAccent  }}>
+                <h2>Questions</h2>
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={indicators.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                    {indicators.sort((a, b) => a.order - b.order).map((ind) => (<AssessmentIndicator meta={indicatorsMeta} assessment={assessment} existing={ind} onUpdate={getAssessmentDetail} />))}
-                </SortableContext>
+                    <SortableContext items={indicators.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+                        {indicators.sort((a, b) => a.order - b.order).map((ind) => (<AssessmentIndicator meta={indicatorsMeta} assessment={assessment} existing={ind} onUpdate={getAssessmentDetail} />))}
+                    </SortableContext>
                 </DndContext>
                 
                 {adding && <AssessmentIndicator meta={indicatorsMeta} assessment={assessment} onCancel={() => setAdding(false)} onUpdate={() => {getAssessmentDetail(); setAdding(false)}} />}
-                <ButtonHover noHover={<ImPencil />} hover={'New Question'} callback={() => setAdding(true)} />
+                <button onClick={() => setAdding(true)}> <FcAddRow />  Add Indicator</button> 
             </div>
         </div>
     )

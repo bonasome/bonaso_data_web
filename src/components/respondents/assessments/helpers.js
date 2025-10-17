@@ -44,7 +44,7 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
                 console.warn('Cannot compare a non-integer.');
                 return false
             }
-            return c.operator == '>' ? reqVal > prereqVal : reqVal < prereqVal
+            return c.operator == '>' ? parseFloat(prereqVal) > parseFloat(reqVal) : parseFloat(prereqVal) < parseFloat(reqVal)
         }
         else if(c.operator == 'contains'){
             return prereqVal.toLowerCase().includes(reqVal.toLowerCase());

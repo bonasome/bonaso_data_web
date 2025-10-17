@@ -65,7 +65,7 @@ export default function AssessmentHistory({ respondent, meta }){
                 <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
                     <h2>Previous Interactions</h2>
                     {interactions.length === 0 && <p>No interactions yet. Be the first to create one!</p>}
-                    {interactions.length > 0 && interactions.map((interaction) => (<InteractionCard key={interaction.id} interaction={interaction} />))}
+                    {interactions.length > 0 && interactions.map((interaction) => (<InteractionCard key={interaction.id} interaction={interaction} onDelete={getInteractions} onUpdate={getInteractions}/>))}
                 </IndexViewWrapper>
                 </div>
         </div>

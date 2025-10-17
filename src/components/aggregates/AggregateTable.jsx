@@ -3,12 +3,12 @@ import { useAuth } from '../../contexts/UserAuth';
 import { Link } from 'react-router-dom';
 import cleanLabels from '../../../services/cleanLabels';
 import fetchWithAuth from '../../../services/fetchWithAuth';
+import theme from '../../../theme/theme';
 import { buildAutoMatrix } from './helpers';
-
-
 
 import prettyDates from '../../../services/prettyDates';
 import Messages from '../reuseables/Messages';
+import FlagDetailModal from '../flags/FlagDetailModal';
 import ComponentLoading from "../reuseables/loading/ComponentLoading";
 import ButtonHover from '../reuseables/inputs/ButtonHover';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
@@ -31,37 +31,41 @@ export default function AggregateTable({ id, meta, onDelete }){
     */
     const { user } = useAuth();
     const [count, setCount] = useState(null); //information about the pivot table
+    const [viewingFlag, setViewingFlag] = useState(null);
     //page meta
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [del, setDel] = useState(false);
 
+    const getCount = async() => {
+        try {
+            console.log('fetching aggregate details...');
+            const url = `/api/aggregates/${id}`;
+            const response = await fetchWithAuth(url);
+            const data = await response.json();
+            if(response.ok){
+                setCount(data)
+                console.log(data);
+            }
+            else{
+                setErrors(['Something went wrong. Please try again later.'])
+            }
+        } 
+        catch (err) {
+            console.error('Failed to get meta:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        } 
+        finally{
+            setLoading(false);
+        }
+    }
+
     //get the pivot table details
     useEffect(() => {
-        const getCount = async() => {
-            try {
-                console.log('fetching aggregate details...');
-                const url = `/api/aggregates/${id}`;
-                const response = await fetchWithAuth(url);
-                const data = await response.json();
-                if(response.ok){
-                    setCount(data)
-                    console.log(data);
-                }
-                else{
-                    console.error(data);
-                    setErrors(['Something went wrong. Please try again later.'])
-                }
-            } 
-            catch (err) {
-                console.error('Failed to get meta:', err);
-                setErrors(['Something went wrong. Please try again later.'])
-            } 
-            finally{
-                setLoading(false);
-            }
+        loadInitial = async() => {
+            getCount();
         }
-        getCount();
+        loadInitial()
     }, [id]);
 
     //delete the pivot table
@@ -116,7 +120,6 @@ export default function AggregateTable({ id, meta, onDelete }){
         }
         return buildAutoMatrix(count.counts)
     }, [count]);
-    console.log(matrix)
     const { rowTree, headerRows, colKeys, cells, dims } = matrix;
 
 
@@ -129,10 +132,17 @@ export default function AggregateTable({ id, meta, onDelete }){
         return false
     }, [user]);
 
+    const getLabelFromValue = (field, value) => {
+        if(!meta) return null
+        const match = meta[field]?.find(range => range.value === value);
+        return match ? match.label : null;
+    };
+
     if(loading) return <ComponentLoading />
     return (
         <div className="overflow-auto border rounded-md">
             {del && <ConfirmDelete name={'this aggregate count table'} onCancel={() => setDel(false)} onConfirm={handleDelete} /> }
+            {viewingFlag && <FlagDetailModal flags={count.counts.find(c => (c.id == viewingFlag))?.flags} model={'aggregates.aggregatecount'} id={viewingFlag} onClose={() => {getCount(); setViewingFlag(null)}} /> }
             <table className="min-w-full border-collapse text-sm">
                 <thead>
                     {/* Top-left corner: show row dims labels stacked vertically */}
@@ -142,7 +152,7 @@ export default function AggregateTable({ id, meta, onDelete }){
                     </th>
                         {theadRows.length === 0 ? (
                             // single header row when there are no column dims
-                            <th >{dims.colDims.length ? dims.colDims.join(' › ') : 'Columns'}</th>
+                            <th >{dims.colDims.length ? dims.colDims.join(' , ') : 'Columns'}</th>
                         ) : (
                             // render top row cells that span the full header height (we'll render headerRows next)
                             <th colSpan={colKeys.length} style={{ textAlign: 'center' }}>Columns</th>
@@ -157,7 +167,7 @@ export default function AggregateTable({ id, meta, onDelete }){
                                 <th className="border p-1 bg-gray-50" colSpan={dims.rowDims.length || 1}></th>
                                 {level.map((cell, ci) => (
                                     <th key={cell.key} className="border p-2 bg-white" colSpan={cell.span} style={{ textAlign: 'center' }}>
-                                    {cell.label}
+                                    {cleanLabels(cell.label)}
                                 </th>
                             ))}
                         </tr>
@@ -170,20 +180,35 @@ export default function AggregateTable({ id, meta, onDelete }){
                         <tr key={`row-${ri}`}>
                             {/* render each row's label parts into separate cells (nested row headers) */}
                             {r.labelParts.map((part, pi) => (
-                            <td key={`r-${ri}-p-${pi}`} style={{ whiteSpace: 'nowrap' }}>
-                                {part || ''}
-                            </td>
+                                <td key={`r-${ri}-p-${pi}`} style={{ whiteSpace: 'nowrap' }}>
+                                    {(dims.rowDims[pi] != 'option' ? getLabelFromValue(dims.rowDims[pi], part) : part) || ''}
+                                </td>
                             ))}
 
                             {/* If row dims are fewer than a typical column, make sure table cell alignment remains */}
                             {r.labelParts.length === 0 && <td />}
 
                             {/* data cells for each column key */}
-                            {colKeys.map((ck, ci) => (
-                                <td key={`cell-${ri}-${ci}`} className="border p-2 text-right">
-                                    {Number((cells[r.rowKey] && cells[r.rowKey][ck]) || 0) || '-'}
-                                </td>
-                            ))}
+                            {colKeys.map((ck, ci) => {
+                                if(cells[r.rowKey] && cells[r.rowKey][ck]?.id){
+                                    const found = count.counts.find(c => c.id == cells[r.rowKey][ck]?.id);
+                                    if(found.flags.length > 0){
+                                        if(found.flags.filter(f => (!f.resolved)).length > 0){
+                                            return(<td key={`cell-${ri}-${ci}`} style={{ backgroundColor: theme.colors.warningBg, cursor: 'pointer' }} onClick={() => setViewingFlag(cells[r.rowKey][ck]?.id)}>
+                                                {Number((cells[r.rowKey] && cells[r.rowKey][ck]?.value) || 0) || '-'}
+                                            </td>)
+                                        }
+                                        else if(found.flags.filter(f => (!f.resolved)).length == 0){
+                                            return(<td key={`cell-${ri}-${ci}`} style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, cursor: 'pointer' }} onClick={() => setViewingFlag(cells[r.rowKey][ck]?.id)}>
+                                                {Number((cells[r.rowKey] && cells[r.rowKey][ck]?.value) || 0) || '-'}
+                                            </td>)
+                                        }
+                                    }
+                                }
+                                return(<td key={`cell-${ri}-${ci}`}>
+                                    {Number((cells[r.rowKey] && cells[r.rowKey][ck]?.value) || 0) || '-'}
+                                </td>)
+                            })}
                         </tr>
                     ))}
 
@@ -196,6 +221,7 @@ export default function AggregateTable({ id, meta, onDelete }){
                     )}
                 </tbody>
             </table>
+
             {hasPerm && <div style={{ display: 'flex', flexDirection: 'row'}}> 
                 <Link to={`/aggregates/${id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Counts'} /></Link>
                 <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Count'} forDelete={true} />

@@ -2,7 +2,7 @@ import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
 import Select from "../../reuseables/inputs/Select";
 import Input from "../../reuseables/inputs/Input";
 import Field from "../../reuseables/forms/Field";
-
+import styles from '../../../styles/form.module.css';
 export default function OptionsBuilder() {
     const { control } = useFormContext();
 
@@ -18,7 +18,7 @@ export default function OptionsBuilder() {
     });
     
     return (
-        <div>
+        <div className={styles.formSection}>
             <h3>Options</h3>
             {fields.map((field, index) => {
                 return (

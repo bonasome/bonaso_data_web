@@ -17,23 +17,8 @@ import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 
-// Helper: cartesian product for breakdown values
-function cartesianProduct(keys, valuesMap) {
-    if (!keys.length) return [{}];
-    const [first, ...rest] = keys;
-    const firstList = valuesMap[first] || [];
-    const restProd = cartesianProduct(rest, valuesMap);
-    const out = [];
-    for (const v of firstList) {
-        for (const r of restProd) {
-        out.push({ [first]: v.value, ...r });
-        }
-    }
-    console.log(out)
-    return out;
-}
-
 export default function AggregateBuilder() {
+    const navigate = useNavigate();
     const { id } = useParams();
     const [meta, setMeta] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -115,6 +100,7 @@ export default function AggregateBuilder() {
     // watch relevant fields
     const selectedIndicator = watch('indicator_id');
     const breakdowns = watch('breakdowns') || [];
+    const counts_data = watch('counts_data');
 
     function cartesianProduct(obj) {
         const keys = Object.keys(obj);
@@ -143,7 +129,6 @@ export default function AggregateBuilder() {
                 return acc;
             }, {})
         }
-        console.log(existingVals)
         let all = breakdowns || [];
         if(selectedIndicator?.options.length > 0 && !all.includes('option')) all.push('option');
         let cleanedMeta = {}
@@ -155,7 +140,6 @@ export default function AggregateBuilder() {
         const keys = cartesianProduct(cleanedMeta).map(r => (
             Object.keys(r).map(k => `${k}__${r[k]}`).join('___')
         ))
-        console.log(keys);
         const rows = []
         keys.forEach(r => {
             const val = existingVals?.[r] ?? '';
@@ -167,7 +151,6 @@ export default function AggregateBuilder() {
         return rows
     }, [breakdowns, existing]);
 
-    console.log(fields)
     // transform and submit
     const onSubmit = async (data, e) => {
         const payload = {
@@ -179,15 +162,14 @@ export default function AggregateBuilder() {
             counts_data: (data.counts_data || []).map(c => {
                 let count = {};
                 c.key.split('___').map((k) => {
-                    console.log(k.split('__'))
                     const key = k.split('__')[0] == 'option' ? 'option_id' : k.split('__')[0];
                     count[key]  = k.split('__')[1]
                 })
-                count['value'] = c.value;
+                count['value'] = ['', null].includes(c.value) ? 0 : c.value;
                 return count;
             })
         };
-        console.log(payload);
+
         const action = e.nativeEvent.submitter.value;
         try {
             setSaving(true);
@@ -211,6 +193,7 @@ export default function AggregateBuilder() {
                 }
             }
             else{
+                console.log(returnData)
                 const serverResponse = []
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {

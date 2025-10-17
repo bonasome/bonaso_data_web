@@ -37,6 +37,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
 
     //page meta
     const [editing, setEditing] = useState(existing ? false : true);
+    const [expanded, setExpanded] = useState(false);
     const [del, setDel] = useState(false);
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [saving, setSaving] = useState(false);
@@ -143,13 +144,27 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         if(data.type != 'multi' && data.type != 'single' && !data.match_options){
             data.options_data = []
         }
-        if(!data.include_logic){
+        if(!data.include_logic || data.logic_data?.conditions?.length == 0){
             data.logic_data = {};
+        }
+        if(data.include_logic && data?.logic_data?.conditions?.length > 0){
+            for(let i=0; i < data?.logic_data?.conditions?.length; i++){
+                let c = data.logic_data.conditions[i];
+                if(['any', 'none', 'all'].includes(c.value_option)){
+                    data.logic_data.conditions[i].condition_type = c.value_option;
+                    data.logic_data.conditions[i].value_option = null;
+                }
+                if(data.logic_data.conditions[i].condition_type && !['single', 'multi'].includes(data.type)){
+                    data.logic_data.conditions[i].condition_type = null
+                }
+            }
         }
         if(submitErrors.length > 0){
             setSubmissionErrors(submitErrors);
             return;
         }
+        data.category = 'assessment';
+        console.log(data)
         try{
             setSubmissionErrors([]);
             setSaving(true);
@@ -205,7 +220,10 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             include_logic: existing?.logic?.conditions?.length > 0 ?? false,
             logic_data: {
                 group_operator: existing?.logic?.group_operator ?? "AND",
-                conditions: existing?.logic?.conditions ?? [],  
+                conditions: existing?.logic?.conditions?.map((c) => {
+                    if(c.condition_type) c.value_option = c.condition_type;
+                    return c;
+                }) ?? [],  
             }
         }
     }, [existing]);
@@ -262,14 +280,22 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         },
     ]
 
+    //helper function that converts db values to labels
+    const getLabelFromValue = (field, value) => {
+        if(!meta) return null
+        const match = meta[field]?.find(range => range.value === value);
+        return match ? match.label : null;
+    };
+
     if(!meta?.type) return <ComponentLoading />
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
         margin: 40,
-        padding: 8,
-        backgroundColor: theme.colors.bonasoDarkAccent,
+        padding: 20,
+        backgroundColor: theme.colors.bonasoUberDarkAccent,
     };
+
     const order = existing?.order ?? assessment.indicators.length
 
     if(!editing && existing){
@@ -278,14 +304,52 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                 <Messages errors={submissionErrors} ref={alertRef} />
                 {del && <ConfirmDelete onCancel={() => setDel(false)} onConfirm={handleDelete} name={'this indicator'} />}
                 {!editing && (existing ? <div>
-                    <p>{existing?.order + 1}. {existing?.name}</p>
-                    <i>{existing?.type}</i>
-                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover='Edit Indicator' />
-                        <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover='Delete Indicator' forDelete={true} />
+
+                    <div style={{ display: 'flex', flexDirection: 'row'}}>
+                        <div>
+                            <div onClick={() => setExpanded(!expanded)}>
+                            <h3>{existing?.order + 1}. {existing?.name} {existing?.required ? '*' : ''}</h3>
+                            <i>{getLabelFromValue('type', existing?.type)}</i>
+                            </div>
+                            {expanded && <div style={{ paddingTop: '1vh'}}>
+                                {existing?.options?.length > 0 && <div>
+                                    <ul>
+                                        {existing.options.map((o) => (<li>{o.name}</li>))}
+                                    </ul>
+                                </div>}
+                                {existing?.logic?.conditions?.length > 0 && <div>
+                                    <i>Visible if...</i>
+                                    <ul>
+                                        {existing?.logic?.conditions?.map((c) => {
+                                            console.log(c)
+                                            let source = ''
+                                            let val = '';
+                                            let ind = null;
+                                            
+                                            if(c.source_type == 'assessment') ind = assessment.indicators.find((ind) => (ind.id == c.source_indicator))
+                                            let operator = c.condition_type ? 'Is' : getLabelFromValue('operators', c.operator)
+                                            if(c.condition_type) val = getLabelFromValue('condition_types', c.condition_type)
+                                            else if(ind && ['multi', 'single'].includes(ind.type)) val = ind.options.find((o) => (o.id == c.value_option)).name;
+                                            else if(ind && ['boolean'].includes(ind.type)) val = c.value_boolean ? 'Yes' : 'No'
+                                            else if(meta.respondent_choices?.[c?.respondent_field]) val = meta.respondent_choices?.[c?.respondent_field].find(f => f.value == c.value_text)?.label;
+                                            else val = c.value_text;
+                                            if(c.source_type == 'respondent') source = `Respondent's ${getLabelFromValue('respondent_fields', c.respondent_field)}`;
+                                            else if(c.source_type == 'assessment') source = `${ind.order+1}. ${ind.name}`
+                                            return(<li><strong>{source}</strong> <i>{operator}</i> <strong>{val}</strong></li>)
+                                        })}
+                                    </ul>
+                                </div>}
+                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <ButtonHover callback={() => setEditing(true)} noHover={<ImPencil />} hover='Edit Indicator' />
+                                    <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover='Delete Indicator' forDelete={true} />
+                                </div>
+                            </div>}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 'auto'}}>
+                            <button onClick={() => reorder(existing.order - 1)}><BsArrowBarUp fontSize={20}/></button>
+                            <button onClick={() => reorder(existing.order + 1)}><BsArrowBarDown fontSize={20}/></button>
+                        </div>
                     </div>
-                    <button onClick={() => reorder(existing.order - 1)}><BsArrowBarUp fontSize={20}/></button>
-                    <button onClick={() => reorder(existing.order + 1)}><BsArrowBarDown fontSize={20}/></button>
                 </div> : <ComponentLoading />)}
             </div>
         )
@@ -293,12 +357,12 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
 
     else {
         return(
-            <div className={styles.form}>
-                <h2>{existing ? `Editing ${existing.name}` : 'New Indicator'}</h2>
+            <div>
+                <h2>{existing ? `Editing ${existing.order+1} ${existing.name}` : `${assessment.indicators.length + 1}. New Indicator`}</h2>
                 <Messages errors={submissionErrors} ref={alertRef} />
                 <FormProvider {...methods}>
                     <form onSubmit={handleSubmit(onSubmit, onError)}>
-                        <FormSection fields={basics} control={control} header='Basic Information'/>
+                        <FormSection fields={basics} control={control}/>
                         {['single', 'multi', 'integer', 'boolean'].includes(type) && 
                              <FormSection fields={allowAggies} control={control} header='Aggregates'/>}
                         {(type=='single' || type=='multi') && assessment.indicators.filter((i => i.order < order)).length > 0 && 

@@ -361,7 +361,7 @@ export default function RespondentDetail(){
                 
                 {sbVisible && <div>
                     <h2 style={{ marginTop: 30, textAlign: 'center'}}>Start Assessment for this Respondent</h2>
-                    <Tasks isDraggable={true} callback={(t) => navigate(`/respondents/${id}/assessment/${t.id}/new`)} blacklist={added} includeParams={[{field: 'category', value:'assessment'}]} />
+                    <Tasks isDraggable={true} callback={(t) => navigate(`/respondents/${id}/assessment/${t.id}/new`)} blacklist={added} includeParams={[{field: 'category', value:'assessment'}]} forAssessment={true} />
                 </div>}
             </div>}
         </div>

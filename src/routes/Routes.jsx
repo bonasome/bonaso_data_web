@@ -323,12 +323,7 @@ function Router() {
                     <AssessmentsIndex />
                 </RedirectIfNoPerm>
                 }/>
-            <Route path='assessments/new' element={
-                <RedirectIfNoPerm level={['admin']}>
-                    <AssessmentForm />
-                </RedirectIfNoPerm>
-                }/>
-            <Route path='assessments/:id/edit' element={
+            <Route path='assessments/:id' element={
                 <RedirectIfNoPerm level={['admin']}>
                     <AssessmentBuilder />
                 </RedirectIfNoPerm>

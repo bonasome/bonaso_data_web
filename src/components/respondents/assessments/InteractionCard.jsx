@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import prettyDates from '../../../../services/prettyDates';
+import theme from '../../../../theme/theme';
 
 import { useAuth } from '../../../contexts/UserAuth'
 import { useInteractions } from '../../../contexts/InteractionsContext';
@@ -27,7 +28,7 @@ import { IoIosSave } from "react-icons/io";
 import { MdFlag } from "react-icons/md";
 import { FcCancel } from "react-icons/fc";
 
-export default function InteractionCard({ interaction }){
+export default function InteractionCard({ interaction, onUpdate, onDelete }){
     /*
     Card that displays information about an interaction and also allows for the user to edit this information.
     - interaction (object): the interaction to display information about
@@ -65,7 +66,44 @@ export default function InteractionCard({ interaction }){
         }
         else if(user?.id == interaction?.created_by?.id) return true;
         return false;
-    }, []);
+    }, [user, interaction]);
+
+    const cleanedResponses = useMemo(() => {
+        const seen = new Set();
+        const consolidated = [];
+
+        interaction.responses.forEach((r) => {
+            // Check if this indicator was already handled
+            let existing = consolidated.find(i => i.indicator.id === r.indicator.id);
+
+            if (r.indicator.type === 'multi') {
+                if (existing) {
+                    // Combine response options
+                    existing.response_option = [
+                        ...(Array.isArray(existing.response_option) ? existing.response_option : [existing.response_option]),
+                        r.response_option
+                    ];
+                } else {
+                    // First occurrence — initialize as array
+                    consolidated.push({
+                        ...r,
+                        response_option: [r.response_option]
+                    });
+                    seen.add(r.indicator.id);
+                }
+            } 
+            else {
+                if (existing) {
+                    console.warn('POSSIBLY SUSPECT RESPONSE DATA!');
+                    return;
+                }
+                consolidated.push({ ...r });
+                seen.add(r.indicator.id);
+            }
+        });
+
+        return consolidated;
+    }, [interaction]);
 
     //handle deleting an interaction
     const deleteInteraction = async() => {
@@ -109,7 +147,7 @@ export default function InteractionCard({ interaction }){
             setDel(false)
         }
     }
-
+    console.log(interaction);
     if(!interaction.task) return <ComponentLoading />
     //return this separetly if needed since the otherwise the hover features will mess with the modeal styles
     if(del){
@@ -132,7 +170,6 @@ export default function InteractionCard({ interaction }){
                 onClose={() => {onUpdate(); setViewFlags(false)}}/>
         )
     }
-
     return(
         <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             <h3>{interaction.display_name}</h3>
@@ -140,21 +177,53 @@ export default function InteractionCard({ interaction }){
                 {interaction?.flags.filter(f => !f.resolved).length > 0 ? <h3>This interaction has active flags.</h3> : <h3>This interacion previously had flags.</h3>}
             </div>}
             <div>
-                <p>{prettyDates(interaction.interaction_date)}</p>
-                <p>{interaction.interaction_location}</p>
+                <h2>{interaction.task.display_name}</h2>
+                <p>On: {prettyDates(interaction.interaction_date)}</p>
+                <p>At: {interaction.interaction_location}</p>
             </div>
 
 
-            <div style={{ display: 'flex', flexDirection: 'row'}}>
-                {hasPerm && <Link to={`/respondents/${interaction.respondent.id}/assessment/${interaction.task.id}/edit/${interaction.id}`}> 
-                    <ButtonHover noHover={<ImPencil />} hover={`Edit Details`} />
-                </Link>}
-                {hasPerm && <ButtonHover callback={() => setFlagging(true)} noHover={<MdFlag />} hover={'Raise New Flag'} forWarning={true} />}
-                {user.role == 'admin' && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Record'} forDelete={true} />}
-                {del && <ButtonLoading forDelete={true} /> }
-            </div>
-            <UpdateRecord created_at={interaction.created_at} created_by = {interaction.created_by}
-                updated_at={interaction.updated_at} updated_by={interaction.updated_by} /> 
+            {expanded && <div>
+                <div>
+                    <div>
+                        <h3>Responses</h3>
+                        <div style={{ padding: '2vh', backgroundColor: theme.colors.bonasoDarkAccent }}>
+                            {cleanedResponses.sort((a, b) => (a.indicator.order - b.indicator.order)).map(r => {
+                                if(r.indicator.type == 'multi'){
+                                    return(<div>
+                                        <h4>{r.indicator.order + 1}. {r.indicator.name}</h4>
+                                        <ul>{r.response_option.map((o) => (<li>{o.name}</li>))}</ul>
+                                    </div>)
+                                }
+                                else{
+                                    let val = '';
+                                    if(r.indicator.type == 'single') val = r.response_option?.name;
+                                    else if(r.indicator.type == 'boolean') val = r.response_boolean ? 'Yes' : 'No';
+                                    else val = r.response_value;
+                                    return(<div>
+                                    <h4>{r.indicator.order + 1}. {r.indicator.name}</h4>
+                                    <ul><li>"<i>{val}</i>"</li> </ul>
+                                    </div>)
+                                }
+                                
+                            })}
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'row'}}>
+                        {hasPerm && <Link to={`/respondents/${interaction.respondent.id}/assessment/${interaction.task.id}/edit/${interaction.id}`}> 
+                            <ButtonHover noHover={<ImPencil />} hover={`Edit Details`} />
+                        </Link>}
+                        {hasPerm && <ButtonHover callback={() => setFlagging(true)} noHover={<MdFlag />} hover={'Raise New Flag'} forWarning={true} />}
+                        {user.role == 'admin' && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Record'} forDelete={true} />}
+                        {del && <ButtonLoading forDelete={true} /> }
+                    </div>
+                </div>
+                
+                <UpdateRecord created_at={interaction.created_at} created_by = {interaction.created_by}
+                    updated_at={interaction.updated_at} updated_by={interaction.updated_by} 
+                />
+            </div>} 
 
         </div>
     )

@@ -24,8 +24,8 @@ function Dropdown({ name }){
     //on hover, calculate what links the user should see based on the tab name and their role
     useEffect(() => {
         if(name =='Projects' && user.role == 'admin'){
-            setUrls(['/projects', '/indicators', '/organizations', '/clients'])
-            setLabels(['Manage Projects', 'Manage Indicators', 'Manage Organizations', 'Manage Clients'])
+            setUrls(['/projects', '/indicators', '/indicators/assessments', '/organizations', '/clients'])
+            setLabels(['Manage Projects', 'Manage Indicators', 'Manage Assessments', 'Manage Organizations', 'Manage Clients'])
         }
         if(name== 'Projects' && ['meofficer', 'manager'].includes(user.role)){
             setUrls(['/projects', '/organizations']);
@@ -33,14 +33,14 @@ function Dropdown({ name }){
         }
 
         if(name =='Record' && ['meofficer', 'manager', 'admin'].includes(user.role)){
-            let urls = ['/respondents', '/batch-record', '/events', '/social']
-            let labels = ['Manage Respondents', 'Batch Record', 'Record Events', 'Record Social Post']
+            let urls = ['/respondents', '/batch-record', '/aggregates', '/events', '/social']
+            let labels = ['Manage Respondents', 'Batch Record', 'Record Aggregated Data', 'Record Events', 'Record Social Post']
             setUrls(urls)
             setLabels(labels)
         }
         if(name =='Record' && ['client'].includes(user.role)){
-            let urls = ['/respondents','/events', '/social']
-            let labels = ['Manage Respondents', 'Record Events', 'Record Social Post']
+            let urls = ['/respondents','/events', '/aggregates', '/social']
+            let labels = ['Respondents', 'View Events', 'View Aggregates', 'View Social Posts']
             setUrls(urls)
             setLabels(labels)
         }
@@ -134,6 +134,7 @@ function ThinMenu() {
             <div className={styles.menuBar}><Link to='/respondents'>Respondents</Link></div>
             {['meofficer', 'manager', 'admin'].includes(user.role) && <div className={styles.menuBar}><Link to='/flags'>Flags</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/batch-record'}>Batch Record</Link></div>}
+            {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/aggregates'}>Aggregate Data</Link></div>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/events'}>Events</Link></div>}
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/social'}>Social</Link></div>}
             
@@ -141,6 +142,7 @@ function ThinMenu() {
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/projects'}>Projects</Link></div>}
             {['admin', 'meofficer', 'manager'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/organizations'}>Organizations</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/indicators'}>Indicators</Link></div>}
+            {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/indicators/assessments'}>Assessments</Link></div>}
             {['admin'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/clients'}>Clients</Link></div>}
 
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h2>Analyze</h2>}

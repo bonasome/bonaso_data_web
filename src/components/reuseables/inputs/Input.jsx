@@ -2,7 +2,7 @@ import Messages from '../Messages';
 import Tooltip from '../Tooltip';
 
 //input that generates most keyboard inputs
-export default function Input({ name, type, label, value, onChange, onBlur, errors=[], tooltip=null, placeholder=null, flexOverride=false }){
+export default function Input({ name, type, label, value, onChange, onBlur, errors=[], tooltip=null, placeholder=null, style={} }){
     /*
     Input for various types of keyboard inputs
     - name (string): html name/id
@@ -33,7 +33,7 @@ export default function Input({ name, type, label, value, onChange, onBlur, erro
     }
     {/* else return input with type prop */}
     return(
-        <div style={flexOverride ? {display: 'flex', flexDirection: 'row'} : {}}>
+        <div style={style}>
             <label htmlFor={name} style={{ display: 'flex', flexDirection: 'row'}}>
                 {label}
                 {tooltip && <Tooltip msg={tooltip} />}

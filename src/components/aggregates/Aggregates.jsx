@@ -87,7 +87,7 @@ export default function Aggregates() {
     //if an id param was passed, set viewing to that aggie (if it exists)
     useEffect(() => {
         if(!id) return;
-        setViewing(aggies.filter(a => a.id == id)?.id ?? null);
+        setViewing(id);
     }, [id, aggies]);
 
     if(loading || !meta) return <Loading />
@@ -98,7 +98,7 @@ export default function Aggregates() {
                 <Messages errors={errors} />
 
                 {/*Show Selected aggregate*/}
-                {viewing && <AggregateTable id={viewing} />}
+                {viewing && <AggregateTable id={viewing} meta={meta} />}
 
                 {/* Show a placeholder when nothing is selected */}
                 {!viewing && <div className={styles.placeholder}>

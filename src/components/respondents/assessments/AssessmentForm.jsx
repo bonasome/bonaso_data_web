@@ -17,7 +17,7 @@ import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import Messages from "../../reuseables/Messages";
 
-
+import styles from '../../../styles/form.module.css';
 
 export default function AssessmentForm(){
     const navigate = useNavigate();
@@ -217,7 +217,7 @@ export default function AssessmentForm(){
 
     if(loading || !respondent || !assessment) return <Loading />
     return(
-        <div>
+        <div className={styles.form}>
             <h1>{assessment.name} Assessment for {respondent.display_name}</h1>
             <Messages errors={submissionErrors} ref={alertRef} />
             <FormProvider {...methods} >

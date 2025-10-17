@@ -17,7 +17,7 @@ import styles from './tasks.module.css';
 import { FaTrashAlt } from "react-icons/fa";
 
 //card that holds task details
-function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, onDelete=null, callback=null }) {
+function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, onDelete=null, callback=null, forAssessment=false }) {
     /*
     Card that displays details about a Task
     - task (object): information about the task
@@ -91,13 +91,6 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
         }
     }
 
-    //helper function that converts db values to labels
-    const getLabelFromValue = (field, value) => {
-        if(!meta) return value
-        const match = meta[field]?.find(range => range.value === value);
-        return match ? match.label : value;
-    };
-
     //return delete seperately, since the card hover messes with the modal
     if(del){
         return(
@@ -121,7 +114,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
             <h3>{task.display_name}</h3>
 
             {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button" style={{ maxHeight: 'fit-content' }}>
-                Select {task.display_name}
+                {forAssessment ? `Start ${task?.assessment?.name} Assessent` : `Select ${task.display_name}`}
             </button>}
             
             {expanded && (
@@ -137,7 +130,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
 
 
 export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=false, blacklist=[], 
-    canDelete=false, updateTrigger=null, callback=null, callbackText='Select Task'
+    canDelete=false, updateTrigger=null, callback=null, forAssessment=false
 }) {
     /*
     Paginated index view that allows a user to view their tasks. 
@@ -305,7 +298,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
                 {filteredTasks?.length > 0 ? filteredTasks.map((task) => (
                     <TaskCard task={task} key={task.id} tasks={tasks} 
                         isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} 
-                        callback={callback} callbackText={callbackText} onError={(e) => (setErrors(e))} meta={indicatorsMeta}
+                        callback={callback} forAssessment={forAssessment} meta={indicatorsMeta}
                     />
                 )) : <p>No tasks yet.</p>}
             </IndexViewWrapper>
