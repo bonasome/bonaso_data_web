@@ -6,7 +6,7 @@ import fetchWithAuth from "../../../../services/fetchWithAuth";
 import ButtonLoading from "../../reuseables/loading/ButtonLoading";
 import FormSection from '../../reuseables/forms/FormSection';
 import Messages from '../../reuseables/Messages';
-import IndicatorsIndex from "../../indicators/IndicatorsIndex";
+import AssessmentsIndex from '../../indicators/assessment/AssessmentsIndex';
 import ProjectsIndex from '../../projects/ProjectsIndex';
 import OrganizationsIndex from '../../organizations/OrganizationsIndex';
 
@@ -28,7 +28,7 @@ export default function LineListSettings({ onClose, onUpdate, existing=null }){
     const onSubmit = async(data) => {
         setSubmissionErrors([]);
         //model selects return a full object, so convert the object to just the id
-        data.indicator_id = data.indicator_id?.id ?? null;
+        data.assessment_id = data.assessment_id?.id ?? null;
         data.organization_id = data.organization_id?.id ?? null;
         data.project_id = data.project_id?.id ?? null;
         //the backend will have a panic attack if it gets an empty string for a date, so set these to null if empty
@@ -81,7 +81,7 @@ export default function LineListSettings({ onClose, onUpdate, existing=null }){
             name: existing?.name ?? '',
             start: existing?.start ?? '',
             end: existing?.end ?? '',
-            indicator_id: existing?.indicator ?? '',
+            assessment_id: existing?.indicator ?? '',
             project_id: existing?.project ?? null,
             organization_id: existing?.organization ?? null,
             cascade_organization: existing?.cascade_organization ?? false
@@ -123,7 +123,7 @@ export default function LineListSettings({ onClose, onUpdate, existing=null }){
     const scope = [
         { name: 'start', label: "Start", type: "date"},
         { name: 'end', label: "End", type: "date"},
-        { name: 'indicator_id', label: "Indicator", type: "model", IndexComponent: IndicatorsIndex, labelField: 'display_name',
+        { name: 'assessment_id', label: "Assessment", type: "model", IndexComponent: AssessmentsIndex, labelField: 'display_name',
             includeParams: [{field:'indicator_type', value: 'respondent'}]
         },
         { name: 'project_id', label: 'Scope Data to Project', type: 'model', IndexComponent: ProjectsIndex, labelField: 'name' },

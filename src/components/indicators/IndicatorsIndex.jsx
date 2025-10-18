@@ -183,34 +183,10 @@ export default function IndicatorsIndex({ callback=null, includeParams=[], exclu
                 console.log('fetching indicators...');
                 //append any filter query
                 const filterQuery = 
-                    (filters.status ? `&status=${filters.status}` : '') +
-                    (filters.indicator_type ? `&indicator_type=${filters.indicator_type}` : '');
+                    (filters.category ? `&category=${filters.category}` : '');
 
                 const url = `/api/indicators/manage?search=${search}&page=${page}` + filterQuery + params;
                 console.log(url);
-                const response = await fetchWithAuth(url);
-                const data = await response.json();
-                setEntries(data.count); //total number of entries for page calculation
-                setIndicators(data.results);
-            } 
-            catch (err) {
-                console.error(err);
-                setErrors(['Something went wrong. Please try again later.']);
-            }
-        };
-        loadIndicators();
-    }, [page, search, filters, updateTrigger, params]);
-
-    useEffect(() => {
-        const loadIndicators = async () => {
-            try {
-                console.log('fetching indicators...');
-                //append any filter query
-                const filterQuery = 
-                    (filters.status ? `&status=${filters.status}` : '') +
-                    (filters.indicator_type ? `&indicator_type=${filters.indicator_type}` : '');
-
-                const url = `/api/indicators/manage?search=${search}&page=${page}` + filterQuery + params;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count); //total number of entries for page calculation

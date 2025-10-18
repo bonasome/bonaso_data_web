@@ -35,7 +35,7 @@ export default function ResponseField ({ indicator, assessment, respondent, resp
         if (!shouldShow) {
             if (indicator.type == 'multi') setValue(`response_data.${indicator.id}.value`, []);
             else if (indicator.type == 'single') setValue(`response_data.${indicator.id}.value`, null);
-            else if (indicator.type == 'boolean') setValue(`response_data.${indicator.id}.value`, false);
+            else if (indicator.type == 'boolean') setValue(`response_data.${indicator.id}.value`, null);
             else setValue(`response_data.${indicator.id}.value`, '');
         }
     }, [shouldShow, setValue]);
@@ -43,7 +43,7 @@ export default function ResponseField ({ indicator, assessment, respondent, resp
 
     console.log(responseInfo)
     const convertType = (type) => {
-        if(type=='boolean') return 'checkbox';
+        if(type=='boolean') return 'radio';
         else if(type=='single') return 'radio';
         else if(type=='multi') return 'multiselect';
         else if(type=='text') return 'textarea';
@@ -53,6 +53,7 @@ export default function ResponseField ({ indicator, assessment, respondent, resp
 
     const options = useMemo(() => {
         let opts = indicator?.options?.map((o) => ({value: o.id, label: o.name})) ?? [];
+        if(indicator.type == 'boolean') return [{value: true, label: 'Yes'}, {value: false, label: 'No'}]
         if(indicator.allow_none) opts.push({value: 'none', label: 'None of the above'})
         if(!indicator.match_options) return opts;
         else if(indicator.match_options){
@@ -89,13 +90,18 @@ export default function ResponseField ({ indicator, assessment, respondent, resp
         return selectedValues.filter(v => v !== 'none');
     };
 
-    let fieldConfig = {type: convertType(indicator.type), 
+    let fieldConfig = {
+        type: convertType(indicator.type), 
         name: `response_data.${indicator.id}.value`, 
         label: `${indicator.order + 1}. ${indicator.name}`, 
         options: options, 
-        onChange: indicator.type === 'multi' ? handleMultiSelectChange : undefined,}
+        onChange: indicator.type === 'multi' ? handleMultiSelectChange : undefined,
+    }
 
-    if(indicator.required) fieldConfig.rules = {required: 'Required'};
+    if(indicator.required){
+        fieldConfig.rules = {required: 'Required'};
+        fieldConfig.label = `${indicator.order + 1}. ${indicator.name}*`
+    }
     
     if(!shouldShow) return <></>
     return(

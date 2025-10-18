@@ -13,6 +13,8 @@ import Loading from '../reuseables/loading/Loading';
 import Messages from '../reuseables/Messages';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 
+import styles from '../../styles/form.module.css';
+
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
@@ -100,7 +102,7 @@ export default function AggregateBuilder() {
     // watch relevant fields
     const selectedIndicator = watch('indicator_id');
     const breakdowns = watch('breakdowns') || [];
-    const counts_data = watch('counts_data');
+    const countsData = watch('counts_data');
 
     function cartesianProduct(obj) {
         const keys = Object.keys(obj);
@@ -117,6 +119,7 @@ export default function AggregateBuilder() {
             return temp;
         }, [{}]);
     }
+    console.log(countsData)
 
     const buildRows = useMemo(() => {
         if(!meta || !selectedIndicator) return;
@@ -131,8 +134,16 @@ export default function AggregateBuilder() {
         }
         let all = breakdowns || [];
         if(selectedIndicator?.options.length > 0 && !all.includes('option')) all.push('option');
+
+        if(all.length == 0){
+            const val = existing?.counts?.[0]?.value ?? '';
+            const rows = [{key: `index`, value: val}]
+            setValue(`counts_data.index`, val);
+            replace(rows);
+            return rows;
+        }
+
         let cleanedMeta = {}
-        if(all.length == 0) return 'index'
         all.forEach((bd) => {
             if(bd == 'option') cleanedMeta[bd] = selectedIndicator.options.map((o => o.id));
             else cleanedMeta[bd] = meta[bd]?.map(v => v.value);
@@ -149,7 +160,7 @@ export default function AggregateBuilder() {
         })
         replace(rows)
         return rows
-    }, [breakdowns, existing]);
+    }, [breakdowns, existing, selectedIndicator]);
 
     // transform and submit
     const onSubmit = async (data, e) => {
@@ -161,6 +172,7 @@ export default function AggregateBuilder() {
             end: data.end,
             counts_data: (data.counts_data || []).map(c => {
                 let count = {};
+                if(c.key == 'index') return {value: c.value};
                 c.key.split('___').map((k) => {
                     const key = k.split('__')[0] == 'option' ? 'option_id' : k.split('__')[0];
                     count[key]  = k.split('__')[1]
@@ -180,6 +192,7 @@ export default function AggregateBuilder() {
                 body: JSON.stringify(payload),
         });
         const returnData = await response.json();
+        console.log(returnData)
        if(response.ok){
                 setSuccess(['Event created successfuly!']);
                 //depending on the button clicked, redirect the user to the appropriate page
@@ -246,20 +259,21 @@ export default function AggregateBuilder() {
 
     const breakdownFields = [
         {
-        name: 'breakdowns',
-        label: 'Select Fields to Disaggregate By',
-        type: 'multiselect',
-        options: meta ? Object.keys(meta).map(k => ({ value: k, label: cleanLabels(k) })) : [],
+            name: 'breakdowns',
+            label: 'Select Fields to Disaggregate By',
+            type: 'multiselect',
+            options: meta ? Object.keys(meta).map(k => ({ value: k, label: cleanLabels(k) })) : [],
+            warnings: countsData.filter(c => (!['', '0', 0].includes(c.value))).length > 0 ? ['Selecting a new breakdown while you already have data will erase any data you have recorded!'] : [],
         }
     ];
 
     if (loading) return <Loading />
     return (
-        <div className="p-4 max-w-5xl mx-auto">
-        <h2 className="text-2xl font-semibold mb-4">Aggregate Builder</h2>
+        <div className={styles.form}>
+        <h2 >Aggregate Builder</h2>
         <Messages errors={submissionErrors} ref={alertRef}/>
         <form onSubmit={handleSubmit(onSubmit, onError)}>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
             <FormSection fields={basics} control={control} header="Information" />
             {proj && <FormSection fields={orgSelect} control={control} header="Information" />}
             {org && <FormSection fields={indSelect} control={control} header="Information" />}
@@ -267,24 +281,41 @@ export default function AggregateBuilder() {
             </div>
 
             {selectedIndicator && (
-            <div className="mb-4">
+            <div className={styles.formSection}>
                 <h3 className="font-medium mb-2">Data entry</h3>
 
                 {fields.length === 0 && <div>No rows. Select dimensions and ensure indicator is selected.</div>}
-
-                <div className="overflow-auto border rounded">
-                <table className="min-w-full table-fixed">
+                {fields.length === 1 &&<div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <Controller
+                                    name={`counts_data.${0}.value`}
+                                    control={control}
+                                    render={({ field }) => <input type="number" min="0" {...field} style={{ maxWidth: '10vh'}} />}
+                                />
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>}
+                {fields.length > 1 && <div>
+                <table>
                     <thead>
-                    <tr className="bg-gray-100">
+                    <tr>
                         {breakdowns.map(d => (
-                        <th key={d} className="p-2 capitalize">{cleanLabels(d)}</th>
+                        <th key={d}>{cleanLabels(d)}</th>
                         ))}
-                        <th className="p-2">Value</th>
+                        <th>Value</th>
                     </tr>
                     </thead>
                     <tbody>
                     {fields.map((row, idx) => (
-                        <tr key={row.id} className="border-t">
+                        <tr key={row.id}>
                         {row.key.split('___').map(d => (
                             <td key={d}>
                                 {d.split('__')[0] == 'option' ? selectedIndicator.options.find(o => o.id == d.split('__')[1])?.name :
@@ -293,20 +324,20 @@ export default function AggregateBuilder() {
                         ))}
                         <td className="p-2">
                             <Controller
-                            name={`counts_data.${idx}.value`}
-                            control={control}
-                            render={({ field }) => <input type="number" min="0" {...field} className="border p-1 w-28" />}
+                                name={`counts_data.${idx}.value`}
+                                control={control}
+                                render={({ field }) => <input type="number" min="0" {...field} style={{ maxWidth: '5vh'}} />}
                             />
                         </td>
                         </tr>
                     ))}
                     </tbody>
                 </table>
-                </div>
+                </div>}
             </div>
             )}
 
-            {!saving && selectedIndicator && <div style={{ display: 'flex', flexDirection: 'row' }}>
+            {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                 <button type="submit" value='normal'><IoIosSave /> Save</button>
                 {!id && <button type="submit" value='create_another'><BsDatabaseFillAdd /> Save and Create Another</button>}
                 <Link to={id ? `/aggregates/${id}` : '/aggregates'}><button type="button">

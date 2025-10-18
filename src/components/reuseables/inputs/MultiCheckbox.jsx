@@ -34,7 +34,7 @@ function MultiCheckboxItem({ name, label, checked, onChange, value }) {
 }
 
 //multiselect checkbox
-export default function MultiCheckbox({ name, label, options, value, onChange, onBlur, errors, valueField='value', labelField='label', tooltip=null }) {
+export default function MultiCheckbox({ name, label, options, value, onChange, onBlur, errors, valueField='value', labelField='label', tooltip=null, warnings=[] }) {
     /*
     Component that allows a user to select multiple values from a set of options. Returns an array of values.
     - name (string): name the input should use (for html name/id)
@@ -62,7 +62,7 @@ export default function MultiCheckbox({ name, label, options, value, onChange, o
 
     return (
         <div>
-            <Messages errors={errors} />
+            <Messages errors={errors} warnings={warnings} />
             <div style={{ display: 'flex', flexDirection: 'row' }}>
                 <p>{label} (Select all that apply.)</p>
                 {tooltip && <Tooltip msg={tooltip} />}

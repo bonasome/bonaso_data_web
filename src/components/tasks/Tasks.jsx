@@ -178,7 +178,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
 
     //construct URL param strings from include/exclude param props
     const params = useMemo(() => {
-        const allowedFields = ['organization', 'organizations', 'project', 'event', 'category'];
+        const allowedFields = ['organization', 'organizations', 'project', 'event', 'category', 'for_event'];
         const include = includeParams?.filter(p => allowedFields.includes(p?.field))
         ?.map(p => `&${p?.field}=${p?.value}`)
         .join('') ?? '';

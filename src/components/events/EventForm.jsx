@@ -266,7 +266,7 @@ export default function EventForm(){
     ]
     const tasks = [
         {name: 'task_ids', label: 'Linked to Tasks (Required)', type: 'multimodel', IndexComponent: Tasks,
-            excludeParams: [{field: 'indicator_type', value: 'social'}], includeParams: [{field: 'organizations', value: validOrgs.join(',')}],
+            includeParams: [{field: 'organizations', value: validOrgs.join(',')}, {field: 'for_event', value: 'true'}],
             tooltip: `What tasks does this event contribute to?`
         },
     ]

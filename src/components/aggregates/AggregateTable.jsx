@@ -1,24 +1,25 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../contexts/UserAuth';
 import { Link } from 'react-router-dom';
+
 import cleanLabels from '../../../services/cleanLabels';
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import theme from '../../../theme/theme';
 import { buildAutoMatrix } from './helpers';
-
 import prettyDates from '../../../services/prettyDates';
+
 import Messages from '../reuseables/Messages';
 import FlagDetailModal from '../flags/FlagDetailModal';
 import ComponentLoading from "../reuseables/loading/ComponentLoading";
 import ButtonHover from '../reuseables/inputs/ButtonHover';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
+import Tooltip from '../reuseables/Tooltip';
 
 import styles from '../analytics/pivotTables/pt.module.css';
 
-import { IoSettingsSharp } from "react-icons/io5";
 import { FaTrashAlt } from 'react-icons/fa';
-import { PiFileCsvFill } from "react-icons/pi";
 import { ImPencil } from 'react-icons/im';
+import { MdFlag } from "react-icons/md";
 
 export default function AggregateTable({ id, meta, onDelete }){
     /*
@@ -62,7 +63,7 @@ export default function AggregateTable({ id, meta, onDelete }){
 
     //get the pivot table details
     useEffect(() => {
-        loadInitial = async() => {
+        const loadInitial = async() => {
             getCount();
         }
         loadInitial()
@@ -133,17 +134,28 @@ export default function AggregateTable({ id, meta, onDelete }){
     }, [user]);
 
     const getLabelFromValue = (field, value) => {
-        if(!meta) return null
+        if(!meta) return null;
         const match = meta[field]?.find(range => range.value === value);
         return match ? match.label : null;
     };
 
     if(loading) return <ComponentLoading />
     return (
-        <div className="overflow-auto border rounded-md">
+        <div>
             {del && <ConfirmDelete name={'this aggregate count table'} onCancel={() => setDel(false)} onConfirm={handleDelete} /> }
             {viewingFlag && <FlagDetailModal flags={count.counts.find(c => (c.id == viewingFlag))?.flags} model={'aggregates.aggregatecount'} id={viewingFlag} onClose={() => {getCount(); setViewingFlag(null)}} /> }
-            <table className="min-w-full border-collapse text-sm">
+            <div style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, padding: '4vh', margin: '2vh' }}>
+                <h1>Aggregate Count for {count.indicator.name}</h1>
+                <h3><i>From {prettyDates(count.start)} to {prettyDates(count.end)}</i></h3>
+            </div>
+            <Messages errors={errors} />
+            <div style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, padding: '4vh', margin: '2vh' }}>
+            {count?.counts?.length == 1 && <div>
+                <h1>{count.counts[0]?.value}</h1>
+                <i>Total Number</i>
+            </div>}
+
+            {count?.counts?.length > 1 && <table style={{  marginLeft: 'auto', marginRight: 'auto' }}>
                 <thead>
                     {/* Top-left corner: show row dims labels stacked vertically */}
                     <tr>
@@ -167,7 +179,7 @@ export default function AggregateTable({ id, meta, onDelete }){
                                 <th className="border p-1 bg-gray-50" colSpan={dims.rowDims.length || 1}></th>
                                 {level.map((cell, ci) => (
                                     <th key={cell.key} className="border p-2 bg-white" colSpan={cell.span} style={{ textAlign: 'center' }}>
-                                    {cleanLabels(cell.label)}
+                                    {dims.colDims[ri] != 'option' ?  getLabelFromValue(dims.colDims[ri], cell.label) : cell.label}
                                 </th>
                             ))}
                         </tr>
@@ -180,7 +192,7 @@ export default function AggregateTable({ id, meta, onDelete }){
                         <tr key={`row-${ri}`}>
                             {/* render each row's label parts into separate cells (nested row headers) */}
                             {r.labelParts.map((part, pi) => (
-                                <td key={`r-${ri}-p-${pi}`} style={{ whiteSpace: 'nowrap' }}>
+                                <td key={`r-${ri}-p-${pi}`} style={{ padding: '1vh', textAlign: 'center' }}>
                                     {(dims.rowDims[pi] != 'option' ? getLabelFromValue(dims.rowDims[pi], part) : part) || ''}
                                 </td>
                             ))}
@@ -194,18 +206,20 @@ export default function AggregateTable({ id, meta, onDelete }){
                                     const found = count.counts.find(c => c.id == cells[r.rowKey][ck]?.id);
                                     if(found.flags.length > 0){
                                         if(found.flags.filter(f => (!f.resolved)).length > 0){
-                                            return(<td key={`cell-${ri}-${ci}`} style={{ backgroundColor: theme.colors.warningBg, cursor: 'pointer' }} onClick={() => setViewingFlag(cells[r.rowKey][ck]?.id)}>
+                                            return(<td key={`cell-${ri}-${ci}`} style={{ backgroundColor: theme.colors.warning, cursor: 'pointer', textAlign: 'center' }} onClick={() => setViewingFlag(cells[r.rowKey][ck]?.id)}>
                                                 {Number((cells[r.rowKey] && cells[r.rowKey][ck]?.value) || 0) || '-'}
+                                                <Tooltip msg={'This count has been flagged. Click the cell to find out more.'} />
                                             </td>)
                                         }
                                         else if(found.flags.filter(f => (!f.resolved)).length == 0){
-                                            return(<td key={`cell-${ri}-${ci}`} style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, cursor: 'pointer' }} onClick={() => setViewingFlag(cells[r.rowKey][ck]?.id)}>
+                                            return(<td key={`cell-${ri}-${ci}`} style={{ textAlign: 'center', backgroundColor: theme.colors.bonasoLightAccent , cursor: 'pointer' }} onClick={() => setViewingFlag(cells[r.rowKey][ck]?.id)}>
                                                 {Number((cells[r.rowKey] && cells[r.rowKey][ck]?.value) || 0) || '-'}
+                                                <Tooltip msg={'This count was previously flagged. Click the cell to find out more.'} />
                                             </td>)
                                         }
                                     }
                                 }
-                                return(<td key={`cell-${ri}-${ci}`}>
+                                return(<td key={`cell-${ri}-${ci}`} style={{ textAlign: 'center' }}>
                                     {Number((cells[r.rowKey] && cells[r.rowKey][ck]?.value) || 0) || '-'}
                                 </td>)
                             })}
@@ -220,12 +234,13 @@ export default function AggregateTable({ id, meta, onDelete }){
                     </tr>
                     )}
                 </tbody>
-            </table>
+            </table>}
 
             {hasPerm && <div style={{ display: 'flex', flexDirection: 'row'}}> 
                 <Link to={`/aggregates/${id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Counts'} /></Link>
                 <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Count'} forDelete={true} />
             </div>}
+            </div>
         </div>
     )
 }

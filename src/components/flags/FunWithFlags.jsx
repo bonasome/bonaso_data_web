@@ -50,7 +50,7 @@ export default function FunWithFlags(){
         alertRef.current.focus({ preventScroll: true });
         }
     }, [errors]);
-    
+    console.log(flags)
     //retrieve the meta
     useEffect(() => {
         const getMeta = async() => {

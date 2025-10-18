@@ -12,16 +12,16 @@ import Loading from '../../reuseables/loading/Loading';
 import AssessmentIndicator from './AssessmentIndicator';
 import Messages from '../../reuseables/Messages';
 import UpdateRecord from '../../reuseables/meta/UpdateRecord';
-import styles from '../../../styles/form.module.css';
-
-import { ImPencil } from 'react-icons/im';
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import AssessmentDetailsModal from './AssessmentDetailsModal';
-import Input from '../../reuseables/inputs/Input';
-import Select from '../../reuseables/inputs/Select';
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
+import ReturnLink from '../../reuseables/ReturnLink';
+
+import { ImPencil } from 'react-icons/im';
 import { FaTrashAlt } from 'react-icons/fa';
 import { FcAddRow } from 'react-icons/fc';
+
+import styles from '../../../styles/form.module.css';
 import theme from '../../../../theme/theme';
 
 
@@ -209,6 +209,7 @@ export default function AssessmentForm(){
     return(
         <div>
             <div className={styles.form}>
+                <ReturnLink url={'/indicators/assessments'} display='Return to asssessments' />
                 {editing && <AssessmentDetailsModal onUpdate={(d) => setAssessment(d)} onCancel={() => setEditing(false)} existing={assessment} />}
                 <h1>{assessment.name}</h1>
                 <Messages errors={submissionErrors} ref={alertRef} />

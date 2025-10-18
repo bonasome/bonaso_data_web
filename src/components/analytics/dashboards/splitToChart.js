@@ -10,6 +10,7 @@ export default function splitToChart(data, map, axis=null, legend=null, stack=nu
     - stack (string, optional): the selected stack for bar charts
     - targets (array, optional): an array of information about targets associated with this chart
     */
+   console.log(data)
     const chartMap = {};
     const keyMeta = {};  // To track each key's breakdowns for stacking
     if(!data) return { dataArray: [], keys: []}
@@ -17,25 +18,25 @@ export default function splitToChart(data, map, axis=null, legend=null, stack=nu
 
     for (const row of arr) {
         const period = row.period || 'All-Time'; //default if no axis
-
+        
         const legendVal = row[legend] || 'Total'; //default if not legend
         const stackVal = row[stack] || ''; 
-
+        
         // Initialize chartMap row
         if (!chartMap[period]) chartMap[period] = { period };
         
         let legendValCleaned = legendVal;
-        if(legend && (!['subcategory', 'indicator', 'platform', 'organization', 'metric'].includes(legend))){
-            legendValCleaned = map[legend][legendVal]
+        if(legend && (!['option', 'indicator', 'platform', 'organization', 'metric'].includes(legend))){
+            legendValCleaned = map[legend]?.find(i => i.value == legendVal)?.label
         } //try to get the legend value label if map has its value
         let stackValCleaned = stackVal
-        if(stack && (!['subcategory', 'indicator', 'platform', 'organization', 'metric'].includes(stack))){
-            stackValCleaned = map[stack][stackVal]
+        if(stack && (!['option', 'indicator', 'platform', 'organization', 'metric'].includes(stack))){
+            stackValCleaned = map[stack]?.find(i => i.value == stackVal)?.label
         } //try to get the stack value label if map has its value
         const key = stack ? `${legendVal}__${stackVal}` : `${legendVal}` //create a key for reference
         // Add the value
         chartMap[period][key] = row.count;
-        
+        console.log(map, stack, stackVal)
         if (!keyMeta[key]) {
             keyMeta[key] = {stackKey: stackValCleaned, legendKey: legendValCleaned}
         }
@@ -72,7 +73,7 @@ export default function splitToChart(data, map, axis=null, legend=null, stack=nu
             return yearA - yearB || quarterA - quarterB;
         });
     }
-
+    console.log(keyMeta)
     const keys = Object.entries(keyMeta).map(([compoundKey, { stackKey, legendKey }]) => ({
         key: compoundKey,
         bar: legendKey ?? '',

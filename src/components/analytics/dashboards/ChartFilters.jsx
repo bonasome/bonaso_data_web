@@ -8,6 +8,7 @@ import fetchWithAuth from "../../../../services/fetchWithAuth";
 import MultiCheckbox from "../../reuseables/inputs/MultiCheckbox";
 import ButtonHover from "../../reuseables/inputs/ButtonHover";
 import ComponentLoading from "../../reuseables/loading/ComponentLoading";
+import Messages from '../../reuseables/Messages';
 
 import styles from './dashboard.module.css';
 
@@ -48,6 +49,7 @@ function BreakdownFilterSegment({ options, option, value, callback}){
     (which pulls from the respondent/demogrpahic count TextChoices).If trying to create a custom filter 
     (subcategories, etc.) use CustomFilterSegment above. 
     */
+
     const [expanded, setExpanded] = useState(false); //controls visiblity of checkboxes
     return(
          <div className={styles.chartSettings}>
@@ -59,9 +61,7 @@ function BreakdownFilterSegment({ options, option, value, callback}){
 
             {expanded && <div className={styles.chartFilters}>
                 <MultiCheckbox label={cleanLabels(option)} 
-                    options={
-                        Object.keys(options[option]).map(val => ({'value': val, 'label': options[option][val]}))
-                    } 
+                    options={options[option]} 
                     name={option}
                     onChange={(vals) => callback(vals)}
                     value={value}
@@ -86,7 +86,7 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
     const subcategories = useMemo(() => {
         if(!chart) return []
         return chart.chart.indicators.flatMap(ind => 
-            ind.subcategories.map(sc => ({ value: sc.id.toString(), label: sc.name }))
+            ind.options.map(o => ({ value: o.id.toString(), label: o.name }))
         );
     }, [chart]);
 
@@ -121,7 +121,7 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
             map[o] = chart.chart.filters[o] ?? [];
         });
 
-        if(subcategories) map['subcategory'] = chart.chart.filters['subcategory'] ?? [];
+        if(options) map['option'] = chart.chart.filters['option'] ?? [];
         if(chart.chart.indicators[0].indicator_type=='social'){
             map['platform'] =chart.chart.filters['platform'] ?? [];
             //map['metric'] =chart.chart.filters['metric'] ?? [];
@@ -173,7 +173,8 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
     if(!chart || !options || !filters || saving) return <ComponentLoading />
     return(
         <div className={styles.chartFilters}>
-            {chart.chart.indicators[0].indicator_type == 'respondent' && <div>
+            <Messages errors={errors} />
+            {chart.chart.indicators[0].category == 'assessment' && <div>
                 {options && Object.keys(options).map((o) => (
                 <BreakdownFilterSegment options={options} option={o} value={filters[o]}
                         callback={(vals) => {const updatedFilters = { ...filters, [o]: vals };
@@ -181,9 +182,9 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
                             handleUpdate(updatedFilters);}}/>
                 ))}
 
-                {subcategories.length > 0 && filters?.subcategory &&
-                    <CustomFilterSegment options={subcategories} type={'subcategory'} value={filters.subcategory}
-                        callback={(vals) => {const updatedFilters = { ...filters, subcategory: vals };
+                {subcategories.length > 0 && filters?.option &&
+                    <CustomFilterSegment options={subcategories} type={'option'} value={filters.option}
+                        callback={(vals) => {const updatedFilters = { ...filters, option: vals };
                             setFilters(updatedFilters);
                             handleUpdate(updatedFilters);}}
                 />}
@@ -192,7 +193,7 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
                 </div>
             </div>}
 
-            {chart.chart.indicators[0].indicator_type == 'social' && <div>
+            {chart.chart.indicators[0].category == 'social' && <div>
                 <CustomFilterSegment options={socialPostsMeta.platforms} type={'platform'} value={filters.platform}
                         callback={(vals) => {const updatedFilters = { ...filters, platform: vals };
                             setFilters(updatedFilters);
@@ -202,7 +203,7 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
                     <ButtonHover callback={() => handleUpdate({})} noHover={<FaFilterCircleXmark />} hover={'Clear All Filters'} />
                 </div>
             </div>}
-            {!['respondent', 'social'].includes(chart.chart.indicators[0].indicator_type) && 
+            {!['assessment', 'social'].includes(chart.chart.indicators[0].indicator_type) && 
                 <p>You cannot apply filters to this indicator type.</p>}
         </div>
     )

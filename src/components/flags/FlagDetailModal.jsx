@@ -3,7 +3,10 @@ import FlagCard from './FlagCard';
 import FlagModal from './FlagModal';
 
 import modalStyles from '../../styles/modals.module.css';
+import errorStyles from '../../styles/errors.module.css';
+
 import { GiExitDoor } from "react-icons/gi";
+import { MdFlag } from "react-icons/md";
 
 //similar to a flag component for items that do not have a dedicated page.
 export default function FlagDetailModal({ flags, model, id, onClose, displayName=null }){
@@ -24,7 +27,7 @@ export default function FlagDetailModal({ flags, model, id, onClose, displayName
     //if no flags, do not displat any flag cards
     if(!flags || flags.length === 0) return( <div className={modalStyles.modal}>
         <p>No Flags yet!</p>
-        <button onClick={() => setFlagging(true)}>Raise one here.</button>
+        <button className={errorStyles.warningButton} onClick={() => setFlagging(true)}> <MdFlag /> Raise one here.</button>
         <button onClick={() => onClose()}><GiExitDoor /> Close</button>
     </div>)
     
@@ -32,8 +35,10 @@ export default function FlagDetailModal({ flags, model, id, onClose, displayName
         <div className={modalStyles.modal}>
             {displayName ? <h3>Flags for {displayName}</h3> : <h3>Flags</h3>}
             {flags.map((flag) => <FlagCard flag={flag} />)}
-            <button onClick={() => setFlagging(true)}>Raise New Flag.</button>
-            <button onClick={() => onClose()}><GiExitDoor /> Close</button>
+            <div styles={{ display: 'flex', flexDirection: 'row'}}>
+                <button className={errorStyles.warningButton} onClick={() => setFlagging(true)}><MdFlag /> Raise New Flag.</button>
+                <button onClick={() => onClose()}><GiExitDoor /> Close</button>
+            </div>
         </div>
     )
 

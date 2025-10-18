@@ -21,8 +21,7 @@ import styles from './eventDetail.module.css'
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 import { IoIosStar, IoIosStarOutline, IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
-import { FaSearch } from "react-icons/fa";
-import Select from "../reuseables/inputs/Select";
+
 
 export default function EventDetail(){
     /*
@@ -39,12 +38,6 @@ export default function EventDetail(){
     const { eventDetails, setEventDetails } = useEvents();
     
     const [event, setEvent] = useState(null); //event details
-    const [breakdowns, setBreakdowns] = useState(null); //breakdowns, or demographic categories for creating labels when creating counts
-
-    const [eventCounts, setEventCounts] = useState([]); //counts related to this event
-    const [newCount, setNewCount] = useState(false); //lets the page know the user is creating a count
-    const [newTask, setNewTask] = useState(''); //lets the page know what task the count being created is related to
-    const [countsSearch, setCountsSearch] = useState(''); //search component to easily find counts, if there are a lot
 
     //control page sections expansion
     const [showDetails, setShowDetails] = useState(true);
@@ -104,79 +97,13 @@ export default function EventDetail(){
                     setErrors(['Something went wrong. Please try again later.'])
                     console.error('Failed to fetch event: ', err);
                 } 
+                finally{
+                    setLoading(false);
+                }
             }
         };
         getEventDetails();
     }, [id]);
-
-    //get a meta list of demographic breakdown categories
-    useEffect(() => {
-        const getEventBreakdowns = async () => {
-            try {
-                console.log('fetching event details...');
-                const response = await fetchWithAuth(`/api/activities/events/breakdowns-meta/`);
-                const data = await response.json();
-                if(response.ok){
-                    setBreakdowns(data)
-                }
-            } 
-            catch (err) {
-                console.error('Failed to fetch event: ', err);
-            } 
-            finally{
-                setLoading(false);
-            }
-        }
-        getEventBreakdowns();
-    }, [])
-
-    //get an array of counts related to this event
-    const getEventCounts = async () => {
-        //slightly delay this to make sure information about the event has been fetched first
-        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-        await sleep(1000);
-        try {
-            console.log('fetching event details...');
-            setLoading(true);
-            const response = await fetchWithAuth(`/api/activities/events/${id}/get-counts/`);
-            const data = await response.json();
-            if(response.ok){
-                setNewCount(false);
-                setNewTask('');
-                console.log()
-                setEventCounts(prepareCounts(data))
-                
-            }
-            else{
-                //if a bad ID is provided, navigate to 404
-                navigate('/not-found')
-            }
-            
-        } 
-        catch (err) {
-            console.error('Failed to fetch event: ', err);
-        } 
-        finally{
-            setLoading(false);
-        }
-    };
-    //load event counts once on load
-    useEffect(() => {
-        const initialLoad = async () => {
-            await getEventCounts();
-        }
-        initialLoad();
-    }, [breakdowns]);
-
-    //convert tasks to a map for easier conversion to tables
-    const prepareCounts = (data) => {
-        const map = {}
-        data.forEach(d => {
-            map[d.task.id] = map[d.task.id] || {}
-            map[d.task.id][d.id] = d;
-        })
-        return map
-    }
 
     //delete this event
     const deleteEvent = async() => {
@@ -221,11 +148,6 @@ export default function EventDetail(){
         }
     }
 
-    //handle cancelling the creation of a new count
-    const handleCancel = () => {
-        setNewCount(false)
-        setNewTask('')
-    }
     //check if a user has permissions to edit event details
     const hasPerm = useMemo(() => {
         if(!event) return false
@@ -234,14 +156,8 @@ export default function EventDetail(){
         return false; 
     }, [event, user]);
 
-    //create a list of tasks that do not have counts that are available for creation
-    const filteredTasks = useMemo(() => {
-        const countKeys = Object.keys(eventCounts);
-        return event?.tasks?.filter((t) => !countKeys.includes(t.id.toString()))
-            .map((ts) => ({value: ts.id, label: ts.display_name})) ?? [];
-    }, [eventCounts]);
-
-    if(loading || !event || !breakdowns) return <Loading />
+    console.log(event)
+    if(loading || !event ) return <Loading />
     return(
         <div>
             {del && <ConfirmDelete name={event?.name} statusWarning={'You will not be allowed to delete this event if it has counts associated with it.'} onConfirm={() => deleteEvent()} onCancel={() => setDel(false)} /> }
@@ -306,52 +222,7 @@ export default function EventDetail(){
                     </div>}
                 </div>
             </div>
-            <div className={styles.segment}>
-                <h2>Counts</h2>
-
-                {event?.start && new Date(event.start) <= new Date() && !['client'].includes(user.role) && <div className={styles.segment}>
-                    <h2>Select a task to start adding counts.</h2>
-                    {filteredTasks.length > 0 ? <Select name={'task'} label={'Select a Task'} value={newTask || ''}
-                        onChange={(v) => {setNewTask(v); if(v != '') setNewCount(true)}} search={true} 
-                        options={filteredTasks}
-                    />  : <p>No tasks left! Either edit your existing counts or add a new task.</p>}
-                </div>}
-
-                {event?.start && new Date(event.start) > new Date() && <p>Looking to add counts? You cannot add counts for events in the future.</p>}
-                
-                 {newCount && newTask !== '' && <Counts onUpdate={() => getEventCounts()} onCancel={() => handleCancel()} 
-                    breakdownOptions={breakdowns} event={event} task={event.tasks.find(t => t.id == newTask)} />}
-
-                {eventCounts && Object.keys(eventCounts).length > 0 && <div> 
-                    <div style={{display: 'flex', flexDirection: 'row'}}>
-                    <FaSearch style={{marginLeft: 15, marginRight: 10, marginTop: 'auto', marginBottom: 'auto'}} />
-                    <input type='text' value={countsSearch} onChange={(e) => setCountsSearch(e.target.value)} placeholder='Search for counts by task...' />
-                    </div>
-                    {Object.keys(eventCounts)?.length > 0 && Object.keys(eventCounts).map((c) => {
-                        const taskId = parseInt(c);
-                        const task = event.tasks.find(t => t.id === taskId);
-                        if (!task) return null;
-                        if(countsSearch =='' || task.organization.name.toLowerCase().includes(countsSearch.toLowerCase()) || task.indicator.name.toLowerCase().includes(countsSearch.toLowerCase())){
-                            return (
-                                <Counts
-                                    key={taskId}
-                                    onCancel={handleCancel}
-                                    event={event}
-                                    breakdownOptions={breakdowns}
-                                    task={task}
-                                    onUpdate={getEventCounts}
-                                    onDelete={getEventCounts}
-                                    existing={eventCounts[taskId]}
-                                />
-                            );
-                        }
-                        return null;
-                    })}
-                </div>}
-                {eventCounts && Object.keys(eventCounts).length === 0 && <div>
-                    <p><i>No counts for this event... for now at least.</i></p>    
-                </div>}
-            </div>
+            
             <div className={styles.spacer}>
                 <p></p>
             </div>

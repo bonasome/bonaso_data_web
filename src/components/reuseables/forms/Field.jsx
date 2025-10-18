@@ -17,7 +17,7 @@ export default function Field({ field, control, style={} }) {
     - field (object): information about the input
     - control (RHF control): the RHF form control
     */
-    const { type, name, rules, label, options, IndexComponent, labelField, valueField,  images, includeParams, excludeParams, blacklist, tooltip, placeholder, search } = field;
+    const { type, name, rules, label, options, IndexComponent, labelField, valueField,  images, includeParams, excludeParams, blacklist, tooltip, placeholder, search, warnings } = field;
     /*
     Field props:
     - type (string): what type of data is this collecting (used to determine what type of input to show)
@@ -46,6 +46,7 @@ export default function Field({ field, control, style={} }) {
     return (
         <Controller name={name} control={control} rules={rules}render={({ field: controllerField, fieldState }) => {
             const commonProps = {...controllerField, label, 
+                warnings,
                 errors: fieldState.error ? [fieldState.error.message] : [],
                 tooltip,
                 onChange: (value) => {

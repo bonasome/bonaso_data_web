@@ -8,6 +8,10 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
         else if(['boolean'].includes(prereq.type)) reqVal = c.value_boolean;
         else reqVal = c.value_text;
         let prereqVal = responseInfo?.[c.source_indicator]?.value
+        console.log(prereqVal)
+        if([null, ''].includes(prereqVal)) return false;
+        
+        
         if ((prereq.type === 'multi') && ['any','none','all'].includes(c.condition_type)) {
             prereqVal = prereqVal || [];
             switch(reqVal) {
@@ -82,7 +86,7 @@ export const calcDefault = (assessment, existing=null) => {
             map[ind.id] = { value: val }
         }
         else if(ind.type == 'boolean'){
-            const val = existing?.responses.find(r => r.indicator.id == ind.id)?.response_boolean ?? false;
+            const val = existing?.responses.find(r => r.indicator.id == ind.id)?.response_boolean ?? null;
             map[ind.id] = { value: val }
         }
         else {
