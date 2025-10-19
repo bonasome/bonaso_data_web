@@ -119,7 +119,7 @@ export default function AggregateTable({ id, meta, onDelete }){
             colKeys: [],
             cells: []
         }
-        return buildAutoMatrix(count.counts)
+        return buildAutoMatrix(count.counts, count.indicator)
     }, [count]);
     const { rowTree, headerRows, colKeys, cells, dims } = matrix;
 

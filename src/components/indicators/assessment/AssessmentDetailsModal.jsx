@@ -53,7 +53,7 @@ export default function AssessmentDetailsModal({ onCancel, onUpdate=null, existi
                     onUpdate(returnData); //tell tha parent component the update was made
                 }
                 else{
-                    navigate(`/indicators/assessments/${returnData.id}/edit`)
+                    navigate(`/indicators/assessments/${returnData.id}`)
                 }
                 onCancel(); //close the modal
             }

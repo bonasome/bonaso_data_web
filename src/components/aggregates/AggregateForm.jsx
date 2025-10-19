@@ -119,7 +119,6 @@ export default function AggregateBuilder() {
             return temp;
         }, [{}]);
     }
-    console.log(countsData)
 
     const buildRows = useMemo(() => {
         if(!meta || !selectedIndicator) return;
@@ -127,7 +126,9 @@ export default function AggregateBuilder() {
 
         if(existing?.counts?.length > 0){
             existingVals = existing.counts.reduce((acc, c) => {
-                const key = `${getDynamicKeys(existing?.counts[0]).map(d => d == 'option' ? `${d}__${c[d]?.id}` : `${d}__${c[d]}`).join('___')}`;
+                const key = `${getDynamicKeys(existing?.counts[0]).map(d => d == 'option' ? (c.unique_only ? `${d}__Total` : `${d}__${c[d]?.id}`) : 
+                    `${d}__${c[d]}`).join('___')}`;
+                console.log(key)
                 acc[key] = c.value;
                 return acc;
             }, {})
@@ -145,7 +146,12 @@ export default function AggregateBuilder() {
 
         let cleanedMeta = {}
         all.forEach((bd) => {
-            if(bd == 'option') cleanedMeta[bd] = selectedIndicator.options.map((o => o.id));
+            if(bd == 'option'){
+                cleanedMeta[bd] = selectedIndicator.options.map((o => o.id));
+                if(selectedIndicator.type == 'multi'){
+                    cleanedMeta[bd].push('Total')
+                }
+            } 
             else cleanedMeta[bd] = meta[bd]?.map(v => v.value);
         })
         const keys = cartesianProduct(cleanedMeta).map(r => (
@@ -174,14 +180,19 @@ export default function AggregateBuilder() {
                 let count = {};
                 if(c.key == 'index') return {value: c.value};
                 c.key.split('___').map((k) => {
-                    const key = k.split('__')[0] == 'option' ? 'option_id' : k.split('__')[0];
-                    count[key]  = k.split('__')[1]
+                    if(k.split('__')[0] == 'option' && k.split('__')[1] == 'Total' && selectedIndicator.type == 'multi'){
+                        count['unique_only'] = true
+                    }
+                    else{
+                        const key = k.split('__')[0] == 'option' ? 'option_id' : k.split('__')[0];
+                        count[key]  = k.split('__')[1]
+                    }
                 })
                 count['value'] = ['', null].includes(c.value) ? 0 : c.value;
                 return count;
             })
         };
-
+        console.log(payload)
         const action = e.nativeEvent.submitter.value;
         try {
             setSaving(true);
@@ -318,7 +329,7 @@ export default function AggregateBuilder() {
                         <tr key={row.id}>
                         {row.key.split('___').map(d => (
                             <td key={d}>
-                                {d.split('__')[0] == 'option' ? selectedIndicator.options.find(o => o.id == d.split('__')[1])?.name :
+                                {d.split('__')[0] == 'option' ? (d.split('__')[1] == 'Total' ? 'Total' : selectedIndicator.options.find(o => o.id == d.split('__')[1])?.name) :
                                  <p>{meta[d.split('__')[0]]?.find(v => v.value === d.split('__')[1])?.label || ''}</p>}
                             </td>
                         ))}

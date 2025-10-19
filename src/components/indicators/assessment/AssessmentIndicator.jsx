@@ -153,9 +153,11 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                 if(['any', 'none', 'all'].includes(c.value_option)){
                     data.logic_data.conditions[i].condition_type = c.value_option;
                     data.logic_data.conditions[i].value_option = null;
+                    console.log(data.logic_data.conditions[i])
                 }
-                if(data.logic_data.conditions[i].condition_type && !['single', 'multi'].includes(data.type)){
+                if(data.logic_data.conditions[i].condition_type && !['single', 'multi'].includes(assessment.indicators.find(i => (i.id == c.source_indicator)).type)){
                     data.logic_data.conditions[i].condition_type = null
+                    data.logic_data.conditions[i].value_option = null
                 }
             }
         }

@@ -17,7 +17,7 @@ export function collectUniqueValues(counts, keys) {
     keys.forEach(k => (uniques[k] = new Set()));
     counts.forEach(item => {
         keys.forEach(k => {
-            uniques[k].add(normalizeVal(item[k]));
+            uniques[k].add((k == 'option' && item.unique_only) ? 'Total (Unique)' : normalizeVal(item[k]));
         });
     });
     // convert to array
@@ -83,17 +83,32 @@ export function buildColHeaderTree(colDims, uniquesByKey) {
 export function buildRowTree(rowDims, uniquesByKey) {
     if (!rowDims.length) return [{ labelParts: [''], rowKey: '' }];
     const lists = rowDims.map(k => uniquesByKey[k]);
+    console.log(lists)
     const combos = cartesian(lists);
     return combos.map(combo => ({ labelParts: combo, rowKey: combo.join('||') }));
 }
 
 
 // Build cells mapping: { [rowKey]: { [colKey]: sumValue } }
-export function buildCells(counts, rowDims, colDims) {
+export function buildCells(counts, rowDims, colDims, indicator) {
     const cells = {};
     counts.forEach(item => {
-        const rowParts = rowDims.map(k => normalizeVal(item[k]));
-        const colParts = colDims.map(k => normalizeVal(item[k]));
+        let rowParts = rowDims.map(k => normalizeVal(item[k]));
+        let colParts = colDims.map(k => normalizeVal(item[k]));
+        if(indicator.type == 'multi'){
+            if(rowDims.includes('option')){
+                if(item.unique_only){
+                    const index = rowDims.indexOf('option');
+                    rowParts[index] = 'Total (Unique)'
+                }
+            }
+            if(colDims.includes('option')){
+                if(item.unique_only){
+                    const index = colDims.indexOf('option');
+                    colParts[index] = 'Total (Unique)'
+                }
+            }
+        }
         const rowKey = rowParts.join('||');
         const colKey = colParts.join('||');
         const v = Number(item.value ?? 0) || 0;
@@ -101,13 +116,16 @@ export function buildCells(counts, rowDims, colDims) {
         if (!cells[rowKey][colKey]) cells[rowKey][colKey] = {id: item?.id, value: 0};
         cells[rowKey][colKey].value += v;
     });
+    console.log(cells)
     return cells;
 }
 
 
-export function buildAutoMatrix(counts) {
+export function buildAutoMatrix(counts, indicator) {
     // options: { maxRowDims, maxColDims }
-    const keys = getDynamicKeys(counts[0]);
+    let keys = getDynamicKeys(counts[0]);
+    if(['multi'].includes(indicator.type) && !keys.includes('option')) keys.push('option');
+    if(['multi'].includes(indicator.type) && !keys.includes('unique_only')) keys = keys.filter(k => k != 'unique_only')
     const uniques = collectUniqueValues(counts, keys);
 
 
@@ -122,10 +140,9 @@ export function buildAutoMatrix(counts) {
     const rowDims = sorted.slice(0, half);
     const colDims = sorted.slice(half);
 
-
     const rowTree = buildRowTree(rowDims, uniques);
     const { headerRows, colKeys } = buildColHeaderTree(colDims, uniques);
-    const cells = buildCells(counts, rowDims, colDims);
+    const cells = buildCells(counts, rowDims, colDims, indicator);
 
 
     return {

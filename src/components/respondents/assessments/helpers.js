@@ -16,7 +16,7 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
             prereqVal = prereqVal || [];
             switch(reqVal) {
                 case 'any':
-                    return prereqVal.length > 0;
+                    return prereqVal.length > 0 && !['none'].includes(prereqVal);
                 case 'none':
                     return prereqVal.includes('none');
                 case 'all':
@@ -26,10 +26,10 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
         if ((prereq.type === 'single') && ['any','none','all'].includes(c.condition_type)) {
             prereqVal = prereqVal || null;
             switch(reqVal) {
-                case 'any':
-                    return prereqVal;
                 case 'none':
                     return prereqVal == 'none';
+                case 'any':
+                    return prereqVal && prereqVal != 'none';
                 case 'all':
                     return false; // impossible
             }
@@ -74,24 +74,28 @@ export const calcDefault = (assessment, existing=null) => {
     let map = {}
     
     assessment.indicators.forEach((ind) => {
+        const firstMatch = existing?.responses?.find(r => r.indicator.id == ind.id) ?? null;
+        console.log(firstMatch)
+        const rDate = firstMatch?.response_date ?? '';
+        const rLocation = firstMatch?.response_location ?? '';
         if(ind.type == 'multi'){
             const val =  (existing && ind.allow_none) ? (existing?.responses?.filter(r => r.indicator.id == ind.id)?.map(r => (r.response_option.id)).length > 0 ? 
                 existing?.responses?.filter(r => r.indicator.id == ind.id)?.map(r => (r.response_option.id)) : ['none']) : 
                 existing?.responses?.filter(r => r.indicator.id == ind.id)?.map(r => (r.response_option.id)) ?? [];
-            map[ind.id] = { value: val }
+            map[ind.id] = { value: val, date: rDate, location: rLocation }
         } 
         else if(ind.type == 'single'){
-            const val = (ind.allow_none && existing) ? (existing?.responses?.find(r => r.indicator.id == ind.id)?.response_option ?? 'none'): 
-                existing?.responses?.find(r => r.indicator.id == ind.id)?.response_option ?? null;
-            map[ind.id] = { value: val }
+            const val = (ind.allow_none && existing) ? (firstMatch?.response_option ?? 'none'): 
+                existing?.responses?.firstMatch?.response_option ?? null;
+            map[ind.id] = { value: val, date: rDate, location: rLocation }
         }
         else if(ind.type == 'boolean'){
-            const val = existing?.responses.find(r => r.indicator.id == ind.id)?.response_boolean ?? null;
-            map[ind.id] = { value: val }
+            const val = firstMatch?.response_boolean ?? null;
+            map[ind.id] = { value: val, date: rDate, location: rLocation }
         }
         else {
-            const val = existing?.responses?.find(r => r.indicator.id == ind.id)?.response_value ?? '';
-            map[ind.id] = { value: val }
+            const val = firstMatch?.response_value ?? '';
+            map[ind.id] = { value: val, date: rDate, location: rLocation }
         }
     });
     console.log(map)

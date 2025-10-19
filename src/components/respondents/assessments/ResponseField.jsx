@@ -12,7 +12,7 @@ export default function ResponseField ({ indicator, assessment, respondent, resp
 
 
     const { field } = useController({ name: `response_data.${indicator.id}.value` });
-    const { control, setValue, getValues } = useFormContext();
+    const { control, setValue, getValues, unregister } = useFormContext();
 
     
     const shouldShow = useMemo(() => {
@@ -37,6 +37,7 @@ export default function ResponseField ({ indicator, assessment, respondent, resp
             else if (indicator.type == 'single') setValue(`response_data.${indicator.id}.value`, null);
             else if (indicator.type == 'boolean') setValue(`response_data.${indicator.id}.value`, null);
             else setValue(`response_data.${indicator.id}.value`, '');
+            unregister(`response_data.${indicator.id}.value`);
         }
     }, [shouldShow, setValue]);
 
@@ -99,7 +100,16 @@ export default function ResponseField ({ indicator, assessment, respondent, resp
     }
 
     if(indicator.required){
-        fieldConfig.rules = {required: 'Required'};
+        fieldConfig.rules = {
+            validate: (value) => {
+                // Allow false, 0, empty array, but disallow null or undefined
+                console.log(value)
+                if (value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
+                    return 'Required';
+                }
+                return true;
+            }
+        };
         fieldConfig.label = `${indicator.order + 1}. ${indicator.name}*`
     }
     
