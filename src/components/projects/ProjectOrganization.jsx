@@ -241,8 +241,9 @@ export default function ProjectOrganization(){
 
             <div className={styles.segment}>
                 <ReturnLink url={`/projects/${id}`} display='Return to projects overview' /> 
-                {organization.parent && <ReturnLink url={`/projects/${id}/organizations/${organization.parent?.id}`} display='Return to parent organization' />}   
+                {hasPerm && <ReturnLink url={`/projects/${id}/organizations/${organization.parent?.id}`} display='Return to parent organization' />}   
                 <h1>Viewing Page for {organization.name} for {project.name}</h1>
+                {organization?.parent?.id && <h3><i>Subgrantee of {organization.parent.name}</i></h3>}
                 <Messages errors={errors} />
             </div>
 
@@ -256,7 +257,7 @@ export default function ProjectOrganization(){
                     </div>
 
                     {showTasks && <div style={{ margin: '4vh'}}>
-                        {hasPerm && !addingAssTask && <button onClick={() => setAddingAssTask(true)}><MdAssignmentAdd /> Assign New Assessment(s)</button>}
+                        {hasPerm && !addingAssTask && !addingIndTask && <button onClick={() => setAddingAssTask(true)}><MdAssignmentAdd /> Assign New Assessment(s)</button>}
                         {addingAssTask && <AssignTask project={project} type={'assessment'} organization={organization} 
                             onUpdate={(data) => {
                                 setUpdateTasks(prev => prev+=1); setTaskSuccess([`Successfully assigned ${data.created.length} new tasks to ${organization.name}!`])
@@ -264,7 +265,7 @@ export default function ProjectOrganization(){
                             onClose={() => setAddingAssTask(false)}
                         />}
 
-                        {hasPerm && !addingIndTask && <button onClick={() => setAddingIndTask(true)}><MdAssignmentAdd /> Assign New Standalone Indicator(s)</button>}
+                        {hasPerm && !addingIndTask && !addingAssTask && <button onClick={() => setAddingIndTask(true)}><MdAssignmentAdd /> Assign New Standalone Indicator(s)</button>}
                         {addingIndTask && <AssignTask project={project} type={'indicator'} organization={organization} 
                             onUpdate={(data) => {
                                 setUpdateTasks(prev => prev+=1); setTaskSuccess([`Successfully assigned ${data.created.length} new tasks to ${organization.name}!`])

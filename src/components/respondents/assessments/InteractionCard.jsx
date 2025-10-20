@@ -180,6 +180,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                 <h2>{interaction.task.display_name}</h2>
                 <p>On: {prettyDates(interaction.interaction_date)}</p>
                 <p>At: {interaction.interaction_location}</p>
+                <UpdateRecord created_by={interaction.created_by} created_at={interaction.created_at} updated_by={interaction.updated_by} updated_at={interaction.updated_at} />
             </div>
 
 
@@ -189,10 +190,14 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                         <h3>Responses</h3>
                         <div style={{ padding: '2vh', backgroundColor: theme.colors.bonasoDarkAccent }}>
                             {cleanedResponses.sort((a, b) => (a.indicator.order - b.indicator.order)).map(r => {
+                                const rDate = r.response_date != interaction.interaction_date ? `(${prettyDates(r.response_date)})` : '';
+                                console.log(r.response_location, interaction.interaction_location)
+                                const rLoc = r.response_location != interaction.interaction_location ? `(${r.response_location})` : '';
+                                const app = rDate + ' ' + rLoc;
                                 if(r.indicator.type == 'multi'){
                                     return(<div>
                                         <h4>{r.indicator.order + 1}. {r.indicator.name}</h4>
-                                        <ul>{r.response_option.map((o) => (<li>{o.name}</li>))}</ul>
+                                        <ul>{r.response_option.map((o) => (<li>"{o.name}" {app}</li>))}</ul>
                                     </div>)
                                 }
                                 else{
@@ -202,12 +207,14 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                                     else val = r.response_value;
                                     return(<div>
                                     <h4>{r.indicator.order + 1}. {r.indicator.name}</h4>
-                                    <ul><li>"<i>{val}</i>"</li> </ul>
+                                    <ul><li>"<i>{val}" {app}</i></li> </ul>
                                     </div>)
                                 }
                                 
                             })}
                         </div>
+                        <p><strong>Comments</strong></p>
+                        {interaction?.comments ? <p>{interaction.comments}</p> : <p><i>No comments.</i></p>}
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'row'}}>

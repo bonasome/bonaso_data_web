@@ -8,10 +8,9 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
         else if(['boolean'].includes(prereq.type)) reqVal = c.value_boolean;
         else reqVal = c.value_text;
         let prereqVal = responseInfo?.[c.source_indicator]?.value
-        console.log(prereqVal)
+        if(prereqVal ==null || prereqVal == 'undefined') return false
         if([null, ''].includes(prereqVal)) return false;
-        
-        
+        console.log(prereq.name, prereqVal)
         if ((prereq.type === 'multi') && ['any','none','all'].includes(c.condition_type)) {
             prereqVal = prereqVal || [];
             switch(reqVal) {
@@ -34,6 +33,7 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
                     return false; // impossible
             }
         }
+        console.log(prereq.name, prereqVal)
         if(prereq.type=='multi'){
             if(c.operator == '=') return prereqVal?.includes(reqVal);
             if(c.operator == '!=') return !prereqVal?.includes(reqVal);
@@ -60,7 +60,8 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
     }
     else if(c.source_type == 'respondent'){
         const reqVal = c.value_text;
-        const prereqVal = respondent?.[c.respondent_field];
+        const prereqVal = c.respondent_field == 'hiv_status' ? (respondent?.hiv_status?.hiv_positive ? "true" : 'false') : 
+            respondent?.[c.respondent_field];
         //these are all that's supported right now
         if(c.operator == '=') return prereqVal == reqVal;
         if(c.operator == '!=') return prereqVal != reqVal;
@@ -69,35 +70,57 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
 }
 
 
-export const calcDefault = (assessment, existing=null) => {
-    if(!assessment) return {}
-    let map = {}
-    
+export const calcDefault = (assessment, existing = null) => {
+    if (!assessment) return {};
+
+    let map = {};
+
     assessment.indicators.forEach((ind) => {
         const firstMatch = existing?.responses?.find(r => r.indicator.id == ind.id) ?? null;
-        console.log(firstMatch)
         const rDate = firstMatch?.response_date ?? '';
         const rLocation = firstMatch?.response_location ?? '';
-        if(ind.type == 'multi'){
-            const val =  (existing && ind.allow_none) ? (existing?.responses?.filter(r => r.indicator.id == ind.id)?.map(r => (r.response_option.id)).length > 0 ? 
-                existing?.responses?.filter(r => r.indicator.id == ind.id)?.map(r => (r.response_option.id)) : ['none']) : 
-                existing?.responses?.filter(r => r.indicator.id == ind.id)?.map(r => (r.response_option.id)) ?? [];
-            map[ind.id] = { value: val, date: rDate, location: rLocation }
-        } 
-        else if(ind.type == 'single'){
-            const val = (ind.allow_none && existing) ? (firstMatch?.response_option ?? 'none'): 
-                existing?.responses?.firstMatch?.response_option ?? null;
-            map[ind.id] = { value: val, date: rDate, location: rLocation }
+
+        // MULTI-SELECT
+        if (ind.type === 'multi') {
+            let val = existing
+                ? existing.responses
+                      .filter(r => r.indicator.id == ind.id)
+                      .map(r => r.response_option?.id)
+                : [];
+            if (ind.allow_none && firstMatch && (!val || val.length === 0)) {
+                val = ['none'];
+            }
+            map[ind.id] = { value: val, date: rDate, location: rLocation };
         }
-        else if(ind.type == 'boolean'){
-            const val = firstMatch?.response_boolean ?? null;
-            map[ind.id] = { value: val, date: rDate, location: rLocation }
+
+        // SINGLE-SELECT
+        else if (ind.type === 'single') {
+            let val;
+            if (existing) {
+                if (ind.allow_none) {
+                    val = firstMatch ? firstMatch?.response_option?.id ?? 'none' : null;
+                } 
+                else {
+                    val = firstMatch?.response_option?.id ?? null;
+                }
+            } else {
+                val = null;
+            }
+            map[ind.id] = { value: val, date: rDate, location: rLocation };
         }
+
+        // BOOLEAN
+        else if (ind.type === 'boolean') {
+            const val = [true, false].includes(firstMatch?.response_boolean) ? firstMatch?.response_boolean : null;
+            map[ind.id] = { value: val, date: rDate, location: rLocation };
+        }
+
+        // TEXT / NUMBER / OTHER
         else {
             const val = firstMatch?.response_value ?? '';
-            map[ind.id] = { value: val, date: rDate, location: rLocation }
+            map[ind.id] = { value: val, date: rDate, location: rLocation };
         }
     });
-    console.log(map)
+
     return map;
-}
+};

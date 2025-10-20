@@ -14,6 +14,7 @@ import ComponentLoading from "../reuseables/loading/ComponentLoading";
 import ButtonHover from '../reuseables/inputs/ButtonHover';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
 import Tooltip from '../reuseables/Tooltip';
+import UpdateRecord from '../reuseables/meta/UpdateRecord';
 
 import styles from '../analytics/pivotTables/pt.module.css';
 
@@ -127,12 +128,6 @@ export default function AggregateTable({ id, meta, onDelete }){
     // create thead rows for column dims (may be zero)
     const theadRows = headerRows?.length ? headerRows : [];
 
-    const hasPerm = useMemo(() => {
-        if(user.role == 'admin') return true;
-        if(['meofficer', 'manager'].includes(user.role) && user.org_id == count?.organization.id) return true;
-        return false
-    }, [user]);
-
     const getLabelFromValue = (field, value) => {
         if(!meta) return null;
         const match = meta[field]?.find(range => range.value === value);
@@ -146,7 +141,9 @@ export default function AggregateTable({ id, meta, onDelete }){
             {viewingFlag && <FlagDetailModal flags={count.counts.find(c => (c.id == viewingFlag))?.flags} model={'aggregates.aggregatecount'} id={viewingFlag} onClose={() => {getCount(); setViewingFlag(null)}} /> }
             <div style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, padding: '4vh', margin: '2vh' }}>
                 <h1>Aggregate Count for {count.indicator.name}</h1>
+                <h3>By {count.organization.name} for {count.project.name}</h3>
                 <h3><i>From {prettyDates(count.start)} to {prettyDates(count.end)}</i></h3>
+                <UpdateRecord created_by={count.created_by} created_at={count.created_at} updated_by={count.updated_by} updated_at={count.updated_at} />
             </div>
             <Messages errors={errors} />
             <div style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, padding: '4vh', margin: '2vh' }}>
@@ -236,10 +233,10 @@ export default function AggregateTable({ id, meta, onDelete }){
                 </tbody>
             </table>}
 
-            {hasPerm && <div style={{ display: 'flex', flexDirection: 'row'}}> 
+            <div style={{ display: 'flex', flexDirection: 'row'}}> 
                 <Link to={`/aggregates/${id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Counts'} /></Link>
                 <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Count'} forDelete={true} />
-            </div>}
+            </div>
             </div>
         </div>
     )

@@ -70,7 +70,7 @@ export default function MultiCheckbox({ name, label, options, value, onChange, o
             {options.map((o) => {
                 const optionValue = o[valueField];
                 const optionLabel = o[labelField];
-                const valueStr = value?.map((v) => v.toString());
+                const valueStr = Array.isArray(value) ?  value?.map((v) => v.toString()) : [];
                 {/* map each item in options as its own checkbox, then use its checked state to add or 
                     remove it from the value array */}
                 return <MultiCheckboxItem

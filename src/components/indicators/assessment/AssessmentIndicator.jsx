@@ -141,9 +141,16 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     const onSubmit = async(data, e) => {
         let submitErrors = []
         data.assessment_id = assessment.id; //set the related project based on the URL param
-        if(data.type != 'multi' && data.type != 'single' && !data.match_options){
-            data.options_data = []
+        //wipe any option related data if the type does not allow for custom options (to clear stale states)
+        if(!['multi', 'single'].includes(data.type)){
+            data.options_data = [];
+            data.match_options_id = null;
         }
+        //wipe match_options data if the data type isn't multi (indicating a stale state)
+        if(data.type != 'multi') data.match_options_id = null;
+        //wipe any options that were included if match options was selected
+        if(data.type == 'multi' && data.match_options_id) data.options_data = [];
+        //wipe any stale logic data if the user chose to not include logic
         if(!data.include_logic || data.logic_data?.conditions?.length == 0){
             data.logic_data = {};
         }
@@ -271,7 +278,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     ]
     const match = [
         { name: 'match_options_id', label: "Match Options", type: "select",
-            options: assessment.indicators.map((ind) => ({value: ind.id, label: ind.name}))
+            options: assessment.indicators.filter(ind => (ind.type == 'multi')).map((ind) => ({value: ind.id, label: ind.name}))
         },
     ]
     const noneOption = [
@@ -306,7 +313,6 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                 <Messages errors={submissionErrors} ref={alertRef} />
                 {del && <ConfirmDelete onCancel={() => setDel(false)} onConfirm={handleDelete} name={'this indicator'} />}
                 {!editing && (existing ? <div>
-
                     <div style={{ display: 'flex', flexDirection: 'row'}}>
                         <div>
                             <div onClick={() => setExpanded(!expanded)}>
@@ -367,7 +373,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                         <FormSection fields={basics} control={control}/>
                         {['single', 'multi', 'integer', 'boolean'].includes(type) && 
                              <FormSection fields={allowAggies} control={control} header='Aggregates'/>}
-                        {(type=='single' || type=='multi') && assessment.indicators.filter((i => i.order < order)).length > 0 && 
+                        {type=='multi' && assessment.indicators.filter((i => (i.order < order && i.type == 'multi'))).length > 0 && 
                             <FormSection fields={match} control={control} header='Match Options'/>}
                         {(type=='single' || type=='multi') && !usingMatched && 
                             <OptionsBuilder />

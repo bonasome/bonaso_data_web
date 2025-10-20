@@ -25,7 +25,7 @@ export default function BatchRecord(){
 
     //org and project for generating template
     const [org, setOrg] = useState(null);
-    const [tasks, setTasks] = useState([]);
+    const [task, setTask] = useState([]);
 
     //the file itself
     const [file, setFile] = useState(null);
@@ -58,8 +58,8 @@ export default function BatchRecord(){
 
         //make sure a project/organization is selected
         let getErrors = [];
-        if(!tasks){
-            getErrors.push('Please select a project.')
+        if(!task){
+            getErrors.push('Please select a task.')
         }
         if(!org){
             getErrors.push('Please select an organization.')
@@ -78,7 +78,7 @@ export default function BatchRecord(){
                 },
                 body: JSON.stringify({
                     'organization_id': org.id,
-                    'task_ids': tasks.map(t => t.id),
+                    'task_id': task.id,
                 })
             });
             if(response.ok){
@@ -214,11 +214,11 @@ export default function BatchRecord(){
             <div className={styles.template}>
 
                 <i>1. Select your organization and the project to get a ready-to-use template for recording data. There are directions and examples in the template for your reference.</i>
-                    <ModelSelect IndexComponent={OrganizationsIndex} value={org} callbackText={'Choose Organization'}
+                    <ModelSelect name={'organization'} IndexComponent={OrganizationsIndex} value={org} callbackText={'Choose Organization'}
                          onChange={setOrg} label={'Select an Organization'} labelField={'name'} />
 
-                    {org && <ModelMultiSelect IndexComponent={Tasks} value={tasks} onChange={setTasks}
-                        label={'Select a Project'} callbackText={'Choose Project'} includeParams={[{field: 'organization', value: org?.id}, {field: 'category', value: 'assessment' }]}/>}
+                    {org && <ModelSelect name={'assessment(s)'} IndexComponent={Tasks} value={task} onChange={setTask}
+                        label={'Select a Assessment(s) to Include'} labelField='display_name' includeParams={[{field: 'organization', value: org?.id}, {field: 'category', value: 'assessment' }]}/>}
                 
                 {gettingFile ? <ButtonLoading /> : 
                      <button onClick={() => handleClick()}><FaFileDownload /> Get my file!</button>}

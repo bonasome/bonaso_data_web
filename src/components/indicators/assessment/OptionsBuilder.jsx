@@ -26,7 +26,7 @@ export default function OptionsBuilder() {
                         {/* Source Type */}
                         <Field control={control} field={{ name: `options_data.${index}.name`, 
                             label: `${index+1}.`, type: "text", rules: { required: "Required" },
-                        }} flexOverride={true} />
+                        }} style={{ display: 'flex', flexDirection: 'row'}} />
                         <button type="button" onClick={() => remove(index)}>Remove</button>
                     </div>
                 );

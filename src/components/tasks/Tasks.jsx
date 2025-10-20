@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useIndicators } from "../../contexts/IndicatorsContext";
 import { useAuth } from "../../contexts/UserAuth";
 import fetchWithAuth from '../../../services/fetchWithAuth';
-import {filterConfig, initial} from './filtersConfig';
 
 import IndexViewWrapper from "../reuseables/IndexView";
 import ConfirmDelete from "../reuseables/ConfirmDelete";
@@ -15,6 +14,7 @@ import Messages from '../reuseables/Messages';
 import styles from './tasks.module.css';
 
 import { FaTrashAlt } from "react-icons/fa";
+import Select from "../reuseables/inputs/Select";
 
 //card that holds task details
 function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, onDelete=null, callback=null, forAssessment=false }) {
@@ -130,7 +130,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
 
 
 export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=false, blacklist=[], 
-    canDelete=false, updateTrigger=null, callback=null, forAssessment=false
+    canDelete=false, updateTrigger=null, callback=null, forAssessment=false, supportFilter=false
 }) {
     /*
     Paginated index view that allows a user to view their tasks. 
@@ -155,7 +155,10 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [entries, setEntries] = useState(0);
-    const [filters, setFilters] = useState(initial);
+    const [filters, setFilters] = useState({
+        organization: user.organization_id,
+        project: '',
+    });
     //for filters
     const [orgSearch, setOrgSearch] = useState('');
     const [projectSearch, setProjectSearch] = useState('');
@@ -195,10 +198,8 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
         const getTasks = async () => {
             try {
                 console.log('fetching tasks...');
-                const filterQuery = 
-                    (filters.project ? `&project=${filters.project}` : '') + 
-                    (filters.organization ? `&organization=${filters.organization}` : '');
                 //run the filters
+                const filterQuery = supportFilter ? `&organization=${filters.organization}&project=${filters.project}` : '';
                 const url = `/api/manage/tasks/?search=${search}&page=${page}` + filterQuery + params;
                 console.log(url)
                 const response = await fetchWithAuth(url);
@@ -243,6 +244,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
     //load organizations (for filtering)
     useEffect(() => {
         const loadOrgs = async () => {
+            if(!supportFilter) return;
             try {
                 const url = `/api/organizations/?search=${search}`
                 const response = await fetchWithAuth(url);
@@ -260,11 +262,13 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
     //load projects (for filtering)
     useEffect(() => {
         const loadProjects = async () => {
+            if(!supportFilter) return;
             try {
                 const url = `/api/manage/projects/?search=${search}`
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setProjects(data.results);
+                setFilters(prev => ({...prev, project: data?.results?.[0]?.id ?? ''}));
             } 
             catch (err) {
                 console.error('Failed to fetch organizations: ', err)
@@ -292,9 +296,11 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
             
             <p><i>Search your tasks by name, organization, or project.</i></p>
             
-            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}
-                filter={<Filter config={filterConfig(orgs, projects, (s) => setOrgSearch(s), (s) => setProjectSearch(s), user)} initial={initial} onFilterChange={(f) => setFilters(f)} /> } 
-            >
+            <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} >
+                {supportFilter && <div>
+                    <Select options={projects.map(p => ({value: p.id, label: p.name}))} onChange={(v) => setFilters(prev => ({...prev, project: v}))} value={filters.project} search={true} label='Select a Project' onSearchChange={(v) => setProjectSearch(v)} />
+                    <Select options={orgs.map(o => ({value: o.id, label: o.name}))} onChange={(v) => setFilters(prev => ({...prev, organization: v}))} value={filters.organization} search={true} label='Select an Organization' onSearchChange={(v) => setOrgSearch(v)} />
+                </div>}
                 {filteredTasks?.length > 0 ? filteredTasks.map((task) => (
                     <TaskCard task={task} key={task.id} tasks={tasks} 
                         isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} 

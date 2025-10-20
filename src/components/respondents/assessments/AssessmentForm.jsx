@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useForm,  useWatch, useController, useFormContext, FormProvider } from "react-hook-form";
 
 import fetchWithAuth from "../../../../services/fetchWithAuth";
-import { calcDefault } from './helpers';
+import { calcDefault, checkLogic } from './helpers';
 
 import { useRespondents } from "../../../contexts/RespondentsContext";
 import { useIndicators } from "../../../contexts/IndicatorsContext";
@@ -51,7 +51,6 @@ export default function AssessmentForm(){
                 const data = await response.json();
                 if(response.ok){
                     //update the context
-                    console.log(data)
                     setAssessmentDetails(prev => [...prev, data.assessment]);
                     setAssessment(data.assessment);
                 }
@@ -80,7 +79,6 @@ export default function AssessmentForm(){
                 const data = await response.json();
                 if(response.ok){
                     //update the context
-                    console.log(data)
                     setExisting(data);
                 }
                 else{
@@ -170,11 +168,12 @@ export default function AssessmentForm(){
             interaction_date: existing?.interaction_date ?? '',
             interaction_location: existing?.interaction_location ?? '',
             response_data: calcDefault(assessment, existing),
+            comments: existing?.comments ?? '',
         }
     }, [existing]);
 
     const methods = useForm({ defaultValues });
-    const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = methods;
+    const { register, unregister, control, handleSubmit, reset, watch, setFocus, getValues, setValue, formState: { errors } } = methods;
     
     //scroll to errors
     const onError = (errors) => {
@@ -188,6 +187,7 @@ export default function AssessmentForm(){
             }
         }
     };
+
     //load existing values once existing loads, if provided
     useEffect(() => {
         if (assessment) {
@@ -195,15 +195,101 @@ export default function AssessmentForm(){
                 interaction_date: existing?.interaction_date ?? '',
                 interaction_location: existing?.interaction_location ?? '',
                 response_data: calcDefault(assessment, existing),
+                comments: existing?.comments ?? '',
             };
             reset(defaults);
         }
     }, [assessment, existing, reset]);
 
+    
+
+
     const date = watch("interaction_date");
     const loc = watch("interaction_location");
 
-    const responseInfo = watch("response_data");
+    const responseInfo = useWatch({ control, name: "response_data" });
+    
+    const visibilityMap = useMemo(() => {
+        if(!assessment || !respondent) return {};
+        const map = {}
+        assessment.indicators.forEach((ind) => {
+             const logic = ind.logic;
+            //no logic, always return true
+            if(!logic?.conditions || logic?.conditions?.length == 0) map[ind.id] = true;
+            else if(ind.logic.group_operator == 'AND'){
+                map[ind.id] = logic.conditions.every(c => (checkLogic(c, responseInfo, assessment, respondent)))
+            }
+            //must be an OR
+            else{
+                map[ind.id] =  logic.conditions.some(c => (checkLogic(c, responseInfo, assessment, respondent)))
+            }
+        });
+        return map;
+    }, [responseInfo]);
+    console.log(assessment)
+    console.log(responseInfo, visibilityMap)
+    useEffect(() => {
+        if (!assessment || !respondent) return;
+        assessment.indicators.forEach(ind => {
+            if (!visibilityMap[ind.id]) {
+                const currentValue = responseInfo?.[ind.id]?.value;
+                // ✅ Only unregister/reset if there’s actually data
+                if (currentValue !== undefined) {
+                    setValue(`response_data.${ind.id}`, {}, { shouldDirty: false });
+                    unregister(`response_data.${ind.id}.value`);
+                }
+            }
+        });
+    }, [visibilityMap, unregister, assessment, respondent]);
+
+     const optionsMap = useMemo(() => {
+        if(!assessment) return {};
+        const map = {}
+        assessment.indicators.forEach((ind) => {
+            if(['boolean'].includes(ind.type)){
+                map[ind.id] = [{value: true, label: 'Yes'}, {value: false, label: 'No'}];
+                return;
+            }
+            else if(!['single', 'multi'].includes(ind.type)){
+                map[ind.id] = [] //keep each value in map as an array to avoid issues down the line
+                return;
+            }
+            let opts = ind?.options?.map((o) => ({value: o.id, label: o.name})) ?? [];
+            if(ind.allow_none) opts.push({value: 'none', label: 'None of the above'})
+            if(ind.match_options){
+                const valid = responseInfo?.[ind.match_options]?.value;
+                opts = opts.filter(o => (valid?.includes(o?.value) || o?.value == 'none'));
+            }
+            map[ind.id] = opts
+        })
+        return map
+    }, [assessment, responseInfo]);
+        
+    useEffect(() => {
+        if(!assessment || !optionsMap) return;
+        assessment.indicators.forEach((ind) => {
+            const options = optionsMap[ind.id]
+            if (!['single', 'multi'].includes(ind.type)) return;
+            if (!options || options.length === 0) return;
+
+            const val = getValues(`response_data.${ind.id}.value`);
+            const valid_ids = options.map(p => p.value);
+
+            if (ind.type === 'multi') {
+                const valArray = Array.isArray(val) ? val : [];
+                const filtered = valArray.filter(v => valid_ids.includes(v));
+                if (JSON.stringify(valArray) !== JSON.stringify(filtered)) {
+                    setValue(`response_data.${ind.id}.value`, filtered);
+                }
+            }
+            if (ind.type === 'single') {
+                const useVal = valid_ids.includes(val) ? val : null;
+                if (JSON.stringify(val) !== JSON.stringify(useVal)) {
+                    setValue(`response_data.${ind.id}.value`, useVal);
+                }
+            }
+        });
+    }, [optionsMap]);
 
     const basics = [
         { name: 'interaction_date', label: 'Date of Interaction', type: "date", rules: { required: "Required", },
@@ -213,21 +299,26 @@ export default function AssessmentForm(){
                 placeholder: 'A brief overview, the purpose, objectives, anything...'
         },
     ]
-    
+    const comments = [
+        { name: 'comments', label: 'Comments/Notes', type: 'textarea', placeholder: 'Any additional notes that may be helpful to remember' }
+    ]
 
+
+    const visibleInds = (assessment && respondent && visibilityMap) ? assessment.indicators.filter(ind => (visibilityMap[ind.id])) : [];
     if(loading || !respondent || !assessment) return <Loading />
     return(
         <div className={styles.form}>
             <h1>{assessment.name} Assessment for {respondent.display_name}</h1>
             <Messages errors={submissionErrors} ref={alertRef} />
-            <FormProvider {...methods} >
+
+            {visibleInds?.length > 0 && <FormProvider {...methods} >
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection control={control} fields={basics} header={'Date & Location'} />
 
                 {assessment.indicators.sort((a, b) => a.order-b.order).map((ind) => (
-                    <ResponseField indicator={ind} assessment={assessment} respondent={respondent} responseInfo={responseInfo} />
+                    <ResponseField indicator={ind} shouldShow={visibilityMap[ind.id]} options={optionsMap[ind.id]} />
                 ))}
-
+                <FormSection control={control} fields={comments} />
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     <Link to={id ? `/respondents/${id}` : '/respondents'}><button type="button">
@@ -236,7 +327,8 @@ export default function AssessmentForm(){
                 </div>}
                 {saving && <ButtonLoading />}
             </form>
-            </FormProvider>
+            </FormProvider>}
+            {!visibleInds || visibleInds.length == 0 && <Messages warnings={['This respondent is not eligible for this assessment.']} />}
         </div>
     )
 }

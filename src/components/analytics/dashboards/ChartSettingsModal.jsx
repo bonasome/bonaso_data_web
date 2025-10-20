@@ -142,6 +142,7 @@ export default function ChartSettingsModal({ dashboard, onUpdate, onClose, meta,
             stack: chart?.stack ?? null,
             indicators: chart?.indicators ?? [],
             use_target: chart?.use_target ?? false,
+            average: chart?.average ?? false,
             filters: chart?.filters ?? null,
             tabular: chart?.tabular ?? false,
 
@@ -223,6 +224,11 @@ export default function ChartSettingsModal({ dashboard, onUpdate, onClose, meta,
             tooltip: `Give your chart a name so you know what it is supposed to track.`
         }
     ]
+    const average = [
+        { name: 'average', label: "Average Value Per Respondent (instead of sum)", type: "checkbox",
+            tooltip: `Checking this box will pull the average value per respondent.`
+        },
+    ]
     //only show this if its not a pie chart
     const axis = [
         { name: 'axis', label: "Axis", type: "radio", options: meta.axes,
@@ -282,6 +288,7 @@ export default function ChartSettingsModal({ dashboard, onUpdate, onClose, meta,
                     <FormSection fields={repeat} control={control} header={'Track Repeat Only?'} />}
                 {needRepeat && <FormSection fields={repeatN} control={control} header={'How Many Times?'} />}
                 {inds.length == 1 && chartType != 'pie' && <FormSection fields={target} control={control} header='Show Targets' />}
+                {inds.length == 1 && inds[0]?.type == 'integer' && chartType != 'pie' && <FormSection fields={average} control={control} header='Data Type' />}
                 {inds.length == 1 && chartType && !usingTargets && fields?.length > 0 &&
                      <FormSection fields={legend} control={control} header='Legend' />}
                 {inds.length == 1 && fields?.length > 0 && chartType == 'bar' && !usingTargets && <FormSection fields={stack} control={control} header='Stack' />}

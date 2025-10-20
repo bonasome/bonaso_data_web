@@ -76,6 +76,7 @@ export default function EventDetail(){
             const found = eventDetails.find(e => e.id.toString() === id.toString());
             if (found) {
                 setEvent(found);
+                setLoading(false)
                 return;
             }
             else{
@@ -156,7 +157,6 @@ export default function EventDetail(){
         return false; 
     }, [event, user]);
 
-    console.log(event)
     if(loading || !event ) return <Loading />
     return(
         <div>

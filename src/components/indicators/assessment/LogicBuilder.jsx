@@ -47,6 +47,7 @@ export default function LogicBuilder({ order, meta, assessment }) {
                 if(['single', 'multi', 'boolean'].includes(selectedIndicator?.type)) operatorOptions = meta?.operators.filter((o) => ['=', '!='].includes(o.value));
                 if(['text'].includes(selectedIndicator?.type)) operatorOptions = meta?.operators.filter((o) => !['>', '<'].includes(o.value));
                 if(['integer'].includes(selectedIndicator?.type)) operatorOptions = meta?.operators.filter((o) => !['!contains', 'contains'].includes(o.value));
+                if(meta.respondent_choices?.[condition?.respondent_field]) operatorOptions = meta?.operators.filter((o) => ['=', '!='].includes(o.value));
                 
                 return (
                     <div key={field.id} style={{ backgroundColor: theme.colors.bonasoMain, padding: '2vh', margin: '2vh'}}>

@@ -36,7 +36,7 @@ export default function splitToChart(data, map, axis=null, legend=null, stack=nu
         const key = stack ? `${legendVal}__${stackVal}` : `${legendVal}` //create a key for reference
         // Add the value
         chartMap[period][key] = row.count;
-        console.log(map, stack, stackVal)
+
         if (!keyMeta[key]) {
             keyMeta[key] = {stackKey: stackValCleaned, legendKey: legendValCleaned}
         }
@@ -80,7 +80,7 @@ export default function splitToChart(data, map, axis=null, legend=null, stack=nu
         stackId: stackKey ||  '', //for grouping bars into stacks
         label: stack ? `${cleanLabels(legend)}: ${legendKey} - ${cleanLabels(stack)} ${stackKey}` : `${cleanLabels(legendKey)}`, //the label
         fill: undefined // optional: use a color mapping here
-    })).sort((a, b) => a.label.localeCompare(b.label)); //sort alphabetically by default
+    }))
 
     return { dataArray, keys }; //return both the data and the keys
 }

@@ -138,7 +138,7 @@ export default function Targets({ project, organization}) {
         if(!id || !orgID) return;
         try {
             console.log('fetching targets...');
-            const response = await fetchWithAuth(`/api/manage/targets/?task__organization=${orgID}&task__project=${id}`);
+            const response = await fetchWithAuth(`/api/manage/targets/?organization=${orgID}&project=${id}`);
             const data = await response.json();
             if(response.ok){
                 setEntries(data.count);

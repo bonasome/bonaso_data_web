@@ -3,7 +3,7 @@ import Messages from '../Messages';
 import Tooltip from '../Tooltip';
 import { FaSearch } from 'react-icons/fa';
 
-export default function Select({ name, label, onChange, onBlur, value, options, errors=[], tooltip=null, search=false }){
+export default function Select({ name, label, onChange, onBlur, value, options, errors=[], tooltip=null, search=false, onSearchChange=null }){
     /*
     Select component that allows a user to select a single value from  a list. Radio Buttons are preferable 
     unless the list of options is on the longer side.
@@ -44,7 +44,7 @@ export default function Select({ name, label, onChange, onBlur, value, options, 
                         id={`search_${name}`}
                         type="text"
                         value={searchTerm}
-                        onChange={(e) => {setSearchTerm(e.target.value)}}
+                        onChange={(e) => {setSearchTerm(e.target.value); onSearchChange ? onSearchChange(e) : null }}
                         placeholder='Start typing to search...'
                         style={{ maxWidth: 200, padding: 4, marginBottom: 1}}
                     />
