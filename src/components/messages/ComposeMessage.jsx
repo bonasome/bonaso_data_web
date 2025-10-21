@@ -87,7 +87,6 @@ export default function ComposeMessage({ profiles=[], onUpdate, onCancel, admin=
             });
             const returnData = await response.json();
             if(response.ok){
-                console.log('here')
                 onUpdate(); //let the parent know the message was updated
                 onCancel(); //run onCancel to edit parent states
             }

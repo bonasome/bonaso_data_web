@@ -64,6 +64,10 @@ export default function AssessmentHistory({ respondent, meta }){
                 <div id={'previous-interactions'}>
                 <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries}>
                     <h2>Previous Interactions</h2>
+                    <p>
+                        Here you can find a history of assessments this person has completed. Click on the 
+                        card with the assessment you are interested in to view more information.
+                    </p>
                     {interactions.length === 0 && <p>No interactions yet. Be the first to create one!</p>}
                     {interactions.length > 0 && interactions.map((interaction) => (<InteractionCard key={interaction.id} interaction={interaction} onDelete={getInteractions} onUpdate={getInteractions}/>))}
                 </IndexViewWrapper>

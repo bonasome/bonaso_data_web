@@ -125,7 +125,7 @@ export default function Dashboard({ id, meta, breakdowns, onUpdate, onDelete }){
 
             {editing && <CreateDashboardModal existing={dashboard} onClose={() => setEditing(false)} onUpdate={(data) => {getData(); onUpdate(data)}} />}
             {adding && <ChartSettingsModal chart={null} onClose={() => setAdding(false)} onUpdate={getData} meta={meta} dashboard={dashboard} />}
-            {dashboard?.indicator_charts?.length === 0 && <p><i>No charts yet. Add one!</i></p>}
+            {dashboard?.indicator_charts?.length === 0 && <p><i>No charts yet. Add one by clicking the button above.</i></p>}
             {!editing && dashboard.indicator_charts.length > 0 && <div className={styles.charts}>
                 { dashboard.indicator_charts.map((ic) => (
                     <IndicatorChart chartData={ic} dashboard={dashboard} meta={meta} options={breakdowns} onUpdate={getData} onRemove={getData}/>

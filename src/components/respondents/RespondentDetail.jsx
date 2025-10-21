@@ -11,7 +11,6 @@ import fetchWithAuth from '../../../services/fetchWithAuth';
 import useWindowWidth from '../../../services/useWindowWidth';
 import { favorite, checkFavorited } from '../../../services/favorite';
 
-import Interactions from './interactions/Interactions'; 
 import Tasks from '../tasks/Tasks';
 import Loading from '../reuseables/loading/Loading';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
@@ -23,6 +22,7 @@ import UpdateRecord from '../reuseables/meta/UpdateRecord';
 import FlagModal from '../flags/FlagModal';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
 import ReturnLink from '../reuseables/ReturnLink';
+import AssessmentHistory from './assessments/AssessmentHistory';
 
 import errorStyles from '../../styles/errors.module.css';
 import styles from './respondentDetail.module.css'
@@ -32,7 +32,6 @@ import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
 import { IoIosStar, IoIosStarOutline, IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 import { MdFlag } from "react-icons/md";
-import AssessmentHistory from './assessments/AssessmentHistory';
 
 export default function RespondentDetail(){
     /*

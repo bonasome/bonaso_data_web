@@ -139,6 +139,7 @@ export default function UpdateBox(){
             const url = `/api/messages/alerts/`
             const response = await fetchWithAuth(url);
             const data = await response.json();
+            console.log(data)
             setAlerts(data.results);
         } 
         catch (err) {
@@ -169,7 +170,7 @@ export default function UpdateBox(){
     useEffect(() => {
         const initialLoad = async() => {
             getAnnouncements();
-            getMessages
+            getMessages();
             getAlerts();
         }
         initialLoad();

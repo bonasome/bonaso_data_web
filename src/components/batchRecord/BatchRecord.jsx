@@ -212,8 +212,15 @@ export default function BatchRecord(){
             {conflict && conflictList.length > 0 && <ConflictManagerModal conflicts={conflictList} onClose={()=>setConflict(false)} />}
             
             <div className={styles.template}>
-
-                <i>1. Select your organization and the project to get a ready-to-use template for recording data. There are directions and examples in the template for your reference.</i>
+                <p>
+                    Use this page to get Excel templates for an assessment. After filling out the template,
+                    you can then upload that template right here as well and the data will appear in our system.
+                    Easy as that.
+                </p>
+            </div>
+            <div className={styles.template}>
+                <p><i>1. Select your organization and the project to get a ready-to-use template for recording data. There are directions and examples in the template for your reference.</i></p>
+                <p><strong>Please make sure you review the "tutorial" worksheet before collecting data!</strong></p>
                     <ModelSelect name={'organization'} IndexComponent={OrganizationsIndex} value={org} callbackText={'Choose Organization'}
                          onChange={setOrg} label={'Select an Organization'} labelField={'name'} />
 
@@ -226,7 +233,9 @@ export default function BatchRecord(){
             </div>
             
             <div className={styles.upload}>
-                <i>2. Upload your completed file. If there are any issues, you will be informed and can try to upload again. </i>
+                <p><i>2. Upload your completed file. If there are any issues, you will be informed and can try to upload again. </i></p>
+                <p><strong>Please make sure you are only uploading templates that you got from this site!</strong></p>
+                <p><strong>Also, please check for any error messages you receive after uploading. They may have important information about things you need to correct before your data is uploaded.</strong></p>
                 <form onSubmit={handleSubmit}  noValidate={true}>
                     <div style={{ display: 'flex', flexDirection: 'row'}}>
                         <label htmlFor="upload_file">Select a file</label>

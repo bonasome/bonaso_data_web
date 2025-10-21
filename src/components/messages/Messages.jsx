@@ -175,8 +175,8 @@ export default function MyMessages(){
                     <button onClick={(e) => {setComposing(false)}}>Cancel</button>
                 </div>}
                 {composing && sendTo.length > 0 && <h2>Starting a new conversation with {sendTo.map((r) => (r.display_name)).join(', ')}</h2>}
-                {composing && <ComposeMessage profiles={sendTo} onSave={getMsgs} onCancel={() => setComposing(false)}/>}
-                {toAdmin && <ComposeMessage profiles={[]} admin={true} onSave={getMsgs} onCancel={() => {setToAdmin(false)}} />}
+                {composing && <ComposeMessage profiles={sendTo} onUpdate={getMsgs} onCancel={() => setComposing(false)}/>}
+                {toAdmin && <ComposeMessage profiles={[]} admin={true} onUpdate={getMsgs} onCancel={() => {setToAdmin(false)}} />}
                 
                 {/* if a message is selected, display the message card */}
                 {!composing && !toAdmin && activeThread && <MessageCard message={activeThread} onUpdate={getMsgs} />}

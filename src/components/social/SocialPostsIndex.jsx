@@ -15,9 +15,9 @@ import Loading from '../reuseables/loading/Loading';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import Filter from '../reuseables/Filter';
 import ButtonHover from '../reuseables/inputs/ButtonHover';
+import Messages from '../reuseables/Messages';
 
-import styles from '../../styles/indexView.module.css'
-import errorStyles from '../../styles/errors.module.css';
+import styles from '../../styles/indexView.module.css';
 
 import { MdOutlinePostAdd } from "react-icons/md";
 import { ImPencil } from 'react-icons/im';
@@ -122,15 +122,12 @@ export default function SocialPostsIndex({ callback=null, callbackText='Add Post
     return(
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Posts' : 'My Posts'}</h1> 
+            <p>Here you can view a list of all social media posts your network has recorded in this site.</p>
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={
                 <Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} 
                 config={filterConfig(socialPostsMeta)} initial={initial} 
             /> }>
-                {errors.length != 0 && <div className={errorStyles.errors} ref={alertRef}>
-                    <ul>{errors.map((msg)=>
-                        <li key={msg}>{msg}</li>)}
-                    </ul>
-                </div>}
+                <Messages errors={errors} ref={alertRef} />
                 {['meofficer', 'manager', 'admin'].includes(user.role) && 
                     <Link to='/social/new'><button><MdOutlinePostAdd /> Record a New Post</button></Link>} 
                 {socialPosts?.length === 0 ? 

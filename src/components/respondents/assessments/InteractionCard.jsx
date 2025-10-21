@@ -193,7 +193,6 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                 <h2>{interaction.task.display_name}</h2>
                 <p>On: {prettyDates(interaction.interaction_date)}</p>
                 <p>At: {interaction.interaction_location}</p>
-                <UpdateRecord created_by={interaction.created_by} created_at={interaction.created_at} updated_by={interaction.updated_by} updated_at={interaction.updated_at} />
             </div>
 
 
@@ -233,6 +232,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                         </div>
                         <p><strong>Comments</strong></p>
                         {interaction?.comments ? <p>{interaction.comments}</p> : <p><i>No comments.</i></p>}
+                        
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'row'}}>

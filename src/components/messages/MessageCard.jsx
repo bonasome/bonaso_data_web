@@ -66,6 +66,7 @@ export default function MessageCard({ message, onUpdate, reply=false, parent=nul
                     method: 'PATCH',
                 });
                 const returnData = await response.json();
+                console.log(returnData)
                 if(response.ok){
                     onUpdate(); //run onUpdate
                     setRead(true); //set read to true so this isn't run again

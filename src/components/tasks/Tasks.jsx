@@ -313,14 +313,12 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
     return (
         <div className={styles.tasks} id={'tasks'}>
             <Messages errors={errors} success={success} ref={alertRef} />
-            
-            <p><i>Search your tasks by name, organization, or project.</i></p>
-            
+            {supportFilter && <div>
+                <Select options={projects.map(p => ({value: p.id, label: p.name}))} onChange={(v) => setFilters(prev => ({...prev, project: v}))} value={filters.project} search={true} label='Select a Project...' onSearchChange={(v) => setProjectSearch(v)} />
+                <Select options={orgs.map(o => ({value: o.id, label: o.name}))} onChange={(v) => setFilters(prev => ({...prev, organization: v}))} value={filters.organization} search={true} label='Select an Organization...' onSearchChange={(v) => setOrgSearch(v)} />
+            </div>}
+            <p><i>Search by indicator name...</i></p>
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} >
-                {supportFilter && <div>
-                    <Select options={projects.map(p => ({value: p.id, label: p.name}))} onChange={(v) => setFilters(prev => ({...prev, project: v}))} value={filters.project} search={true} label='Select a Project' onSearchChange={(v) => setProjectSearch(v)} />
-                    <Select options={orgs.map(o => ({value: o.id, label: o.name}))} onChange={(v) => setFilters(prev => ({...prev, organization: v}))} value={filters.organization} search={true} label='Select an Organization' onSearchChange={(v) => setOrgSearch(v)} />
-                </div>}
                 {filteredTasks?.length > 0 ? filteredTasks.map((task) => (
                     <TaskCard task={task} key={task.id} tasks={tasks} 
                         isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} 

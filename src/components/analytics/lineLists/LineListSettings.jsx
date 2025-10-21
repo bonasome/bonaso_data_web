@@ -81,7 +81,7 @@ export default function LineListSettings({ onClose, onUpdate, existing=null }){
             name: existing?.name ?? '',
             start: existing?.start ?? '',
             end: existing?.end ?? '',
-            assessment_id: existing?.indicator ?? '',
+            assessment_id: existing?.assessment ?? '',
             project_id: existing?.project ?? null,
             organization_id: existing?.organization ?? null,
             cascade_organization: existing?.cascade_organization ?? false
@@ -123,9 +123,7 @@ export default function LineListSettings({ onClose, onUpdate, existing=null }){
     const scope = [
         { name: 'start', label: "Start", type: "date"},
         { name: 'end', label: "End", type: "date"},
-        { name: 'assessment_id', label: "Assessment", type: "model", IndexComponent: AssessmentsIndex, labelField: 'display_name',
-            includeParams: [{field:'indicator_type', value: 'respondent'}]
-        },
+        { name: 'assessment_id', label: "Assessment", type: "model", IndexComponent: AssessmentsIndex, labelField: 'display_name'},
         { name: 'project_id', label: 'Scope Data to Project', type: 'model', IndexComponent: ProjectsIndex, labelField: 'name' },
         { name: 'organization_id', label: 'Scope Data to Organization', type: 'model', IndexComponent: OrganizationsIndex, 
             labelField: 'name', includeParams: projectSel ? [{field: 'project', value: projectSel?.id ?? []}] : [] 

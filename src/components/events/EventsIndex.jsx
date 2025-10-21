@@ -199,6 +199,12 @@ export default function EventsIndex({ callback=null, callbackText='Select Event'
         <div className={styles.index}>
             <h1>{user.role == 'admin' ? 'All Events' : 'My Events'}</h1> 
             <Messages errors={errors} />
+            <p>
+                Here you can view a list of all events in our system. An event is any activity that is 
+                linked to an indicator in some way. It could be an activity where you reach out to people
+                in the community (like a World AIDS Day event), but it could also be training of subgrantees
+                or a capacity building workshop. 
+            </p>
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter 
                 onFilterChange={setFilters} config={filterConfig(eventsMeta, orgs, (s) => setOrgSearch(s))} initial={initial}  
             />}>

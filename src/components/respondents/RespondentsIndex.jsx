@@ -43,7 +43,6 @@ function RespondentCard({ respondent, meta }) {
             {expanded && <div>
                     <h4>{respondent.village}, {getLabelFromValue('districts', respondent.district)}</h4>
                     <p>{getLabelFromValue('age_ranges', respondent?.age_range)}, {getLabelFromValue('sexs', respondent.sex)}</p>
-                    <p>{respondent.comments ? respondent.comments : 'No Comments'}</p>
                     <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <Link to={`/respondents/${respondent.id}`}> <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} /></Link>
                     <Link to={`/respondents/${respondent.id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
@@ -134,6 +133,13 @@ export default function RespondentsIndex(){
     return(
         <div className={styles.index}>
             <h1>Respondents</h1> 
+            <p>
+                Here you can find a list of ever person in our system. Use the search bar to search a 
+                person by name, ID/Passport Number, or even village. Click on the green space around a person's name
+                to view more information about them. Click on the person's name (or name 
+                placeholder if they are anonymous) to go to their page. Here you can view more information
+                about them or start an assessment with them. 
+            </p>
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
                 filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} 
                 initial={initial} config={filterConfig(respondentsMeta)} 

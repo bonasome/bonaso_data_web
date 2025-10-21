@@ -259,9 +259,8 @@ export default function EventForm(){
         ]
     const participants = [
         {name: 'organization_ids', label: 'Participating Organizations', type: 'multimodel', IndexComponent: OrganizationsIndex,
-            labelField: 'name', tooltip: `Did any of your subgrantees attend this event? You can also include any 
-            subgrantees you may have trained. NOTE: If you assign a participant and also assign a task for this organization,
-            they will be allowed to edit counts for that task.`
+            labelField: 'name', tooltip: `Did any of your subgrantees attend this event? You can include any 
+            subgrantees you may have trained. `
          },
     ]
     const tasks = [
