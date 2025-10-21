@@ -12,9 +12,12 @@ import Filter from '../reuseables/Filter';
 import Messages from '../reuseables/Messages';
 
 import styles from './tasks.module.css';
+import modalStyles from '../../styles/modals.module.css';
 
 import { FaTrashAlt } from "react-icons/fa";
 import Select from "../reuseables/inputs/Select";
+import theme from "../../../theme/theme";
+import AssessmentIndicatorsModal from "../indicators/assessment/AssessmentIndicatorsModal";
 
 //card that holds task details
 function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, onDelete=null, callback=null, forAssessment=false }) {
@@ -32,7 +35,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
     const [expanded, setExpanded] = useState(false);
-
+    const [viewingAssessment, setViewingAssessment] = useState(false);
     //(for interactions) if this card should be draggable, mark it as such
     const handleDragStart = (e) => {
         e.dataTransfer.setData('application/json', JSON.stringify(task));
@@ -91,6 +94,13 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
         }
     }
 
+     //helper function that converts db values to labels
+    const getLabelFromValue = (field, value) => {
+        if(!meta) return null
+        const match = meta[field]?.find(range => range.value === value);
+        return match ? match.label : null;
+    };
+
     //return delete seperately, since the card hover messes with the modal
     if(del){
         return(
@@ -106,7 +116,11 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
         )
 
     }
-
+    if(viewingAssessment){
+        return(
+            <AssessmentIndicatorsModal assessment={task?.assessment} meta={meta} onClose={() => setViewingAssessment(false)} />
+        )
+    }
     return (
         <div className={styles.card} onClick={() => setExpanded(!expanded)} 
             draggable={isDraggable} onDragStart={isDraggable ? handleDragStart : undefined}
@@ -120,7 +134,13 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
             {expanded && (
                 <div>
                     {/* Display additional information about this tasks indicator for the user to reference */}
+                    {task?.assessment && <p><i>{task?.assessment?.indicators?.length} questions.</i></p>}
                     <p><strong>{typeLabel} Description:</strong> {task[type].description ? task[type].description : 'No description.'}</p>
+                    {task?.indicator && <p><i>{getLabelFromValue('category', task?.indicator?.category)}</i></p>}
+                    {task?.assessment && <div>
+                        <button onClick={() => setViewingAssessment(true)}>View Indicators in Assessment</button>
+                        
+                    </div>}
                     {canDelete && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Remove Task'} forDelete={true} />}
                 </div>
             )}

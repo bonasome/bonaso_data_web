@@ -97,7 +97,8 @@ export default function IndicatorDetail(){
             if(!indicator) return;
             try {
                 console.log('fetching projects...');
-                const response = await fetchWithAuth(`/api/manage/projects/?indicator=${indicator.id}`);
+                const url = indicator.category == 'assessment' ? `/api/manage/projects/?assessment=${indicator.assessment.id}` : `/api/manage/projects/?indicator=${indicator.id}`
+                const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setProjects(data.results);
             } 
@@ -115,7 +116,8 @@ export default function IndicatorDetail(){
             if(!indicator) return;
             try {
                 console.log('fetching organizations...');
-                const response = await fetchWithAuth(`/api/manage/tasks/?indicator=${indicator.id}`);
+                const url = indicator.category == 'assessment' ? `/api/manage/tasks/?assessment=${indicator.assessment.id}` : `/api/manage/tasks/?indicator=${indicator.id}`
+                const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setTasks(data.results);
             } 
@@ -129,6 +131,7 @@ export default function IndicatorDetail(){
 
     //function to delete indicator
     const deleteIndicator = async() => {
+        if(indicator.category == 'assessment') return;
         try {
             console.log('deleting indicator...');
             const response = await fetchWithAuth(`/api/indicators/manage/${id}/`, {
@@ -187,15 +190,14 @@ export default function IndicatorDetail(){
                 <h1>{indicator?.display_name}</h1>
                 <Messages errors={errors} />
                 
-                <p>{indicator?.description ? indicator.description : 'No description yet.'}</p>
-
-                <p><i>
-                    {getLabelFromValue('category',indicator?.category)}
-                </i></p>
+                {indicator?.description ? <p><strong>Description:</strong><i> {indicator.description}</i></p> : <p><i>No Description</i></p>}
+                
+                {indicator?.category == 'assessment' ? <Link to={`/indicators/assessments/${indicator?.assessment?.id}`}><h4>In assessment {indicator.assessment.name}</h4></Link> : 
+                    <p><strong>Category:</strong> {getLabelFromValue('category',indicator?.category)}</p>}
                 
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <Link to={`/indicators/${id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
-                    {!del && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt /> } hover={'Delete Indicator'} forDelete={true} />}
+                    <Link to={indicator?.category == 'assessment' ? `/indicators/assessments/${indicator?.assessment?.id}` : `/indicators/${id}/edit`}><ButtonHover noHover={<ImPencil />} hover={'Edit Details'} /></Link>
+                    {!del && indicator?.category != 'assessment' && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt /> } hover={'Delete Indicator'} forDelete={true} />}
                 </div>
                 <UpdateRecord created_by={indicator?.created_by} updated_by={indicator?.updated_by}
                     created_at={indicator?.created_at} updated_at={indicator?.updated_at} /> 

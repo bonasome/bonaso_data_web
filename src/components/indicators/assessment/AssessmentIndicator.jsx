@@ -220,11 +220,13 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
+            description: existing?.description ?? '',
             required: existing?.required ?? true,
             type: existing?.type ?? 'text',
             match_options_id: existing?.match_options ?? null,
             options_data: existing?.options ?? [{name: ''}],
             allow_none: existing?.allow_none ?? false,
+            allow_aggregate: existing?.allow_aggregate ?? false,
             include_logic: existing?.logic?.conditions?.length > 0 ?? false,
             logic_data: {
                 group_operator: existing?.logic?.group_operator ?? "AND",
@@ -263,28 +265,44 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     const usingMatched = useWatch({ control, name: 'match_options_id', defaultValue: false });
     const usingLogic= useWatch({ control, name: 'include_logic', defaultValue: false });
     const basics = [
-        { name: 'name', label: 'Name (Required)', type: "textarea", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
-            placeholder: "Give this deadline a short snappy name so that people know what's due...",
+        { name: 'name', label: 'Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
+            placeholder: "Write a simple name that tells people what they are supposed to collect...",
+            tooltip: `This name will be displayed to data collectors, so make sure it is clear what data they 
+            are supposed to collect or what they are supposed to ask the patient.`
         },
         { name: 'required', label: "Required", type: "checkbox",
-            placeholder: "Any additional information that will help people understand this deadline..."
+            tooltip: 'Only select this if every single patient/respondent should answer this question.'
         },
-        { name: 'type', label: "Type", type: "radio", options: meta?.type, rules: { required: "Required" }}, 
+        { name: 'type', label: "Type", type: "radio", options: meta?.type, rules: { required: "Required" },
+            tooltip: `Open Answer: Allow any text as an answer. \nNumber: Allow any number. \nSingle Select: User selects one option
+            from a predefined list. \nMultiselect: User selects as many options as apply from a predefined list.
+            \nYes/No: Allow a yes or a no. \nNumbers by Category: Define a list of options, with each option taking a number.`
+        }, 
+        { name: 'description', label: 'Description', type: 'textarea', 
+            placeholder: 'Any information that might help people understand what data this is collecting',
+            tooltip: 'This will be displayed as a tooltip when data collectors are filling out this assessment.'
+        }
     ]
     const allowAggies = [
         { name: 'allow_aggregate', label: 'Allow for Aggregates Reporting', type: "checkbox",
+            tooltip: 'Also allow users to enter data for this indicator in aggregated tables.'
         },
     ]
     const match = [
         { name: 'match_options_id', label: "Match Options", type: "select",
-            options: assessment.indicators.filter(ind => (ind.type == 'multi')).map((ind) => ({value: ind.id, label: ind.name}))
+            options: assessment.indicators.filter(ind => (ind.type == 'multi')).map((ind) => ({value: ind.id, label: ind.name})),
+            tooltip: `This indicator will have the same options as the indicator selected here, and will automatically limit
+            what options a person can select for this indicator based on what was options were selected for the other indicator.`
         },
     ]
     const noneOption = [
-        { name: 'allow_none', label: 'Add "None" option', type: "checkbox" },
+        { name: 'allow_none', label: 'Add "None" option', type: "checkbox",
+            tooltip: `Allow users to select "None of the above".`
+         },
     ]
     const logic = [
         { name: 'include_logic', label: "Add logic", type: "checkbox",
+            tooltip: 'Only show this indicator depending on responses to previous indicators or collected patient information.'
         },
     ]
 
@@ -319,6 +337,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                             <i>{getLabelFromValue('type', existing?.type)}</i>
                             </div>
                             {expanded && <div style={{ paddingTop: '1vh'}}>
+                                {existing?.description ? <p>Description: {existing.description}</p> : <p><i>No description</i></p>}
                                 {existing?.options?.length > 0 && <div>
                                     <ul>
                                         {existing.options.map((o) => (<li>{o.name}</li>))}
@@ -370,7 +389,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                 <FormProvider {...methods}>
                     <form onSubmit={handleSubmit(onSubmit, onError)}>
                         <FormSection fields={basics} control={control}/>
-                        {['single', 'multi', 'integer', 'boolean'].includes(type) && 
+                        {['single', 'multi', 'multint', 'integer', 'boolean'].includes(type) && 
                              <FormSection fields={allowAggies} control={control} header='Aggregates'/>}
                         {type=='multi' && assessment.indicators.filter((i => (i.order < order && i.type == 'multi'))).length > 0 && 
                             <FormSection fields={match} control={control} header='Match Options'/>}

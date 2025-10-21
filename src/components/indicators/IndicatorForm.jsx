@@ -203,7 +203,7 @@ export default function IndicatorForm(){
     const basicInfo = [
         { name: "name", label: "Indicator Name (Required)", type: "text", rules: { required: "Required", 
                 maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
-            tooltip: 'HINT: This name will be seen by community health workers, so make sure its readable/understandable.',
+            tooltip: 'Give this indicator a short name that will allow anyone on the site to easily identify what data it tracks.',
             placeholder: 'Tested for HIV, Received Treatement for STIs...'    
         },
         { name: "description", label: "Indicator Description", type: "textarea", 
@@ -211,12 +211,13 @@ export default function IndicatorForm(){
             or what its objectives are.`
          },
          { name: "category", label: "Indicator Type (Required)", type: "radio", options: indicatorsMeta?.category.filter(c => (c.value != 'assessment')),
-             rules: { required: "Required" }, tooltip: `The type determines what kind of data this indicator 
-                is meant to collect. Trying to track social posts? Check social. 
-                Tracking individual interactions with respondents? Select respondent.` },
+             rules: { required: "Required" }, tooltip: `This will determine what type of data this indicator collects.
+             "social media" indicators will be linked to social posts, "number of events" will be linked to events, "organizations capacitated"
+             will be linked to participating organizations at events, and "other" can be collected using an aggregate.` },
     ]
     const allowAggies = [
         { name: 'allow_aggregate', label: 'Allow for Aggregates Reporting', type: "checkbox",
+            tooltip: 'Do you want to allow people to collect data about this indicator in aggregate format?'
         },
     ]
 
@@ -227,6 +228,11 @@ export default function IndicatorForm(){
         <div className={styles.form}>
             <ReturnLink url={id ? `/indicators/${id}` : '/indicators'} display={id ? 'Return to detail page' : 'Return to indicators overview'} />
             <h1>{id ? `Editing ${existing?.display_name}` : 'New Indicator' }</h1>
+            <p>
+                Fill in the fields below to create a new standalone indicator from a template. These types of
+                indicators are meant to track things like social media posts, events, or one-off metrics.
+            </p>
+            <p>If you want this indicator to record data about and be linked to specific people, create an assessment instead.</p>
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             
             <form onSubmit={handleSubmit(onSubmit, onError)}>

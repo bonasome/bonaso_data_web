@@ -117,8 +117,8 @@ export default function AssessmentDetailsModal({ onCancel, onUpdate=null, existi
         { name: 'name', label: 'Name (Required)', type: "text", rules: { required: "Required", 
                 maxLength: { value: 255, message: 'Maximum length is 255 characters.'}, 
             }, 
-            tooltip: `This will appear in project pages, so make sure it's short and readable.`,
-            placeholder: 'NAHPA...',
+            tooltip: `You don't need to include "assessment", we'll handle that.`,
+            placeholder: 'HIV Testing, Condom Distribution...',
         },
         { name: 'description', label: "Assessment Description", type: "textarea", 
             placeholder: 'Any additional information you may want to note...'

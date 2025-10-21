@@ -11,11 +11,13 @@ import { useIndicators } from "../../../contexts/IndicatorsContext";
 import Loading from "../../reuseables/loading/Loading";
 import FormSection from "../../reuseables/forms/FormSection";
 import ResponseField from "./ResponseField";
-
 import ButtonLoading from "../../reuseables/loading/ButtonLoading";
+import Messages from "../../reuseables/Messages";
+import AssessmentIndicatorsModal from "../../indicators/assessment/AssessmentIndicatorsModal";
+
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
-import Messages from "../../reuseables/Messages";
+
 
 import styles from '../../../styles/form.module.css';
 
@@ -29,6 +31,8 @@ export default function AssessmentForm(){
     const [assessment, setAssessment] = useState(null);
     const [respondent, setRespondent] = useState(null);
     const [existing, setExisting] = useState(null);
+    const [viewingAssessment, setViewingAssessment] = useState(false);
+    const [meta, setMeta] = useState(null);
 
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -42,6 +46,25 @@ export default function AssessmentForm(){
         alertRef.current.focus({ preventScroll: true });
         }
     }, [submissionErrors]);
+
+    //fetch the model meta
+    useEffect(() => {
+        const getMeta = async () => {
+            try {
+                console.log('fetching meta...');
+                //run the filters
+                const url = `/api/indicators/manage/meta/`;
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setMeta(data)
+            } 
+            catch (err) {
+                console.error('Failed to get meta:', err);
+                setSubmissionErrors(['Something went wrong. Please try again later.'])
+            }
+        };
+        getMeta();
+    }, []);
 
     useEffect(() => {
         const getAssessmentDetail = async () => {
@@ -201,12 +224,6 @@ export default function AssessmentForm(){
         }
     }, [assessment, existing, reset]);
 
-    
-
-
-    const date = watch("interaction_date");
-    const loc = watch("interaction_location");
-
     const responseInfo = useWatch({ control, name: "response_data" });
     
     const visibilityMap = useMemo(() => {
@@ -292,14 +309,14 @@ export default function AssessmentForm(){
 
     const basics = [
         { name: 'interaction_date', label: 'Date of Interaction', type: "date", rules: { required: "Required", },
-            tooltip: 'Give it a memorable name.',
+            tooltip: 'What date did this interaction occur at?',
         },
         { name: 'interaction_location', label: "Location of Interaction", type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
-                placeholder: 'A brief overview, the purpose, objectives, anything...'
+                placeholder: 'Gaborone Clinic, Plot No. 253, Francistown...', tooltip: 'Where did this interaction take place at?'
         },
     ]
     const comments = [
-        { name: 'comments', label: 'Comments/Notes', type: 'textarea', placeholder: 'Any additional notes that may be helpful to remember' }
+        { name: 'comments', label: 'Comments/Notes', type: 'textarea', placeholder: 'Any additional notes that may be helpful to remember...' }
     ]
 
 
@@ -307,9 +324,10 @@ export default function AssessmentForm(){
     if(loading || !respondent || !assessment) return <Loading />
     return(
         <div className={styles.form}>
+            {viewingAssessment && <AssessmentIndicatorsModal assessment={assessment} meta={meta} onClose={() => setViewingAssessment(false)} />}
             <h1>{assessment.name} Assessment for {respondent.display_name}</h1>
             <Messages errors={submissionErrors} ref={alertRef} />
-
+            <button onClick={() => setViewingAssessment(true)}>Click Here to View Complete List of Questions</button>
             {visibleInds?.length > 0 && <FormProvider {...methods} >
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection control={control} fields={basics} header={'Date & Location'} />

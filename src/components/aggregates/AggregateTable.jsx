@@ -147,6 +147,8 @@ export default function AggregateTable({ id, meta, onDelete }){
             </div>
             <Messages errors={errors} />
             <div style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, padding: '4vh', margin: '2vh' }}>
+            <h3>Aggregated Data</h3>
+            {count.comments && count.comments != '' && <p><strong>Comments: </strong><i>{count.comments}</i></p>}
             {count?.counts?.length == 1 && <div>
                 <h1>{count.counts[0]?.value}</h1>
                 <i>Total Number</i>
@@ -227,12 +229,11 @@ export default function AggregateTable({ id, meta, onDelete }){
                     {/* If no rows exist, render a placeholder */}
                     {rowTree.length === 0 && (
                     <tr>
-                        <td className="border p-2" colSpan={(dims.rowDims.length || 1) + (colKeys.length || 1)}>No data</td>
+                        <td colSpan={(dims.rowDims.length || 1) + (colKeys.length || 1)}>No data</td>
                     </tr>
                     )}
                 </tbody>
             </table>}
-
             <div style={{ display: 'flex', flexDirection: 'row'}}> 
                 <Link to={`/aggregates/${id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Counts'} /></Link>
                 <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Count'} forDelete={true} />

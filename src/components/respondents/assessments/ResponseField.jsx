@@ -52,6 +52,9 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
         };
         fieldConfig.label = `${indicator.order + 1}. ${indicator.name}*`
     }
+    if(indicator.description && indicator.description != ''){
+        fieldConfig.tooltip = indicator.description;
+    }
     
     if(!shouldShow) return <></>
     return(
@@ -63,7 +66,8 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
                 </div>
             </div>
             {expanded && <div>
-                <Field control={control} field={{ name: `response_data.${indicator.id}.date`, label: 'Date', type: "date" }} />
+                <p><i>You only need to record date/location information here if it differs from the Date of Interaction/Location of Interaction you entered above.</i></p>
+                <Field control={control} field={{ name: `response_data.${indicator.id}.date`, label: 'Date', type: "date", }} />
                 <Field control={control} field={{ name: `response_data.${indicator.id}.location`, label: 'Response Location', type: "text" }} />
             </div>}
         </div>

@@ -84,6 +84,7 @@ export default function AggregateBuilder() {
         project_id: existing?.project ?? null,
         start: existing?.start ?? '',
         end: existing?.end ?? '',
+        comments: existing?.comments ?? '',
         breakdowns: existing?.counts?.length > 0 ? getDynamicKeys(existing?.counts[0]) : [],
         counts_data: []
     }), [existing]);
@@ -176,6 +177,7 @@ export default function AggregateBuilder() {
             indicator_id: data.indicator_id.id,
             start: data.start,
             end: data.end,
+            comments: data.comments,
             counts_data: (data.counts_data || []).map(c => {
                 let count = {};
                 if(c.key == 'index') return {value: c.value};
@@ -192,7 +194,6 @@ export default function AggregateBuilder() {
                 return count;
             })
         };
-        console.log(payload)
         const action = e.nativeEvent.submitter.value;
         try {
             setSaving(true);
@@ -257,8 +258,12 @@ export default function AggregateBuilder() {
     const proj = watch('project_id');
     const org = watch('organization_id')
     const basics = [
-        { name: 'start', label: 'Start', type: 'date', rules: { required: 'Required' } },
-        { name: 'end', label: 'End', type: 'date', rules: { required: 'Required' } },
+        { name: 'start', label: 'Start', type: 'date', rules: { required: 'Required' },
+            tooltip: `Start of the reporting period.`
+        },
+        { name: 'end', label: 'End', type: 'date', rules: { required: 'Required' },
+            tooltip: `End of the reporting period.`
+        },
         { name: 'project_id', label: 'Project', type: 'model', IndexComponent: ProjectsIndex, rules: { required: 'Required' } },
     ];
     const orgSelect = [
@@ -275,9 +280,12 @@ export default function AggregateBuilder() {
             type: 'multiselect',
             options: meta ? Object.keys(meta).map(k => ({ value: k, label: cleanLabels(k) })) : [],
             warnings: countsData.filter(c => (!['', '0', 0].includes(c.value))).length > 0 ? ['Selecting a new breakdown while you already have data will erase any data you have recorded!'] : [],
+            tooltip: `Select what fields to disaggregate this data by. WARNING: Selecting too many fields may impact performance.`
         }
     ];
-
+    const comments = [
+        { name: 'comments', label: 'Comments/Notes', type: 'textarea', placeholder: 'Any additional notes that may be helpful to remember...' }
+    ]
     if (loading) return <Loading />
     return (
         <div className={styles.form}>
@@ -294,7 +302,11 @@ export default function AggregateBuilder() {
             {selectedIndicator && (
             <div className={styles.formSection}>
                 <h3 className="font-medium mb-2">Data entry</h3>
-
+                <p>
+                    Each row indicates a group of people based on the breakdowns you selected above.
+                    Enter the number of people reached with this indicator who fall into this breakdown
+                    category in the "value" column.
+                </p>
                 {fields.length === 0 && <div>No rows. Select dimensions and ensure indicator is selected.</div>}
                 {fields.length === 1 &&<div>
                     <table>
@@ -347,6 +359,7 @@ export default function AggregateBuilder() {
                 </div>}
             </div>
             )}
+            <FormSection fields={comments} control={control} />
 
             {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                 <button type="submit" value='normal'><IoIosSave /> Save</button>

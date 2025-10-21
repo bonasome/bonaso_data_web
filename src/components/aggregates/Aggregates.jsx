@@ -106,6 +106,16 @@ export default function Aggregates() {
                         <MdOutlinePivotTableChart style={{ fontSize: '150px', margin: 30, opacity: '75%' }} />
                     </div>
                     <h1>Select or create a an aggregate to begin.</h1>
+                    <p>
+                        Aggregates allow you to record data in a tabular form, without having to 
+                        enter individual names. Please note that we strongly recommend always recording data
+                        via the "respondents" tool. Only use this tool if you do not have access to 
+                        respondent's demographic information. 
+                    </p>
+                    <p>
+                        <strong>Please also make sure that you do not record
+                        data here that you have recorded elsewhere in the site.</strong>
+                    </p>
                 </div>}
             </div>
 
