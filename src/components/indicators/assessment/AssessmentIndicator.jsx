@@ -142,9 +142,8 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         let submitErrors = []
         data.assessment_id = assessment.id; //set the related project based on the URL param
         //wipe any option related data if the type does not allow for custom options (to clear stale states)
-        if(!['multi', 'single'].includes(data.type)){
+        if(!['multi', 'single', 'multint'].includes(data.type)){
             data.options_data = [];
-            data.match_options_id = null;
         }
         //wipe match_options data if the data type isn't multi (indicating a stale state)
         if(data.type != 'multi') data.match_options_id = null;
@@ -375,10 +374,10 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                              <FormSection fields={allowAggies} control={control} header='Aggregates'/>}
                         {type=='multi' && assessment.indicators.filter((i => (i.order < order && i.type == 'multi'))).length > 0 && 
                             <FormSection fields={match} control={control} header='Match Options'/>}
-                        {(type=='single' || type=='multi') && !usingMatched && 
+                        {['single', 'multi', 'multint'].includes(type) && !usingMatched && 
                             <OptionsBuilder />
                         }
-                        {(type=='single' || type=='multi') && <FormSection control={control} fields={noneOption} header={'Add None Option?'} />}
+                        {['single', 'multi'].includes(type) && <FormSection control={control} fields={noneOption} header={'Add None Option?'} />}
                         <FormSection fields={logic} control={control} header='Logic'/>
                         {usingLogic && <LogicBuilder control={control} meta={meta} order={existing?.order ?? assessment.indicators.length} assessment={assessment} />}
                         {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>

@@ -226,8 +226,7 @@ export default function AssessmentForm(){
         });
         return map;
     }, [responseInfo]);
-    console.log(assessment)
-    console.log(responseInfo, visibilityMap)
+
     useEffect(() => {
         if (!assessment || !respondent) return;
         assessment.indicators.forEach(ind => {
@@ -250,7 +249,7 @@ export default function AssessmentForm(){
                 map[ind.id] = [{value: true, label: 'Yes'}, {value: false, label: 'No'}];
                 return;
             }
-            else if(!['single', 'multi'].includes(ind.type)){
+            else if(!['single', 'multi', 'multint'].includes(ind.type)){
                 map[ind.id] = [] //keep each value in map as an array to avoid issues down the line
                 return;
             }
@@ -264,7 +263,7 @@ export default function AssessmentForm(){
         })
         return map
     }, [assessment, responseInfo]);
-        
+
     useEffect(() => {
         if(!assessment || !optionsMap) return;
         assessment.indicators.forEach((ind) => {

@@ -62,7 +62,7 @@ export default function LogicBuilder({ order, meta, assessment }) {
                             {condition?.source_type === "assessment" && (
                                 <Field control={control} field={{ name: `logic_data.conditions.${index}.source_indicator`, 
                                     label: 'Show when...', type: "select", rules: { required: "Required"},
-                                    options: assessment.indicators.filter((si) => si.order < order)
+                                    options: assessment.indicators.filter((si) => (si.order < order && si.type != 'multint'))
                                         .map((si) => ({value: si.id, label: si.name})), 
                                     label: 'This indicator...'}}
                                 />

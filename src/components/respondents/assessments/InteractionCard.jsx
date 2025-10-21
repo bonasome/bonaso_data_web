@@ -92,6 +92,19 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                     seen.add(r.indicator.id);
                 }
             } 
+            else if(r.indicator.type == 'multint'){
+                if(existing){
+                    existing.response_value.push(`${r.response_option.name} - ${[null, ''].includes(r.response_value) ? '0' : r.response_value}`)
+                }
+                else {
+                    // First occurrence — initialize as array
+                    consolidated.push({
+                        ...r,
+                        response_value: [`${r.response_option.name} - ${[null, ''].includes(r.response_value) ? '0' : r.response_value}`]
+                    });
+                    seen.add(r.indicator.id);
+                }
+            }
             else {
                 if (existing) {
                     console.warn('POSSIBLY SUSPECT RESPONSE DATA!');
@@ -147,7 +160,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             setDel(false)
         }
     }
-    console.log(interaction);
+    console.log(cleanedResponses);
     if(!interaction.task) return <ComponentLoading />
     //return this separetly if needed since the otherwise the hover features will mess with the modeal styles
     if(del){
@@ -191,13 +204,18 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                         <div style={{ padding: '2vh', backgroundColor: theme.colors.bonasoDarkAccent }}>
                             {cleanedResponses.sort((a, b) => (a.indicator.order - b.indicator.order)).map(r => {
                                 const rDate = r.response_date != interaction.interaction_date ? `(${prettyDates(r.response_date)})` : '';
-                                console.log(r.response_location, interaction.interaction_location)
                                 const rLoc = r.response_location != interaction.interaction_location ? `(${r.response_location})` : '';
                                 const app = rDate + ' ' + rLoc;
                                 if(r.indicator.type == 'multi'){
                                     return(<div>
                                         <h4>{r.indicator.order + 1}. {r.indicator.name}</h4>
-                                        <ul>{r.response_option.map((o) => (<li>"{o.name}" {app}</li>))}</ul>
+                                        <ul>{r.response_option.map((o) => (<li>{o.name} {app}</li>))}</ul>
+                                    </div>)
+                                }
+                                 if(r.indicator.type == 'multint'){
+                                    return(<div>
+                                        <h4>{r.indicator.order + 1}. {r.indicator.name}</h4>
+                                        <ul>{r.response_value.map((v) => (<li>{v} {app}</li>))}</ul>
                                     </div>)
                                 }
                                 else{

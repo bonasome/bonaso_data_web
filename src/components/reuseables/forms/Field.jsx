@@ -9,7 +9,7 @@ import ModelMultiSelect from '../inputs/ModelMultiSelect';
 import SimpleDynamicRows from '../inputs/SimpleDynamicRows';
 import ImageSelect from '../inputs/ImageSelect';
 import Select from '../inputs/Select';
-import MultiCheckboxNum from '../inputs/MultiCheckboxNum';
+import MultiInt from '../inputs/MultiInt'
 
 export default function Field({ field, control, style={} }) {
     /*
@@ -74,8 +74,8 @@ export default function Field({ field, control, style={} }) {
                     return <Checkbox  {...commonProps} />;
                 case 'multiselect': //multiselect from checkbox
                     return <MultiCheckbox labelField={labelField} valueField={valueField} {...commonProps} options={options} />
-                case 'multiselectnum': //multiselect from checkbox with numeric component that appears if checked (for use with indicator num select)
-                    return <MultiCheckboxNum labelField={labelField} valueField={valueField} {...commonProps} options={options} />
+                case 'multint': //multiselect from checkbox with numeric component that appears if checked (for use with indicator num select)
+                    return <MultiInt labelField={labelField} valueField={valueField} {...commonProps} options={options} />
                 case 'image': //select with an icon, for that pretty factor
                     return <ImageSelect {...commonProps} options={options} images={images} />
                 case 'rows': //add/subtract dynamic number of rows with inputs

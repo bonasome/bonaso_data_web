@@ -33,7 +33,6 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
                     return false; // impossible
             }
         }
-        console.log(prereq.name, prereqVal)
         if(prereq.type=='multi'){
             if(c.operator == '=') return prereqVal?.includes(reqVal);
             if(c.operator == '!=') return !prereqVal?.includes(reqVal);
@@ -72,7 +71,7 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
 
 export const calcDefault = (assessment, existing = null) => {
     if (!assessment) return {};
-
+    console.log(existing)
     let map = {};
 
     assessment.indicators.forEach((ind) => {
@@ -92,7 +91,13 @@ export const calcDefault = (assessment, existing = null) => {
             }
             map[ind.id] = { value: val, date: rDate, location: rLocation };
         }
-
+        else if(ind.type == 'multint'){
+            let val = ind.options.map(o => ({ 
+                option: o.id, 
+                value: existing?.responses?.find(r => (r?.indicator?.id == ind.id && r?.response_option?.id == o?.id))?.response_value ?? ''
+            }))
+            map[ind.id] = { value: val, date: rDate, location: rLocation };
+        }
         // SINGLE-SELECT
         else if (ind.type === 'single') {
             let val;
