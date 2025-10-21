@@ -234,10 +234,10 @@ export default function AggregateTable({ id, meta, onDelete }){
                     )}
                 </tbody>
             </table>}
-            <div style={{ display: 'flex', flexDirection: 'row'}}> 
+            {!['client'].includes(user.role) && <div style={{ display: 'flex', flexDirection: 'row'}}> 
                 <Link to={`/aggregates/${id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Counts'} /></Link>
                 <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Count'} forDelete={true} />
-            </div>
+            </div>}
             </div>
         </div>
     )

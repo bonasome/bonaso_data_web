@@ -13,8 +13,7 @@ export function filterConfig(meta){
     if(!meta?.statuses) return [];
     return [
         {name: 'status', label: 'Project Status', type: 'select', constructors: {
-            values: meta.statuses.map((s) => (s.value)),
-            labels: meta.statuses.map((s) => (s.label)),
+            options: meta.statuses,
         }},
         {name: 'start', label: 'Starts After', type: 'date'},
         {name: 'end', label: 'Ends Before', type: 'date'},

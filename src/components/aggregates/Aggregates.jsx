@@ -1,7 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
+import { useAuth } from '../../contexts/UserAuth';
+
 import fetchWithAuth from '../../../services/fetchWithAuth';
+import prettyDates from '../../../services/prettyDates';
 
 import Loading from '../reuseables/loading/Loading';
 import Messages from '../reuseables/Messages';
@@ -11,7 +14,7 @@ import styles from '../analytics/dashboards/dashboard.module.css';
 
 import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 import { MdOutlinePivotTableChart } from "react-icons/md";
-import prettyDates from '../../../services/prettyDates';
+
 
 export default function Aggregates() {
     /*
@@ -20,7 +23,7 @@ export default function Aggregates() {
     //page information
 
     const { id } = useParams(); //optional param to load with a specfic aggie in view
-
+    const { user } = useAuth();
     const [meta, setMeta] = useState({}); //load meta (breakdown options)
     const [aggies, setAggies] = useState([]); //list of aggregates
     //page meta
@@ -126,7 +129,7 @@ export default function Aggregates() {
                 </div>
                 {!hidden && <div>
                     <h2>Your Aggregates</h2>
-                    <Link to={'/aggregates/new'}><button><MdOutlinePivotTableChart /> Create a New Aggreate</button></Link>
+                    {!['client'].includes(user.role) && <Link to={'/aggregates/new'}><button><MdOutlinePivotTableChart /> Create a New Aggreate</button></Link>}
                     {aggies.length > 0 && aggies.map((ag) => (
                         <div onClick={() => setViewing(ag.id)} className={styles.dbCard}>
                             <h3>{ag.indicator.name}</h3>

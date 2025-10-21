@@ -13,8 +13,7 @@ export function filterConfig(meta, user){
     if(!meta?.category) return []
     let filters = [
         {name: 'category', label: 'Type', type: 'select', constructors: {
-            values: meta.category.map((t) => (t.value)),
-            labels: meta.category.map((t) => (t.label)),
+            options: meta.category,
         }},
     ]
         

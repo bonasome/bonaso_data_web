@@ -19,16 +19,13 @@ export function filterConfig(meta, orgs, searchCallback){
     if(!meta?.statuses) return [];
     return [
         {name: 'status', label: 'Status', type: 'select', constructors: {
-            values: meta.statuses.map((s) => (s.value)),
-            labels: meta.statuses.map((s) => (s.label)),
+            options: meta.statuses,
         }},
         {name: 'type', label: 'Event Type', type: 'select', constructors: {
-            values: meta.event_types.map((c) => (c.value)),
-            labels: meta.event_types.map((c) => (c.label)),
+            options: meta.event_types
         }},
         {name: 'host', label: 'Event Host', type: 'select', constructors: {
-            values: orgs.map((c) => (c.id)),
-            labels: orgs.map((c) => (c.name)),
+            options: orgs.map((org) => ({value: org.id, label: org.name})),
             search: true,
             searchCallback: searchCallback
         }},

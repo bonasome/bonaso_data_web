@@ -8,25 +8,21 @@ import { CSS } from "@dnd-kit/utilities";
 import theme from '../../../../theme/theme';
 import fetchWithAuth from "../../../../services/fetchWithAuth";
 
-import Loading from '../../reuseables/loading/Loading';
 import FormSection from '../../reuseables/forms/FormSection';
 import Messages from '../../reuseables/Messages';
-import ReturnLink from '../../reuseables/ReturnLink';
 import ButtonLoading from '../../reuseables/loading/ButtonLoading';
-import OrganizationsIndex from '../../organizations/OrganizationsIndex';
-import SimpleDynamicRows from '../../reuseables/inputs/SimpleDynamicRows';
-import styles from '../../../styles/form.module.css';
+import LogicBuilder from './LogicBuilder';
+import ButtonHover from '../../reuseables/inputs/ButtonHover';
+import ComponentLoading from '../../reuseables/loading/ComponentLoading';
+import ConfirmDelete from '../../reuseables/ConfirmDelete';
+import OptionsBuilder from './OptionsBuilder';
 
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
-import ComponentLoading from '../../reuseables/loading/ComponentLoading';
-import LogicBuilder from './LogicBuilder';
-import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import { ImPencil } from 'react-icons/im';
 import { FaTrashAlt } from 'react-icons/fa';
-import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import { BsArrowBarDown, BsArrowBarUp } from 'react-icons/bs';
-import OptionsBuilder from './OptionsBuilder';
+
 
 
 export default function AssessmentIndicator({ meta, assessment, onUpdate, existing=null, onCancel=null}){

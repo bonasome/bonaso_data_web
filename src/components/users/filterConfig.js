@@ -19,25 +19,21 @@ export function filterConfig(meta, orgs, clients, orgSearchCallback, clientSearc
     if(!meta?.roles) return [];
     let filters = [
         {name: 'role', label: 'User Role', type: 'select', constructors: {
-            values: meta?.roles?.map((r) => (r.value)),
-            labels: meta?.roles?.map((r) => (r.label)),
+            options: meta?.roles,
         }},
 
         {name: 'organization', label: 'User With Organization', type: 'select', constructors: {
-            values: orgs?.map((org) => (org.id)),
-            labels: orgs?.map((org) => (org.name)),
+            options: orgs?.map((org) => ({value: org.id, label: org.name})),
             search: true,
             searchCallback: orgSearchCallback,
         }},
         {name: 'active', label: 'User is Active', type: 'select', constructors: {
-            values: ['true', 'false'],
-            labels: ['Active', 'Inactive'],
+            options: [{value: 'true', label: 'Active'}, {value: 'false', label: 'Inactive'}],
         }},
     ]
     if(user.role == 'admin'){
         filters.push({name: 'client', label: 'User With Client', type: 'select', constructors: {
-            values: clients?.map((c) => (c.id)),
-            labels: clients?.map((c) => (c.name)),
+            options: clients?.map((c) => ({value: c.id, label: c.name})),
             search: true,
             searchCallback: clientSearchCallback,
         }})

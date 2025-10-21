@@ -21,28 +21,23 @@ export function filterConfig(meta, orgs, searchCallback){
     return [
         
         {name: 'organization', label: 'Organization', type: 'select', constructors: {
-            values: orgs.map((t) => (t.id)),
-            labels: orgs.map((t) => (t.name)),
+            options: orgs.map((org) => ({value: org.id, label: org.name})),
             search: true,
             searchCallback: searchCallback
         }},
 
         {name: 'model', label: 'Related to Data Type', type: 'select', constructors: {
-            values: meta.models.map((m) => (m.value)),
-            labels: meta.models.map((m) => (m.label)),
+            options: meta.models,
         }},
 
         {name: 'reason', label: 'Reason Type', type: 'select', constructors: {
-            values: meta.flag_reasons.map((s) => (s.value)),
-            labels: meta.flag_reasons.map((s) => (s.label)),
+            options: meta.flag_reasons,
         }},
         {name: 'resolved', label: 'Status', type: 'select', constructors: {
-            values: ['true', 'false'],
-            labels: ['Resolved', 'Active'],
+            options: [{value: 'true', label: 'Resolved'}, {value: 'false', label: 'Active'}],
         }},
         {name: 'auto', label: 'Made By', type: 'select', constructors: {
-            values: ['true', 'false'],
-            labels: ['Automatically Generated', 'Human Generated'],
+            options: [{value: 'true', label: 'Automatically Generated'}, {value: 'false', label: 'Human Generated'}],
         }},
         {name: 'start', label: 'Starts After', type: 'date'},
         {name: 'end', label: 'Ends Before', type: 'date'},

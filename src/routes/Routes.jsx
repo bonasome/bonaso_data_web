@@ -142,12 +142,12 @@ function Router() {
             }
         >
             <Route index element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <Aggregates />
                 </RedirectIfNoPerm>
             }/>
             <Route path=':id' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
+                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager', 'client']}>
                     <Aggregates />
                 </RedirectIfNoPerm>
             }/>

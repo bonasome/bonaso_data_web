@@ -8,16 +8,14 @@ import IndexViewWrapper from "../reuseables/IndexView";
 import ConfirmDelete from "../reuseables/ConfirmDelete";
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 import ButtonHover from "../reuseables/inputs/ButtonHover";
-import Filter from '../reuseables/Filter';
 import Messages from '../reuseables/Messages';
+import Select from "../reuseables/inputs/Select";
+import AssessmentIndicatorsModal from "../indicators/assessment/AssessmentIndicatorsModal";
 
 import styles from './tasks.module.css';
-import modalStyles from '../../styles/modals.module.css';
 
 import { FaTrashAlt } from "react-icons/fa";
-import Select from "../reuseables/inputs/Select";
-import theme from "../../../theme/theme";
-import AssessmentIndicatorsModal from "../indicators/assessment/AssessmentIndicatorsModal";
+
 
 //card that holds task details
 function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, onDelete=null, callback=null, forAssessment=false }) {

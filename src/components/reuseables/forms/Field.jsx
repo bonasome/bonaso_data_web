@@ -6,7 +6,6 @@ import MultiCheckbox from '../inputs/MultiCheckbox';
 import Checkbox from '../inputs/Checkbox';
 import ModelSelect from '../inputs/ModelSelect';
 import ModelMultiSelect from '../inputs/ModelMultiSelect';
-import SimpleDynamicRows from '../inputs/SimpleDynamicRows';
 import ImageSelect from '../inputs/ImageSelect';
 import Select from '../inputs/Select';
 import MultiInt from '../inputs/MultiInt'
@@ -78,8 +77,6 @@ export default function Field({ field, control, style={} }) {
                     return <MultiInt labelField={labelField} valueField={valueField} {...commonProps} options={options} />
                 case 'image': //select with an icon, for that pretty factor
                     return <ImageSelect {...commonProps} options={options} images={images} />
-                case 'rows': //add/subtract dynamic number of rows with inputs
-                    return <SimpleDynamicRows {...commonProps} />
                 case 'model': //select a model instance 
                     return <ModelSelect labelField={labelField} {...commonProps} IndexComponent={IndexComponent} includeParams={includeParams} excludeParams={excludeParams} blacklist={blacklist} />
                 case 'multimodel': //select multiple models

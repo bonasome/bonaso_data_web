@@ -3,8 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 
 import cleanLabels from '../../../services/cleanLabels';
 
-import SimpleSelect from './inputs/SimpleSelect';
-import ButtonHover from '../reuseables/inputs/ButtonHover';
+import Select from './inputs/Select';
 import ComponentLoading from '../reuseables/loading/ComponentLoading';
 
 import styles from '../../styles/filters.module.css';
@@ -57,9 +56,9 @@ export default function Filter({ onFilterChange, initial, config }){
                             //get label or default to name (name is required)
                             const label = field?.label ?? cleanLabels(field.name);
                             if(field.type === 'select'){
-                                return <SimpleSelect key={field.name} name={field.name} label={label} 
-                                    optionValues={field.constructors.values} optionLabels={field.constructors.labels}
-                                    callback={(val) => setFilters(prev => ({...prev, [field.name]: val}))}
+                                return <Select key={field.name} name={field.name} label={label} 
+                                    options={field.constructors.options}
+                                    onChange={(val) => setFilters(prev => ({...prev, [field.name]: val}))}
                                     search={field.constructors.search} searchCallback={field.constructors.searchCallback}
                                     value={filters[field.name]}
                                 />
