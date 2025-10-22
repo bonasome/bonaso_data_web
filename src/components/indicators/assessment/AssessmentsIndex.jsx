@@ -22,14 +22,12 @@ import { GiJumpAcross } from "react-icons/gi";
 import AssessmentDetailsModal from './AssessmentDetailsModal';
 
 
-function AssessmentCard({ assessment, callback = null, callbackText='Select Assessment' }) {
+function AssessmentCard({ assessment, callback = null }) {
     /*
     Expandable card that displays details about particular assessment for use with an index component
     - assessment (object): the assessment this card displays information about
     - callback (function, optional): a callback function that allows information about this assessment to be selected and 
         passed to another component (passed down from the AssessmentIndex Component).
-    - callbackText (string, optional): text to display on the button that triggers the callback function (passed 
-        down from the AssessmentIndex Component)
     */
 
     //context
@@ -115,8 +113,9 @@ export default function AssessmentsIndex({ callback=null, includeParams=[], excl
     const { user } = useAuth();
     const { assessments, setAssessments, indicatorseta, setIndicatorsMeta } = useIndicators();
 
+    const [creating, setCreating] = useState(false); //if true loads the modal for creating an assessment
+
     //page meta
-    const [creating, setCreating] = useState(false);
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -138,18 +137,17 @@ export default function AssessmentsIndex({ callback=null, includeParams=[], excl
     useEffect(() => {
         const getMeta = async() => {
             try {
-                console.log('fetching meta...')
                 const url = `/api/indicators/manage/meta/`;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setIndicatorsMeta(data);
-                console.log(data)
-                setLoading(false);
             } 
             catch (err) {
                 setErrors(['Something went wrong. Plese try again later.'])
                 console.error('Failed to fetch meta: ', err)
-                setLoading(false)
+            }
+            finally{
+                setLoading(false);
             }
         }
         getMeta();
@@ -193,7 +191,6 @@ export default function AssessmentsIndex({ callback=null, includeParams=[], excl
     }, [page, search, updateTrigger, params]);
 
     //filter out blacklisted IDs
-
     const filteredAssessments = assessments?.filter(ass => !blacklist.includes(ass.id));
 
     if(loading || !assessments) return callback ? <ComponentLoading /> : <Loading /> //on callback don't show full load

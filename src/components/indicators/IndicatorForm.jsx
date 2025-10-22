@@ -21,8 +21,10 @@ import { BsDatabaseFillAdd } from "react-icons/bs";
 
 export default function IndicatorForm(){
     /*
-    Form that allows a user to create/edit an indicator. An optional ID param can be passed in the URL
-    which will cause the form to try and fetch details from the server. 
+    Form that allows a user to create/edit an indicator. This is only meant to be used for standalone 
+    indicoats. Assessment category indicators should be edited using their assessment page. 
+    An optional ID param can be passed in the URL which will cause the form to try and fetch details from
+     the server. 
     */
     const navigate = useNavigate();
     

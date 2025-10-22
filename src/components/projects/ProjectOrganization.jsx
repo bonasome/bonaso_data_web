@@ -50,7 +50,7 @@ export default function ProjectOrganization(){
     
     //contorl visibility of index components for adding
     const [addingIndTask, setAddingIndTask] = useState(false); //user is adding a standalone indicator task
-    const [addingAssTask, setAddingAssTask] = useState(false); //user is adding an assessment task
+    const [addingAssTask, setAddingAssTask] = useState(false); //user is adding an assessment task (these are seperated for clarity)
     const [addingChildOrg, setAddingChildOrg] = useState(false); //user is adding a subgrantee
 
     //controls which sections are visible

@@ -21,7 +21,8 @@ import { FaTrashAlt } from 'react-icons/fa';
 
 export default function IndicatorDetail(){
     /*
-    Detail component for the indicator. Takes an ID param in the URL.
+    Detail component for the indicator. Takes an ID param in the URL. Can also be used to view
+    indicators in an assessment, but those should be viewed through the AssessmentBuilder comp.
     */
     const navigate = useNavigate();
     const { id } = useParams(); //indicator id from url

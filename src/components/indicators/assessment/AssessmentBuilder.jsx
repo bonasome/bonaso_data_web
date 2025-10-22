@@ -25,11 +25,11 @@ import styles from '../../../styles/form.module.css';
 import theme from '../../../../theme/theme';
 
 
-
 export default function AssessmentForm(){
     /*
-    Form that allows a user to create/edit an indicator. An optional ID param can be passed in the URL
-    which will cause the form to try and fetch details from the server. 
+    Component that allows a user to view/edit an assessment and its indicators. Editing the assessment
+    will display the AssessmentDetailsModal component and each indicator will be rendered as an
+    Assessment Indicator comp. 
     */
     const navigate = useNavigate();
     
@@ -39,26 +39,25 @@ export default function AssessmentForm(){
     //context
     const { setAssessmentDetails, indicatorsMeta, setIndicatorsMeta } = useIndicators();
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-    //existing value if editing
-    const [assessment, setAssessment] = useState(null);
-    const [indicators, setIndicators] = useState([]);
+    
+    const [assessment, setAssessment] = useState(null); //assessment
+    const [indicators, setIndicators] = useState([]); //indicators of the assessment
+    
     //page meta
-    const [editing, setEditing] = useState(false);
-    const [adding, setAdding] = useState(false);
+    const [editing, setEditing] = useState(false); //controls AssessmentDetailModal for editing name/desc
+    const [adding, setAdding] = useState(false); //shows a AssessmentIndicator comp with no existing
     const [del, setDel] = useState(false);
     const [loading, setLoading] = useState(true);
     const [submissionErrors, setSubmissionErrors] = useState([]);
-    const [success, setSuccess] = useState([]);
-    const [saving, setSaving] = useState(false);
 
     //ref to scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
-        if ((submissionErrors.length > 0 || success.length > 0) && alertRef.current) {
+        if ((submissionErrors.length > 0) && alertRef.current) {
         alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         alertRef.current.focus({ preventScroll: true });
         }
-    }, [submissionErrors, success]);
+    }, [submissionErrors]);
 
     //fetch the meta
     useEffect(() => {
@@ -84,6 +83,7 @@ export default function AssessmentForm(){
         getMeta();
     }, []);
 
+    //fetch the asssessment details (including indicators)
     const getAssessmentDetail = async () => {
         try {
             console.log('fetching indicator details...');
@@ -106,6 +106,7 @@ export default function AssessmentForm(){
         } 
     }
 
+    //action to allow for reordering (from drag and drop)
     const reorder = async(ind, pos) => {
         try{
             console.log('submitting data...', pos);
@@ -142,6 +143,7 @@ export default function AssessmentForm(){
         }
     }
 
+    //helper functions for drag and drop for reordering
     const handleDragEnd = (event) => {
         const { active, over } = event;
         if (!over || active.id === over.id) return;
@@ -164,10 +166,9 @@ export default function AssessmentForm(){
         loadInitial();
     }, [id]);   
     
-    //delete the organization
+    //delete the assessment
     const handleDelete = async() => {
         try {
-            console.log('deleting organization...');
             const response = await fetchWithAuth(`/api/indicators/assessments/${id}/`, {
                 method: 'DELETE',
             });
@@ -204,7 +205,7 @@ export default function AssessmentForm(){
             setDel(false);
         }
     } 
-    console.log(indicators);
+
     if(loading || !assessment || !indicatorsMeta?.type) return <Loading />
     return(
         <div>

@@ -115,6 +115,7 @@ export function AssignTask({ organization, project, onUpdate, onClose, type='ass
     - project (object): the project this action is related to
     - onUpdate (function): what to do on submission of the data
     - onClose (function): how to close the modal
+    - type (string): what type of task is being added (assessment or standalone)
     */
 
     //list of selected indicators passed from MultiModalSelect

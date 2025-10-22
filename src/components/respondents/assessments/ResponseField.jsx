@@ -8,12 +8,19 @@ import styles from '../../../styles/form.module.css';
 import { FaArrowAltCircleDown, FaArrowAltCircleUp, FaArrowCircleDown } from "react-icons/fa";
 
 export default function ResponseField ({ indicator, shouldShow=false, options=[] }){
-    const [expanded, setExpanded] = useState(false);
+    /*
+    Displays a response field for a specific indicator within an assessment.
+    - indicator (object): indicator being responded to
+    - shouldShow(object): should this question be visible based on logic rules
+    - options(array): options to use, if applicable
+    */
+    const [expanded, setExpanded] = useState(false); //show meta fields (date/location)
 
-
+    //set context variables based on FormProvider
     const { field } = useController({ name: `response_data.${indicator.id}.value` });
     const { control, setValue, getValues, formState } = useFormContext();
 
+    //conver the indicator types to what we use to build fields
     const convertType = (type) => {
         if(type=='boolean') return 'radio';
         else if(type=='single') return 'radio';
@@ -23,6 +30,7 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
         else return type;
     }
 
+    //special onChange that handles none option for multiselect
     const handleMultiSelectChange = (selectedValues) => {
         const lastElement = selectedValues[selectedValues.length - 1];
         if (lastElement == 'none') {
@@ -31,6 +39,7 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
         return selectedValues.filter(v => v !== 'none');
     };
 
+    //field config object
     let fieldConfig = {
         type: convertType(indicator.type), 
         name: `response_data.${indicator.id}.value`, 
@@ -38,7 +47,7 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
         options: options, 
         onChange: indicator.type === 'multi' ? handleMultiSelectChange : undefined,
     }
-
+    //if required, add rules (false is OK)
     if(indicator.required){
         fieldConfig.rules = {
             validate: (value) => {
@@ -52,6 +61,7 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
         };
         fieldConfig.label = `${indicator.order + 1}. ${indicator.name}*`
     }
+    //if a description, pass it as a tooltip
     if(indicator.description && indicator.description != ''){
         fieldConfig.tooltip = indicator.description;
     }
@@ -66,6 +76,7 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
                 </div>
             </div>
             {expanded && <div>
+                {/* Optional date.location fields if different from the main interaction */}
                 <p><i>You only need to record date/location information here if it differs from the Date of Interaction/Location of Interaction you entered above.</i></p>
                 <Field control={control} field={{ name: `response_data.${indicator.id}.date`, label: 'Date', type: "date", }} />
                 <Field control={control} field={{ name: `response_data.${indicator.id}.location`, label: 'Response Location', type: "text" }} />

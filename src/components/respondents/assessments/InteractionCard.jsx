@@ -6,50 +6,40 @@ import prettyDates from '../../../../services/prettyDates';
 import theme from '../../../../theme/theme';
 
 import { useAuth } from '../../../contexts/UserAuth'
-import { useInteractions } from '../../../contexts/InteractionsContext';
 
 import ConfirmDelete from '../../reuseables/ConfirmDelete';
 import ComponentLoading from '../../reuseables/loading/ComponentLoading';
-import Checkbox from '../../reuseables/inputs/Checkbox';
 import ButtonLoading from '../../reuseables/loading/ButtonLoading';
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import UpdateRecord from '../../reuseables/meta/UpdateRecord';
 import FlagModal from '../../flags/FlagModal';
 import FlagDetailModal from "../../flags/FlagDetailModal";
-import FormSection from '../../reuseables/forms/FormSection'
-import Messages from '../../reuseables/Messages';
 
 import styles from '../respondentDetail.module.css';
 import errorStyles from '../../../styles/errors.module.css';
 
 import { ImPencil } from "react-icons/im";
 import { FaTrashAlt } from "react-icons/fa";
-import { IoIosSave } from "react-icons/io";
 import { MdFlag } from "react-icons/md";
-import { FcCancel } from "react-icons/fc";
 
 export default function InteractionCard({ interaction, onUpdate, onDelete }){
     /*
     Card that displays information about an interaction and also allows for the user to edit this information.
     - interaction (object): the interaction to display information about
-    - onUpdate (function): what to do when the interaction is edited
+    - onUpdate (function): used for helping to refresh when flags are added or resolved
     - onDelete (function): what to do when the interaction is deleted
     */
     const { user } = useAuth();
-    const {setInteractions} = useInteractions();
 
     //page meta
-    const [editing, setEditing] = useState(false); //controls when user is editing the details
     const [expanded, setExpanded] = useState(false);
-    const [submissionErrors, setSubmissionErrors] = useState([]);
-    const [saving, setSaving] = useState(false);
     const [del, setDel] = useState(false);
     const [flagging, setFlagging] = useState(false); //controls when a user is flagging the interaction
     const [viewFlags, setViewFlags] = useState(false); //controls when a user is viewing flag information
 
     
 
-    //quick memo to check for an unresolved flag
+    //quick memo to check for an unresolved flag, will display a warning if so
     const activeFlags = useMemo(() => {
         if(!interaction) return false
         return interaction?.flags?.filter(f => !f.resolved).length > 0;
@@ -68,6 +58,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
         return false;
     }, [user, interaction]);
 
+    //helper to build a list of responses. Will combine multiselects stored separtely
     const cleanedResponses = useMemo(() => {
         const seen = new Set();
         const consolidated = [];
@@ -94,6 +85,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             } 
             else if(r.indicator.type == 'multint'){
                 if(existing){
+                    //append option/value as a single string
                     existing.response_value.push(`${r.response_option.name} - ${[null, ''].includes(r.response_value) ? '0' : r.response_value}`)
                 }
                 else {
@@ -107,6 +99,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             }
             else {
                 if (existing) {
+                    //this shouldn't happen
                     console.warn('POSSIBLY SUSPECT RESPONSE DATA!');
                     return;
                 }
@@ -160,23 +153,23 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             setDel(false)
         }
     }
-    console.log(cleanedResponses);
+
     if(!interaction.task) return <ComponentLoading />
-    //return this separetly if needed since the otherwise the hover features will mess with the modeal styles
+    //return these modals separetly if needed since the otherwise the hover features will mess with the modeal styles
     if(del){
         return(
             <ConfirmDelete name={`Interaction ${interaction?.display_name}`} statusWarning={'This cannot be undone, and this data will be lost. Consider flagging this instead if you are unsure.'} 
                 onConfirm={() => deleteInteraction()} onCancel={() => setDel(false)} />
         )
     }
-    
+    //creating a flag
     if(flagging){
         return(
             <FlagModal id={interaction.id} model={'respondents.interaction'} onCancel={() => setFlagging(false)}
                 onConfirm={() => {onUpdate(); setFlagging(false)}} />
         )
     }
-    
+    //viewing flags related to this interaction
     if(viewFlags){
         return(
             <FlagDetailModal flags={interaction.flags} displayName={interaction.display_name} 
@@ -195,7 +188,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                 <p>At: {interaction.interaction_location}</p>
             </div>
 
-
+            {/* Map of responses */}
             {expanded && <div>
                 <div>
                     <div>

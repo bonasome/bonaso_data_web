@@ -26,7 +26,6 @@ import { IoIosStar, IoIosStarOutline, IoIosArrowDropup, IoIosArrowDropdownCircle
 export default function EventDetail(){
     /*
     Component that displays detail about an event. Takes an id as a URL param to fetch the correct event. 
-    This component also houses event counts. 
     */
 
     const navigate = useNavigate();

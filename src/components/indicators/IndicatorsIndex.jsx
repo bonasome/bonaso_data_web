@@ -96,7 +96,7 @@ function IndicatorCard({ indicator, callback = null, callbackText='Select Indica
                         <Link to={`/indicators/${indicator.id}`}>
                             <ButtonHover noHover={<GiJumpAcross />} hover={'Go to Page'} />
                         </Link>
-                        <Link to={`/indicators/${indicator.id}/edit`}>
+                        <Link to={indicator.assessment ? `/indicators/assessments/${indicator.assessment.id}` : `/indicators/${indicator.id}/edit`}>
                             <ButtonHover noHover={<ImPencil />} hover={'Edit Details'} />
                         </Link>
                     </div>}
@@ -108,7 +108,9 @@ function IndicatorCard({ indicator, callback = null, callbackText='Select Indica
 
 export default function IndicatorsIndex({ callback=null, includeParams=[], excludeParams=[], updateTrigger=null, blacklist=[], }){
     /*
-    Expandable card that displays details about particular indicator for use with an index component
+    Displays a list of all indicators. Will also show indicators within an assessment, even though
+    these are mostly meant to be viewed in the context of the entire assessment. 
+    
     - callback (function, optional): a callback function that allows information about this indicator to be selected and 
         passed to another component
     - callbackText (string, optional): text to display on the button that triggers the callback function 

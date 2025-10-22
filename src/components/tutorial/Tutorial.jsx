@@ -43,9 +43,11 @@ export default function Tutorial(){
                         <li>Child Organization: Or "Subgrantee" is an organization that is underneath a parent organization. They can be assigned tasks by their parent organization.</li>
                         <li>Project: This is a project that your organization is working on. You may see many projects of you may see just one.</li>
                         <li>Indicator: An indicator is a metric that a project is tracking. Indicators can be reused in several projects.</li>
+                        <li>Assessment: An assessment is a group of indicators that are meant to be answered by a person in a series.</li>
                         <li>Task: A task is when an indicator is assigned to an organization within a project.</li>
                         <li>Respondent: A respondent is a person that you are collecting data from.</li>
-                        <li>Interaction: An interaction is when you "interact" with a respondent. This could be testing them for HIV or delivering NCD messages. Each interaction is tied to a task you were assigned.</li>
+                        <li>Interaction: An interaction is when you "interact" with a respondent. Each interaction is linked to an assessment via a task.</li>
+                        <li>Response: An interaction will have a response for each indicator in the assessment. This may be a yes/no (screened for GBV), a number (blood pressure results), or several other types of data.</li>
                         <li>Event: An event is any type of activity that contributes towards the project goals. This could include counselling sessions, walkathons, activations, or anything.</li>
                     </ul>
                 </p>

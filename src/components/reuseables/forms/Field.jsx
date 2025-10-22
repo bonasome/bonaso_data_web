@@ -40,6 +40,7 @@ export default function Field({ field, control, style={} }) {
     - tooltip (string, optional): text to display when hovering over a tooltip (no tooltip will show if left null)
     - placeholder (string, optional): placeholder text for blank inputs (for use with text/textarea/number)
     - search (boolean, optional): for select, allows the option to search the select by the label field
+    -warning (array, optional): list of warning messages to display
     */
     const customOnChange = field.onChange;
     return (

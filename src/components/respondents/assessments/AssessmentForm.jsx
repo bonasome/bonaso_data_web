@@ -22,18 +22,27 @@ import { IoIosSave } from "react-icons/io";
 import styles from '../../../styles/form.module.css';
 
 export default function AssessmentForm(){
+    /*
+    Allows a user to fill out an assessment for a respondent, creating an interaction and a set of linked
+    responses (per indicator). Manages logic/match options as well. 
+    */
     const navigate = useNavigate();
 
+    //id: respondent ID
+    //taskID: the task this is for
+    //irID: if editing an existing interaction, provide its ID as a param
     const { id, taskID, irID } = useParams();
+
     const { setAssessmentDetails } = useIndicators();
     const { setRespondentDetails} = useRespondents();
 
-    const [assessment, setAssessment] = useState(null);
-    const [respondent, setRespondent] = useState(null);
-    const [existing, setExisting] = useState(null);
-    const [viewingAssessment, setViewingAssessment] = useState(false);
-    const [meta, setMeta] = useState(null);
+    const [assessment, setAssessment] = useState(null); //assessment being completed
+    const [respondent, setRespondent] = useState(null); //respondent this is for
+    const [existing, setExisting] = useState(null); //existing interaction if applicable
+    const [viewingAssessment, setViewingAssessment] = useState(false); //for showing modal with all assessment questions
+    const [meta, setMeta] = useState(null); //model information
 
+    //page meta
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -66,6 +75,7 @@ export default function AssessmentForm(){
         getMeta();
     }, []);
 
+    //getch the assessment details (from the taskID)
     useEffect(() => {
         const getAssessmentDetail = async () => {
             try {
@@ -93,6 +103,7 @@ export default function AssessmentForm(){
         getAssessmentDetail();
     }, [taskID]);
 
+    //fetch the existing interaction if an ID is provided
     useEffect(() => {
         const getInteraction = async () => {
             if(!irID) return;
@@ -120,6 +131,7 @@ export default function AssessmentForm(){
         getInteraction();
     }, [irID]);
 
+    //get respondent details
     useEffect(() => {
         const getRespondentDetails = async () => {
             try {
@@ -143,12 +155,13 @@ export default function AssessmentForm(){
         getRespondentDetails();
     }, [id])
 
+    //handle submission
     const onSubmit = async (data) => {
+        // append respondent/task ID from params
         data.respondent_id = id;
         data.task_id = taskID;
         try{
             setSaving(true);
-            console.log('submitting data...', data);
             const url = existing?.id ? `/api/record/interactions/${existing?.id}/` : `/api/record/interactions/`;
             const response = await fetchWithAuth(url, {
                 method: existing?.id ? 'PATCH' : 'POST',
@@ -186,6 +199,7 @@ export default function AssessmentForm(){
         }
     }
     
+    //set default values
     const defaultValues = useMemo(() => {
         return {
             interaction_date: existing?.interaction_date ?? '',
@@ -195,6 +209,7 @@ export default function AssessmentForm(){
         }
     }, [existing]);
 
+    //construct RHF variables
     const methods = useForm({ defaultValues });
     const { register, unregister, control, handleSubmit, reset, watch, setFocus, getValues, setValue, formState: { errors } } = methods;
     
@@ -224,8 +239,10 @@ export default function AssessmentForm(){
         }
     }, [assessment, existing, reset]);
 
+    //watch on response data for recalculating logic/options
     const responseInfo = useWatch({ control, name: "response_data" });
-    
+
+    //determine what indicators should be visible
     const visibilityMap = useMemo(() => {
         if(!assessment || !respondent) return {};
         const map = {}
@@ -244,6 +261,7 @@ export default function AssessmentForm(){
         return map;
     }, [responseInfo]);
 
+    //unregister invisible fields so stale values aren't passed
     useEffect(() => {
         if (!assessment || !respondent) return;
         assessment.indicators.forEach(ind => {
@@ -258,6 +276,7 @@ export default function AssessmentForm(){
         });
     }, [visibilityMap, unregister, assessment, respondent]);
 
+    //create an options map (mostly for matched options)
      const optionsMap = useMemo(() => {
         if(!assessment) return {};
         const map = {}
@@ -271,7 +290,9 @@ export default function AssessmentForm(){
                 return;
             }
             let opts = ind?.options?.map((o) => ({value: o.id, label: o.name})) ?? [];
-            if(ind.allow_none) opts.push({value: 'none', label: 'None of the above'})
+            //add a none opton if none is allowed
+            if(ind.allow_none) opts.push({value: 'none', label: 'None of the above'});
+            //if matching options, filter to only what was selected for the prereq
             if(ind.match_options){
                 const valid = responseInfo?.[ind.match_options]?.value;
                 opts = opts.filter(o => (valid?.includes(o?.value) || o?.value == 'none'));
@@ -281,6 +302,7 @@ export default function AssessmentForm(){
         return map
     }, [assessment, responseInfo]);
 
+    //recalculate options based on prerequisite selections
     useEffect(() => {
         if(!assessment || !optionsMap) return;
         assessment.indicators.forEach((ind) => {
@@ -307,6 +329,7 @@ export default function AssessmentForm(){
         });
     }, [optionsMap]);
 
+    //constant fields for all assessments
     const basics = [
         { name: 'interaction_date', label: 'Date of Interaction', type: "date", rules: { required: "Required", },
             tooltip: 'What date did this interaction occur at?',
@@ -319,7 +342,7 @@ export default function AssessmentForm(){
         { name: 'comments', label: 'Comments/Notes', type: 'textarea', placeholder: 'Any additional notes that may be helpful to remember...' }
     ]
 
-
+    //helper to determine if anything is visible (sometimes a respondent may be blocked from an assessment if it is gaurded by respondent logic)
     const visibleInds = (assessment && respondent && visibilityMap) ? assessment.indicators.filter(ind => (visibilityMap[ind.id])) : [];
     if(loading || !respondent || !assessment) return <Loading />
     return(

@@ -282,7 +282,7 @@ export default function ChartSettingsModal({ dashboard, onUpdate, onClose, meta,
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={basics} control={control} header={'Basics'}/>
                 {chartType && chartType != 'pie' && <FormSection fields={axis} control={control} header={'Axis'}/>}
-                {inds.length === 1 && inds[0].indicator_type == 'respondent' && chartType == 'bar' && 
+                {inds.length === 1 && inds[0].category == 'assessment' && chartType == 'bar' && 
                     <FormSection fields={repeat} control={control} header={'Track Repeat Only?'} />}
                 {needRepeat && <FormSection fields={repeatN} control={control} header={'How Many Times?'} />}
                 {inds.length == 1 && chartType != 'pie' && <FormSection fields={target} control={control} header='Show Targets' />}

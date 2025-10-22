@@ -2,6 +2,9 @@ const META_KEYS = new Set(['id', 'value', 'created_at', 'created_by', 'updated_a
 
 //gets list of dimension keys (sex)
 export function getDynamicKeys(count) {
+    /*
+    Gets a list of object keys from a count to determine what aggregates fields are present
+    */
     const keys = new Set();
     Object.keys(count).forEach(k => {
         if (!META_KEYS.has(k) && count[k]) {
@@ -13,6 +16,9 @@ export function getDynamicKeys(count) {
 
 //get dynamic list of all dimension "values" (male, female)
 export function collectUniqueValues(counts, keys) {
+    /*
+    Gets a list of unique disaggergation values based on the keys/counts
+    */
     const uniques = {};
     keys.forEach(k => (uniques[k] = new Set()));
     counts.forEach(item => {
@@ -41,6 +47,7 @@ export function cartesian(arrays) {
     return res;
     }, [[]]);
 }
+
 export function normalizeVal(v) {
     // If object with `name`, use name (common for `option`). Otherwise string/number.
     if (v == null) return '';
@@ -51,6 +58,7 @@ export function normalizeVal(v) {
     return String(v);
 }
 export function buildColHeaderTree(colDims, uniquesByKey) {
+    // build a column header setup
     if (!colDims.length) return { headerRows: [], colKeys: [''] };
     const lists = colDims.map(k => uniquesByKey[k]);
     const combos = cartesian(lists);
@@ -94,13 +102,16 @@ export function buildCells(counts, rowDims, colDims, indicator) {
     counts.forEach(item => {
         let rowParts = rowDims.map(k => normalizeVal(item[k]));
         let colParts = colDims.map(k => normalizeVal(item[k]));
+        //if the type is multi and there is no option, its the default unique deduplication option, so createa Total Label
         if(indicator.type == 'multi'){
+            //check if option is in the row, and it so add the Total value
             if(rowDims.includes('option')){
                 if(item.unique_only){
                     const index = rowDims.indexOf('option');
                     rowParts[index] = 'Total (Unique)'
                 }
             }
+            //else check the columns
             if(colDims.includes('option')){
                 if(item.unique_only){
                     const index = colDims.indexOf('option');
@@ -120,10 +131,13 @@ export function buildCells(counts, rowDims, colDims, indicator) {
 
 
 export function buildAutoMatrix(counts, indicator) {
-    // options: { maxRowDims, maxColDims }
+    /*
+    Builds a matrix with headers/cells to construct a pivot table with the values
+    */
     let keys = getDynamicKeys(counts[0]);
-    if(['multi'].includes(indicator.type) && !keys.includes('option')) keys.push('option');
-    if(['multi'].includes(indicator.type) && !keys.includes('unique_only')) keys = keys.filter(k => k != 'unique_only')
+    //multiselect have a unique deduplication set of counts, we'll treat these as another option to make building the table easier
+    if(['multi'].includes(indicator.type) && !keys.includes('option')) keys.push('option'); //add option in so the breakdowns align
+    if(['multi'].includes(indicator.type) && !keys.includes('unique_only')) keys = keys.filter(k => k != 'unique_only') //remove this field 
     const uniques = collectUniqueValues(counts, keys);
 
 

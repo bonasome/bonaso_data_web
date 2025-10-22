@@ -23,7 +23,7 @@ export default function BatchRecord(){
     then uploaded into the system. 
     */
 
-    //org and project for generating template
+    //org and task for generating template
     const [org, setOrg] = useState(null);
     const [task, setTask] = useState([]);
 
@@ -56,7 +56,7 @@ export default function BatchRecord(){
         setWarnings([]);
         setErrors([]);
 
-        //make sure a project/organization is selected
+        //make sure a task/organization is selected
         let getErrors = [];
         if(!task){
             getErrors.push('Please select a task.')
@@ -80,6 +80,7 @@ export default function BatchRecord(){
                     'task_id': task.id,
                 })
             });
+            //what does this do? I don't know. But it works. 
             if(response.ok){
                 //file download jargon
                 const blob = await response.blob();

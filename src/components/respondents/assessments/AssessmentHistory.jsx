@@ -12,20 +12,15 @@ import styles from '../respondentDetail.module.css';
 
 export default function AssessmentHistory({ respondent, meta }){
     /*
-    Component that displays a list of interactions and gives the user the ability to create new interactions
-    via the AddInteraction component.
+    Component that displays a list of interactions and view responses within that interaction.
     - respondent (object): the respondent these interactions relate to
     - meta (object): the respondent model information
-    - onUpdate (object): what to do when a new task is added in the AddInteraction component
-    - setAddingTask (function): helper function to pass a task from respondents to AddInteraction
-    - onAdd (function): what to do when a user submits a new batch of interactions from AddInteraction
     */
-    const { user } = useAuth();
+
     const { interactions, setInteractions } = useInteractions();
 
     //page meta
     const [loading, setLoading] = useState(true);
-    const[success, setSuccess] = useState('');
 
     //index helpers
     const [search, setSearch] = useState('');

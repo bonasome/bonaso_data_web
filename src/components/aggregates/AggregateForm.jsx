@@ -20,11 +20,17 @@ import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 
 export default function AggregateBuilder() {
+    /*
+    Component that holds a form that allows a user to enter aggregated data. Accepts an optional id param
+    that will load an existing aggregate group. 
+    */
     const navigate = useNavigate();
-    const { id } = useParams();
+    const { id } = useParams(); //existing id, if not id this is a new count
+    const [existing, setExisting] = useState(null); //if editing, holds the existing values
+
+    //page meta
     const [meta, setMeta] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [existing, setExisting] = useState(null);
     const [saving, setSaving] = useState(false);
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [success, setSuccess] = useState([]);
@@ -57,7 +63,7 @@ export default function AggregateBuilder() {
         getMeta();
     }, []);
 
-    // fetch meta on mount (meta contains dimension lists keyed by name: { sex: [{value,label}, ...], age_range: [...] })
+    // get the existing values if an id is provided
     useEffect(() => {
         const getGroup = async() => {
             if(!id) return;
@@ -77,7 +83,7 @@ export default function AggregateBuilder() {
         getGroup();
     }, [id]);
 
-    // form
+    // create default values
     const defaultValues = useMemo(() => ({
         indicator_id: existing?.indicator ?? null,
         organization_id: existing?.organization ?? null,
@@ -85,13 +91,14 @@ export default function AggregateBuilder() {
         start: existing?.start ?? '',
         end: existing?.end ?? '',
         comments: existing?.comments ?? '',
-        breakdowns: existing?.counts?.length > 0 ? getDynamicKeys(existing?.counts[0]) : [],
+        breakdowns: existing?.counts?.length > 0 ? getDynamicKeys(existing?.counts[0]) : [], //determine what should be checked by getting a list of unqiue values from existing
         counts_data: []
     }), [existing]);
+    
 
+    //RHF variables
     const { control, handleSubmit, reset, watch, setValue, setFocus } = useForm({ defaultValues });
     const { fields, replace } = useFieldArray({ control, name: 'counts_data' });
-
 
     //if provided, set default values to existing values once loaded
     useEffect(() => {
@@ -101,10 +108,11 @@ export default function AggregateBuilder() {
     }, [existing, reset, defaultValues]);
 
     // watch relevant fields
-    const selectedIndicator = watch('indicator_id');
-    const breakdowns = watch('breakdowns') || [];
-    const countsData = watch('counts_data');
+    const selectedIndicator = watch('indicator_id'); //what indicator this count is for
+    const breakdowns = watch('breakdowns') || []; //list of disaggregation fields to use
+    const countsData = watch('counts_data'); //what counts have been entered
 
+    //helper cartesian product that will help us create a key for each row. 
     function cartesianProduct(obj) {
         const keys = Object.keys(obj);
         if (!keys.length) return [{}];
@@ -121,12 +129,15 @@ export default function AggregateBuilder() {
         }, [{}]);
     }
 
+    //memoo that sets default values/builds our rows. It creates a key for each possible input based on the breakdown__value pair
     const buildRows = useMemo(() => {
         if(!meta || !selectedIndicator) return;
         let existingVals = [];
 
+        //if there are existing values, build a key for each value so that we can easily tell what values to populate
         if(existing?.counts?.length > 0){
             existingVals = existing.counts.reduce((acc, c) => {
+                //if the value has the unique only flag, log the option field as being "Total" to make building the entry table easier
                 const key = `${getDynamicKeys(existing?.counts[0]).map(d => d == 'option' ? (c.unique_only ? `${d}__Total` : `${d}__${c[d]?.id}`) : 
                     `${d}__${c[d]}`).join('___')}`;
                 acc[key] = c.value;
@@ -135,7 +146,8 @@ export default function AggregateBuilder() {
         }
         let all = breakdowns || [];
         if(selectedIndicator?.options.length > 0 && !all.includes('option')) all.push('option');
-
+        
+        //if there are no breakdowns, just create an "index" value that will be used to track the one value entered
         if(all.length == 0){
             const val = existing?.counts?.[0]?.value ?? '';
             const rows = [{key: `index`, value: val}]
@@ -143,31 +155,35 @@ export default function AggregateBuilder() {
             replace(rows);
             return rows;
         }
-
+        // else, create a map with all possible permutations of the breakdown combos
         let cleanedMeta = {}
         all.forEach((bd) => {
             if(bd == 'option'){
                 cleanedMeta[bd] = selectedIndicator.options.map((o => o.id));
                 if(selectedIndicator.type == 'multi'){
-                    cleanedMeta[bd].push('Total')
+                    cleanedMeta[bd].push('Total') //add our unique total option for multiselect
                 }
             } 
             else cleanedMeta[bd] = meta[bd]?.map(v => v.value);
         })
+
+        //create a key that uses the breakdown__value___ ... so that we know what set of values this number is attached to
         const keys = cartesianProduct(cleanedMeta).map(r => (
             Object.keys(r).map(k => `${k}__${r[k]}`).join('___')
         ))
         const rows = []
+
+        //set the value of each key if it exists, else default to an empty string
         keys.forEach(r => {
             const val = existingVals?.[r] ?? '';
             rows[r] = val;
             setValue(`counts_data.${r}`, val)
             rows.push({ key: r, value: val})
         })
-        replace(rows)
+        replace(rows) //replace the rows to set the values
         return rows
     }, [breakdowns, existing, selectedIndicator]);
-
+    
     // transform and submit
     const onSubmit = async (data, e) => {
         const payload = {
@@ -179,22 +195,24 @@ export default function AggregateBuilder() {
             end: data.end,
             comments: data.comments,
             counts_data: (data.counts_data || []).map(c => {
-                let count = {};
-                if(c.key == 'index') return {value: c.value};
+                let count = {}; //we'll need to reconstruct the breakdown fields into an object from the key
+                if(c.key == 'index') return {value: c.value}; //if there are no breakdowns, just create one count object with a value
                 c.key.split('___').map((k) => {
                     if(k.split('__')[0] == 'option' && k.split('__')[1] == 'Total' && selectedIndicator.type == 'multi'){
+                        //if this was the unique row, flag it as such
                         count['unique_only'] = true
                     }
                     else{
-                        const key = k.split('__')[0] == 'option' ? 'option_id' : k.split('__')[0];
+                        //otherwise create a breakdown: value pair
+                        const key = k.split('__')[0] == 'option' ? 'option_id' : k.split('__')[0]; //backend will expect option_id
                         count[key]  = k.split('__')[1]
                     }
                 })
-                count['value'] = ['', null].includes(c.value) ? 0 : c.value;
+                count['value'] = ['', null].includes(c.value) ? 0 : c.value; //set the object value
                 return count;
             })
         };
-        const action = e.nativeEvent.submitter.value;
+        const action = e.nativeEvent.submitter.value; //determine to redirect or create another
         try {
             setSaving(true);
             const url = id ? `/api/aggregates/${id}/` : '/api/aggregates/'
@@ -253,6 +271,7 @@ export default function AggregateBuilder() {
         }
     };
 
+    //watches to help limit indicators
     const proj = watch('project_id');
     const org = watch('organization_id')
     const basics = [
@@ -309,6 +328,7 @@ export default function AggregateBuilder() {
                     category in the "value" column.
                 </p>
                 {fields.length === 0 && <div>No rows. Select dimensions and ensure indicator is selected.</div>}
+                {/* If one value, create a simplified table with only one input/value */}
                 {fields.length === 1 &&<div>
                     <table>
                         <thead>
@@ -327,17 +347,20 @@ export default function AggregateBuilder() {
                         </tbody>
                     </table>
                 </div>}
+                {/* Otherwise we need a whole dang table */}
                 {fields.length > 1 && <div>
                 <table>
                     <thead>
-                    <tr>
-                        {breakdowns.map(d => (
-                        <th key={d}>{cleanLabels(d)}</th>
-                        ))}
-                        <th>Value</th>
-                    </tr>
+                        <tr>
+                            {breakdowns.map(d => (
+                                <th key={d}>{cleanLabels(d)}</th>
+                            ))}
+                            <th>Value</th>
+                        </tr>
                     </thead>
+
                     <tbody>
+                    {/* Create the row with the values for each disaggregation (based on the key) */}
                     {fields.map((row, idx) => (
                         <tr key={row.id}>
                         {row.key.split('___').map(d => (
@@ -347,6 +370,7 @@ export default function AggregateBuilder() {
                             </td>
                         ))}
                         <td className="p-2">
+                            {/* Controller/input for this key */}
                             <Controller
                                 name={`counts_data.${idx}.value`}
                                 control={control}

@@ -24,21 +24,21 @@ import { MdFlag } from "react-icons/md";
 
 export default function AggregateTable({ id, meta, onDelete }){
     /*
-    Displays a single pivot table with the option to download it as a csv.
-    - id (integer): the id of the pivot table
-    - breakdowns (object): the map of db values and labels to create readable labels
-    - onUpdate (function): handle edits to settings
-    - onDelete (function): handle deleting the table
+    Displays information about an aggregate group with the counts represented as a pivot table. 
+    - id (integer): the id of the aggregate group
     - meta (object): model information
+    - onDelete (function): what to do if the component is deleted
     */
     const { user } = useAuth();
+
     const [count, setCount] = useState(null); //information about the pivot table
-    const [viewingFlag, setViewingFlag] = useState(null);
+    const [viewingFlag, setViewingFlag] = useState(null); //is the user looking at a count's flags (and which one)
     //page meta
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [del, setDel] = useState(false);
 
+    //function to pull existing data
     const getCount = async() => {
         try {
             const url = `/api/aggregates/${id}`;
@@ -60,7 +60,7 @@ export default function AggregateTable({ id, meta, onDelete }){
         }
     }
 
-    //get the pivot table details
+    //get the count details once on load
     useEffect(() => {
         const loadInitial = async() => {
             getCount();
@@ -68,7 +68,7 @@ export default function AggregateTable({ id, meta, onDelete }){
         loadInitial()
     }, [id]);
 
-    //delete the pivot table
+    //delete the count
     const handleDelete = async() => {
         try {
             const response = await fetchWithAuth(`/api/aggregates/${id}/`, {
@@ -108,7 +108,9 @@ export default function AggregateTable({ id, meta, onDelete }){
         }
     }
 
+    //see helpers for how the matrix is built
     const matrix = useMemo(() => {
+        //if the count hasn't loaded yet, return an empty object
         if(!count?.counts) return {
             dims: null,
             uniques: [],
@@ -125,6 +127,7 @@ export default function AggregateTable({ id, meta, onDelete }){
     // create thead rows for column dims (may be zero)
     const theadRows = headerRows?.length ? headerRows : [];
 
+    //helper function to get a label from value (from the meta)
     const getLabelFromValue = (field, value) => {
         if(!meta) return null;
         const match = meta[field]?.find(range => range.value === value);
@@ -150,7 +153,8 @@ export default function AggregateTable({ id, meta, onDelete }){
                 <h1>{count.counts[0]?.value}</h1>
                 <i>Total Number</i>
             </div>}
-
+            
+            {/* If there is only one count in the group (one number), just display the number. */}
             {count?.counts?.length > 1 && <table style={{  marginLeft: 'auto', marginRight: 'auto' }}>
                 <thead>
                     {/* Top-left corner: show row dims labels stacked vertically */}

@@ -22,22 +22,27 @@ import Filter from '../reuseables/Filter';
 export default function Aggregates() {
     /*
     Displays a list of all aggregates. On selected, one will appear in the main panel.
+    Accepts optional param to preload page with one aggregate group in view
     */
-    //page information
 
     const { id } = useParams(); //optional param to load with a specfic aggie in view
     const { user } = useAuth();
+
+    const [aggies, setAggies] = useState([]); //list of aggregate groups
     const [meta, setMeta] = useState({}); //load meta (breakdown options)
-    const [aggies, setAggies] = useState([]); //list of aggregates
+    
     //page meta
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [viewing, setViewing] = useState(null); //controls which aggie is visible in the main panel
     const [hidden, setHidden] = useState(false); //controls sb visibility
+
+    //index view helpers
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     const [entries, setEntries] = useState(0);
     const [filters, setFilters] = useState(initial);
+    //filter helpers
     const [orgs, setOrgs] = useState([]);
     const [projects, setProjects] = useState([]);
     const [projectSearch, setProjectSearch] = useState('');
@@ -71,7 +76,7 @@ export default function Aggregates() {
 
     //get a lightweight list of aggregates
     useEffect(() => {
-        const getAggies = async() => {
+        const gigEmAggies = async() => { //future devs: change this function name when A&M loses a game
             try {
                 const filterQuery = 
                     (filters.organization ? `&organization=${filters.organization}` : '') + 
@@ -96,44 +101,44 @@ export default function Aggregates() {
                 setLoading(false);
             }
         }
-        getAggies();
+        gigEmAggies();
     }, [search, page, filters]);
 
-    //get a list of projects that this indicator is in
-        useEffect(() => {
-            const getProjects = async () => {
-                try {
-                    const url = `/api/manage/projects/?search=${projectSearch}` 
-                    const response = await fetchWithAuth(url);
-                    const data = await response.json();
-                    setProjects(data.results);
-                } 
-                catch (err) {
-                    setErrors(['Something went wrong. Please try again later.']);
-                    console.error('Failed to fetch related projects: ', err);
-                } 
-            };
-            getProjects();
-        }, [projectSearch]);
-    
-        //get a list of tasks this indicator is a part of (and therefore also a list of organizations)
-        useEffect(() => {
-            const getOrgs = async () => {
-                try {
-                    const url = `/api/organizations/?search=${orgSearch}`
-                    const response = await fetchWithAuth(url);
-                    const data = await response.json();
-                    setOrgs(data.results);
-                } 
-                catch (err) {
-                    setErrors(['Something went wrong. Please try again later.']);
-                    console.error('Failed to fetch related organizations: ', err);
-                } 
-            };
-            getOrgs();
-        }, [orgSearch]);
+    //get a list of projects to help with filtering
+    useEffect(() => {
+        const getProjects = async () => {
+            try {
+                const url = `/api/manage/projects/?search=${projectSearch}` 
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setProjects(data.results);
+            } 
+            catch (err) {
+                setErrors(['Something went wrong. Please try again later.']);
+                console.error('Failed to fetch related projects: ', err);
+            } 
+        };
+        getProjects();
+    }, [projectSearch]);
 
-    //if an id param was passed, set viewing to that aggie (if it exists)
+    //get a list of orgs to help with filtering
+    useEffect(() => {
+        const getOrgs = async () => {
+            try {
+                const url = `/api/organizations/?search=${orgSearch}`
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setOrgs(data.results);
+            } 
+            catch (err) {
+                setErrors(['Something went wrong. Please try again later.']);
+                console.error('Failed to fetch related organizations: ', err);
+            } 
+        };
+        getOrgs();
+    }, [orgSearch]);
+
+    //if an id param was passed, set viewing to that aggie (if it exists) by default
     useEffect(() => {
         if(!id) return;
         setViewing(id);
@@ -168,7 +173,7 @@ export default function Aggregates() {
                 </div>}
             </div>
 
-            {/* Sidebar Component*/}
+            {/* Sidebar Component with index view */}
             <div className={hidden ? styles.hiddenSB : styles.SB}>
                 <div className={styles.toggle} onClick={() => {setHidden(!hidden); visChange(!hidden)}}>
                     {hidden ? <BiSolidHide /> : <BiSolidShow />}

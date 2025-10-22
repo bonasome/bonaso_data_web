@@ -8,7 +8,9 @@ export function filterConfig(projects, projSearchCallback, orgs, orgSearchCallba
     /*
     Config function that tells the filter component (src/components/reuseables/Filter.jsx) what inputs to build
     - projects (array): an array of projects that can be selected
-    -  searchCallback (function): pass search value from select component to the API.
+    -  projSearchCallback (function): pass search value from select component to the API.
+    - orgs (array): an array of orgs that can be selected
+    -  orgSearchCallback (function): pass search value from select component to the API.
     */
     if(!projects) return []
     return [

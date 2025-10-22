@@ -2,6 +2,12 @@ import modalStyles from '../../../styles/modals.module.css';
 import theme from '../../../../theme/theme';
 
 export default function AssessmentIndicatorsModal({ assessment, meta, onClose}){
+    /*
+    Modal that will provide a list of assessment indicators with information about 
+    options/logic, so that users can see what an assessment is about when completing it
+    or reviewing tasks.
+    */
+
     //helper function that converts db values to labels
     const getLabelFromValue = (field, value) => {
         if(!meta) return null

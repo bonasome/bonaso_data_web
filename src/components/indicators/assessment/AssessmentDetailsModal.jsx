@@ -15,11 +15,12 @@ import { IoIosSave } from "react-icons/io";
 
 export default function AssessmentDetailsModal({ onCancel, onUpdate=null, existing=null }){
     /*
-
-    - onUpdate (function): what to do after succesful updating/creating a client object
+    Allows a user to create/edit an assessment name/description
+    - onUpdate (function): what to do after succesful updating/creating an assessment object
     - onCancel (function): how to close the modal
     - existing (object, optional): the existing object to edit
     */
+   
     const navigate = useNavigate();
     //page meta
     const[modalErrors, setModalErrors] = useState([])

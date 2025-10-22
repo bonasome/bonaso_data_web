@@ -28,16 +28,14 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
     - canDelete (boolean, optional): should this view show the delete button
     - onDelete (function, optional): what to do when this task is deleted
     - callback (function, optional): callback function that, when triggered, will pass this task to another component
+    - forAssessment(boolean, optional): if this task is in the respondetDetail component, slightly change the messaging
     */
+
     //component meta
     const [errors, setErrors] = useState([]);
     const [del, setDel] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [viewingAssessment, setViewingAssessment] = useState(false);
-    //(for interactions) if this card should be draggable, mark it as such
-    const handleDragStart = (e) => {
-        e.dataTransfer.setData('application/json', JSON.stringify(task));
-    };
 
     const type = task?.assessment ? 'assessment' : 'indicator';
     const typeLabel = task?.assessment ? 'Assessment' : 'Indicator';
@@ -92,7 +90,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
         }
     }
 
-     //helper function that converts db values to labels
+    //helper function that converts db values to labels
     const getLabelFromValue = (field, value) => {
         if(!meta) return null
         const match = meta[field]?.find(range => range.value === value);
@@ -114,6 +112,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
         )
 
     }
+    //if this task has an assessment, allow the user to open a modal that dispalys a list of indicators in the assessment
     if(viewingAssessment){
         return(
             <AssessmentIndicatorsModal assessment={task?.assessment} meta={meta} onClose={() => setViewingAssessment(false)} />
@@ -163,12 +162,15 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
         the API to update the results
     - callback (function, optional): function that allows information abouta  specific task to be passed to another
         component
-    - callbackText (string, optional): text to display on button that triggers callback function
+    - forAssessment (boolean, optional): determines what messaging to use on task card
+    - supportFilter(boolean, optional): determines if a user should have to select a project/org (for 
+        respondent detail component).
     */
     const { indicatorsMeta, setIndicatorsMeta } = useIndicators();
     const { user } = useAuth();
     //the tasks themselves (usually not pulled in very large numbers)
     const [ tasks, setTasks ] = useState([]);
+    
     //index helpers
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);

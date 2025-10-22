@@ -19,6 +19,8 @@ import { AiFillAlert } from "react-icons/ai";
 import { HiMiniBellAlert, HiMiniBellSnooze } from "react-icons/hi2";
 import { BiSolidMessageError, BiSolidMessageAltCheck } from "react-icons/bi";
 import { FaClipboardCheck } from "react-icons/fa";
+
+
 //simple alert card since these don't show up anywhere else
 function AlertCard({ alert, onUpdate }){
     // Component to display an alert's details
@@ -120,7 +122,6 @@ export default function UpdateBox(){
     //fetch announcements
     const getAnnouncements = async () => {
         try {
-            console.log('fetching announcements...');
             const url = `/api/messages/announcements/`
             const response = await fetchWithAuth(url);
             const data = await response.json();
@@ -135,11 +136,9 @@ export default function UpdateBox(){
     //fetch alerts
     const getAlerts = async () => {
         try {
-            console.log('fetching alerts...');
             const url = `/api/messages/alerts/`
             const response = await fetchWithAuth(url);
             const data = await response.json();
-            console.log(data)
             setAlerts(data.results);
         } 
         catch (err) {
@@ -154,7 +153,6 @@ export default function UpdateBox(){
     //get messages
     const getMessages = async () => {
         try {
-            console.log('fetching messages...');
             const url = `/api/messages/dm/`
             const response = await fetchWithAuth(url);
             const data = await response.json();

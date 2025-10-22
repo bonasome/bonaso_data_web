@@ -4,13 +4,16 @@ import Input from "../../reuseables/inputs/Input";
 import Field from "../../reuseables/forms/Field";
 import styles from '../../../styles/form.module.css';
 export default function OptionsBuilder() {
-    const { control } = useFormContext();
+    /*
+    Helper component within the AssessmentIndicator form that builds a dynamic array of options.
+    */
+    const { control } = useFormContext(); //context from FormProvider
 
     const { fields, append, remove } = useFieldArray({
         control,
         name: `options_data`,
-    });
-    console.log(fields)
+    }); //dynamic array of options
+
     const options = useWatch({
         control,
         name: "options_data",
@@ -23,7 +26,7 @@ export default function OptionsBuilder() {
             {fields.map((field, index) => {
                 return (
                     <div key={field.id} style={{ display: 'flex', flexDirection: 'row'}}>
-                        {/* Source Type */}
+                        {/* User enters a value into each row */}
                         <Field control={control} field={{ name: `options_data.${index}.name`, 
                             label: `${index+1}.`, type: "text", rules: { required: "Required" },
                         }} style={{ display: 'flex', flexDirection: 'row'}} />

@@ -231,7 +231,7 @@ export default function TargetModal(){
             labelField: 'display_name',  includeParams: [{field: 'organization', value: orgID}, {field: 'project', value: id}]},
     ]
     const asRelated = [
-        { name: 'as_percentage', label: 'Measure as a Percentage of Another Task', type: "checkbox", 
+        { name: 'as_percentage', label: 'Measure as a Percentage of Another Indicator', type: "checkbox", 
             tooltip: `Instead of setting this target as a number, you can set it based on the organization's
             achievement of another task (for example, 100% of all positive results are referred for further treatment).`
         },
@@ -244,11 +244,11 @@ export default function TargetModal(){
     ]
     //only show if as related is checked
     const relatedToInd = [
-        { name: 'related_to_id', label: 'Select Related Task (Required)', type: "model", IndexComponent: IndicatorsIndex, labelField: 'display_name', rules: { required: "Required" },
+        { name: 'related_to_id', label: 'Select Related Indicator (Required)', type: "model", IndexComponent: IndicatorsIndex, labelField: 'display_name', rules: { required: "Required" },
             includeParams: [{field: 'organization', value: orgID}, {field: 'project', value: id}], blacklist: [targetInd?.id],
             tooltip: `This is the task whose achievement should set the target for the task selected above.`
         },
-        { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Task (Required)', type: "number", rules: { required: "Required",
+        { name: 'percentage_of_related', label: 'Percentage of Achievement of Related Indicator (Required)', type: "number", rules: { required: "Required",
             min: { value: 1, message: "Must be at least 1" },
             max: { value: 100, message: "Cannot exceed 100" }, 
             }, placeholder: 'ex. 100...', tooltip: 'What percentage of acheivement for the related task should be the target (between 0 and 100)?'

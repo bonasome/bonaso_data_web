@@ -27,18 +27,24 @@ import { BsArrowBarDown, BsArrowBarUp } from 'react-icons/bs';
 
 export default function AssessmentIndicator({ meta, assessment, onUpdate, existing=null, onCancel=null}){
     /*
-    Form for editing/creating project deadlines. Requires a URL param for the related project (id) and 
-    accepts an optional deadlineID URL param for when editing an existing value. 
+    Form for editing an indicator from within an assessment. Should be used for any indicator in the assessment
+    category. 
+    - meta (object): model information
+    - assessment (object): information about the assessment this indicator is in
+    - onUpdate(function): call the api again when edited/deleted
+    - onCancel(function): stop editing
     */
 
+    const [editing, setEditing] = useState(existing ? false : true); //on create set as true, should not be false if there is no existing
+    const [expanded, setExpanded] = useState(false); //if non-editing card is expanded or not
+    
     //page meta
-    const [editing, setEditing] = useState(existing ? false : true);
-    const [expanded, setExpanded] = useState(false);
     const [del, setDel] = useState(false);
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [saving, setSaving] = useState(false);
 
-     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id:existing?.id });
+    //for drag and drop reordering
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id:existing?.id });
      
     //ref to scroll to errors
     const alertRef = useRef(null);
@@ -50,7 +56,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     }, [submissionErrors]);  
 
 
-    //delete the organization
+    //delete the indicator from the assessment
     const handleDelete = async() => {
         if(!existing?.id) return;
         try {
@@ -85,13 +91,14 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         } 
         catch (err) {
             setSubmissionErrors(['Something went wrong. Please try again later.'])
-            console.error('Failed to delete organization:', err);
+            console.error('Failed to delete indicator:', err);
         }
         finally{
             setDel(false);
         }
     } 
 
+    //helper function that pings the api when a reorder is requested (from drag and drop or buttons)
     const reorder = async(pos) => {
         if(!existing) return;
         if(pos < 0 || pos >= assessment.indicators.length){
@@ -135,7 +142,6 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
 
     //handle form submission
     const onSubmit = async(data, e) => {
-        let submitErrors = []
         data.assessment_id = assessment.id; //set the related project based on the URL param
         //wipe any option related data if the type does not allow for custom options (to clear stale states)
         if(!['multi', 'single', 'multint'].includes(data.type)){
@@ -152,23 +158,21 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         if(data.include_logic && data?.logic_data?.conditions?.length > 0){
             for(let i=0; i < data?.logic_data?.conditions?.length; i++){
                 let c = data.logic_data.conditions[i];
+                //since we collect condition type under value_option for better UI, here we need to parse that out again
                 if(['any', 'none', 'all'].includes(c.value_option)){
                     data.logic_data.conditions[i].condition_type = c.value_option;
                     data.logic_data.conditions[i].value_option = null;
-                    console.log(data.logic_data.conditions[i])
                 }
+                //remove value_option/condition of the source indicator is not of the correct type
                 if(data.logic_data.conditions[i].condition_type && !['single', 'multi'].includes(assessment.indicators.find(i => (i.id == c.source_indicator)).type)){
                     data.logic_data.conditions[i].condition_type = null
                     data.logic_data.conditions[i].value_option = null
                 }
             }
         }
-        if(submitErrors.length > 0){
-            setSubmissionErrors(submitErrors);
-            return;
-        }
+        //set category automatically
         data.category = 'assessment';
-        console.log(data)
+
         try{
             setSubmissionErrors([]);
             setSaving(true);
@@ -188,7 +192,6 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             }
             else{
                 const serverResponse = [];
-                console.log(returnData)
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
                         returnData[field].forEach(msg => {
@@ -212,6 +215,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         }
     }
     console.log(submissionErrors);
+
     //set default values
     const defaultValues = useMemo(() => {
         return {
@@ -257,9 +261,13 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
+
+    //wathces to help with logic
     const type = useWatch({ control, name: 'type', defaultValue: 'text' });
     const usingMatched = useWatch({ control, name: 'match_options_id', defaultValue: false });
     const usingLogic= useWatch({ control, name: 'include_logic', defaultValue: false });
+
+    //fields
     const basics = [
         { name: 'name', label: 'Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
             placeholder: "Write a simple name that tells people what they are supposed to collect...",
@@ -309,7 +317,9 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
         return match ? match.label : null;
     };
 
+    //if there's no meta options won't load properly
     if(!meta?.type) return <ComponentLoading />
+    //for drag and drop
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
@@ -320,6 +330,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
 
     const order = existing?.order ?? assessment.indicators.length
 
+    //return a expandable card if not editing and something exists
     if(!editing && existing){
         return (
             <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
@@ -376,7 +387,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             </div>
         )
     }
-
+    //if editing or creating, return a form
     else {
         return(
             <div>
@@ -397,6 +408,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                         {usingLogic && <LogicBuilder control={control} meta={meta} order={existing?.order ?? assessment.indicators.length} assessment={assessment} />}
                         {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <button type="submit" value='normal'><IoIosSave /> Save</button>
+                            {/* If this is an edit, cancel just sets editing false, if creating, it will call the onCancel prop */}
                             <button type="button" onClick={() => {existing ? setEditing(false) : onCancel()}}><FcCancel /> Cancel</button>
                         </div>}
                         {saving && <ButtonLoading />}
