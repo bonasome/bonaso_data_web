@@ -83,7 +83,6 @@ export function buildColHeaderTree(colDims, uniquesByKey) {
 export function buildRowTree(rowDims, uniquesByKey) {
     if (!rowDims.length) return [{ labelParts: [''], rowKey: '' }];
     const lists = rowDims.map(k => uniquesByKey[k]);
-    console.log(lists)
     const combos = cartesian(lists);
     return combos.map(combo => ({ labelParts: combo, rowKey: combo.join('||') }));
 }
@@ -116,7 +115,6 @@ export function buildCells(counts, rowDims, colDims, indicator) {
         if (!cells[rowKey][colKey]) cells[rowKey][colKey] = {id: item?.id, value: 0};
         cells[rowKey][colKey].value += v;
     });
-    console.log(cells)
     return cells;
 }
 

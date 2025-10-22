@@ -16,7 +16,9 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 - [Messages](#messages)
 - [Record](#record)
     - [Respondents](#respondents)
+        - [Assessments](#assessment-form)
     - [BatchRecord](#batch-record)
+    - [Aggregates](#aggregates)
     - [Events](#events)
     - [Social](#social)
 - [Projects](#projects)
@@ -25,6 +27,7 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
         - [Deadlines](#project-deadlines)
         - [ProjectOrganizations](#project-organization)
     - [Indicators](#indicators)
+    - [Assessments](#assessments)
     - [Organizations](#organizations)
     - [Clients](#clients)
 - [Analyze](#analyze)
@@ -109,8 +112,7 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
     - [HIVStatus](/src/components/respondents/respondentDetail/HIVStatus.jsx): For displaying/editing a users HIV Status.
     - [Pregnancies](/src/components/respondents/respondentDetail/Pregnancies.jsx): For displaying/editing a users pregnancy history.
     - [Tasks](/src/components/tasks/Tasks.jsx): For displaying a users tasks on the sidebar.
-    - [AddInteractions](/src/components/respondents/interactions/AddInteractions.jsx): For creating interactions from the tasks on the sidebar.
-    - [Interactions](/src/components/respondents/interactions/Interactions.jsx): For viewing/editing past interactions.
+    - [AssessmentHistory](/src/components/respondents/assessments/AssessmentHistory.jsx): For viewing/editing past interactions.
 
 **Create/Edit Component**: [RespondentForm](/src/components/respondents/RespondentForm.jsx)
 - **Relies on Components**
@@ -118,8 +120,16 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 
 **Note**: For logistical and privacy reasons, HIV status and pregnancy information is edited in the detail page, not the create/edit form. 
 
+#### Assessment Form
+**Description**: The assessment form component allows a user to complete an assessment for a specific respondent. The user will input indicators in the assessment and then submit it to collect data. 
+
+**Main Component**: [AssessmentForm](/src/components/respondents/assessments/AssessmentForm.jsx)
+**Relues on Components**:
+    - [AssessmentIndicatorModal](/src/components/indicators/assessment/AssessmentIndicatorsModal.jsx): Displays the full assessment, including logic, for reference.
+
+
 ### Batch Record
-**Description**: Allows a user to select a project/organization to get a template they can use to collect data via Excel and then upload that template into the system.
+**Description**: Allows a user to select an assessment/organization to get a template they can use to collect data via Excel and then upload that template into the system.
 
 **Main Component**: [BatchRecord](/src/components/batchRecord/BatchRecord.jsx)
 - **Relies on Component**:
@@ -127,18 +137,27 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 
 **Permission**: Only M&E Officers/Managers and admins can access this tool.
 
+### Aggregates
+**Description**: Allows a user to input aggreagted data for a specific indicator/project/organization over a specific time period.
+
+**Index Component**: [Aggregates](/src/components/aggregates/Aggregates.jsx)
+
+**Detail Component**: [AggregateTable](/src/components/aggregates/AggregateTable.jsx)
+
+**Create/Edit Component**: [AggregateForm](/src/components/aggregates/AggregateForm.jsx)
+
+**Permission**: Only M&E Officers/Managers and admins can use this tool. Clients can view counts but not create/edit them.
+
 ### Events
 **Description**: The events app is related to managing events that directly relate to project goals (not planning or monitoring meetings). It also serves as a place where users can enter aggregated information about indicators.
 
 **Index Component**: [EventsIndex](/src/components/events/EventsIndex.jsx)
 
 **Detail Component**: [EventDetail](/src/components/events/EventDetail.jsx)
-- **Relies on Components**:
-    - [Counts](/src/components/events/Counts.jsx): For creating and viewing demographic count tables related to events (displayed in a list with collapsable tables).
 
 **Create/Edit Component**: [EventsForm](/src/components/events/EventForm.jsx)
 
-**Permissions**: Available to admins, Clients, and M&E Officers/Managers (though clients cannot create/edit). By default editing is limited to M&E Officers/Managers from the hosting organization, with the only exception being that M&E Officers/Managers from participating child organizations/subgrantees can create/edit counts for their tasks in the event. 
+**Permissions**: Available to admins, Clients, and M&E Officers/Managers (though clients cannot create/edit). 
 
 ### Social
 **Description**: The social app is related to managing information about social media posts that contribute towards project goals.
@@ -205,14 +224,14 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 
 **Main Component**: [ProjectOrganization](/src/components/projects/ProjectOrganization.jsx)
 - **Relies on Components**:
-    - [Tasks](/src/components/tasks/Tasks.jsx): For displaying a list of tasks filtered to the project and organization.
+    - [Tasks](/src/components/tasks/Tasks.jsx): For displaying a list of tasks filtered to the project and organization (note that tasks are added seperately depending on if a standalone indicator is being assigned or group of indicators are being assigned via an assessment).
     - [Targets](/src/components/projects/targets/Targets.jsx): For displaying a list of targets (has a related seperate component that displays a create/edit [modal](/src/components/projects/targets/EditTargetModal.jsx)).
     - [NarrativeReportDownload](/src/components/narrativeReports/NarrativeReportDownload.jsx): Displays a list of related supporting documents that can be downloaded. Also contains a link to a seperate page for [uploading](/src/components/narrativeReports/NarrativeReportUpload.jsx) narrative reports that accepts the project and organization as URL params.
 
 **Permissions**: M&E Officers/Managers can assign tasks and targets for their child organization, but not for their own organization. Admins can assign tasks/targets for anyone. If an organization does not have a prent organization, M&E Officers/Managers and admins can assign subgrantees to them. If they are already a subgrantee/child organization of another org in this project, this section will be hidden entirely. 
 
 ### Indicators
-**Description**: The Indicators app is for managing content related to indicators, which track information about project goals.
+**Description**: The Indicators app is for managing content related to indicators, which track information about project goals. 
 
 **Index Component**: [IndicatorsIndex](/src/components/indicators/IndicatorsIndex.jsx)
 
@@ -220,7 +239,38 @@ Navigation is primarily handled in [src/routes/Routes.jsx](/src/routes/Routes.js
 
 **Create/Edit Component**: [IndicatorForm](/src/components/indicators/IndicatorDetail.jsx)
 
-**Permissions**: The indicator page network should only be visible to admins, since only they have permission to create/edit indicators. Other users interact with indicators via tasks assigned to their specific organization.
+**Notes**: Indicators that are meant to be linked directly to a respondent are grouped into "assessments" (see below). But some indicators, measuring things like events, social media posts, or one off measures (like number of staff trained) can be recorded as standalone indicators. Standalone indicators fall into the categories of social media, number of events, participating organizations (think subgrantees trained), and miscellanous (which are reported on via aggregate counts). Assessment category indicators are built seperately via the assessment tool (below).
+
+**Permissions**: The indicator page network should only be visible to admins, since only they have permission to create/edit indicators. Other users interact with indicators via tasks assigned to their specific organization (assigning tasks to subgrantees or for analytics).
+
+### Assessments
+**Description**:  Assessments are a tool that groups a set of related indicators that are meant to be collected about a respondent at the same time. Think of something like a GBV screening series (person was screened --> person was referred --> person received care). It helps better group a set of indicators in a way that is easy to track and respond at once. 
+
+**Index Component**: [AssessmentsIndex](/src/components/indicators/assessment/AssessmentsIndex.jsx)
+
+**Create Component**: [AssessmentDetailModal](/src/components/indicators/assessment/AssessmentDetailsModal.jsx): Simple modal where a user enters a name for an assessment. They can then start building indicators within the assessment at the assessment builder component.
+**Edit/Detail Component**: [AssessmentBuilder](/src/components/indicators/assessment/AssessmentBuilder.jsx)
+    - **Relies on Components**:
+        - [AssessmentIndicator](/src/components/indicators/assessment/AssessmentIndicator.jsx): Allows a user to create an indicator within this assessment.
+            - **Relies on Components**:
+                - [LogicBuilder](/src/components/indicators/assessment/LogicBuilder.jsx): A user can create logic conditionally show this indicator only if certain conditions (respondent fields or previous answers) are met.
+                - [OptionBuilder](/src/components/indicators/assessment/OptionsBuilder.jsx): A user can enter options the collect additional information. 
+
+
+**Permissions**: The assessment page network should only be visible to admins, since only they have permission to create/edit assessments and the indicators they contain. Other users interact with indicators via tasks assigned to their specific organization (assigning tasks to subgrantees or for analytics).
+
+**Notes**: Only assessment category indicators can be included in an assessment (automatically assigned when creating an indicator from an assessment). Indicators within assessments can have the following data types:
+    - Open Text: Allows a user to enter any text (ex. Why wasn't this person referred?)
+    - Number/Integer: Collects a numeric value (ex. Blood Pressure Reading)
+    - Yes/No: Allows a user to give a boolean response (true/false) to a question (ex. Screened for GBV)
+    - Multi Select: Allows a user to select any number of a list of preset options (ex. Types of NCDs Screened For)
+    - Single Select: Allows a user to select one option from a preset list (ex. Type of Counselling Session)
+    - Numbers by Category: Allows a user to enter a number broken down by predefined options (ex. Number of Condoms Distributed --> Male/Female).
+Multi Select, Numbers by Category, Integer, Single Select, and Yes/No type questions can be set to allow aggregates.
+
+Multi Select and Single Select can accept a "none" option, which means that even if a question is required, a user can deliberately select none of the above. This can be helpful for managing logic.
+
+Mutli Select questions can also be set to match options with a previous cateogry if responses to one indicator should be limited by another (Screened for These Types of NCDs --> Referred for These Types of NCDs)
 
 ### Organizations
 **Description**: The Organizations app is for managing content related to organizations.

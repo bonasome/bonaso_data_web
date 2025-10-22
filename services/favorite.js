@@ -9,7 +9,6 @@ export async function checkFavorited(model, id){
     state of the favorite button).
     */
     try {
-        console.log('checking favorite status...')
         const url = `/api/profiles/users/is-favorited/`;
         
         const data = {
@@ -57,7 +56,6 @@ export async function favorite(model, id, unfavorite = false) {
     unfavorite.
     */
     try {
-        console.log('favoriting object...')
         const url = unfavorite
         ? `/api/profiles/users/unfavorite/` //if unfavorite is true, use the correct url
         : `/api/profiles/users/favorite/`;

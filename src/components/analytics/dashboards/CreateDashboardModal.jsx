@@ -31,7 +31,6 @@ export default function CreateDashboardModal({ onUpdate, onClose, existing=null 
         if(data.project_id) data.project_id = data?.project_id?.id
         if(data.organization_id) data.organization_id = data?.organization_id?.id
         try{
-            console.log('submitting dashboard...', data)
             setSaving(true);
 
             const url = existing ? `/api/analysis/dashboards/${existing.id}/` : '/api/analysis/dashboards/';

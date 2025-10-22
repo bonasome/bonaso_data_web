@@ -43,7 +43,6 @@ export default function PivotTableSettings({ onClose, onUpdate, meta, existing=n
         }
         try{
             setSaving(true);
-            console.log('submitting data...', data);
             const url = existing ? `/api/analysis/tables/${existing.id}/` : `/api/analysis/tables/`;
             const response = await fetchWithAuth(url, {
                 method: existing ? 'PATCH' : 'POST',

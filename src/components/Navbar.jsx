@@ -51,8 +51,8 @@ function Dropdown({ name }){
             setLabels(labels)
         }
         if(name=='Analyze' && user.role == 'admin'){
-            let urls = ['/analytics', '/analytics/tables', '/analytics/lists', '/flags', '/analytics/site']
-            let labels = ['View Dashboards', 'Pivot Tables', 'Line Lists', 'View Flags', 'Site Analytics']
+            let urls = ['/analytics', '/analytics/tables', '/analytics/lists', '/flags']
+            let labels = ['View Dashboards', 'Pivot Tables', 'Line Lists', 'View Flags']
             setUrls(urls);
             setLabels(labels);
         }
@@ -149,7 +149,6 @@ function ThinMenu() {
             {['admin', 'manager', 'meofficer', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics'}>Dashboards</Link></div>} 
             {['admin', 'manager', 'meofficer', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics/tables'}>Pivot Tables</Link></div>} 
             {['admin', 'manager', 'meofficer', 'client'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/analytics/lists'}>Line Lists</Link></div>} 
-            {user.role == 'admin' && <div className={styles.menuBar}><Link to={'/analytics/site'}>Site Analytics</Link></div>}
 
             {['admin', 'meofficer', 'manager', 'client'].includes(user.role) && <h2>Team</h2>}
             {['admin', 'manager', 'meofficer'].includes(user.role) && <div className={styles.menuBar}> <Link to={'/profiles'}>My Team</Link></div>} 

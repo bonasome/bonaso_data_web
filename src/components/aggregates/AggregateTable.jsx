@@ -41,13 +41,11 @@ export default function AggregateTable({ id, meta, onDelete }){
 
     const getCount = async() => {
         try {
-            console.log('fetching aggregate details...');
             const url = `/api/aggregates/${id}`;
             const response = await fetchWithAuth(url);
             const data = await response.json();
             if(response.ok){
                 setCount(data)
-                console.log(data);
             }
             else{
                 setErrors(['Something went wrong. Please try again later.'])
@@ -73,7 +71,6 @@ export default function AggregateTable({ id, meta, onDelete }){
     //delete the pivot table
     const handleDelete = async() => {
         try {
-            console.log('deleting pivot table...');
             const response = await fetchWithAuth(`/api/aggregates/${id}/`, {
                 method: 'DELETE',
             });
@@ -140,7 +137,7 @@ export default function AggregateTable({ id, meta, onDelete }){
             {del && <ConfirmDelete name={'this aggregate count table'} onCancel={() => setDel(false)} onConfirm={handleDelete} /> }
             {viewingFlag && <FlagDetailModal flags={count.counts.find(c => (c.id == viewingFlag))?.flags} model={'aggregates.aggregatecount'} id={viewingFlag} onClose={() => {getCount(); setViewingFlag(null)}} /> }
             <div style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, padding: '4vh', margin: '2vh' }}>
-                <h1>Aggregate Count for {count.indicator.name}</h1>
+                <h1>Aggregate Count for {count.display_name}</h1>
                 <h3>By {count.organization.name} for {count.project.name}</h3>
                 <h3><i>From {prettyDates(count.start)} to {prettyDates(count.end)}</i></h3>
                 <UpdateRecord created_by={count.created_by} created_at={count.created_at} updated_by={count.updated_by} updated_at={count.updated_at} />

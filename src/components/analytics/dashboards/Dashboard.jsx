@@ -38,7 +38,6 @@ export default function Dashboard({ id, meta, breakdowns, onUpdate, onDelete }){
     const getData = async () => {
         if(!id) return;
         try {
-            console.log('fetching settings...');
             const url = `/api/analysis/dashboards/${id}/`
             const response = await fetchWithAuth(url);
             const data = await response.json();
@@ -70,7 +69,6 @@ export default function Dashboard({ id, meta, breakdowns, onUpdate, onDelete }){
     //what to do when a dashboard is deleted
     const handleDelete = async() => {
         try {
-            console.log('deleting dashboard...');
             const response = await fetchWithAuth(`/api/analysis/dashboards/${id}/`, {
                 method: 'DELETE',
             });

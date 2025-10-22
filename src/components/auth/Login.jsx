@@ -45,7 +45,6 @@ export default function Login() {
             });
             if (response.ok) {
                 await refreshAuth();
-                console.log('Login Successful!')
                 navigate('/'); //redirect the user on successful login
             } 
             else {

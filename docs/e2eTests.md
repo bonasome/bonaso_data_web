@@ -1,5 +1,8 @@
 # End to End/Integration Test Structure
 
+**!!Please Note!!** 
+Due to recent system changes as well as internal tranisitions, e2e tests are currently not entirely operational!
+
 End to end/integration tests are run via playwright. Uses a local test db (*bonaso_test_db*). 
 
 Run 

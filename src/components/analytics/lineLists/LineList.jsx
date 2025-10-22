@@ -38,7 +38,6 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
     //get the line list details
     const getLL = async() => {
         try {
-            console.log('fetching line list...');
             const url = `/api/analysis/lists/${id}`;
             const response = await fetchWithAuth(url);
             const data = await response.json();
@@ -105,7 +104,6 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
     //handle deleting the line list
     const handleDelete = async() => {
         try {
-            console.log('deleting line list...');
             const response = await fetchWithAuth(`/api/analysis/lists/${id}/`, {
                 method: 'DELETE',
             });

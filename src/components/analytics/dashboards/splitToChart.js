@@ -10,7 +10,6 @@ export default function splitToChart(data, map, axis=null, legend=null, stack=nu
     - stack (string, optional): the selected stack for bar charts
     - targets (array, optional): an array of information about targets associated with this chart
     */
-   console.log(data)
     const chartMap = {};
     const keyMeta = {};  // To track each key's breakdowns for stacking
     if(!data) return { dataArray: [], keys: []}
@@ -73,7 +72,6 @@ export default function splitToChart(data, map, axis=null, legend=null, stack=nu
             return yearA - yearB || quarterA - quarterB;
         });
     }
-    console.log(keyMeta)
     const keys = Object.entries(keyMeta).map(([compoundKey, { stackKey, legendKey }]) => ({
         key: compoundKey,
         bar: legendKey ?? '',

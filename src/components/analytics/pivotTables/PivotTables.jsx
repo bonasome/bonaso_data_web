@@ -12,6 +12,7 @@ import styles from '../dashboards/dashboard.module.css';
 
 import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 import { MdOutlinePivotTableChart } from "react-icons/md";
+import IndexViewWrapper from '../../reuseables/IndexView';
 
 export default function PivotTables() {
     /*
@@ -27,12 +28,14 @@ export default function PivotTables() {
     const [viewing, setViewing] = useState(null); //controls which dashboard is visible in the main panel
     const [hidden, setHidden] = useState(false); //controls sb visibility
     const [creating, setCreating] = useState(false); //controls visibility of create modal
+    const [page, setPage] = useState(1);
+    const [entries, setEntries] = useState(0);
+    const [search, setSearch] = useState('');
 
     //retrieve the model meta
     useEffect(() => {
         const getMeta = async() => {
             try {
-                console.log('fetching meta...');
                 const url = `/api/analysis/dashboards/meta/`
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
@@ -57,9 +60,8 @@ export default function PivotTables() {
 
     //get options list (basically the meta) for filters/legend/labels
     useEffect(() => {
-        const getEventBreakdowns = async () => {
+        const getBreakdowns = async () => {
             try {
-                console.log('fetching event details...');
                 const response = await fetchWithAuth(`/api/analysis/dashboards/breakdowns/`);
                 const data = await response.json();
                 if(response.ok){
@@ -71,20 +73,19 @@ export default function PivotTables() {
                 console.error('Failed to fetch event: ', err);
             } 
         }
-        getEventBreakdowns();
+        getBreakdowns();
     }, []);
 
     //get a list of the user's pivot tables
     useEffect(() => {
         const getPT = async() => {
             try {
-                console.log('fetching settings...');
-                const url = `/api/analysis/tables/`;
+                const url = `/api/analysis/tables?search=${search}&page=${page}`;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 if(response.ok){
-                    setPivotTables(data.results)
-                    if(data.results.length === 0) setCreating(true);
+                    setPivotTables(data.results);
+                    setEntries(data.count);
                 }
                 else{
                     console.error(data);
@@ -100,11 +101,10 @@ export default function PivotTables() {
             }
         }
         getPT();
-    }, []);
+    }, [search, page]);
 
     //handle a change to settings to make sure it reflects in the sidebar
     const handleUpdate = (data) => {
-        console.log(data)
         const others = pivotTables.filter((d) => (d.id != data.id));
         setPivotTables([...others, data]);
     }
@@ -144,12 +144,14 @@ export default function PivotTables() {
                 </div>
                 {!hidden && <div>
                     <h2>Your Pivot Tables</h2>
+                    <IndexViewWrapper entries={entries} page={page} onPageChange={setPage} onSearchChange={setSearch}>
                     <button onClick={() => setCreating(true)}> <MdOutlinePivotTableChart /> Create a New Pivot Table</button>
                     {pivotTables.length > 0 && pivotTables.map((pt) => (
                         <div onClick={() => setViewing(pt.id)} className={styles.dbCard}>
                             <h3>{pt.display_name}</h3>
                         </div>
                     ))}
+                    </IndexViewWrapper>
                 </div>}
             </div>
         </div>

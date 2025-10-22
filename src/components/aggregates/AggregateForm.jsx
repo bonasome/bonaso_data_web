@@ -129,7 +129,6 @@ export default function AggregateBuilder() {
             existingVals = existing.counts.reduce((acc, c) => {
                 const key = `${getDynamicKeys(existing?.counts[0]).map(d => d == 'option' ? (c.unique_only ? `${d}__Total` : `${d}__${c[d]?.id}`) : 
                     `${d}__${c[d]}`).join('___')}`;
-                console.log(key)
                 acc[key] = c.value;
                 return acc;
             }, {})
@@ -172,6 +171,7 @@ export default function AggregateBuilder() {
     // transform and submit
     const onSubmit = async (data, e) => {
         const payload = {
+            name: data.name,
             organization_id: data.organization_id.id,
             project_id: data.project_id.id,
             indicator_id: data.indicator_id.id,
@@ -204,9 +204,8 @@ export default function AggregateBuilder() {
                 body: JSON.stringify(payload),
         });
         const returnData = await response.json();
-        console.log(returnData)
        if(response.ok){
-                setSuccess(['Event created successfuly!']);
+                setSuccess(['Count created successfuly!']);
                 //depending on the button clicked, redirect the user to the appropriate page
                 if(action === 'create_another'){
                     setExisting(null);
@@ -218,7 +217,6 @@ export default function AggregateBuilder() {
                 }
             }
             else{
-                console.log(returnData)
                 const serverResponse = []
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
@@ -258,6 +256,9 @@ export default function AggregateBuilder() {
     const proj = watch('project_id');
     const org = watch('organization_id')
     const basics = [
+        { name: 'name', label: 'Name', type: 'text', placeholder: 'You can give this count a name to help you remember what it is for...',
+            tooltip: `If you do not give it a name, we will automatically generate one based on the indicator and reporting period.`
+        },
         { name: 'start', label: 'Start', type: 'date', rules: { required: 'Required' },
             tooltip: `Start of the reporting period.`
         },
@@ -289,14 +290,14 @@ export default function AggregateBuilder() {
     if (loading) return <Loading />
     return (
         <div className={styles.form}>
-        <h2 >Aggregate Builder</h2>
-        <Messages errors={submissionErrors} ref={alertRef}/>
+        <h2>Aggregate Builder</h2>
+        <Messages errors={submissionErrors} ref={alertRef} success={success}/>
         <form onSubmit={handleSubmit(onSubmit, onError)}>
             <div>
             <FormSection fields={basics} control={control} header="Information" />
             {proj && <FormSection fields={orgSelect} control={control} header="Information" />}
             {org && <FormSection fields={indSelect} control={control} header="Information" />}
-            {selectedIndicator && <FormSection fields={breakdownFields} control={control} header="Breakdowns" />}
+            {selectedIndicator && <FormSection fields={breakdownFields} control={control} header="Indicator" />}
             </div>
 
             {selectedIndicator && (

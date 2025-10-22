@@ -37,7 +37,6 @@ export default function LineListSettings({ onClose, onUpdate, existing=null }){
 
         try{
             setSaving(true);
-            console.log('submitting data...', data);
             const url = existing ? `/api/analysis/lists/${existing.id}/` : `/api/analysis/lists/`;
             const response = await fetchWithAuth(url, {
                 method: existing ? 'PATCH' : 'POST',

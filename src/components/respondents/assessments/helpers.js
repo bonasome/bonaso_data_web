@@ -86,7 +86,7 @@ export const calcDefault = (assessment, existing = null) => {
                       .filter(r => r.indicator.id == ind.id)
                       .map(r => r.response_option?.id)
                 : [];
-            if (ind.allow_none && firstMatch && (!val || val.length === 0)) {
+            if (ind.allow_none && existing && (!val || val.length === 0)) {
                 val = ['none'];
             }
             map[ind.id] = { value: val, date: rDate, location: rLocation };
@@ -102,8 +102,8 @@ export const calcDefault = (assessment, existing = null) => {
         else if (ind.type === 'single') {
             let val;
             if (existing) {
-                if (ind.allow_none) {
-                    val = firstMatch ? firstMatch?.response_option?.id ?? 'none' : null;
+                if (ind.allow_none && existing) {
+                    val = 'none';
                 } 
                 else {
                     val = firstMatch?.response_option?.id ?? null;

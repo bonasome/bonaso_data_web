@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/UserAuth';
 
 import fetchWithAuth from '../../../services/fetchWithAuth';
 import prettyDates from '../../../services/prettyDates';
+import { filterConfig, initial} from './filterConfig';
 
 import Loading from '../reuseables/loading/Loading';
 import Messages from '../reuseables/Messages';
@@ -14,6 +15,8 @@ import styles from '../analytics/dashboards/dashboard.module.css';
 
 import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 import { MdOutlinePivotTableChart } from "react-icons/md";
+import IndexViewWrapper from '../reuseables/IndexView';
+import Filter from '../reuseables/Filter';
 
 
 export default function Aggregates() {
@@ -31,12 +34,19 @@ export default function Aggregates() {
     const [errors, setErrors] = useState([]);
     const [viewing, setViewing] = useState(null); //controls which aggie is visible in the main panel
     const [hidden, setHidden] = useState(false); //controls sb visibility
+    const [page, setPage] = useState(1);
+    const [search, setSearch] = useState('');
+    const [entries, setEntries] = useState(0);
+    const [filters, setFilters] = useState(initial);
+    const [orgs, setOrgs] = useState([]);
+    const [projects, setProjects] = useState([]);
+    const [projectSearch, setProjectSearch] = useState('');
+    const [orgSearch, setOrgSearch] = useState('');
 
     //retrieve the model meta
     useEffect(() => {
         const getMeta = async() => {
             try {
-                console.log('fetching meta...');
                 const url = `/api/aggregates/meta/`
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
@@ -63,13 +73,15 @@ export default function Aggregates() {
     useEffect(() => {
         const getAggies = async() => {
             try {
-                console.log('fetching settings...');
-                const url = `/api/aggregates/`;
+                const filterQuery = 
+                    (filters.organization ? `&organization=${filters.organization}` : '') + 
+                    (filters.project ? `&project=${filters.project}` : '');
+                const url = `/api/aggregates?page=${page}&search=${search}` + filterQuery;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 if(response.ok){
-                    setAggies(data.results)
-                    if(data.results.length === 0) setCreating(true);
+                    setAggies(data.results);
+                    setEntries(data.count);
                 }
                 else{
                     console.error(data);
@@ -85,7 +97,41 @@ export default function Aggregates() {
             }
         }
         getAggies();
-    }, []);
+    }, [search, page, filters]);
+
+    //get a list of projects that this indicator is in
+        useEffect(() => {
+            const getProjects = async () => {
+                try {
+                    const url = `/api/manage/projects/?search=${projectSearch}` 
+                    const response = await fetchWithAuth(url);
+                    const data = await response.json();
+                    setProjects(data.results);
+                } 
+                catch (err) {
+                    setErrors(['Something went wrong. Please try again later.']);
+                    console.error('Failed to fetch related projects: ', err);
+                } 
+            };
+            getProjects();
+        }, [projectSearch]);
+    
+        //get a list of tasks this indicator is a part of (and therefore also a list of organizations)
+        useEffect(() => {
+            const getOrgs = async () => {
+                try {
+                    const url = `/api/organizations/?search=${orgSearch}`
+                    const response = await fetchWithAuth(url);
+                    const data = await response.json();
+                    setOrgs(data.results);
+                } 
+                catch (err) {
+                    setErrors(['Something went wrong. Please try again later.']);
+                    console.error('Failed to fetch related organizations: ', err);
+                } 
+            };
+            getOrgs();
+        }, [orgSearch]);
 
     //if an id param was passed, set viewing to that aggie (if it exists)
     useEffect(() => {
@@ -130,12 +176,14 @@ export default function Aggregates() {
                 {!hidden && <div>
                     <h2>Your Aggregates</h2>
                     {!['client'].includes(user.role) && <Link to={'/aggregates/new'}><button><MdOutlinePivotTableChart /> Create a New Aggreate</button></Link>}
+                    <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter initial={initial} config={filterConfig(projects, (s) => setProjectSearch(s), orgs, (s) => setOrgSearch(s) )} onFilterChange={setFilters} /> }>
                     {aggies.length > 0 && aggies.map((ag) => (
                         <div onClick={() => setViewing(ag.id)} className={styles.dbCard}>
-                            <h3>{ag.indicator.name}</h3>
+                            <h3>{ag.display_name}</h3>
                             <p><i>{prettyDates(ag.start)} - {prettyDates(ag.end)}</i></p>
                         </div>
                     ))}
+                    </IndexViewWrapper>
                 </div>}
             </div>
         </div>

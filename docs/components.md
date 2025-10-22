@@ -63,11 +63,10 @@ Inputs should always be wrapped in our reusable components rather than raw HTML 
 <MultiCheckbox name="kp_status" label="KP Status" options={[{value: 1, label: 'Option1'}, {value: 2, label: 'Option2'}]} value={state} onChange={(v) => setState(v)} /> //onChange: returns array of values
 ```
 
-- [MultiCheckboxNum](/src/components/reuseables/inputs/MultiCheckboxNum.jsx): A list of checkboxes that conditionally show a numeric input if checked. Returns an array of objects with data about the checked item and the number entered. Specifically designed for interactions that need a subcategory and a number, but possibly expandable. 
+- [MultiInt](/src/components/reuseables/inputs/MultiInt.jsx): Gives a list of numeric entries that correspond to a specific option. Used for the "Multiple Number" indicator type, where a user can segment numbers within one indicator by category. 
 ```jsx
 <MultiCheckboxNum name="condoms" label="Condoms Received" options={[{id: 1, name: 'Option1'}, {id: 2, name: 'Option2'}]} value={state} onChange={(v) => setState(v)} /> 
-//when check an input will appear allowing the user to type a number associated with that selected option
-//onChange: returns an array of objects [{id: null, subcategory: {id: 1}, numeric_component: 3}]
+//onChange: returns an array of objects [{value: null, option: id: 1}]
 ```
 
 - [RadioButtons](/src/components/reuseables/inputs/RadioButtons.jsx): A custom radio button component with custom icons that allows a user to select a single option.
@@ -79,14 +78,12 @@ Inputs should always be wrapped in our reusable components rather than raw HTML 
 ```jsx
 <Select name="age_range" label="Age Range" options={[{value: 1, label: 'Option1'}, {value: 2, label: 'Option2'}]} value={state} onChange={(v) => setState(v)} search={true} /> //onChange: returns selected value
 ```
-    - *Note*: For selects with many options, enabling 'search=true' in params will display an input that the user can type into the filter the list (can also be used for selects that pull from paginated APIs)   
+    - *Note*: For selects with many options, enabling 'search=true' in params will display an input that the user can type into the filter the list (can also be used for selects that pull from paginated APIs if a searchCallback is provided)   
 
 - [Input](/src/components/reuseables/inputs/Input.jsx): A basic text input component. Can be passed a type prop that can specify for textarea, numbers, email, or date inputs. 
 ```jsx
 <Input name='first_name' label='First name' onChange={(e) => setState(e.target.value)} value={state} type={'text'} /> //returns string of typed value
 ```
-
-- [SimpleDynamicRows](/src/components/reuseables/inputs/SimpleDynamicRows.jsx): This component is used for creating dynamic lists of text inputs and returns an array. It is really only used for creating Indicator Subcategories (and has custom deprecation logic for that), but could be expanded if similar needs arise in the future. For example, see [`IndicatorForm.jsx`](/src/components/indicators/IndicatorForm.jsx).
 
 - [ImageSelect](/src/components/reuseables/inputs/ImageSelect.jsx): This component displays a list of icons that, when hovered over, also show text. Can be used to select one or multiple items, and will return a single value or array as specified. Used to add a bit of visual flare.
 ```jsx
@@ -102,9 +99,6 @@ Inputs should always be wrapped in our reusable components rather than raw HTML 
 <ModelMultiSelect IndexComponent={IndexComponent} onChange={(v) => handleUpdate(v)} callbackText='Add Item' />
 //returns an array of the selected objects
 ```
-
-**!!Deprecated!!**
-- [SimpleSelect](/src/components/reuseables/inputs/SimpleSelect.jsx): This is an overly complicated version of "Select" that should not be used, but still appears in a few components.
 
 ---
 

@@ -199,7 +199,7 @@ export default function AssessmentsIndex({ callback=null, includeParams=[], excl
     if(loading || !assessments) return callback ? <ComponentLoading /> : <Loading /> //on callback don't show full load
     return(
         <div className={styles.index}>
-            <h1>All Assessments</h1>
+            {!callback && <h1>All Assessments</h1>}
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} >
                 {creating && <AssessmentDetailsModal onCancel={() => setCreating(false)}/> }
                 {['admin'].includes(user.role) && 

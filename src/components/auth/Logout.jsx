@@ -30,7 +30,6 @@ export default function Logout() {
                 if (response.ok) {
                     setUser(null);
                     setLoggedIn(false);
-                    console.log('Logged out successfuly.');
                     navigate('/users/login');
                 } 
                 else {

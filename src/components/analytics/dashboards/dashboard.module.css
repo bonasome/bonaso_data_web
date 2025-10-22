@@ -24,6 +24,10 @@
 .toggle > *{
     position: absolute;
     margin-top: 43vh;
+    z-index: 1000;
+    margin-left: -3vh;
+    padding: .5vh;
+    background-color: var(--bonaso-main);
 }
 .mainPanel {
     margin-left: 4vh;
@@ -42,7 +46,7 @@
 }
 .SB {
     padding: 4vh;
-    height: 84vh;
+    height: 84vh;   
     background-color: var(--bonaso-dark-accent);
     overflow-y: scroll;
 }

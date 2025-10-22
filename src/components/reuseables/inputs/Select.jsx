@@ -54,6 +54,7 @@ export default function Select({ name, label, onChange, onBlur, value, options, 
                     name={name}
                     onChange={(e) => onChange(event.target.value)}
                     value={value}
+                    style={{ padding: 10, margin: 10, maxWidth: '40vh', borderRadius: 0}}
                 >
                     {filteredOptions.map(({ value, label }) => (
                         <option key={value + label} value={value}>

@@ -23,14 +23,12 @@ export default function SiteAnalytics(){
     useEffect(() => {
         const getData = async() => {
             try{
-                console.log('fetching hacker data...');
                 const response = await fetchWithAuth('/api/analysis/meta/site-analytics/');
                 const data = await response.json();
                 data.forEach(r => {
                     r.path = r.path.replace(/\/\d+(?=\/|$)/g, "/:id").replace('/api/', '');
                 });
                 setHackerData(data);
-                console.log(data)
             }
             catch(err){
                 setErrors(['Something went wrong. Please try again later.']);
@@ -41,7 +39,7 @@ export default function SiteAnalytics(){
             }
         }
         getData();
-    }, [])
+    }, []);
 
     //list of bad requests from the previous 24 hours (for identifying potential hotfixes)
     const now = new Date();
@@ -52,7 +50,6 @@ export default function SiteAnalytics(){
         return hackerData.filter((r) => (![200, 201, 207, 204, 401].includes(r.status_code) && new Date(r.timestamp) >= oneDayAgo));
     }, [hackerData])
         
-
     if(loading) return <Loading />
     return(
         <div>

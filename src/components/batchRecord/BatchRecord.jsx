@@ -69,7 +69,6 @@ export default function BatchRecord(){
             return;
         }
         try{
-            console.log('fetching template...');
             setGettingFile(true);
             const response = await fetchWithAuth(`/api/record/interactions/template/`, {
                 method: 'POST',
@@ -155,13 +154,11 @@ export default function BatchRecord(){
         formData.append('file', file);
         try{
             setUploading(true);
-            console.log('submitting file...')
             const response = await fetchWithAuth(`/api/record/interactions/upload/`, {
                 method: 'POST',
                 body: formData,
             });
             const data = await response.json();
-            console.log(data)
             if(response.ok){
                 if(data.errors.length == 0 && data.warnings.length ==0){
                     setSuccess(['Uploaded with no errors. Great work!']);

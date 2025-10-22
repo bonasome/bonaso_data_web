@@ -33,7 +33,6 @@ export default function EnterEmail(){
             return;
         }
         try{
-            console.log('Submitting email...');
             setSaving(true);
             const response = await fetch(`${baseUrl}/api/users/manage/users/reset_password/`, {
                 method: 'POST',

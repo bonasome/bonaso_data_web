@@ -38,7 +38,6 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
     //get the pivot table details
     const getPT = async() => {
         try {
-            console.log('fetching pivot table...');
             const url = `/api/analysis/tables/${id}`;
             const response = await fetchWithAuth(url);
             const data = await response.json();
@@ -105,7 +104,6 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
     //delete the pivot table
     const handleDelete = async() => {
         try {
-            console.log('deleting pivot table...');
             const response = await fetchWithAuth(`/api/analysis/tables/${id}/`, {
                 method: 'DELETE',
             });
@@ -159,6 +157,7 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
             {editing && <PivotTableSettings existing={table} onUpdate={(data) => {getPT(); onUpdate(data)}} onClose={() => setEditing(false)} meta={meta} />}
             <div className={styles.segment}>
                 <h1>{table.display_name}</h1>
+                {<p><strong>{table.indicator.name}</strong></p>}
                 <Messages errors={errors} />
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <ButtonHover callback={() => setEditing(true)} noHover={<IoSettingsSharp />} hover='Edit Pivot Table' />

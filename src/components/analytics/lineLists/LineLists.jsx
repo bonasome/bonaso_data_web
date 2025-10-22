@@ -12,6 +12,7 @@ import styles from '../dashboards/dashboard.module.css';
 
 import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 import { MdOutlineViewList } from "react-icons/md";
+import IndexViewWrapper from '../../reuseables/IndexView';
 
 export default function LineLists() {
     /*
@@ -26,13 +27,14 @@ export default function LineLists() {
     const [viewing, setViewing] = useState(null); //controls which list is visible in the main panel
     const [hidden, setHidden] = useState(false); //controls sb visibility
     const [creating, setCreating] = useState(false); //controls visibility of create modal
-
+    const [page, setPage] = useState(1);
+    const [entries, setEntries] = useState(0);
+    const [search, setSearch] = useState('');
 
     //get options list (basically the meta) for filters/legend/labels
     useEffect(() => {
-        const getEventBreakdowns = async () => {
+        const getBreakdowns = async () => {
             try {
-                console.log('fetching event details...');
                 const response = await fetchWithAuth(`/api/analysis/dashboards/breakdowns/`);
                 const data = await response.json();
                 if(response.ok){
@@ -44,20 +46,19 @@ export default function LineLists() {
                 console.error('Failed to fetch event: ', err);
             } 
         }
-        getEventBreakdowns();
+        getBreakdowns();
     }, []);
 
     //get the list of line lists
     useEffect(() => {
         const getLL = async() => {
             try {
-                console.log('fetching settings...');
-                const url = `/api/analysis/lists/`;
+                const url = `/api/analysis/lists?search=${search}&page=${page}`;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 if(response.ok){
                     setLLs(data.results)
-                    if(data.results.length === 0) setCreating(true);
+                    setEntries(data.count);
                 }
                 else{
                     console.error(data);
@@ -73,11 +74,10 @@ export default function LineLists() {
             }
         }
         getLL();
-    }, []);
+    }, [search, page]);
 
     //on update to any settings, make sure it reflects in the sidebar
     const handleUpdate = (data) => {
-        console.log(data)
         const others = lls.filter((l) => (l.id != data.id));
         setLLs([...others, data]);
     }
@@ -112,17 +112,19 @@ export default function LineLists() {
 
             {/* Sidebar Component*/}
             <div className={hidden ? styles.hiddenSB : styles.SB}>
-                <div className={styles.toggle} onClick={() => {setHidden(!hidden); visChange(!hidden)}}>
+                <div className={styles.toggle} onClick={() => {setHidden(!hidden)}}>
                     {hidden ? <BiSolidHide /> : <BiSolidShow />}
                 </div>
                 {!hidden && <div>
                     <h2>Your Line Lists</h2>
+                    <IndexViewWrapper onPageChange={setPage} onSearchChange={setSearch} page={page} entries={entries}>
                     <button onClick={() => setCreating(true)}> <MdOutlineViewList /> Create a New Line List</button>
                     {lls.length > 0 && lls.map((l) => (
                         <div onClick={() => setViewing(l.id)} className={styles.dbCard}>
                             <h3>{l.name}</h3>
                         </div>
                     ))}
+                    </IndexViewWrapper>
                 </div>}
             </div>
         </div>

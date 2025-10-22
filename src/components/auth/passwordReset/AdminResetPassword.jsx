@@ -34,7 +34,6 @@ export default function AdminResetPassword({ id }){
             return;
         }
         try{
-            console.log('resetting password...')
             const response = await fetchWithAuth(`/api/users/admin-reset-password/`, {
                 method: 'POST',
                 body: JSON.stringify({
@@ -50,11 +49,9 @@ export default function AdminResetPassword({ id }){
             }
             else{
                 const returnData = await response.json();
-                console.log(returnData)
             }
         }
         catch(err){
-            console.log(err)
             setErrors(['Something went wrong. Please try again later.'])
         }
         finally{

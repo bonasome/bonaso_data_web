@@ -98,7 +98,6 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
             }
             else{
                 try{
-                    console.log('fetching model info...')
                     const response = await fetchWithAuth(`/api/social/posts/meta/`);
                     const data = await response.json();
                     setSocialPostsMeta(data);
@@ -132,7 +131,6 @@ export default function ChartFilters({ chart, options, dashboard, onUpdate }){
     //update settings and refresh data on change
     const handleUpdate = async(data) => {
         try{
-            console.log('submiting data...', data)
             setSaving(true);
             const response = await fetchWithAuth(`/api/analysis/dashboards/${dashboard.id}/filters/${chart.id}/`, {
                 method: 'PATCH',

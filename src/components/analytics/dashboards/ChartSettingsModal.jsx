@@ -90,7 +90,6 @@ export default function ChartSettingsModal({ dashboard, onUpdate, onClose, meta,
         if(data.repeat_n === '') data.repeat_n = null; //same with this int
 
         try{
-            console.log('submiting data...', data)
             setSaving(true);
             const response = await fetchWithAuth(`/api/analysis/dashboards/${dashboard.id}/charts/`, {
                 method: 'PATCH',
@@ -162,7 +161,6 @@ export default function ChartSettingsModal({ dashboard, onUpdate, onClose, meta,
             setFocus(firstError); // sets cursor into the field
             // scroll the element into view smoothly
             const field = document.querySelector(`[name="${firstError}"]`);
-            console.log(firstError, field)
             if (field && field.scrollIntoView) {
                 field.scrollIntoView({ behavior: "smooth", block: "center" });
             }

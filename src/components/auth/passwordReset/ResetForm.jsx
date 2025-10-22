@@ -37,7 +37,6 @@ export default function ResetForm(){
             return;
         }
         try{
-            console.log('Submitting request...');
             setSaving(true);
             response = await fetch(`${baseUrl}/api/users/manage/users/reset_password_confirm/`, {
                 method: 'POST',

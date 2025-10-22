@@ -14,6 +14,7 @@ import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 import { MdInsertChart } from "react-icons/md";
 import { FaChartPie } from "react-icons/fa6";
 import { FaChartGantt } from "react-icons/fa6";
+import IndexViewWrapper from '../../reuseables/IndexView';
 
 export default function Dashboards() {
     /*
@@ -31,12 +32,14 @@ export default function Dashboards() {
     const [hidden, setHidden] = useState(false); //controls sb visibility
     const [creating, setCreating] = useState(false); //controls visibility of create modal
 
+    const [search, setSearch] = useState('');
+    const [entries, setEntries] = useState(0);
+    const [page, setPage] = useState(1);
 
     //load the dashboard metea
     useEffect(() => {
         const getMeta = async() => {
             try {
-                console.log('fetching settings...');
                 const url = `/api/analysis/dashboards/meta/`
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
@@ -64,13 +67,12 @@ export default function Dashboards() {
     useEffect(() => {
         const getDashboards = async() => {
             try {
-                console.log('fetching settings...');
-                const url = `/api/analysis/dashboards/`
+                const url = `/api/analysis/dashboards?search=${search}&page=${page}`;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 if(response.ok){
+                    setEntries(data.count)
                     setDashboards(data.results)
-                    if(data.results.length === 0) setCreating(true);
                 }
                 else{
                     console.error(data);
@@ -86,13 +88,12 @@ export default function Dashboards() {
             }
         }
         getDashboards();
-    }, []);
+    }, [search, page]);
 
     //get options list (basically the meta) for filters/legend/labels
     useEffect(() => {
         const getEventBreakdowns = async () => {
             try {
-                console.log('fetching event details...');
                 const response = await fetchWithAuth(`/api/analysis/dashboards/breakdowns/`);
                 const data = await response.json();
                 if(response.ok){
@@ -144,17 +145,19 @@ export default function Dashboards() {
 
             {/* Sidebar Component*/}
             <div className={hidden ? styles.hiddenSB : styles.SB}>
-                <div className={styles.toggle} onClick={() => {setHidden(!hidden); visChange(!hidden)}}>
+                <div className={styles.toggle} onClick={() => {setHidden(!hidden)}}>
                     {hidden ? <BiSolidHide /> : <BiSolidShow />}
                 </div>
                 {!hidden && <div>
                     <h2>Your Dashboards</h2>
+                    <IndexViewWrapper onSearchChange={setSearch} entries={entries} page={page} onPageChange={setPage}>
                     <button onClick={() => setCreating(true)}> <FaChartPie /> Create a New Dashboard</button>
                     {dashboards.length > 0 && dashboards.map((db) => (
                         <div onClick={() => setViewing(db.id)} className={styles.dbCard}>
                             <h3>{db.name}</h3>
                         </div>
                     ))}
+                    </IndexViewWrapper>
                 </div>}
             </div>
         </div>
