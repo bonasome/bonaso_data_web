@@ -56,8 +56,8 @@ export default function ResponseField ({ indicator, defaultVal, isVisible, onFie
     }, [isVisible, unregister, indicator.id]);
 
     useEffect(() => {
-        if (defaultVal) {
-            setValue(`response_data.${indicator.id}`, defaultVal, { shouldDirty: false });
+        if (defaultVal && isVisible) {
+            resetField(`response_data.${indicator.id}`, { defaultValue: defaultVal });
         }
     }, [defaultVal, isVisible, indicator.id, setValue]);
 
