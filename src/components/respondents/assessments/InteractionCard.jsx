@@ -14,6 +14,7 @@ import ButtonHover from '../../reuseables/inputs/ButtonHover';
 import UpdateRecord from '../../reuseables/meta/UpdateRecord';
 import FlagModal from '../../flags/FlagModal';
 import FlagDetailModal from "../../flags/FlagDetailModal";
+import Messages from '../../reuseables/Messages';
 
 import styles from '../respondentDetail.module.css';
 import errorStyles from '../../../styles/errors.module.css';
@@ -36,7 +37,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
     const [del, setDel] = useState(false);
     const [flagging, setFlagging] = useState(false); //controls when a user is flagging the interaction
     const [viewFlags, setViewFlags] = useState(false); //controls when a user is viewing flag information
-
+    const [submissionErrors, setSubmissionErrors] = useState([]);
     
 
     //quick memo to check for an unresolved flag, will display a warning if so
@@ -184,6 +185,8 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             </div>}
             <div>
                 <h2>{interaction.task.display_name}</h2>
+                <Messages errors={submissionErrors} />
+                <p><i>With respondent {interaction.respondent.display_name}</i></p>
                 <p>On: {prettyDates(interaction.interaction_date)}</p>
                 <p>At: {interaction.interaction_location}</p>
             </div>

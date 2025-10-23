@@ -161,6 +161,7 @@ export default function AssessmentForm(){
         data.respondent_id = id;
         data.task_id = taskID;
         try{
+            console.log(data)
             setSaving(true);
             const url = existing?.id ? `/api/record/interactions/${existing?.id}/` : `/api/record/interactions/`;
             const response = await fetchWithAuth(url, {
@@ -245,6 +246,7 @@ export default function AssessmentForm(){
     //determine what indicators should be visible
     const visibilityMap = useMemo(() => {
         if(!assessment || !respondent) return {};
+        if(irID && !existing) return;
         const map = {}
         assessment.indicators.forEach((ind) => {
              const logic = ind.logic;
@@ -264,6 +266,7 @@ export default function AssessmentForm(){
     //unregister invisible fields so stale values aren't passed
     useEffect(() => {
         if (!assessment || !respondent) return;
+        if(irID && !existing) return;
         assessment.indicators.forEach(ind => {
             if (!visibilityMap[ind.id]) {
                 const currentValue = responseInfo?.[ind.id]?.value;
@@ -278,6 +281,7 @@ export default function AssessmentForm(){
 
     //create an options map (mostly for matched options)
      const optionsMap = useMemo(() => {
+        if(irID && !existing) return;
         if(!assessment) return {};
         const map = {}
         assessment.indicators.forEach((ind) => {
@@ -304,6 +308,7 @@ export default function AssessmentForm(){
 
     //recalculate options based on prerequisite selections
     useEffect(() => {
+        if(irID && !existing) return;
         if(!assessment || !optionsMap) return;
         assessment.indicators.forEach((ind) => {
             const options = optionsMap[ind.id]
