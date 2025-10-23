@@ -261,7 +261,7 @@ export default function AssessmentForm(){
             }
         });
         return map;
-    }, [responseInfo]);
+    }, [responseInfo, existing]);
 
     //unregister invisible fields so stale values aren't passed
     useEffect(() => {
@@ -277,7 +277,7 @@ export default function AssessmentForm(){
                 }
             }
         });
-    }, [visibilityMap, unregister, assessment, respondent]);
+    }, [visibilityMap, unregister, assessment, respondent, existing]);
 
     //create an options map (mostly for matched options)
      const optionsMap = useMemo(() => {
@@ -304,7 +304,7 @@ export default function AssessmentForm(){
             map[ind.id] = opts
         })
         return map
-    }, [assessment, responseInfo]);
+    }, [assessment, responseInfo, existing]);
 
     //recalculate options based on prerequisite selections
     useEffect(() => {
@@ -332,7 +332,7 @@ export default function AssessmentForm(){
                 }
             }
         });
-    }, [optionsMap]);
+    }, [optionsMap, existing]);
 
     //constant fields for all assessments
     const basics = [
