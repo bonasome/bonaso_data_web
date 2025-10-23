@@ -67,7 +67,7 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
             // Check if this indicator was already handled
             let existing = consolidated.find(i => i.indicator.id === r.indicator.id);
 
-            if (r.indicator.type === 'multi') {
+            if (r.indicator.type === 'multi' && !r.response_none) {
                 if (existing) {
                     // Combine response options
                     existing.response_option = [
@@ -198,13 +198,21 @@ export default function InteractionCard({ interaction, onUpdate, onDelete }){
                                 const rDate = r.response_date != interaction.interaction_date ? `(${prettyDates(r.response_date)})` : '';
                                 const rLoc = r.response_location != interaction.interaction_location ? `(${r.response_location})` : '';
                                 const app = rDate + ' ' + rLoc;
-                                if(r.indicator.type == 'multi'){
+                                if(r.response_none){
+                                    return(
+                                        <div>
+                                            <h4>{r.indicator.order + 1}. {r.indicator.name}</h4>
+                                            <ul><li>"<i>None Selected" {app}</i></li> </ul>
+                                        </div>
+                                    )
+                                }
+                                else if(r.indicator.type == 'multi'){
                                     return(<div>
                                         <h4>{r.indicator.order + 1}. {r.indicator.name}</h4>
                                         <ul>{r.response_option.map((o) => (<li>{o.name} {app}</li>))}</ul>
                                     </div>)
                                 }
-                                 if(r.indicator.type == 'multint'){
+                                else if(r.indicator.type == 'multint'){
                                     return(<div>
                                         <h4>{r.indicator.order + 1}. {r.indicator.name}</h4>
                                         <ul>{r.response_value.map((v) => (<li>{v} {app}</li>))}</ul>

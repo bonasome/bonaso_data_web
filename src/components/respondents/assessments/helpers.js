@@ -111,8 +111,7 @@ export const calcDefault = (assessment, existing = null) => {
                       .filter(r => r.indicator.id == ind.id)
                       .map(r => r.response_option?.id)
                 : []; //build an array from all responses from this indicator
-            if (ind.allow_none && existing && (!val || val.length === 0)) {
-                //a none option isn't stored, but if something exists and this should be visible we'll assume none was selected
+            if (ind.allow_none && firstMatch.response_none) {
                 val = ['none'];
             }
             map[ind.id] = { value: val, date: rDate, location: rLocation };
@@ -128,8 +127,7 @@ export const calcDefault = (assessment, existing = null) => {
         else if (ind.type === 'single') {
             let val;
             if (existing) {
-                if (ind.allow_none && existing) {
-                    //a none option isn't stored, but if something exists and this should be visible we'll assume none was selected
+                if (ind.allow_none && firstMatch.response_none) {
                     val = 'none';
                 } 
                 else {
