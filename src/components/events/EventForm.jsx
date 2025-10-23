@@ -14,6 +14,7 @@ import ReturnLink from '../reuseables/ReturnLink';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import OrganizationsIndex from '../organizations/OrganizationsIndex';
 import Tasks from '../tasks/Tasks';
+import ProjectIndex from '../projects/ProjectsIndex';
 
 import styles from '../../styles/form.module.css';
 
@@ -121,6 +122,16 @@ export default function EventForm(){
         data.host_id = data.host_id?.id ?? null;
         data.task_ids = data?.task_ids?.map((t) => (t.id)) ?? [];
         data.organization_ids = data?.organization_ids?.map((o) => (o.id)) ?? [];
+        if((!data.task_ids ||data.task_ids?.length > 0) && !data.project_id?.id){
+            setSubmissionErrors(['Task or project is required.']);
+            return;
+        }
+        if(data.task_ids?.length > 0){
+            data.project_id = nulll
+        }
+        if(data.project_id){
+            data.project_id = data.project_id.id
+        }
         try{
             setSaving(true);
             console.log('submitting data...', data);
@@ -185,8 +196,9 @@ export default function EventForm(){
             host_id: existing?.host ?? null,
             status: existing?.status ?? 'planned',
             event_type: existing?.event_type ?? '',
-
+            
             task_ids: existing?.tasks ?? [],
+            project_id: existing?.project ?? null,
             organization_ids: existing?.organizations ?? [],
         }
     }, [existing]);
@@ -217,15 +229,8 @@ export default function EventForm(){
     //watches to help with form logic
     const start = watch("start"); //for validating the end date is after the start
     const hostOrg = watch('host_id'); //for determining validOrgs
-    const participantOrgs = watch('organization_ids'); //for determining validOrgs
+    const selectedTasks = watch('task_ids');
     
-    //helper function to only allow the user to select tasks for organizations that are the host or participants
-    const validOrgs = useMemo(() => {
-        const host_id = hostOrg?.id
-        const pos = participantOrgs.map((org) => (org.id));
-        return [...pos, host_id];
-    }, [hostOrg, participantOrgs])
-
     const basics = [
         { name: 'name', label: 'Event Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
             placeholder: 'ex. World AIDS Day, Counselling Session, Blood Drive...'
@@ -265,8 +270,13 @@ export default function EventForm(){
     ]
     const tasks = [
         {name: 'task_ids', label: 'Linked to Tasks (Required)', type: 'multimodel', IndexComponent: Tasks,
-            includeParams: [{field: 'organizations', value: validOrgs.join(',')}, {field: 'for_event', value: 'true'}],
+            includeParams: [{field: 'organization', value: hostOrg?.id}, {field: 'for_event', value: 'true'}],
             tooltip: `What tasks does this event contribute to?`
+        },
+    ]
+    const project = [
+        {name: 'project_id', label: 'For Project', type: 'model', IndexComponent: ProjectIndex,
+            tooltip: `If not attached to one or more tasks, what project is the event for?`
         },
     ]
 
@@ -279,9 +289,9 @@ export default function EventForm(){
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={basics} control={control} header='Basic Information'/>
                 <FormSection fields={info} control={control} header='Event Information' />
-                <FormSection fields={participants} control={control} header='Participants' />
-                <FormSection fields={tasks} control={control} header='Associated with Task' />
-
+                {hostOrg && <FormSection fields={participants} control={control} header='Participants' />}
+                {hostOrg && <FormSection fields={tasks} control={control} header='Associated with Task' />}
+                {selectedTasks.length == 0 && hostOrg && <FormSection fields={project} control={control} header='Associated with Project' />}
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     {!id && <button type="submit" value='create_another'><BsDatabaseFillAdd /> Save and Create Another</button>}

@@ -23,13 +23,12 @@ export default function ProjectActivityFAGantt({ project }){
 
     //fetch related activities/deadlines for this project (seperate endpoint to avoid pagination and single api request)
     useEffect(() => {
-        const loadRelated = async () => {
+        const loadDeadlines= async () => {
             try {
                 const url = `/api/manage/projects/${project.id}/get-related/`;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setDeadlines(data.deadlines);
-                setActivities(data.activities);
                 setLoading(false);
             } 
             catch (err) {
@@ -37,7 +36,24 @@ export default function ProjectActivityFAGantt({ project }){
                 setLoading(false)
             }
         };
-        loadRelated();
+        loadDeadlines();
+    }, [project]);
+
+    useEffect(() => {
+        const loadEvents= async () => {
+            try {
+                const url = `/api/activities/events/gantt?project=${project.id}`;
+                const response = await fetchWithAuth(url);
+                const data = await response.json();
+                setActivities(data.data);
+                setLoading(false);
+            } 
+            catch (err) {
+                console.error('Failed to fetch events: ', err);
+                setLoading(false)
+            }
+        };
+        loadEvents();
     }, [project]);
 
     //use [./ganttBuilder] to transform the activity data for use in the gantt chart

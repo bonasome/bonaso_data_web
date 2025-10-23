@@ -2,11 +2,14 @@ import theme from '../../../../theme/theme';
 
 const colorMap = {
     //map that ganttBuilder uses to assign colors to different categories
-    general: "#8884d8",
-    training: "#82ca9d",
-    me: "#ffc658",
-    finance: "#999999",
-    default: 'ffffff'
+    training: "#8884d8", 
+    activity: "#82ca9d",
+    engagement: "#ffc658", 
+    commemoration: "#999999",
+    activation: "#2b6a74ff",
+    walkathon: "#e87878ff",
+    counselling_session: "#bb76b4ff", 
+    default: '#fffff',
 };
 
 export default function ganttBuilder(project, activities=[]){

@@ -156,6 +156,10 @@ export default function EventDetail(){
         return false; 
     }, [event, user]);
 
+    const projectsSet = event?.project?.id ? new Set([{name: event.project.name, id: event.project.id}]) : [
+        ...new Map(event?.tasks?.map(t => [t.project.id, t.project])).values()
+    ];
+    const projects = [...projectsSet];
     if(loading || !event ) return <Loading />
     return(
         <div>
@@ -176,6 +180,13 @@ export default function EventDetail(){
                         <i>{prettyDates(event.start)} to {prettyDates(event.end)}, {event.location} ({cleanLabels(event?.status)})</i>
                         <h3>Description</h3>
                         {event.description ? <p>{event.description}</p> : <p>No description.</p>}
+                        {projects.length == 1 && <h3>In project: <Link to={`/projects/${projects[0].id}`}>{projects[0].name}</Link></h3>}
+                        {projects.length > 1 && <div>
+                            <h3>In Projects:</h3>
+                            <ul>{projects.map((p) => (
+                               <li><Link to={`/projects/${p.id}`}>{p.name}</Link></li>
+                            ))}</ul>
+                        </div>}
                         <div style={{ display: 'flex', flexDirection: 'row'}}>
                             {favorited ? <ButtonHover callback={() => {favorite('events.event', event.id, true); setFavorited(false)}} noHover={<IoIosStar />} hover={'Unfavorite'} />:
                                 <ButtonHover callback={() => {favorite('events.event', event.id); setFavorited(true)}} noHover={<IoIosStarOutline />} hover={'Favorite'} />}
