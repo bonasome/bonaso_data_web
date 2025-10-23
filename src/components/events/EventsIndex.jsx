@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/UserAuth'
@@ -96,7 +96,7 @@ function EventCard({ event, callback=null, callbackText='Select Event' }) {
     );
 }
 
-export default function EventsIndex({ callback=null, callbackText='Select Event'}){
+export default function EventsIndex({ callback=null, callbackText='Select Event', includeParams=[], excludeParams=[]}){
     /**
     Index view that displays a list of events (paginated and searchable). Can be used either as a standalone page
     or can be used with other components to select an event instance.
@@ -146,6 +146,21 @@ export default function EventsIndex({ callback=null, callbackText='Select Event'
         getEventsMeta();
     }, []);
 
+    //helper function that converts array of objects in include/exclude params and converts it to a string
+    const params = useMemo(() => {
+        //sepereate from filters, these are passed as params
+        const allowedFields = ['project'];
+        const include = includeParams?.filter(p => allowedFields.includes(p?.field))
+        ?.map(p => `&${p?.field}=${p?.value}`)
+        .join('') ?? '';
+
+        const exclude = excludeParams?.filter(p => allowedFields.includes(p?.field))
+        ?.map(p => `&exclude_${p?.field}=${p?.value}`)
+        .join('') ?? '';
+        return include + exclude
+
+    }, [includeParams, excludeParams]);
+
     //load events
     useEffect(() => {
         const loadEvents = async () => {
@@ -158,7 +173,7 @@ export default function EventsIndex({ callback=null, callbackText='Select Event'
                     (filters.status ? `&status=${filters.status}` : '') + 
                     (filters.type ? `&event_type=${filters.type}` : '');
                 
-                const url = `/api/activities/events/?search=${search}&page=${page}` + filterQuery;
+                const url = `/api/activities/events/?search=${search}&page=${page}` + filterQuery + params;
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setEntries(data.count); //set the total number of entries so pages can be calculated

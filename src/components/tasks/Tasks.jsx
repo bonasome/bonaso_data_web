@@ -18,7 +18,7 @@ import { FaTrashAlt } from "react-icons/fa";
 
 
 //card that holds task details
-function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, onDelete=null, callback=null, forAssessment=false }) {
+function TaskCard({ task,  meta, onError, canDelete=false, onDelete=null, callback=null, forAssessment=false }) {
     /*
     Card that displays details about a Task
     - task (object): information about the task
@@ -119,9 +119,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
         )
     }
     return (
-        <div className={styles.card} onClick={() => setExpanded(!expanded)} 
-            draggable={isDraggable} onDragStart={isDraggable ? handleDragStart : undefined}
-        >
+        <div className={styles.card} onClick={() => setExpanded(!expanded)}>
             <h3>{task.display_name}</h3>
 
             {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button" style={{ maxHeight: 'fit-content' }}>
@@ -146,7 +144,7 @@ function TaskCard({ task,  meta, onError, isDraggable = false, canDelete=false, 
 }
 
 
-export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=false, blacklist=[], 
+export default function Tasks({ includeParams=[], excludeParams=[], blacklist=[], 
     canDelete=false, updateTrigger=null, callback=null, forAssessment=false, supportFilter=false
 }) {
     /*
@@ -321,7 +319,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], isDraggable=
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} >
                 {filteredTasks?.length > 0 ? filteredTasks.map((task) => (
                     <TaskCard task={task} key={task.id} tasks={tasks} 
-                        isDraggable={isDraggable} canDelete={canDelete} onDelete={(id) => updateTasks(id)} 
+                        canDelete={canDelete} onDelete={(id) => updateTasks(id)} 
                         callback={callback} forAssessment={forAssessment} meta={indicatorsMeta}
                     />
                 )) : <p>No tasks yet.</p>}

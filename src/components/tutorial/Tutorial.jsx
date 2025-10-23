@@ -117,13 +117,25 @@ export default function Tutorial(){
             }
             {['meofficer', 'manager', 'admin'].includes(user.role) && 
                 <div className={styles.section}>
+                    <h2>Aggregates</h2>
+                        <p>
+                            If you hover over the  "Record" tab at the top (or click the three bars)
+                            you will see an section for <Link to={'/aggregates'}></Link>. Here you can 
+                            record "aggregated" data in a tabular format. While we encourage you to always record
+                            using respondnets and individual assessments, we recognize that at times, this may not be 
+                            possible. As such, you can use this to report data in tabular format (if you don't
+                            have names, ids, age ranges, etc.).
+                        </p>
+                </div>
+            }
+            {['meofficer', 'manager', 'admin'].includes(user.role) && 
+                <div className={styles.section}>
                     <h2>Events</h2>
                         <p>
                             If you hover over the  "Record" tab at the top (or click the three bars)
                             you will see an option for <Link to={'/events'}></Link>. Here you can 
                             record information about your events by linking the event to one of your tasks.
-                            You can also add counts (for example, if you trained a certain number of people)
-                            which can be broken down by demographic information. You can also assign organizations
+                            ou can also assign organizations
                             as participants, which both allows them to edit counts for their tasks in that event
                             and will count them towards any "Number of Organization" task (i.e., number of subgrantees
                             trained).

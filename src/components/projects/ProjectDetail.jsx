@@ -10,7 +10,7 @@ import prettyDates from '../../../services/prettyDates';
 import { favorite, checkFavorited } from '../../../services/favorite';
 
 import Loading from '../reuseables/loading/Loading';
-import ButtonLoading from '../reuseables/loading/ButtonLoading';
+import EventsIndex from '../events/EventsIndex';
 import ConfirmDelete from '../reuseables/ConfirmDelete';
 import Messages from '../reuseables/Messages';
 import ReturnLink from '../reuseables/ReturnLink';
@@ -241,7 +241,7 @@ export default function ProjectDetail(){
                     </div>
                         
                     {showActivities && <div style={{ paddingLeft: '2vh', paddingRight: '2vh'}}>
-                        <ProjectActivityIndex project={project} />
+                        <EventsIndex includeParams={[{field: 'project', value: project.id}]} />
                     </div>}
                 </div>
                 
