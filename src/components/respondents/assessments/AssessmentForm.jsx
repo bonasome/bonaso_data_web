@@ -239,12 +239,25 @@ export default function AssessmentForm(){
                 comments: existing?.comments ?? '',
             };
             reset(defaults);
-            setDefaultsLoaded(!(irID && !existing));
         }
     }, [assessment, existing, reset]);
 
     //watch on response data for recalculating logic/options
     const responseInfo = useWatch({ control, name: "response_data" });
+
+    useEffect(() => {
+        if (!irID) {
+            setDefaultsLoaded(true); // new form or existing not needed
+            return;
+        }
+        if (!assessment) return;
+        const defaultValuesFromExisting = calcDefault(assessment, existing);
+        // check if responseInfo matches defaults
+        const inSync = Object.keys(defaultValuesFromExisting).every(
+            key => JSON.stringify(defaultValuesFromExisting[key]) === JSON.stringify(responseInfo[key])
+        );
+        setDefaultsLoaded(inSync);
+    }, [responseInfo, existing, assessment, irID]);
 
     //determine what indicators should be visible
     const visibilityMap = useMemo(() => {
