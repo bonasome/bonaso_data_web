@@ -48,7 +48,7 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
         onChange: indicator.type === 'multi' ? handleMultiSelectChange : undefined,
     }
     //if required, add rules (false is OK)
-    if(indicator.required && shouldShow){
+    if(indicator.required){
         fieldConfig.rules = {
             validate: (value) => {
                 // Allow false, 0, empty array, but disallow null or undefined

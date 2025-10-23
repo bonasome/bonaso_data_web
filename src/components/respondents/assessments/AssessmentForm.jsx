@@ -42,7 +42,6 @@ export default function AssessmentForm(){
     const [viewingAssessment, setViewingAssessment] = useState(false); //for showing modal with all assessment questions
     const [meta, setMeta] = useState(null); //model information
 
-    const [defaultsLoaded, setDefaultsLoaded] = useState(false);
     //page meta
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -109,7 +108,6 @@ export default function AssessmentForm(){
         const getInteraction = async () => {
             if(!irID) return;
             try {
-                setLoading(true)
                 console.log('fetching indicator details...');
                 const response = await fetchWithAuth(`/api/record/interactions/${irID}/`);
                 const data = await response.json();
@@ -163,7 +161,6 @@ export default function AssessmentForm(){
         data.respondent_id = id;
         data.task_id = taskID;
         try{
-            console.log(data)
             setSaving(true);
             const url = existing?.id ? `/api/record/interactions/${existing?.id}/` : `/api/record/interactions/`;
             const response = await fetchWithAuth(url, {
@@ -245,23 +242,9 @@ export default function AssessmentForm(){
     //watch on response data for recalculating logic/options
     const responseInfo = useWatch({ control, name: "response_data" });
 
-    useEffect(() => {
-        if (!irID) {
-            setDefaultsLoaded(true); // new form or existing not needed
-            return;
-        }
-        if (!assessment) return;
-        const defaultValuesFromExisting = calcDefault(assessment, existing);
-        // check if responseInfo matches defaults
-        const inSync = Object.keys(defaultValuesFromExisting).every(
-            key => JSON.stringify(defaultValuesFromExisting[key]) === JSON.stringify(responseInfo[key])
-        );
-        setDefaultsLoaded(inSync);
-    }, [responseInfo, existing, assessment, irID]);
-
     //determine what indicators should be visible
     const visibilityMap = useMemo(() => {
-        if(!assessment || !respondent || !defaultsLoaded) return null;
+        if(!assessment || !respondent) return {};
         const map = {}
         assessment.indicators.forEach((ind) => {
              const logic = ind.logic;
@@ -276,11 +259,11 @@ export default function AssessmentForm(){
             }
         });
         return map;
-    }, [responseInfo, existing, assessment, respondent, defaultsLoaded]);
+    }, [responseInfo]);
 
     //unregister invisible fields so stale values aren't passed
     useEffect(() => {
-        if (!assessment || !respondent || !visibilityMap ||!defaultsLoaded) return;
+        if (!assessment || !respondent) return;
         assessment.indicators.forEach(ind => {
             if (!visibilityMap[ind.id]) {
                 const currentValue = responseInfo?.[ind.id]?.value;
@@ -291,11 +274,10 @@ export default function AssessmentForm(){
                 }
             }
         });
-    }, [visibilityMap, unregister, assessment, respondent, responseInfo, defaultsLoaded]);
+    }, [visibilityMap, unregister, assessment, respondent]);
 
     //create an options map (mostly for matched options)
      const optionsMap = useMemo(() => {
-        if(irID && !existing) return;
         if(!assessment) return {};
         const map = {}
         assessment.indicators.forEach((ind) => {
@@ -322,7 +304,6 @@ export default function AssessmentForm(){
 
     //recalculate options based on prerequisite selections
     useEffect(() => {
-        if(irID && !existing) return;
         if(!assessment || !optionsMap) return;
         assessment.indicators.forEach((ind) => {
             const options = optionsMap[ind.id]
@@ -346,7 +327,7 @@ export default function AssessmentForm(){
                 }
             }
         });
-    }, [optionsMap, existing]);
+    }, [optionsMap]);
 
     //constant fields for all assessments
     const basics = [
@@ -363,6 +344,7 @@ export default function AssessmentForm(){
 
     //helper to determine if anything is visible (sometimes a respondent may be blocked from an assessment if it is gaurded by respondent logic)
     const visibleInds = (assessment && respondent && visibilityMap) ? assessment.indicators.filter(ind => (visibilityMap[ind.id])) : [];
+    if(irID && !existing) return <Loading />
     if(loading || !respondent || !assessment) return <Loading />
     return(
         <div className={styles.form}>
