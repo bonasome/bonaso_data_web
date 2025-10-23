@@ -109,6 +109,7 @@ export default function AssessmentForm(){
         const getInteraction = async () => {
             if(!irID) return;
             try {
+                setLoading(true)
                 console.log('fetching indicator details...');
                 const response = await fetchWithAuth(`/api/record/interactions/${irID}/`);
                 const data = await response.json();
@@ -238,15 +239,7 @@ export default function AssessmentForm(){
                 comments: existing?.comments ?? '',
             };
             reset(defaults);
-            if (!(irID && !existing)) {
-                // a tiny delay ensures useWatch sees the new values
-                const timeout = setTimeout(() => setDefaultsLoaded(true), 50);
-                return () => clearTimeout(timeout);
-            } 
-            else {
-                setDefaultsLoaded(false);
-            }
-
+            setDefaultsLoaded(!(irID && !existing));
         }
     }, [assessment, existing, reset]);
 
