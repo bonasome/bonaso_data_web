@@ -7,7 +7,7 @@ import Field from "../../reuseables/forms/Field";
 import styles from '../../../styles/form.module.css';
 import { FaArrowAltCircleDown, FaArrowAltCircleUp, FaArrowCircleDown } from "react-icons/fa";
 
-export default function ResponseField ({ indicator, responseInfo, defaultVal, respondent, assessment, options=[] }){
+export default function ResponseField ({ indicator, defaultVal, isVisible, onFieldChange, options=[] }){
     /*
     Displays a response field for a specific indicator within an assessment.
     - indicator (object): indicator being responded to
@@ -41,38 +41,25 @@ export default function ResponseField ({ indicator, responseInfo, defaultVal, re
     };
     
     // calculate default value for this question
+   const value = useWatch({ control, name: `response_data.${indicator.id}` });
+
     useEffect(() => {
-        if (!indicator) return;
-        const defaultValue = defaultVal?.value;
-        setValue(`response_data.${indicator.id}`, defaultValue);
-        setDefaultsLoaded(true);
-    }, [defaultVal, indicator, setValue]);
+    if (!indicator) return;
+        onFieldChange(indicator.id, value);
+    }, [value, indicator.id, onFieldChange]);
 
-    // calculate visibility locally
-    const isVisible = useMemo(() => {
-        if (!defaultsLoaded) return false;
-        const logic = indicator.logic;
-        if (!logic?.conditions?.length) return true;
-        if (logic.group_operator === 'AND') {
-            return logic.conditions.every(c =>
-                checkLogic(c, responseInfo, assessment, respondent)
-            );
-        } 
-        else {
-            return logic.conditions.some(c =>
-                checkLogic(c, responseInfo, assessment, respondent)
-            );
-        }
-    }, [defaultVal, responseInfo, defaultsLoaded, indicator, respondent]);
-
-    console.log(responseInfo, defaultVal, isVisible)
-    
-    // unregister if invisible
+    // unregister invisible fields
     useEffect(() => {
         if (!isVisible) {
             unregister(`response_data.${indicator.id}.value`);
         }
     }, [isVisible, unregister, indicator.id]);
+
+    useEffect(() => {
+        if (defaultVal) {
+            setValue(`response_data.${indicator.id}`, defaultVal, { shouldDirty: false });
+        }
+    }, [defaultVal, indicator.id, setValue]);
 
     //field config object
     let fieldConfig = {
@@ -82,6 +69,7 @@ export default function ResponseField ({ indicator, responseInfo, defaultVal, re
         options: options, 
         onChange: indicator.type === 'multi' ? handleMultiSelectChange : undefined,
     }
+
     //if required, add rules (false is OK)
     if(indicator.required && isVisible){
         fieldConfig.rules = {

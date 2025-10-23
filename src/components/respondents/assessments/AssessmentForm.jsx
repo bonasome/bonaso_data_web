@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useForm,  useWatch, useController, useFormContext, FormProvider } from "react-hook-form";
 
@@ -231,8 +231,32 @@ export default function AssessmentForm(){
         }
     }, [assessment, existing, reset]);
 
-    //watch on response data for recalculating logic/options
-    const responseInfo = useWatch({ control, name: "response_data" });
+    const [responseMap, setResponseMap] = useState({});
+
+    const handleFieldChange = useCallback((id, value) => {
+        setResponseMap(prev => {
+            // avoid unnecessary re-renders if the value hasn’t changed
+            if (JSON.stringify(prev[id]) === JSON.stringify(value)) return prev;
+            return { ...prev, [id]: value };
+        });
+    }, []);
+
+    const visibilityMap = useMemo(() => {
+        if (!assessment || !respondent) return null;
+        const map = {};
+        for (const ind of assessment.indicators) {
+            const logic = ind.logic;
+            if (!logic?.conditions?.length) {
+            map[ind.id] = true;
+            continue;
+            }
+            map[ind.id] =
+            logic.group_operator === "AND"
+                ? logic.conditions.every(c => checkLogic(c, responseMap, assessment, respondent))
+                : logic.conditions.some(c => checkLogic(c, responseMap, assessment, respondent));
+        }
+        return map;
+    }, [assessment, respondent, responseMap]);
 
     //create an options map (mostly for matched options)
      const optionsMap = useMemo(() => {
@@ -252,13 +276,13 @@ export default function AssessmentForm(){
             if(ind.allow_none) opts.push({value: 'none', label: 'None of the above'});
             //if matching options, filter to only what was selected for the prereq
             if(ind.match_options){
-                const valid = responseInfo?.[ind.match_options]?.value;
+                const valid = responseMap?.[ind.match_options]?.value;
                 opts = opts.filter(o => (valid?.includes(o?.value) || o?.value == 'none'));
             }
             map[ind.id] = opts
         })
         return map
-    }, [assessment, responseInfo]);
+    }, [assessment, responseMap]);
 
     //recalculate options based on prerequisite selections
     useEffect(() => {
@@ -286,7 +310,7 @@ export default function AssessmentForm(){
             }
         });
     }, [optionsMap]);
-    
+
     //constant fields for all assessments
     const basics = [
         { name: 'interaction_date', label: 'Date of Interaction', type: "date", rules: { required: "Required", },
@@ -314,7 +338,7 @@ export default function AssessmentForm(){
                 <FormSection control={control} fields={basics} header={'Date & Location'} />
 
                 {assessment.indicators.sort((a, b) => a.order-b.order).map((ind) => (
-                    <ResponseField indicator={ind} defaultVal={defaultValues?.response_data?.[ind.id]} respondent={respondent} assessment={assessment} options={optionsMap[ind.id]} responseInfo={responseInfo} />
+                    <ResponseField indicator={ind} defaultVal={defaultValues?.response_data?.[ind.id]} isVisible={visibilityMap?.[ind.id] ?? false} options={optionsMap[ind.id]} onFieldChange={handleFieldChange} />
                 ))}
                 <FormSection control={control} fields={comments} />
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
