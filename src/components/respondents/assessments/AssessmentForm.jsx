@@ -337,7 +337,6 @@ export default function AssessmentForm(){
                 {visibleInds.length > 0 && <FormProvider {...methods} >
                 <form onSubmit={handleSubmit(onSubmit, onError)}>
                     <FormSection control={control} fields={basics} header={'Date & Location'} />
-
                     {assessment.indicators.sort((a, b) => a.order-b.order).map((ind) => (
                         <ResponseField indicator={ind} defaultVal={defaultValues?.response_data?.[ind.id]} isVisible={visibilityMap?.[ind.id] ?? false} options={optionsMap[ind.id]} onFieldChange={handleFieldChange} />
                     ))}

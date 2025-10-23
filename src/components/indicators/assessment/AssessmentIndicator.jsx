@@ -348,7 +348,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                         <div>
                             <div onClick={() => setExpanded(!expanded)}>
                             <h3>{existing?.order + 1}. {existing?.name} {existing?.required ? '*' : ''}</h3>
-                            <i>{getLabelFromValue('type', existing?.type)}</i>
+                            <i>{getLabelFromValue('type', existing?.type)} {existing?.allow_aggregate ? '(Σ)' : ''}</i>
                             </div>
                             {expanded && <div style={{ paddingTop: '1vh'}}>
                                 {existing?.description ? <p>Description: {existing.description}</p> : <p><i>No description</i></p>}
