@@ -265,6 +265,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], blacklist=[]
             if(!supportFilter) return;
             try {
                 const url = `/api/organizations/?search=${search}`
+                console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setOrgs(data.results);

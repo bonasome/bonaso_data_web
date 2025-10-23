@@ -333,7 +333,7 @@ export default function AssessmentForm(){
             <h1>{assessment.name} Assessment for {respondent.display_name}</h1>
             <Messages errors={submissionErrors} ref={alertRef} />
             <button onClick={() => setViewingAssessment(true)}>Click Here to View Complete List of Questions</button>
-            {visibileInds.length > 0 && <FormProvider {...methods} >
+            {visibleInds.length > 0 && <FormProvider {...methods} >
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection control={control} fields={basics} header={'Date & Location'} />
 
