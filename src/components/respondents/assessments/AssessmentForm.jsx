@@ -245,8 +245,8 @@ export default function AssessmentForm(){
 
     //determine what indicators should be visible
     const visibilityMap = useMemo(() => {
-        if(!assessment || !respondent) return {};
-        if(irID && !existing) return;
+        if(!assessment || !respondent) return null;
+        if(irID && !existing) return null;
         const map = {}
         assessment.indicators.forEach((ind) => {
              const logic = ind.logic;
@@ -261,12 +261,11 @@ export default function AssessmentForm(){
             }
         });
         return map;
-    }, [responseInfo, existing]);
+    }, [responseInfo]);
 
     //unregister invisible fields so stale values aren't passed
     useEffect(() => {
-        if (!assessment || !respondent) return;
-        if(irID && !existing) return;
+        if (!assessment || !respondent || !visibilityMap) return;
         assessment.indicators.forEach(ind => {
             if (!visibilityMap[ind.id]) {
                 const currentValue = responseInfo?.[ind.id]?.value;
@@ -277,7 +276,7 @@ export default function AssessmentForm(){
                 }
             }
         });
-    }, [visibilityMap, unregister, assessment, respondent, existing]);
+    }, [visibilityMap, unregister, assessment, respondent]);
 
     //create an options map (mostly for matched options)
      const optionsMap = useMemo(() => {
@@ -304,7 +303,7 @@ export default function AssessmentForm(){
             map[ind.id] = opts
         })
         return map
-    }, [assessment, responseInfo, existing]);
+    }, [assessment, responseInfo]);
 
     //recalculate options based on prerequisite selections
     useEffect(() => {
