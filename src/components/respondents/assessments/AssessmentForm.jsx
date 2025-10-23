@@ -238,7 +238,7 @@ export default function AssessmentForm(){
                 comments: existing?.comments ?? '',
             };
             reset(defaults);
-            setDefaultsLoaded(true);
+            setDefaultsLoaded(!(irID && !existing));
         }
     }, [assessment, existing, reset]);
 
