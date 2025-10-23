@@ -264,7 +264,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], blacklist=[]
         const loadOrgs = async () => {
             if(!supportFilter) return;
             try {
-                const url = `/api/organizations/?search=${search}`
+                const url = `/api/organizations/?search=${orgSearch}`
                 console.log(url)
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
@@ -283,7 +283,7 @@ export default function Tasks({ includeParams=[], excludeParams=[], blacklist=[]
         const loadProjects = async () => {
             if(!supportFilter) return;
             try {
-                const url = `/api/manage/projects/?search=${search}`
+                const url = `/api/manage/projects/?search=${projectSearch}`
                 const response = await fetchWithAuth(url);
                 const data = await response.json();
                 setProjects(data.results);
