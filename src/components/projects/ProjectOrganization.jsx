@@ -241,7 +241,7 @@ export default function ProjectOrganization(){
 
             <div className={styles.segment}>
                 <ReturnLink url={`/projects/${id}`} display='Return to projects overview' /> 
-                {hasPerm && <ReturnLink url={`/projects/${id}/organizations/${organization.parent?.id}`} display='Return to parent organization' />}   
+                {hasPerm && organization.parent?.id && <ReturnLink url={`/projects/${id}/organizations/${organization.parent?.id}`} display='Return to parent organization' />}   
                 <h1>Viewing Page for {organization.name} for {project.name}</h1>
                 {organization?.parent?.id && <h3><i>Subgrantee of {organization.parent.name}</i></h3>}
                 <Messages errors={errors} />
