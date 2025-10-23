@@ -19,7 +19,7 @@ export default function ResponseField ({ indicator, defaultVal, isVisible, onFie
 
     //set context variables based on FormProvider
     const { field } = useController({ name: `response_data.${indicator.id}.value` });
-    const { control, setValue, getValues, unregister, formState } = useFormContext();
+    const { control, setValue, getValues, unregister, resetField, formState } = useFormContext();
 
     //conver the indicator types to what we use to build fields
     const convertType = (type) => {
