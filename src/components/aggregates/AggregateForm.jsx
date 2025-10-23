@@ -195,22 +195,22 @@ export default function AggregateBuilder() {
             end: data.end,
             comments: data.comments,
             counts_data: (data.counts_data || []).map(c => {
-                let count = {}; //we'll need to reconstruct the breakdown fields into an object from the key
-                if(c.key == 'index') return {value: c.value}; //if there are no breakdowns, just create one count object with a value
-                c.key.split('___').map((k) => {
-                    if(k.split('__')[0] == 'option' && k.split('__')[1] == 'Total' && selectedIndicator.type == 'multi'){
-                        //if this was the unique row, flag it as such
-                        count['unique_only'] = true
+                if (c.key === 'index') return { value: c.value };
+                if ([0, '0', ''].includes(c.value)) return;
+
+                const count = {};
+                c.key.split('___').forEach(k => {
+                    const [field, val] = k.split('__');
+                    if (field === 'option' && val === 'Total' && selectedIndicator.type === 'multi') {
+                        count.unique_only = true;
+                    } else {
+                        count[field === 'option' ? 'option_id' : field] = val;
                     }
-                    else{
-                        //otherwise create a breakdown: value pair
-                        const key = k.split('__')[0] == 'option' ? 'option_id' : k.split('__')[0]; //backend will expect option_id
-                        count[key]  = k.split('__')[1]
-                    }
-                })
-                count['value'] = ['', null].includes(c.value) ? 0 : c.value; //set the object value
+                });
+
+                count.value = c.value;
                 return count;
-            })
+            }).filter(Boolean)
         };
         const action = e.nativeEvent.submitter.value; //determine to redirect or create another
         try {
@@ -324,7 +324,7 @@ export default function AggregateBuilder() {
 
             {selectedIndicator && (
             <div className={styles.formSection}>
-                <h3 className="font-medium mb-2">Data entry</h3>
+                <h3 >Data entry</h3>
                 <p>
                     Each row indicates a group of people based on the breakdowns you selected above.
                     Enter the number of people reached with this indicator who fall into this breakdown
