@@ -42,6 +42,7 @@ export default function AssessmentForm(){
     const [viewingAssessment, setViewingAssessment] = useState(false); //for showing modal with all assessment questions
     const [meta, setMeta] = useState(null); //model information
 
+    const [defaultsLoaded, setDefaultsLoaded] = useState(false);
     //page meta
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -237,6 +238,7 @@ export default function AssessmentForm(){
                 comments: existing?.comments ?? '',
             };
             reset(defaults);
+            setDefaultsLoaded(true);
         }
     }, [assessment, existing, reset]);
 
@@ -245,8 +247,7 @@ export default function AssessmentForm(){
 
     //determine what indicators should be visible
     const visibilityMap = useMemo(() => {
-        if(!assessment || !respondent) return null;
-        if(irID && !existing) return null;
+        if(!assessment || !respondent || !defaultsLoaded) return null;
         const map = {}
         assessment.indicators.forEach((ind) => {
              const logic = ind.logic;
@@ -261,7 +262,7 @@ export default function AssessmentForm(){
             }
         });
         return map;
-    }, [responseInfo, existing]);
+    }, [responseInfo, existing, assessment, respondent, defaultsLoaded]);
 
     //unregister invisible fields so stale values aren't passed
     useEffect(() => {
@@ -276,7 +277,7 @@ export default function AssessmentForm(){
                 }
             }
         });
-    }, [visibilityMap, unregister, assessment, respondent]);
+    }, [visibilityMap, unregister, assessment, respondent, responseInfo]);
 
     //create an options map (mostly for matched options)
      const optionsMap = useMemo(() => {
