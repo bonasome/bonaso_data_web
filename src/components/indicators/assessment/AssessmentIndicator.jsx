@@ -144,6 +144,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     const onSubmit = async(data, e) => {
         data.assessment_id = assessment.id; //set the related project based on the URL param
         //wipe any option related data if the type does not allow for custom options (to clear stale states)
+        if(['text'].includes(data.type)) data.allow_aggregate = false;
         if(!['multi', 'single', 'multint'].includes(data.type)){
             data.options_data = [];
         }
@@ -222,11 +223,11 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
             name: existing?.name ?? '',
             description: existing?.description ?? '',
             required: existing?.required ?? true,
-            type: existing?.type ?? 'text',
+            type: existing?.type ?? 'boolean',
             match_options_id: existing?.match_options ?? null,
             options_data: existing?.options ?? [{name: ''}],
             allow_none: existing?.allow_none ?? false,
-            allow_aggregate: existing?.allow_aggregate ?? false,
+            allow_aggregate: existing?.allow_aggregate ?? true,
             include_logic: existing?.logic?.conditions?.length > 0 ?? false,
             logic_data: {
                 group_operator: existing?.logic?.group_operator ?? "AND",
@@ -263,9 +264,15 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     }, [existing, reset, defaultValues]);
 
     //wathces to help with logic
-    const type = useWatch({ control, name: 'type', defaultValue: 'text' });
+    const type = useWatch({ control, name: 'type', defaultValue: 'boolean' });
     const usingMatched = useWatch({ control, name: 'match_options_id', defaultValue: false });
     const usingLogic= useWatch({ control, name: 'include_logic', defaultValue: false });
+
+    const aggiesVal = useMemo(() => {
+        if(!type) return false
+        return ['multi', 'multint', 'integer', 'boolean', 'single'].includes(type);
+    }, [type]);
+    const usingAggies = useWatch({ control, name: 'allow_aggregate', defaultValue: aggiesVal});
 
     //fields
     const basics = [
@@ -390,7 +397,7 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
     //if editing or creating, return a form
     else {
         return(
-            <div>
+            <div style={{ padding: '2vh', borderBottom: '4px solid white'}}>
                 <h2>{existing ? `Editing ${existing.order+1} ${existing.name}` : `${assessment.indicators.length + 1}. New Indicator`}</h2>
                 <Messages errors={submissionErrors} ref={alertRef} />
                 <FormProvider {...methods}>

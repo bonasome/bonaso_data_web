@@ -328,29 +328,32 @@ export default function AssessmentForm(){
     const visibleInds = (assessment && respondent && visibilityMap) ? assessment.indicators.filter(ind => (visibilityMap[ind.id])) : [];
     if(loading || !respondent || !assessment) return <Loading />
     return(
-        <div className={styles.form}>
-            {viewingAssessment && <AssessmentIndicatorsModal assessment={assessment} meta={meta} onClose={() => setViewingAssessment(false)} />}
-            <h1>{assessment.name} Assessment for {respondent.display_name}</h1>
-            <Messages errors={submissionErrors} ref={alertRef} />
-            <button onClick={() => setViewingAssessment(true)}>Click Here to View Complete List of Questions</button>
-            {visibleInds.length > 0 && <FormProvider {...methods} >
-            <form onSubmit={handleSubmit(onSubmit, onError)}>
-                <FormSection control={control} fields={basics} header={'Date & Location'} />
+        <div>
+            <div className={styles.form}>
+                {viewingAssessment && <AssessmentIndicatorsModal assessment={assessment} meta={meta} onClose={() => setViewingAssessment(false)} />}
+                <h1>{assessment.name} Assessment for {respondent.display_name}</h1>
+                <Messages errors={submissionErrors} ref={alertRef} />
+                <button onClick={() => setViewingAssessment(true)}>Click Here to View Complete List of Questions</button>
+                {visibleInds.length > 0 && <FormProvider {...methods} >
+                <form onSubmit={handleSubmit(onSubmit, onError)}>
+                    <FormSection control={control} fields={basics} header={'Date & Location'} />
 
-                {assessment.indicators.sort((a, b) => a.order-b.order).map((ind) => (
-                    <ResponseField indicator={ind} defaultVal={defaultValues?.response_data?.[ind.id]} isVisible={visibilityMap?.[ind.id] ?? false} options={optionsMap[ind.id]} onFieldChange={handleFieldChange} />
-                ))}
-                <FormSection control={control} fields={comments} />
-                {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <button type="submit" value='normal'><IoIosSave /> Save</button>
-                    <Link to={id ? `/respondents/${id}` : '/respondents'}><button type="button">
-                        <FcCancel /> Cancel
-                    </button></Link>
-                </div>}
-                {saving && <ButtonLoading />}
-            </form>
-            </FormProvider>}
-            {visibleInds.length == 0 && <Messages warnings={['This respondent is not eligible for this assessment.']} />}
+                    {assessment.indicators.sort((a, b) => a.order-b.order).map((ind) => (
+                        <ResponseField indicator={ind} defaultVal={defaultValues?.response_data?.[ind.id]} isVisible={visibilityMap?.[ind.id] ?? false} options={optionsMap[ind.id]} onFieldChange={handleFieldChange} />
+                    ))}
+                    <FormSection control={control} fields={comments} />
+                    {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <button type="submit" value='normal'><IoIosSave /> Save</button>
+                        <Link to={id ? `/respondents/${id}` : '/respondents'}><button type="button">
+                            <FcCancel /> Cancel
+                        </button></Link>
+                    </div>}
+                    {saving && <ButtonLoading />}
+                </form>
+                </FormProvider>}
+                {visibleInds.length == 0 && <Messages warnings={['This respondent is not eligible for this assessment.']} />}
+            </div>
+            <div style={{ padding: 15}}></div>
         </div>
     )
 }

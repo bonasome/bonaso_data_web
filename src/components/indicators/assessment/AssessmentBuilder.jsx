@@ -231,8 +231,9 @@ export default function AssessmentForm(){
                 </DndContext>
                 
                 {adding && <AssessmentIndicator meta={indicatorsMeta} assessment={assessment} onCancel={() => setAdding(false)} onUpdate={() => {getAssessmentDetail(); setAdding(false)}} />}
-                <button onClick={() => setAdding(true)}> <FcAddRow />  Add Indicator</button> 
+                {!adding && <button onClick={() => setAdding(true)} style={{ marginTop: 30}}> <FcAddRow />  Add Indicator</button>}
             </div>
+            <div style={{ padding: 20}}></div>
         </div>
     )
 }
