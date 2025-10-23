@@ -42,7 +42,7 @@ export default function AssessmentForm(){
     const [viewingAssessment, setViewingAssessment] = useState(false); //for showing modal with all assessment questions
     const [meta, setMeta] = useState(null); //model information
 
-    const [defaultsLoaded, setDefaultsLoaded] = useState(false);
+    //const [defaultsLoaded, setDefaultsLoaded] = useState(false);
     //page meta
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -238,20 +238,14 @@ export default function AssessmentForm(){
                 comments: existing?.comments ?? '',
             };
             reset(defaults);
-            // wait for responseInfo to catch up
-            if (!(irID && !existing)) {
-                const timeout = setTimeout(() => setDefaultsLoaded(true), 0);
-                return () => clearTimeout(timeout);
-            } 
-            else {
-                setDefaultsLoaded(false);
-            }
         }
     }, [assessment, existing, reset]);
 
+    
     //watch on response data for recalculating logic/options
     const responseInfo = useWatch({ control, name: "response_data" });
-
+    const defaultsLoaded = !(irID && !existing) && !!responseInfo && Object.keys(responseInfo).length > 0;
+    
     //determine what indicators should be visible
     const visibilityMap = useMemo(() => {
         if(!assessment || !respondent || !defaultsLoaded) return null;
