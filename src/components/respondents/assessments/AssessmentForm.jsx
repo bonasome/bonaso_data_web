@@ -238,7 +238,14 @@ export default function AssessmentForm(){
                 comments: existing?.comments ?? '',
             };
             reset(defaults);
-            setDefaultsLoaded(!(irID && !existing));
+            // wait for responseInfo to catch up
+            if (!(irID && !existing)) {
+                const timeout = setTimeout(() => setDefaultsLoaded(true), 0);
+                return () => clearTimeout(timeout);
+            } 
+            else {
+                setDefaultsLoaded(false);
+            }
         }
     }, [assessment, existing, reset]);
 
