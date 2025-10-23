@@ -261,7 +261,7 @@ export default function AssessmentForm(){
             }
         });
         return map;
-    }, [responseInfo]);
+    }, [responseInfo, existing]);
 
     //unregister invisible fields so stale values aren't passed
     useEffect(() => {
