@@ -28,7 +28,7 @@ export const checkLogic = (c, responseInfo, assessment, respondent) => {
             prereqVal = prereqVal || [];
             switch(reqVal) {
                 case 'any':
-                    return prereqVal.length > 0 && !['none'].includes(prereqVal); //when none is selected/allowed
+                    return prereqVal.length > 0 && !prereqVal.includes('none'); //when none is selected/allowed
                 case 'none':
                     return prereqVal.includes('none');
                 case 'all':
