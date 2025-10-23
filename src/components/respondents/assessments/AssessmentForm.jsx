@@ -267,7 +267,7 @@ export default function AssessmentForm(){
 
     //unregister invisible fields so stale values aren't passed
     useEffect(() => {
-        if (!assessment || !respondent || !visibilityMap) return;
+        if (!assessment || !respondent || !visibilityMap ||!defaultsLoaded) return;
         assessment.indicators.forEach(ind => {
             if (!visibilityMap[ind.id]) {
                 const currentValue = responseInfo?.[ind.id]?.value;
@@ -278,7 +278,7 @@ export default function AssessmentForm(){
                 }
             }
         });
-    }, [visibilityMap, unregister, assessment, respondent, responseInfo]);
+    }, [visibilityMap, unregister, assessment, respondent, responseInfo, defaultsLoaded]);
 
     //create an options map (mostly for matched options)
      const optionsMap = useMemo(() => {
