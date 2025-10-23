@@ -202,13 +202,15 @@ export default function AssessmentForm(){
     
     //set default values
     const defaultValues = useMemo(() => {
+        if(!assessment) return null;
+        if(irID && !existing) return null;
         return {
             interaction_date: existing?.interaction_date ?? '',
             interaction_location: existing?.interaction_location ?? '',
             response_data: calcDefault(assessment, existing),
             comments: existing?.comments ?? '',
         }
-    }, [existing]);
+    }, [assessment, existing]);
 
     //construct RHF variables
     const methods = useForm({ defaultValues });
@@ -229,7 +231,7 @@ export default function AssessmentForm(){
 
     //load existing values once existing loads, if provided
     useEffect(() => {
-        if (assessment) {
+        if (assessment && !(irID && !existing)) {
             reset(defaultValues);
         }
     }, [assessment, existing, reset]);

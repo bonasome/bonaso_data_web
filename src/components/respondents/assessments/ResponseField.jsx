@@ -44,7 +44,6 @@ export default function ResponseField ({ indicator, responseInfo, defaultVal, re
     useEffect(() => {
         if (!indicator) return;
         const defaultValue = defaultVal?.value;
-        console.log(defaultValue)
         setValue(`response_data.${indicator.id}`, defaultValue);
         setDefaultsLoaded(true);
     }, [defaultVal, indicator, setValue]);
