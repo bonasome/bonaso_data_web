@@ -59,9 +59,8 @@ export default function ResponseField ({ indicator, defaultVal, isVisible, onFie
         if (defaultVal) {
             setValue(`response_data.${indicator.id}`, defaultVal, { shouldDirty: false });
         }
-    }, [defaultVal, indicator.id, setValue]);
-    console.log(isVisible, defaultVal, value);
-    
+    }, [defaultVal, isVisible, indicator.id, setValue]);
+
     //field config object
     let fieldConfig = {
         type: convertType(indicator.type), 
