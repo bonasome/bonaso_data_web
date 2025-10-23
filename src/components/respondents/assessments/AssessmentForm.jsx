@@ -325,7 +325,7 @@ export default function AssessmentForm(){
     ]
 
     //helper to determine if anything is visible (sometimes a respondent may be blocked from an assessment if it is gaurded by respondent logic)
-    //const visibleInds = (assessment && respondent && visibilityMap) ? assessment.indicators.filter(ind => (visibilityMap[ind.id])) : [];
+    const visibleInds = (assessment && respondent && visibilityMap) ? assessment.indicators.filter(ind => (visibilityMap[ind.id])) : [];
     if(loading || !respondent || !assessment) return <Loading />
     return(
         <div className={styles.form}>
@@ -333,7 +333,7 @@ export default function AssessmentForm(){
             <h1>{assessment.name} Assessment for {respondent.display_name}</h1>
             <Messages errors={submissionErrors} ref={alertRef} />
             <button onClick={() => setViewingAssessment(true)}>Click Here to View Complete List of Questions</button>
-            <FormProvider {...methods} >
+            {visibileInds.length > 0 && <FormProvider {...methods} >
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection control={control} fields={basics} header={'Date & Location'} />
 
@@ -349,7 +349,8 @@ export default function AssessmentForm(){
                 </div>}
                 {saving && <ButtonLoading />}
             </form>
-            </FormProvider>
+            </FormProvider>}
+            {visibleInds.length == 0 && <Messages warnings={'This respondent is not eligible for this assessment.'} />}
         </div>
     )
 }
