@@ -284,8 +284,10 @@ export default function AggregateBuilder() {
         { name: 'end', label: 'End', type: 'date', rules: { required: 'Required' },
             tooltip: `End of the reporting period.`
         },
-        { name: 'project_id', label: 'Project', type: 'model', IndexComponent: ProjectsIndex, rules: { required: 'Required' } },
     ];
+    const projSelect = [
+        { name: 'project_id', label: 'Project', type: 'model', IndexComponent: ProjectsIndex, rules: { required: 'Required' } },
+    ]
     const orgSelect = [
         { name: 'organization_id', label: 'Organization', type: 'model', IndexComponent: OrganizationsIndex, rules: { required: 'Required' }, includeParams: [{ field: 'project', value: proj?.id }] },
     ]
@@ -314,9 +316,10 @@ export default function AggregateBuilder() {
         <form onSubmit={handleSubmit(onSubmit, onError)}>
             <div>
             <FormSection fields={basics} control={control} header="Information" />
-            {proj && <FormSection fields={orgSelect} control={control} header="Information" />}
-            {org && <FormSection fields={indSelect} control={control} header="Information" />}
-            {selectedIndicator && <FormSection fields={breakdownFields} control={control} header="Indicator" />}
+            <FormSection fields={projSelect} control={control} header="Aggregate for Project" />
+            {proj && <FormSection fields={orgSelect} control={control} header="For Organization" />}
+            {org && <FormSection fields={indSelect} control={control} header="For Indicator" />}
+            {selectedIndicator && <FormSection fields={breakdownFields} control={control} header="Disaggregate Data By..." />}
             </div>
 
             {selectedIndicator && (
