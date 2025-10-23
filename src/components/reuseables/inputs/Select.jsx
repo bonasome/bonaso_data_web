@@ -44,7 +44,7 @@ export default function Select({ name, label, onChange, onBlur, value, options, 
                         id={`search_${name}`}
                         type="text"
                         value={searchTerm}
-                        onChange={(e) => {setSearchTerm(e.target.value); onSearchChange ? onSearchChange(e) : null }}
+                        onChange={(e) => {setSearchTerm(e.target.value); onSearchChange ? onSearchChange(e.target.value) : null }}
                         placeholder='Start typing to search...'
                         style={{ maxWidth: 200, padding: 4, marginBottom: 1}}
                     />
