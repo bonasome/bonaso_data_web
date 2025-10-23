@@ -229,52 +229,12 @@ export default function AssessmentForm(){
     //load existing values once existing loads, if provided
     useEffect(() => {
         if (assessment) {
-            const defaults = {
-                interaction_date: existing?.interaction_date ?? '',
-                interaction_location: existing?.interaction_location ?? '',
-                response_data: calcDefault(assessment, existing),
-                comments: existing?.comments ?? '',
-            };
-            reset(defaults);
+            reset(defaultValues);
         }
     }, [assessment, existing, reset]);
 
     //watch on response data for recalculating logic/options
     const responseInfo = useWatch({ control, name: "response_data" });
-
-    //determine what indicators should be visible
-    const visibilityMap = useMemo(() => {
-        if(!assessment || !respondent) return {};
-        const map = {}
-        assessment.indicators.forEach((ind) => {
-             const logic = ind.logic;
-            //no logic, always return true
-            if(!logic?.conditions || logic?.conditions?.length == 0) map[ind.id] = true;
-            else if(ind.logic.group_operator == 'AND'){
-                map[ind.id] = logic.conditions.every(c => (checkLogic(c, responseInfo, assessment, respondent)))
-            }
-            //must be an OR
-            else{
-                map[ind.id] =  logic.conditions.some(c => (checkLogic(c, responseInfo, assessment, respondent)))
-            }
-        });
-        return map;
-    }, [responseInfo]);
-
-    //unregister invisible fields so stale values aren't passed
-    useEffect(() => {
-        if (!assessment || !respondent) return;
-        assessment.indicators.forEach(ind => {
-            if (!visibilityMap[ind.id]) {
-                const currentValue = responseInfo?.[ind.id]?.value;
-                // ✅ Only unregister/reset if there’s actually data
-                if (currentValue !== undefined) {
-                    setValue(`response_data.${ind.id}`, {}, { shouldDirty: false });
-                    unregister(`response_data.${ind.id}.value`);
-                }
-            }
-        });
-    }, [visibilityMap, unregister, assessment, respondent]);
 
     //create an options map (mostly for matched options)
      const optionsMap = useMemo(() => {
@@ -328,7 +288,7 @@ export default function AssessmentForm(){
             }
         });
     }, [optionsMap]);
-
+    
     //constant fields for all assessments
     const basics = [
         { name: 'interaction_date', label: 'Date of Interaction', type: "date", rules: { required: "Required", },
@@ -343,8 +303,7 @@ export default function AssessmentForm(){
     ]
 
     //helper to determine if anything is visible (sometimes a respondent may be blocked from an assessment if it is gaurded by respondent logic)
-    const visibleInds = (assessment && respondent && visibilityMap) ? assessment.indicators.filter(ind => (visibilityMap[ind.id])) : [];
-    if(irID && !existing) return <Loading />
+    //const visibleInds = (assessment && respondent && visibilityMap) ? assessment.indicators.filter(ind => (visibilityMap[ind.id])) : [];
     if(loading || !respondent || !assessment) return <Loading />
     return(
         <div className={styles.form}>
@@ -352,12 +311,12 @@ export default function AssessmentForm(){
             <h1>{assessment.name} Assessment for {respondent.display_name}</h1>
             <Messages errors={submissionErrors} ref={alertRef} />
             <button onClick={() => setViewingAssessment(true)}>Click Here to View Complete List of Questions</button>
-            {visibleInds?.length > 0 && <FormProvider {...methods} >
+            <FormProvider {...methods} >
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection control={control} fields={basics} header={'Date & Location'} />
 
                 {assessment.indicators.sort((a, b) => a.order-b.order).map((ind) => (
-                    <ResponseField indicator={ind} shouldShow={visibilityMap[ind.id]} options={optionsMap[ind.id]} />
+                    <ResponseField indicator={ind} defaultVal={defaultValues?.response_data?.[ind.id]} respondent={respondent} assessment={assessment} options={optionsMap[ind.id]} responseInfo={responseInfo} />
                 ))}
                 <FormSection control={control} fields={comments} />
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -368,8 +327,7 @@ export default function AssessmentForm(){
                 </div>}
                 {saving && <ButtonLoading />}
             </form>
-            </FormProvider>}
-            {!visibleInds || visibleInds.length == 0 && <Messages warnings={['This respondent is not eligible for this assessment.']} />}
+            </FormProvider>
         </div>
     )
 }

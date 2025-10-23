@@ -7,7 +7,7 @@ import Field from "../../reuseables/forms/Field";
 import styles from '../../../styles/form.module.css';
 import { FaArrowAltCircleDown, FaArrowAltCircleUp, FaArrowCircleDown } from "react-icons/fa";
 
-export default function ResponseField ({ indicator, shouldShow=false, options=[] }){
+export default function ResponseField ({ indicator, responseInfo, defaultVal, respondent, assessment, options=[] }){
     /*
     Displays a response field for a specific indicator within an assessment.
     - indicator (object): indicator being responded to
@@ -15,10 +15,11 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
     - options(array): options to use, if applicable
     */
     const [expanded, setExpanded] = useState(false); //show meta fields (date/location)
+    const [defaultsLoaded, setDefaultsLoaded] = useState(false);
 
     //set context variables based on FormProvider
     const { field } = useController({ name: `response_data.${indicator.id}.value` });
-    const { control, setValue, getValues, formState } = useFormContext();
+    const { control, setValue, getValues, unregister, formState } = useFormContext();
 
     //conver the indicator types to what we use to build fields
     const convertType = (type) => {
@@ -38,6 +39,41 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
         } 
         return selectedValues.filter(v => v !== 'none');
     };
+    
+    // calculate default value for this question
+    useEffect(() => {
+        if (!indicator) return;
+        const defaultValue = defaultVal?.value;
+        console.log(defaultValue)
+        setValue(`response_data.${indicator.id}`, defaultValue);
+        setDefaultsLoaded(true);
+    }, [defaultVal, indicator, setValue]);
+
+    // calculate visibility locally
+    const isVisible = useMemo(() => {
+        if (!defaultsLoaded) return false;
+        const logic = indicator.logic;
+        if (!logic?.conditions?.length) return true;
+        if (logic.group_operator === 'AND') {
+            return logic.conditions.every(c =>
+                checkLogic(c, responseInfo, assessment, respondent)
+            );
+        } 
+        else {
+            return logic.conditions.some(c =>
+                checkLogic(c, responseInfo, assessment, respondent)
+            );
+        }
+    }, [defaultVal, responseInfo, defaultsLoaded, indicator, respondent]);
+
+    console.log(responseInfo, isVisible)
+    
+    // unregister if invisible
+    useEffect(() => {
+        if (!isVisible) {
+            unregister(`response_data.${indicator.id}.value`);
+        }
+    }, [isVisible, unregister, indicator.id]);
 
     //field config object
     let fieldConfig = {
@@ -48,7 +84,7 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
         onChange: indicator.type === 'multi' ? handleMultiSelectChange : undefined,
     }
     //if required, add rules (false is OK)
-    if(indicator.required){
+    if(indicator.required && isVisible){
         fieldConfig.rules = {
             validate: (value) => {
                 // Allow false, 0, empty array, but disallow null or undefined
@@ -66,7 +102,7 @@ export default function ResponseField ({ indicator, shouldShow=false, options=[]
         fieldConfig.tooltip = indicator.description;
     }
     
-    if(!shouldShow) return <></>
+    if (!isVisible) return null;
     return(
         <div className={styles.formSection}>
             <div style={{display: 'flex', flexDirection: 'row'}}>
