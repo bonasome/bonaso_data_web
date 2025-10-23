@@ -60,7 +60,6 @@ export default function AssessmentForm(){
     useEffect(() => {
         const getMeta = async () => {
             try {
-                console.log('fetching meta...');
                 //run the filters
                 const url = `/api/indicators/manage/meta/`;
                 const response = await fetchWithAuth(url);
@@ -79,7 +78,6 @@ export default function AssessmentForm(){
     useEffect(() => {
         const getAssessmentDetail = async () => {
             try {
-                console.log('fetching indicator details...');
                 const response = await fetchWithAuth(`/api/manage/tasks/${taskID}/`);
                 const data = await response.json();
                 if(response.ok){
@@ -108,8 +106,6 @@ export default function AssessmentForm(){
         const getInteraction = async () => {
             if(!irID) return;
             try {
-                
-                console.log('fetching indicator details...');
                 const response = await fetchWithAuth(`/api/record/interactions/${irID}/`);
                 const data = await response.json();
                 if(response.ok){
@@ -136,7 +132,6 @@ export default function AssessmentForm(){
     useEffect(() => {
         const getRespondentDetails = async () => {
             try {
-                console.log('fetching respondent details...');
                 const response = await fetchWithAuth(`/api/record/respondents/${id}/`);
                 const data = await response.json();
                 if(response.ok){
@@ -304,7 +299,7 @@ export default function AssessmentForm(){
     const comments = [
         { name: 'comments', label: 'Comments/Notes', type: 'textarea', placeholder: 'Any additional notes that may be helpful to remember...' }
     ]
-    console.log(defaultValues, existing)
+
     //helper to determine if anything is visible (sometimes a respondent may be blocked from an assessment if it is gaurded by respondent logic)
     //const visibleInds = (assessment && respondent && visibilityMap) ? assessment.indicators.filter(ind => (visibilityMap[ind.id])) : [];
     if(loading || !respondent || !assessment) return <Loading />

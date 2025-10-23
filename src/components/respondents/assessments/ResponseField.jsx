@@ -65,7 +65,7 @@ export default function ResponseField ({ indicator, responseInfo, defaultVal, re
         }
     }, [defaultVal, responseInfo, defaultsLoaded, indicator, respondent]);
 
-    console.log(responseInfo, isVisible)
+    console.log(responseInfo, defaultVal, isVisible)
     
     // unregister if invisible
     useEffect(() => {
@@ -87,7 +87,6 @@ export default function ResponseField ({ indicator, responseInfo, defaultVal, re
         fieldConfig.rules = {
             validate: (value) => {
                 // Allow false, 0, empty array, but disallow null or undefined
-                console.log(value)
                 if (value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
                     return 'Required';
                 }
