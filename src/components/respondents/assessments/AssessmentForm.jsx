@@ -350,7 +350,7 @@ export default function AssessmentForm(){
                 {saving && <ButtonLoading />}
             </form>
             </FormProvider>}
-            {visibleInds.length == 0 && <Messages warnings={'This respondent is not eligible for this assessment.'} />}
+            {visibleInds.length == 0 && <Messages warnings={['This respondent is not eligible for this assessment.']} />}
         </div>
     )
 }
