@@ -5,12 +5,13 @@ import Field from "../../reuseables/forms/Field";
 import styles from '../../../styles/form.module.css';
 import errorStyles from '../../../styles/errors.module.css';
 import { FaPlusSquare, FaMinusSquare } from "react-icons/fa";
+import useWindowWidth from "../../../../services/useWindowWidth";
 export default function OptionsBuilder() {
     /*
     Helper component within the AssessmentIndicator form that builds a dynamic array of options.
     */
     const { control } = useFormContext(); //context from FormProvider
-
+    const width = useWindowWidth();
     const { fields, append, remove } = useFieldArray({
         control,
         name: `options_data`,
@@ -27,7 +28,7 @@ export default function OptionsBuilder() {
             <h3>Options</h3>
             {fields.map((field, index) => {
                 return (
-                    <div key={field.id} style={{ display: 'flex', flexDirection: 'row'}}>
+                    <div key={field.id} style={width > 760 ? { display: 'flex', flexDirection: 'row'} : {}}>
                         {/* User enters a value into each row */}
                         <Field control={control} field={{ name: `options_data.${index}.name`, 
                             label: `${index+1}.`, type: "text", rules: { required: "Required" },

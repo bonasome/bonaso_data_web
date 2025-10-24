@@ -5,8 +5,8 @@
 }
 @media screen and (max-width: 500px){
     .index{
-        margin: 2vh;
-        padding: 2vh;
+        margin: 1vh;
+        padding: 1vh;
     }
 }
 .card{

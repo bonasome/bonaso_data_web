@@ -1,4 +1,5 @@
 import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
+import useWindowWidth from "../../../../services/useWindowWidth";
 
 import Field from "../../reuseables/forms/Field";
 
@@ -15,7 +16,7 @@ export default function LogicBuilder({ order, meta, assessment }) {
     - assessment (object): information about the rest of the assessment
     */
     const { control, setValue } = useFormContext(); //form context from FormProvider
-
+    const width = useWindowWidth();
     const { fields, append, remove } = useFieldArray({
         control,
         name: `logic_data.conditions`,
@@ -69,7 +70,7 @@ export default function LogicBuilder({ order, meta, assessment }) {
                             options: meta.source_types
                         }} />
                         
-                        {condition?.source_type && condition?.source_type != '' && <div style={{ display: 'flex', flexDirection: 'row'}}>
+                        {condition?.source_type && condition?.source_type != '' && <div style={ width > 760 ? { display: 'flex', flexDirection: 'row'} : {}}>
                             {/* Source Indicator Selection if source type is assessment */}
                             {condition?.source_type === "assessment" && (
                                 <Field control={control} field={{ name: `logic_data.conditions.${index}.source_indicator`, 
