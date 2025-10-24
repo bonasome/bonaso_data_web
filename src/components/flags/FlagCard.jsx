@@ -54,7 +54,7 @@ export default function FlagCard({ flag, onUpdate=null, index=false }){
         try {
             console.log('flagging respondent...');
             setSaving(true);
-            const response = await fetchWithAuth(`/api/flags/${flag.id}/resolve-flag/`, {
+            const response = await fetchWithAuth(`/api/flags/${flag?.id}/resolve-flag/`, {
                 method: 'PATCH',
                 headers: {
                         'Content-Type': "application/json",
@@ -93,7 +93,7 @@ export default function FlagCard({ flag, onUpdate=null, index=false }){
         }
     }
 
-    if(!flagDetail) return <></>
+    if(!flagDetail?.id) return <></>
     return(
         <div className={flagDetail.resolved ? styles.cardResolved : styles.cardActive} onClick={() => setExpanded(!expanded)}>
             {index ? <Link to={generateURL(flagDetail.model_string, flagDetail.target)} style={{ display:'flex', width:"fit-content" }}><h3>Flag on {getContentTypeLabel(flagDetail.model_string)} {flagDetail.target.display} {flagDetail.resolved ? '(RESOLVED)' : '(ACTIVE)'}</h3></Link> :

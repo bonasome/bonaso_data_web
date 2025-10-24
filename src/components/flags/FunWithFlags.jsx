@@ -152,7 +152,7 @@ export default function FunWithFlags(){
 
     //what to do when a flag is resolved or updated
     const updateFlag = (flag) => {
-        const others = flags.filter((f) => f.id != flag.id);
+        const others = flags.filter((f) => f?.id != flag?.id);
         setFlags([...others, flag]);
     }
 
