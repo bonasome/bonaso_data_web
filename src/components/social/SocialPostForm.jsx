@@ -13,6 +13,7 @@ import Messages from '../reuseables/Messages';
 import ReturnLink from '../reuseables/ReturnLink';
 import ButtonLoading from '../reuseables/loading/ButtonLoading';
 import Tasks from '../tasks/Tasks';
+import OrganizationsIndex from '../organizations/OrganizationsIndex';
 
 import styles from '../../styles/form.module.css';
 
@@ -116,6 +117,7 @@ export default function SocialPostForm(){
         if(data.task_ids.length > 0) {
             data.task_ids = data.task_ids.map(task => (task.id))
         }
+        data.organization_id = data.organization_id?.id;
         //action that determines which button was pressed
         const action = e.nativeEvent.submitter.value;
         try{
@@ -174,6 +176,7 @@ export default function SocialPostForm(){
         return {
             name: existing?.name ?? '',
             description: existing?.description ?? '',
+            organization_id: existing?.organization ?? null,
             task_ids: existing?.tasks ?? [],
             published_at: existing?.published_at ?? new Date().toISOString().split('T')[0],
 
@@ -209,6 +212,7 @@ export default function SocialPostForm(){
 
     //watch platform to possibly display other platform text input
     const platform = watch("platform");
+    const selectedOrg = watch('organization_id');
 
     //list of icons to use for Image select
     const images = [FaFacebookSquare, FaInstagramSquare, FaTiktok, FaTwitter, FaYoutube, FaQuestion];
@@ -233,10 +237,14 @@ export default function SocialPostForm(){
             }}, tooltip: `You can provide a url to this post for your records.`
         },
     ]
-    //these tasks must all be from the same organizaton
+    const org = [
+        { name: 'organization_id', label: "For Organization (Required)", type: "model", IndexComponent: OrganizationsIndex, rules: { required: "Required"},
+            includeParams: [{field: 'category', value: 'social'}], tooltip: `What organization is this for?`
+        }
+    ]
     const task = [
         { name: 'task_ids', label: "Post Associated with Task(s) (Required)", type: "multimodel", IndexComponent: Tasks, rules: { required: "Required"},
-            includeParams: [{field: 'category', value: 'social'}], tooltip: `What tasks does this post contribute towards?`
+            includeParams: [{field: 'category', value: 'social'}, {field: 'organization', value: selectedOrg?.id}], tooltip: `What tasks does this post contribute towards?`
         }
     ]
     const platformInfo = [
@@ -260,7 +268,8 @@ export default function SocialPostForm(){
             <Messages errors={submissionErrors} success={success} ref={alertRef} />
             <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <FormSection fields={basics} control={control} header='Basic Information'/>
-                <FormSection fields={task} control={control} header='Related to Task(s)' />
+                <FormSection fields={org} control={control} header='Organization' />
+                {selectedOrg && <FormSection fields={task} control={control} header='Related to Task(s)' />}
                 <FormSection fields={platformInfo} control={control} header='Made on Platform'/>
                 {platform==='other' && <FormSection fields={other} control={control} header='Specify Platform' />}
 

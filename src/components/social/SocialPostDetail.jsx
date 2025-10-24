@@ -19,6 +19,7 @@ import UpdateRecord from '../reuseables/meta/UpdateRecord';
 import Messages from '../reuseables/Messages';
 
 import styles from './postDetail.module.css';
+import errorStyles from '../../styles/errors.module.css';
 
 import { ImPencil } from 'react-icons/im';
 import { FcCancel } from 'react-icons/fc';
@@ -26,6 +27,7 @@ import { IoSaveSharp } from 'react-icons/io5';
 import { FaTrashAlt } from 'react-icons/fa';
 import { IoIosArrowDropup, IoIosArrowDropdownCircle } from "react-icons/io";
 import { MdFlag } from 'react-icons/md';
+import theme from '../../../theme/theme';
 
 export default function SocialPostDetail(){
     /*
@@ -126,12 +128,12 @@ export default function SocialPostDetail(){
         try{
             console.log('submitting changes...', formData)
             setSaving(true);
-            const response = await fetchWithAuth(`/api/social/posts/${id}/`, {
+            const response = await fetchWithAuth(`/api/social/posts/${id}/update-metrics/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': "application/json",
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({metrics: formData})
             });
             const returnData = await response.json();
             if(response.ok){
@@ -245,14 +247,16 @@ export default function SocialPostDetail(){
                 <div>
                     <p>On Platform: {post.platform==='other' ? post.other_platform : cleanLabels(post.platform)}</p>
                     <p>Published: {post.published_at ? prettyDates(post.published_at) : prettyDates(post.created_at)} </p>
+                    <p>For Organization: <Link to={`/organizations/${post.organization.id}`}>{post.organization.name}</Link></p>
                     <p>Linked to Tasks: </p>
                     <ul>
-                        {post.tasks.map((t) => (<li key={t.id}> {t.display_name}</li>))}
+                        {post.tasks.map((t) => (<li key={t.id}> <Link to={`/projects/${t.project.id}/organizations/${t.organization.id}`}>{t.display_name}</Link></li>))}
                     </ul>
-                    <h4>Link to Post:</h4>
-                    {!post.link_to_post && <p>No link on record.</p>}
-                    {post.link_to_post && <Messages warnings={['This link will take you to an external site. Please review it first.']} />}
-                    {post.link_to_post && <a href={post.link_to_post}>See post here!</a>}
+                    
+                    {!post.link_to_post && <p>Link to Post: No link on record.</p>}
+                    {post.link_to_post && <div className={errorStyles.warnings}>
+                        <p><a style={{ fontWeight: 'bold', color: theme.colors.warningText }} href={post.link_to_post}>See post here!</a> (This link will take you to an external site. Please review it first.)</p>
+                    </div>}
                     <UpdateRecord created_by={post.created_by} created_at={post.created_at} updated_by={post.updated_by}
                         updated_at={post.updated_at} 
                     />
@@ -337,6 +341,7 @@ export default function SocialPostDetail(){
                     </div>
                 </div>}
             </div>
+            <div style={{ padding: 20}}></div>
         </div>
     )
 }

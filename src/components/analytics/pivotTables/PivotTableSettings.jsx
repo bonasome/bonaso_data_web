@@ -147,7 +147,7 @@ export default function PivotTableSettings({ onClose, onUpdate, meta, existing=n
     ]
     //show params based on the indicator details
     const params = [
-        { name: 'param_names', label: 'Split Data By', type: 'multiselect', options: fields}
+        { name: 'param_names', label: 'Split Data By', type: 'multiselect', options: (ind?.options?.length > 0 ? fields : fields.filter((v) => (v.value != 'option')))}
     ]
     const scope = [
         { name: 'start', label: "Start", type: "date"},

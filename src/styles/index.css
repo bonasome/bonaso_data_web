@@ -80,12 +80,12 @@ textarea:focus{
     box-shadow: 4px 4px 4px var(--bonaso-uber-dark-accent);
 }
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 5px;
+    width: 10px;
+    height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: white;
+    background: white;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -93,7 +93,7 @@ textarea:focus{
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--bonaso-primary);
+    background: var(--bonaso-main);
 }
 .spacer{
     padding: 4vh

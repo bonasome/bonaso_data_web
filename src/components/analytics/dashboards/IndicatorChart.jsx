@@ -177,7 +177,7 @@ export default function IndicatorChart({ chartData, dashboard, meta, options, on
             {dataArray.length > 0 && chartData.chart.tabular && <DataTable data={dataArray} 
                 breakdown1={chartData.chart.use_target ? 'Target' : (chartData.chart.indicators.length > 1 ? 
                     'indicator' : chartData.chart.legend)} 
-                breakdown2={chartData.chart.stack} map={options}
+                breakdown2={chartData.chart.stack} map={options} sortMap={chartData.chart.indicators.length > 1 ? Object.fromEntries(Object.values(chartData.chart.chart_data).map(item => [item.indicator, item.order])) : null} 
             />}
 
             <div style={{ display: 'flex', flexDirection: 'row'}}>

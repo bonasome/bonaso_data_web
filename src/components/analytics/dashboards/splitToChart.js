@@ -1,4 +1,6 @@
 import cleanLabels from '../../../../services/cleanLabels';
+import { AGE_ORDER } from '../../../../services/ageRanges';
+
 
 export default function splitToChart(data, map, axis=null, legend=null, stack=null, targets = []) {
     /*
@@ -15,6 +17,20 @@ export default function splitToChart(data, map, axis=null, legend=null, stack=nu
     if(!data) return { dataArray: [], keys: []}
     const arr = Object.values(data);
 
+    //create a map to help us sort complex fields
+    let sortMap = {}
+    //order indicators by order if the have one
+    if(legend == 'indicator'){
+        arr.forEach((item) => {
+            sortMap[item.indicator] = item.order
+        })
+    } 
+    //order age ranges using the map
+    if(legend == 'age_range'){
+        arr.forEach((item) => {
+            sortMap[item.age_range] = AGE_ORDER[item.age_range]
+        })
+    }
     for (const row of arr) {
         const period = row.period || 'All-Time'; //default if no axis
         
@@ -72,13 +88,15 @@ export default function splitToChart(data, map, axis=null, legend=null, stack=nu
             return yearA - yearB || quarterA - quarterB;
         });
     }
+
     const keys = Object.entries(keyMeta).map(([compoundKey, { stackKey, legendKey }]) => ({
         key: compoundKey,
         bar: legendKey ?? '',
         stackId: stackKey ||  '', //for grouping bars into stacks
         label: stack ? `${cleanLabels(legend)}: ${legendKey} - ${cleanLabels(stack)} ${stackKey}` : `${cleanLabels(legendKey)}`, //the label
         fill: undefined // optional: use a color mapping here
-    }))
+    })).sort((a, b) => Object.keys(sortMap).length > 0 ? (sortMap[a.bar] - sortMap[b.bar])
+         : (a.bar - b.bar)) //sort the array if there is a sort map
 
     return { dataArray, keys }; //return both the data and the keys
 }

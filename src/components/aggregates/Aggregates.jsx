@@ -188,6 +188,7 @@ export default function Aggregates() {
                             <p><i>{prettyDates(ag.start)} - {prettyDates(ag.end)}</i></p>
                         </div>
                     ))}
+                    {aggies.length == 0 && <p>No aggregates found...</p>}
                     </IndexViewWrapper>
                 </div>}
             </div>

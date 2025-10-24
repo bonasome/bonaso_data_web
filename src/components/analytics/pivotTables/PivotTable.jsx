@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import cleanLabels from '../../../../services/cleanLabels';
 import fetchWithAuth from '../../../../services/fetchWithAuth';
 import prettyDates from '../../../../services/prettyDates';
+import { AGE_ORDER } from '../../../../services/ageRanges';
+
 import Messages from '../../reuseables/Messages';
 import ComponentLoading from "../../reuseables/loading/ComponentLoading";
 import ButtonHover from '../../reuseables/inputs/ButtonHover';
@@ -62,7 +64,7 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
             setLoading(false);
         }
         initialLoad();
-    }, []);
+    }, [id]);
 
     //handle a download to a csv
     const handleDownload = async () => {
@@ -157,8 +159,13 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
             {editing && <PivotTableSettings existing={table} onUpdate={(data) => {getPT(); onUpdate(data)}} onClose={() => setEditing(false)} meta={meta} />}
             <div className={styles.segment}>
                 <h1>{table.display_name}</h1>
-                {<p><strong>{table.indicator.name}</strong></p>}
                 <Messages errors={errors} />
+                {table.name && <h3> For Indicator: {table.indicator.name}</h3>}
+                <h3>Parameters</h3>
+                {table.params.length > 0 && <p>Split by {table.params.map(p => (cleanLabels(p))).join(', ')}</p>}
+                {table.start && <p>From {prettyDates(table.start)} {table.end && `to ${prettyDates(table.end)}`}</p>}
+                {table.project && <p><strong>Project: </strong> {table.project.name}</p>}
+                {table.organization && <p><strong>Organization: </strong> {table.organization.name} {table.cascade_organization && '(and subgrantees)'}</p>}
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <ButtonHover callback={() => setEditing(true)} noHover={<IoSettingsSharp />} hover='Edit Pivot Table' />
                     {downloading ? <ButtonLoading /> : 
@@ -167,17 +174,21 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
                 </div>
             </div>
             <div className={styles.table}>
-                <h2>Parameters</h2>
-                {table.params.length > 0 && <p>Split by {table.params.map(p => (cleanLabels(p))).join(', ')}</p>}
-                {table.start && <p>From {prettyDates(table.start)} {table.end && `to ${prettyDates(table.end)}`}</p>}
-                {table.project && <p><strong>Project: </strong> {table.project.name}</p>}
-                {table.organization && <p><strong>Organization: </strong> {table.organization.name} {table.cascade_organization && '(and subgrantees)'}</p>}
+                    <h2>Data</h2>
                 <table border="1" cellPadding="5" style={{ borderCollapse: 'collapse' }}>
                     <thead>
                         <tr>
-                        {headers.map((header, i) => (
-                            <th key={i}>{(!headers[0]) ? table.indicator.display_name : 
-                                breakdowns?.[headerBD]?.[header] ?? cleanLabels(header)}</th>
+                        {headers.sort((a, b) => {
+                                if (headerBD === 'age_range') {
+                                    return (AGE_ORDER[a] ?? -1) - (AGE_ORDER[b] ?? -1);
+                                }
+                                // fallback: lexicographic sort
+                                return String(a).localeCompare(String(b));
+                            }).map((header, i) => (
+                                <th key={i}>{
+                                    (!headers[0]) ? table.indicator.display_name : 
+                                    breakdowns?.[headerBD]?.find(v => v.value == header)?.label ?? cleanLabels(header)}
+                                </th>
                         ))}
                         </tr>
                     </thead>
@@ -185,7 +196,7 @@ export default function PivotTable({ id, breakdowns, onUpdate, onDelete, meta })
                         {rows.map((row, rowIndex) => (
                         <tr key={rowIndex}>
                             {row.map((cell, colIndex) => (
-                            <td key={colIndex}>{breakdowns?.[rowBDs[colIndex]]?.[cell] ?? 
+                            <td key={colIndex}>{breakdowns?.[rowBDs[colIndex]]?.find(v => v.value == cell)?.label ?? 
                                 (typeof(cell) === 'string' ? cleanLabels(cell) : cell)}</td>
                             ))}
                         </tr>

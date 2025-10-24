@@ -157,6 +157,7 @@ export default function Dashboards() {
                             <h3>{db.name}</h3>
                         </div>
                     ))}
+                    {dashboards.length == 0 && <p>No dashboards found. Click the button above to create a new one.</p>}
                     </IndexViewWrapper>
                 </div>}
             </div>

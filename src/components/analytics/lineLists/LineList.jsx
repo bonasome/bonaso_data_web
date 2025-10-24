@@ -62,7 +62,7 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
             setLoading(false);
         }
         initialLoad();
-    }, []);
+    }, [id]);
 
     //download the line list as a csv file
     const handleDownload = async () => {
@@ -150,25 +150,29 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
         //these ones are already in good shape
         if(['indicator', 'organization', 'project', 'numeric_component', 'subcategory'].includes(headers[col])) return cell;
         //clean up dates
-        if(['dob', 'interaction_date'].includes(headers[col])) return prettyDates(cell);
+        if(['dob', 'response_date'].includes(headers[col])) return prettyDates(cell);
         //get full country name for citizenship (db stores 2 digit code)
         if(headers[col] === 'citizenship'){
             const country = countries.find(c => c.cca2 === cell.toUpperCase());
             return country ? country.name.common : null;
         }
+        if([null, ''].includes(cell)) return '-';
+        if(Array.isArray(cell) && cell.length == 0) return '-';
         //convert booleans
-        if(cell === true) return 'True';
-        if(cell === false) return 'False';
+        if(cell === true) return 'Yes';
+        if(cell === false) return 'No';
         //if an array, join the array in a readable format
         if(Array.isArray(cell)){
             let cat = headers[col]
             if(cat == 'kp_status') cat = 'kp_type';
             if(cat == 'disability_status') cat='disability_type';
-            return cell.map(c => (breakdowns?.[cat]?.[c] ?? 
+            console.log(breakdowns[cat], cell)
+            return cell.map(c => (
+                breakdowns?.[cat] ? breakdowns?.[cat]?.find(v => (v?.value == c))?.label : 
                 (typeof(c) === 'string' ? cleanLabels(c) : c))).join(', ')
         }
         //try to find it in the map
-        return breakdowns?.[headers[col]]?.[cell] ?? 
+        return breakdowns?.[headers[col]]?.find(v => (v?.value == cell))?.label ?? 
             (typeof(cell) === 'string' ? cleanLabels(cell) : cell)
     }
 
@@ -190,13 +194,13 @@ export default function LineList({ id, onUpdate, onDelete, breakdowns }){
 
             <div className={styles.table}>
             {list?.data?.length > 0 ? <div>
-                <h2>Parameters</h2>
+                <h2>Data</h2>
                 {/* Display the users selected filters/params */}
                 {list.start && <p>From {prettyDates(list.start)} {list.end && `to ${prettyDates(list.end)}`}</p>}
-                {list.indicator && <p><strong>Indicator: </strong> {list.indicator.display_name}</p>}
+                {list.assessment && <p><strong>For Assessment: </strong> {list.assessment.display_name}</p>}
                 {list.project && <p><strong>Project: </strong> {list.project.name}</p>}
                 {list.organization && <p><strong>Organization: </strong> {list.organization.name} {list.cascade_organization && '(and subgrantees)'}</p>}
-                <table>
+                <table style={{ padding: 20}}>
                     <thead>
                         <tr>
                             {headers.map(h => (

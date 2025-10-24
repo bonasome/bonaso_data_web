@@ -87,7 +87,7 @@ export default function LineLists() {
         setLLs(prev => prev.filter((l) => (l.id != id)));
         setViewing(null);
     }
-
+    console.log(viewing)
     if(loading) return <Loading />
     return(
         <div className={hidden ? styles.fullContainer : styles.container}>
@@ -107,6 +107,14 @@ export default function LineLists() {
                         <MdOutlineViewList style={{ fontSize: '150px', margin: 30, opacity: '75%' }} />
                     </div>
                     <h1>Select or Create a Line List From the Sidebar to Begin.</h1>
+                    <p>
+                        A line list is a way for you to get a list of all responses to assessments in 
+                        detail. You can filter by organization, time period, assessment, or project. 
+                    </p>
+                    <p>
+                        Your line list will automatically update with new data. If you want, you can also 
+                        download the line list as a CSV file to do extra analysis with Excel or another tool.
+                    </p>
                 </div>}
             </div>
 
@@ -124,6 +132,7 @@ export default function LineLists() {
                             <h3>{l.name}</h3>
                         </div>
                     ))}
+                    {lls.length == 0 && <p>No lists found. Click the button above to create a new one.</p>}
                     </IndexViewWrapper>
                 </div>}
             </div>

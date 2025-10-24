@@ -114,7 +114,7 @@ export default function PivotTables() {
         setPivotTables(prev => prev.filter((d) => (d.id != id)));
         setViewing(null);
     }
-
+    console.log(viewing)
     if(loading || !meta) return <Loading />
     return(
         <div className={hidden ? styles.fullContainer : styles.container}>
@@ -151,6 +151,7 @@ export default function PivotTables() {
                             <h3>{pt.display_name}</h3>
                         </div>
                     ))}
+                    {pivotTables.length == 0 && <p>No tables found. Click the button above to create a new one.</p>}
                     </IndexViewWrapper>
                 </div>}
             </div>

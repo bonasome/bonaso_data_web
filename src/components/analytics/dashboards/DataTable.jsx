@@ -1,13 +1,14 @@
 import cleanLabels from "../../../../services/cleanLabels";
 import styles from './dashboard.module.css';
 //build a data table based on rechart data
-export default function DataTable({ data, map, breakdown1=null, breakdown2=null }) {
+export default function DataTable({ data, map, breakdown1=null, breakdown2=null, sortMap=null }) {
     /*
     Component that displays a data table beneath a chart. Specifically designed to work with data prepared for that chart.
     - data(array): data from the chart
+    - map (object): object containing a map of the options/labels to display readable labels
     - breakdown 1 (string, optional): the name of the legend category (alternatively indicator/target)
     - breakdown 2 (string, optional): the name of the stack category
-    - map (object): object containing a map of the options/labels to display readable labels
+    - sortMap (object, optional): used for sorting indicators so they appear in the order they do in the assessment (if applicable)
     */
     
 
@@ -21,12 +22,18 @@ export default function DataTable({ data, map, breakdown1=null, breakdown2=null 
     
     let uniqueBreakdown1 = [...new Set(columns.map(([b1]) => b1))];
     let uniqueBreakdown1Labels = [...new Set(columns.map(([b1]) => b1))]; //seperate out labels, since some breakdowns may not have values in map
-    if(breakdown1 && breakdown1 != 'subcategory' && breakdown1 != 'indicator' && breakdown1 != 'Target'){ //these categories will not have values in map
+    if(breakdown1 && breakdown1 != 'option' && breakdown1 != 'indicator' && breakdown1 != 'Target'){ //these categories will not have values in map
         uniqueBreakdown1Labels = uniqueBreakdown1.map((val) => (map?.[breakdown1]?.[val] ?? val)) //if applicable, try to find the value in the map and get the label
     }
+    //use the indicator order
+    if(breakdown1 == 'indicator'){
+        uniqueBreakdown1 = uniqueBreakdown1.sort((a, b) => (sortMap[a] - sortMap[b]))
+        uniqueBreakdown1Labels = uniqueBreakdown1Labels.sort((a, b) => (sortMap[a] - sortMap[b]))
+    }
+    
     let uniqueBreakdown2 = [...new Set(columns.map(([, b2]) => b2).filter(Boolean))]; //seperate out labels, since some breakdowns may not have values in map
     let uniqueBreakdown2Labels = [...new Set(columns.map(([, b2]) => b2).filter(Boolean))];
-    if(breakdown2 && breakdown2 != 'subcategory'){ //these categories will not have values in map
+    if(breakdown2 && breakdown2 != 'option'){ //these categories will not have values in map
         uniqueBreakdown2Labels = uniqueBreakdown2.map((val) => (map?.[breakdown2]?.[val] ?? val)) //if applicable, try to find the value in the map and get the label
     }
 
