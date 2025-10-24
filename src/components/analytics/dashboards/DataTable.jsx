@@ -19,11 +19,11 @@ export default function DataTable({ data, map, breakdown1=null, breakdown2=null,
         .filter((k) => k !== "period")
         .map(getBreakdowns);
 
-    
+    console.log(map)
     let uniqueBreakdown1 = [...new Set(columns.map(([b1]) => b1))];
     let uniqueBreakdown1Labels = [...new Set(columns.map(([b1]) => b1))]; //seperate out labels, since some breakdowns may not have values in map
     if(breakdown1 && breakdown1 != 'option' && breakdown1 != 'indicator' && breakdown1 != 'Target'){ //these categories will not have values in map
-        uniqueBreakdown1Labels = uniqueBreakdown1.map((val) => (map?.[breakdown1]?.[val] ?? val)) //if applicable, try to find the value in the map and get the label
+        uniqueBreakdown1Labels = uniqueBreakdown1.map((val) => (map?.[breakdown1]?.find(v => v.value == val)?.label ?? val)) //if applicable, try to find the value in the map and get the label
     }
     //use the indicator order
     if(breakdown1 == 'indicator'){
@@ -34,7 +34,7 @@ export default function DataTable({ data, map, breakdown1=null, breakdown2=null,
     let uniqueBreakdown2 = [...new Set(columns.map(([, b2]) => b2).filter(Boolean))]; //seperate out labels, since some breakdowns may not have values in map
     let uniqueBreakdown2Labels = [...new Set(columns.map(([, b2]) => b2).filter(Boolean))];
     if(breakdown2 && breakdown2 != 'option'){ //these categories will not have values in map
-        uniqueBreakdown2Labels = uniqueBreakdown2.map((val) => (map?.[breakdown2]?.[val] ?? val)) //if applicable, try to find the value in the map and get the label
+        uniqueBreakdown2Labels = uniqueBreakdown2.map((val) => (map?.[breakdown2]?.find(v => v.value == val)?.label ?? val)) //if applicable, try to find the value in the map and get the label
     }
 
     return (

@@ -42,7 +42,7 @@ export default function Profile(){
     const[loading, setLoading] = useState(true);
     const [errors, setErrors] = useState([]);
     const [changePass, setChangePass] = useState(false); //shows/hides password changer
-    
+    console.log(profile)
     //get profile detials, meta, and activity
     useEffect(() => {
         const getProfile = async () => {
