@@ -142,11 +142,17 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
 
     //handle form submission
     const onSubmit = async(data, e) => {
+        let errs = []
         data.assessment_id = assessment.id; //set the related project based on the URL param
         //wipe any option related data if the type does not allow for custom options (to clear stale states)
         if(['text'].includes(data.type)) data.allow_aggregate = false;
         if(!['multi', 'single', 'multint'].includes(data.type)){
             data.options_data = [];
+        }
+        if(data.options_data?.length > 0){
+            data.options_data.forEach(o => {
+                if(['', 'none', 'any', 'all'].includes(o.name.toLowerCase())) errs.push(`"${o.name}" is not a valid option name.`)
+            })
         }
         //wipe match_options data if the data type isn't multi (indicating a stale state)
         if(data.type != 'multi') data.match_options_id = null;
@@ -171,9 +177,14 @@ export default function AssessmentIndicator({ meta, assessment, onUpdate, existi
                 }
             }
         }
+        if(errs.length > 0){
+            console.log(errs)
+            setSubmissionErrors(errs);
+            return;
+        }
+
         //set category automatically
         data.category = 'assessment';
-
         try{
             setSubmissionErrors([]);
             setSaving(true);

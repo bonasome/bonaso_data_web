@@ -114,7 +114,7 @@ export default function PivotTables() {
         setPivotTables(prev => prev.filter((d) => (d.id != id)));
         setViewing(null);
     }
-    console.log(viewing)
+
     if(loading || !meta) return <Loading />
     return(
         <div className={hidden ? styles.fullContainer : styles.container}>
@@ -134,6 +134,10 @@ export default function PivotTables() {
                         <MdOutlinePivotTableChart style={{ fontSize: '150px', margin: 30, opacity: '75%' }} />
                     </div>
                     <h1>Select or Create a Pivot Table From the Sidebar to Begin.</h1>
+                    <p>
+                        A pivot table allows you to view aggregated data for an indicator in a tabular format,
+                        broken down by whatever category you like.
+                    </p>
                 </div>}
             </div>
 

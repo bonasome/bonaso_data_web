@@ -11,6 +11,7 @@ import modalStyles from '../../../styles/modals.module.css';
 
 
 import { FaCheckSquare } from "react-icons/fa";
+import { FcCancel } from 'react-icons/fc';
 
 export default function ModelSelect({ name, IndexComponent, value, onChange, label,  errors, tooltip=null, labelField='name', includeParams=[], excludeParams=[], blacklist=[] }){
     /*
@@ -60,7 +61,9 @@ export default function ModelSelect({ name, IndexComponent, value, onChange, lab
                         <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
                             <IndexComponent callback={(obj) => {onChange(obj); setSelecting(false)}} includeParams={includeParams} excludeParams={excludeParams} blacklist={blacklist}/>
                         </div>
-                        <button onClick={() => setSelecting(false)} type='button'><FaCheckSquare /> Done</button>
+                        <div style={{ marginLeft: 'auto', marginRight: 'auto', textAlign: 'center'}}>
+                            <button onClick={() => setSelecting(false)} type='button'><FcCancel />Cancel</button>
+                        </div>
                     </div>
                 </div>
             </fieldset>

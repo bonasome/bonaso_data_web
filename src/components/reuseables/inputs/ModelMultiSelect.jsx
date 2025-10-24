@@ -6,6 +6,7 @@ import Tooltip from '../Tooltip';
 import styles from '../../../styles/indexSelect.module.css';
 import modalStyles from '../../../styles/modals.module.css';
 
+import { BiCheckCircle } from 'react-icons/bi';
 //select multiple models from an index component
 export default function ModelMultiSelect({ name, IndexComponent, value, onChange, label, errors=[], tooltip=null, labelField='display_name', includeParams=[], excludeParams=[], projAdd=false, addRedirect=null, blacklist=[] }){
     /*
@@ -84,7 +85,7 @@ export default function ModelMultiSelect({ name, IndexComponent, value, onChange
                         <div style={{ height: '90%', overflowY: 'scroll', overflowX: 'hidden' }}>
                             <IndexComponent callback={(obj) => handleAdd(obj)} blacklist={[...selectedVals, ...blacklist]} includeParams={includeParams} excludeParams={excludeParams} projAdd={projAdd} addRedirect={addRedirect} />
                         </div>
-                        <button onClick={() => setSelecting(false)}>Done Selecting</button>
+                        <button onClick={() => setSelecting(false)}> <BiCheckCircle /> Done Selecting</button>
                     </div>}
                 </div>
             </fieldset>

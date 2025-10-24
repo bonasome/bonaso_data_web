@@ -90,6 +90,11 @@ export default function ClientsIndex({ callback=null, blacklist=[] }){
     return(
         <div className={styles.index}>
             {!callback && <h1>Clients</h1>}
+            {!callback && <p>
+                Here you can view all of our clients, or people who own our projects. Clients are important
+                for helping us track who each project is for and what client level users should be able 
+                to view when they log in.
+            </p>}
             <Messages errors={errors} />
             {showClientModal && <CreateClient onUpdate={(client) => {setClients(prev=> [...prev, client]); setShowClientModal(false)}} onCancel={() => setShowClientModal(false)} /> }
             {!callback && <button onClick={() => setShowClientModal(true)}> <RiGovernmentFill /> Create New Client</button>}

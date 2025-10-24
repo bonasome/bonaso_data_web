@@ -1,5 +1,6 @@
 import modalStyles from '../../../styles/modals.module.css';
 import theme from '../../../../theme/theme';
+import { FaWindowClose } from "react-icons/fa";
 
 export default function AssessmentIndicatorsModal({ assessment, meta, onClose}){
     /*
@@ -18,7 +19,7 @@ export default function AssessmentIndicatorsModal({ assessment, meta, onClose}){
     return(
         <div className={modalStyles.modal}>
             <h2>Indicators in {assessment?.name} Assessment</h2>
-            <div>
+            <div style={{ height: '90%', overflowY: 'scroll', backgroundColor: theme.colors.bonasoUberDarkAccent, padding: 20 }}>
                 {assessment.indicators.sort((a, b) => (a.order - b.order)).map((ind) => (<div key={ind.id} style={{ borderBottom: '4px solid white'}}>
                     <p>{ind.order+1}. {ind.name} ({getLabelFromValue('type', ind.type)})</p>
                     {ind.description && ind.description != '' && <p>Description: <i>{ind.description}</i></p>}
@@ -52,7 +53,9 @@ export default function AssessmentIndicatorsModal({ assessment, meta, onClose}){
                     </div>}
                 </div>))}
             </div>
-            <button onClick={onClose}>Close</button>
+            <div style={{ marginTop: 10}}>
+                <button onClick={onClose}><FaWindowClose /> Close</button>
+            </div>
         </div>
     )
 }

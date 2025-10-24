@@ -209,6 +209,11 @@ export default function IndicatorsIndex({ callback=null, includeParams=[], exclu
     return(
         <div className={styles.index}>
             {!callback && <h1>{user.role == 'admin' ? 'All Indicators' : 'My Indicators'}</h1>} 
+            {!callback && <p>
+                Here you can view all indicators, or metrics we collect data about. Some of these will belong
+                to <Link to={'/indicators/assessments'}>assessments</Link>, and you can edit and view more
+                context about them there. Others are standalone, and you can view them here.
+            </p>}
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
                 filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1);}} 
                 initial={initial} config={filterConfig(indicatorsMeta, user)} 

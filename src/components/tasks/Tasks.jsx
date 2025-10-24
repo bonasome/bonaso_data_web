@@ -15,7 +15,8 @@ import AssessmentIndicatorsModal from "../indicators/assessment/AssessmentIndica
 import styles from './tasks.module.css';
 
 import { FaTrashAlt } from "react-icons/fa";
-
+import { TbListDetails } from "react-icons/tb";
+import { RiFileEditFill } from "react-icons/ri";
 
 //card that holds task details
 function TaskCard({ task,  meta, onError, canDelete=false, onDelete=null, callback=null, forAssessment=false }) {
@@ -123,7 +124,7 @@ function TaskCard({ task,  meta, onError, canDelete=false, onDelete=null, callba
             <h3>{task.display_name}</h3>
 
             {callback && <button onClick={(e) => {callback(task); e.stopPropagation()}} type="button" style={{ maxHeight: 'fit-content' }}>
-                {forAssessment ? `Start ${task?.assessment?.name} Assessent` : `Select ${task.display_name}`}
+                {forAssessment ? `Start ${task?.assessment?.name} Assessment` : `Select ${task.display_name}`}
             </button>}
             
             {expanded && (
@@ -133,7 +134,7 @@ function TaskCard({ task,  meta, onError, canDelete=false, onDelete=null, callba
                     <p><strong>{typeLabel} Description:</strong> {task[type].description ? task[type].description : 'No description.'}</p>
                     {task?.indicator && <p><i>{getLabelFromValue('category', task?.indicator?.category)}</i></p>}
                     {task?.assessment && <div>
-                        <button onClick={() => setViewingAssessment(true)}>View Indicators in Assessment</button>
+                        <button onClick={() => setViewingAssessment(true)}><TbListDetails /> View Indicators in Assessment</button>
                         
                     </div>}
                     {canDelete && <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Remove Task'} forDelete={true} />}

@@ -328,6 +328,7 @@ export default function ProjectOrganization(){
                     {hasPerm && <ButtonHover callback={() => setDel(true)} noHover={<IoIosRemoveCircle />} hover={'Remove Organization from Project'} forDelete={true} />}
                 </div>
             </div>
+            <div style={{ padding: 20}}></div>
         </div>
     )
 }

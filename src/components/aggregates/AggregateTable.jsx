@@ -139,14 +139,14 @@ export default function AggregateTable({ id, meta, onDelete }){
         <div>
             {del && <ConfirmDelete name={'this aggregate count table'} onCancel={() => setDel(false)} onConfirm={handleDelete} /> }
             {viewingFlag && <FlagDetailModal flags={count.counts.find(c => (c.id == viewingFlag))?.flags} model={'aggregates.aggregatecount'} id={viewingFlag} onClose={() => {getCount(); setViewingFlag(null)}} /> }
-            <div style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, padding: '4vh', margin: '2vh' }}>
+            <div style={{ backgroundColor: theme.colors.bonasoDarkAccent, padding: '4vh', margin: '2vh' }}>
                 <h1>Aggregate Count for {count.display_name}</h1>
                 <h3>By {count.organization.name} for {count.project.name}</h3>
                 <h3><i>From {prettyDates(count.start)} to {prettyDates(count.end)}</i></h3>
                 <UpdateRecord created_by={count.created_by} created_at={count.created_at} updated_by={count.updated_by} updated_at={count.updated_at} />
             </div>
             <Messages errors={errors} />
-            <div style={{ backgroundColor: theme.colors.bonasoUberDarkAccent, padding: '4vh', margin: '2vh' }}>
+            <div style={{ backgroundColor: theme.colors.bonasoDarkAccent, padding: '4vh', margin: '2vh' }}>
             <h3>Aggregated Data</h3>
             {count.comments && count.comments != '' && <p><strong>Comments: </strong><i>{count.comments}</i></p>}
             {count?.counts?.length == 1 && <div>
@@ -155,7 +155,7 @@ export default function AggregateTable({ id, meta, onDelete }){
             </div>}
             
             {/* If there is only one count in the group (one number), just display the number. */}
-            {count?.counts?.length > 1 && <table style={{  marginLeft: 'auto', marginRight: 'auto' }}>
+            {count?.counts?.length > 1 && <table style={{  marginLeft: 'auto', marginRight: 'auto', border: `solid 2px ${theme.colors.bonasoLightAccent}` }}>
                 <thead>
                     {/* Top-left corner: show row dims labels stacked vertically */}
                     <tr>

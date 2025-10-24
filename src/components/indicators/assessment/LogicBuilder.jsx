@@ -3,8 +3,10 @@ import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
 import Field from "../../reuseables/forms/Field";
 
 import styles from '../../../styles/form.module.css';
-import theme from "../../../../theme/theme";
+import errorStyles from '../../../styles/errors.module.css';
 
+import theme from "../../../../theme/theme";
+import { FaPlusSquare, FaMinusSquare } from "react-icons/fa";
 export default function LogicBuilder({ order, meta, assessment }) {
     /*
     Helper component within the AssessmentIndicator form that builds a dynamic array of logic conditions.
@@ -136,7 +138,7 @@ export default function LogicBuilder({ order, meta, assessment }) {
                             )}
                         </div>}
                         {/* Removes a condition */}
-                        <button type="button" onClick={() => remove(index)}>Remove</button>
+                        <button type="button" onClick={() => remove(index)} className={errorStyles.deleteButton}><FaMinusSquare /> Remove</button>
                     </div>
                 );
             })}
@@ -154,7 +156,7 @@ export default function LogicBuilder({ order, meta, assessment }) {
                     })
                 }
             >
-                Add Condition
+                <FaPlusSquare /> Add Condition
             </button>
         </div>
     );

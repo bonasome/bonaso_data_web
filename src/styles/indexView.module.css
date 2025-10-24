@@ -11,8 +11,11 @@
 }
 .card{
     background-color: var(--bonaso-uber-dark-accent);
-    margin: 5vh;
-    padding: 3vh;
+    margin: 3vh;
+    padding-left: 4vh;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    padding-right: 2vh;
     height: fit-content;
     transition: transform 0.3s ease;
 }

@@ -96,7 +96,7 @@ function EventCard({ event, callback=null, callbackText='Select Event' }) {
     );
 }
 
-export default function EventsIndex({ callback=null, callbackText='Select Event', includeParams=[], excludeParams=[]}){
+export default function EventsIndex({ callback=null, callbackText='Select Event', includeParams=[], excludeParams=[], inProject=false}){
     /**
     Index view that displays a list of events (paginated and searchable). Can be used either as a standalone page
     or can be used with other components to select an event instance.
@@ -212,14 +212,14 @@ export default function EventsIndex({ callback=null, callbackText='Select Event'
     if(loading) return <Loading />
     return(
         <div className={styles.index}>
-            <h1>{user.role == 'admin' ? 'All Events' : 'My Events'}</h1> 
+            {!inProject && <h1>{user.role == 'admin' ? 'All Events' : 'My Events'}</h1>} 
             <Messages errors={errors} />
-            <p>
+            {!inProject && <p>
                 Here you can view a list of all events in our system. An event is any activity that is 
                 linked to an indicator in some way. It could be an activity where you reach out to people
                 in the community (like a World AIDS Day event), but it could also be training of subgrantees
                 or a capacity building workshop. 
-            </p>
+            </p>}
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter 
                 onFilterChange={setFilters} config={filterConfig(eventsMeta, orgs, (s) => setOrgSearch(s))} initial={initial}  
             />}>

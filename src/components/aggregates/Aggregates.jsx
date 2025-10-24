@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/UserAuth';
 
@@ -14,7 +14,7 @@ import AggregateTable from './AggregateTable';
 import styles from '../analytics/dashboards/dashboard.module.css';
 
 import { BiSolidShow, BiSolidHide } from "react-icons/bi";
-import { MdOutlinePivotTableChart } from "react-icons/md";
+import { GrTableAdd } from "react-icons/gr";
 import IndexViewWrapper from '../reuseables/IndexView';
 import Filter from '../reuseables/Filter';
 
@@ -24,7 +24,7 @@ export default function Aggregates() {
     Displays a list of all aggregates. On selected, one will appear in the main panel.
     Accepts optional param to preload page with one aggregate group in view
     */
-
+    const navigate = useNavigate();
     const { id } = useParams(); //optional param to load with a specfic aggie in view
     const { user } = useAuth();
 
@@ -74,34 +74,38 @@ export default function Aggregates() {
         getMeta();
     }, []);
 
+    const gigEmAggies = async() => { //future devs: change this function name when A&M loses a game
+        try {
+            const filterQuery = 
+                (filters.organization ? `&organization=${filters.organization}` : '') + 
+                (filters.project ? `&project=${filters.project}` : '');
+            const url = `/api/aggregates?page=${page}&search=${search}` + filterQuery;
+            const response = await fetchWithAuth(url);
+            const data = await response.json();
+            if(response.ok){
+                setAggies(data.results);
+                setEntries(data.count);
+            }
+            else{
+                console.error(data);
+                setErrors(['Something went wrong. Please try again later.'])
+            }
+        } 
+        catch (err) {
+            console.error('Failed to get aggregates:', err);
+            setErrors(['Something went wrong. Please try again later.'])
+        } 
+        finally {
+            setLoading(false);
+        }
+    }
+
     //get a lightweight list of aggregates
     useEffect(() => {
-        const gigEmAggies = async() => { //future devs: change this function name when A&M loses a game
-            try {
-                const filterQuery = 
-                    (filters.organization ? `&organization=${filters.organization}` : '') + 
-                    (filters.project ? `&project=${filters.project}` : '');
-                const url = `/api/aggregates?page=${page}&search=${search}` + filterQuery;
-                const response = await fetchWithAuth(url);
-                const data = await response.json();
-                if(response.ok){
-                    setAggies(data.results);
-                    setEntries(data.count);
-                }
-                else{
-                    console.error(data);
-                    setErrors(['Something went wrong. Please try again later.'])
-                }
-            } 
-            catch (err) {
-                console.error('Failed to get aggregates:', err);
-                setErrors(['Something went wrong. Please try again later.'])
-            } 
-            finally {
-                setLoading(false);
-            }
+        const initialLoad = async() => {
+            await gigEmAggies();
         }
-        gigEmAggies();
+        initialLoad(); 
     }, [search, page, filters]);
 
     //get a list of projects to help with filtering
@@ -152,12 +156,12 @@ export default function Aggregates() {
                 <Messages errors={errors} />
 
                 {/*Show Selected aggregate*/}
-                {viewing && <AggregateTable id={viewing} meta={meta} />}
+                {viewing && <AggregateTable id={viewing} meta={meta} onDelete={() => {setViewing(null); gigEmAggies(); navigate('/aggregates')}} />}
 
                 {/* Show a placeholder when nothing is selected */}
                 {!viewing && <div className={styles.placeholder}>
                     <div>
-                        <MdOutlinePivotTableChart style={{ fontSize: '150px', margin: 30, opacity: '75%' }} />
+                        <GrTableAdd style={{ fontSize: '150px', margin: 30, opacity: '75%' }} />
                     </div>
                     <h1>Select or create a an aggregate to begin.</h1>
                     <p>
@@ -180,7 +184,7 @@ export default function Aggregates() {
                 </div>
                 {!hidden && <div>
                     <h2>Your Aggregates</h2>
-                    {!['client'].includes(user.role) && <Link to={'/aggregates/new'}><button><MdOutlinePivotTableChart /> Create a New Aggreate</button></Link>}
+                    {!['client'].includes(user.role) && <Link to={'/aggregates/new'}><button><GrTableAdd /> Create a New Aggreate</button></Link>}
                     <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} filter={<Filter initial={initial} config={filterConfig(projects, (s) => setProjectSearch(s), orgs, (s) => setOrgSearch(s) )} onFilterChange={setFilters} /> }>
                     {aggies.length > 0 && aggies.map((ag) => (
                         <div onClick={() => setViewing(ag.id)} className={styles.dbCard}>

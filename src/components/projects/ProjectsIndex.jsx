@@ -181,6 +181,11 @@ export default function ProjectsIndex({callback=null, callbackText='Select Proje
     return(
         <div className={styles.index}>
             {!callback && <h1>{user.role == 'admin' ? 'All Projects' : 'My Projects'}</h1>} 
+            {!callback && <p>
+                Here you can view all of your projects. Within a project, you can view announcements for 
+                that project, activities related to that project, organizations in that project,
+                and tasks and targets for each organization in the project.    
+            </p>}
             <Messages errors={errors} />
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} 
                 filter={<Filter onFilterChange={(inputs) => {setFilters(inputs); setPage(1)}} initial={initial} config={filterConfig(projectsMeta)} />}>

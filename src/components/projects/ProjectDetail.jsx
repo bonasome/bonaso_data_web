@@ -18,8 +18,7 @@ import UpdateRecord from '../reuseables/meta/UpdateRecord';
 import ButtonHover from '../reuseables/inputs/ButtonHover';
 import AnnouncementsIndex from '../messages/announcements/AnnouncementsIndex';
 import ProjectDeadlineIndex from './deadlines/ProjectDeadlineIndex';
-import ProjectActivityIndex from './activities/ProjectActivityIndex';
-import ProjectActivityFAGantt from './activities/ProjectActivityFAGantt';
+import ProjectActivityFAGantt from './gantt/ProjectActivityFAGantt';
 import { AssignOrgToProject } from './AssignModals';
 
 import styles from './projectDetail.module.css';
@@ -241,7 +240,7 @@ export default function ProjectDetail(){
                     </div>
                         
                     {showActivities && <div style={{ paddingLeft: '2vh', paddingRight: '2vh'}}>
-                        <EventsIndex includeParams={[{field: 'project', value: project.id}]} />
+                        <EventsIndex includeParams={[{field: 'project', value: project.id}]} inProject={true} />
                     </div>}
                 </div>
                 
@@ -270,6 +269,8 @@ export default function ProjectDetail(){
                         {addingOrgs && <AssignOrgToProject onUpdate={fetchProject} 
                             onClose={() => setAddingOrgs(false)} project={project}
                         />}
+                        <p>Click on an organization to view their tasks, targets, subgrantees, and narrative reports.</p>
+                        <p>If you see a little arrow to the right of their name, you can click the card to view and jump to their subgrantees.</p>
                         {project.organizations.length > 0 ? project.organizations.map((org) => (
                             <ProjectOrgCard key={org.id} org={org} project={project} />
                         )) : <p>No organizations yet.</p>}

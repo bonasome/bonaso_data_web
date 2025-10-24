@@ -197,6 +197,10 @@ export default function AssessmentsIndex({ callback=null, includeParams=[], excl
     return(
         <div className={styles.index}>
             {!callback && <h1>All Assessments</h1>}
+            {!callback && <p>
+                This is the place to find assessments. An assessment is a collection of indicators that are 
+                meant to be answered in sequential order by a respondent during one "interaction".     
+            </p>}
             <IndexViewWrapper onSearchChange={setSearch} page={page} onPageChange={setPage} entries={entries} >
                 {creating && <AssessmentDetailsModal onCancel={() => setCreating(false)}/> }
                 {['admin'].includes(user.role) && 

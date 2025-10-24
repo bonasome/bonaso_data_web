@@ -17,7 +17,7 @@ import AssessmentIndicatorsModal from "../../indicators/assessment/AssessmentInd
 
 import { FcCancel } from "react-icons/fc";
 import { IoIosSave } from "react-icons/io";
-
+import { TbListDetails } from "react-icons/tb";
 
 import styles from '../../../styles/form.module.css';
 
@@ -333,7 +333,7 @@ export default function AssessmentForm(){
                 {viewingAssessment && <AssessmentIndicatorsModal assessment={assessment} meta={meta} onClose={() => setViewingAssessment(false)} />}
                 <h1>{assessment.name} Assessment for {respondent.display_name}</h1>
                 <Messages errors={submissionErrors} ref={alertRef} />
-                <button onClick={() => setViewingAssessment(true)}>Click Here to View Complete List of Questions</button>
+                <button onClick={() => setViewingAssessment(true)}><TbListDetails/> Click Here to View Complete List of Questions</button>
                 {visibleInds.length > 0 && <FormProvider {...methods} >
                 <form onSubmit={handleSubmit(onSubmit, onError)}>
                     <FormSection control={control} fields={basics} header={'Date & Location'} />

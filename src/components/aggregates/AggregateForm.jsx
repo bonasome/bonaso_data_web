@@ -85,6 +85,7 @@ export default function AggregateBuilder() {
 
     // create default values
     const defaultValues = useMemo(() => ({
+        name: existing?.name ?? '',
         indicator_id: existing?.indicator ?? null,
         organization_id: existing?.organization ?? null,
         project_id: existing?.project ?? null,

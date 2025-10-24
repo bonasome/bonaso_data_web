@@ -3,6 +3,8 @@ import Select from "../../reuseables/inputs/Select";
 import Input from "../../reuseables/inputs/Input";
 import Field from "../../reuseables/forms/Field";
 import styles from '../../../styles/form.module.css';
+import errorStyles from '../../../styles/errors.module.css';
+import { FaPlusSquare, FaMinusSquare } from "react-icons/fa";
 export default function OptionsBuilder() {
     /*
     Helper component within the AssessmentIndicator form that builds a dynamic array of options.
@@ -30,7 +32,7 @@ export default function OptionsBuilder() {
                         <Field control={control} field={{ name: `options_data.${index}.name`, 
                             label: `${index+1}.`, type: "text", rules: { required: "Required" },
                         }} style={{ display: 'flex', flexDirection: 'row'}} />
-                        <button type="button" onClick={() => remove(index)}>Remove</button>
+                        <button type="button" onClick={() => remove(index)} className={errorStyles.deleteButton}><FaMinusSquare /> Remove</button>
                     </div>
                 );
             })}
@@ -39,7 +41,7 @@ export default function OptionsBuilder() {
                         name: '',
                     })}
             >
-                Add Option
+                <FaPlusSquare /> Add Option
             </button>
         </div>
     );

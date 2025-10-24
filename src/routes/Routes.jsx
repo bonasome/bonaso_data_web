@@ -68,7 +68,6 @@ import LineLists from '../components/analytics/lineLists/LineLists';
 import SiteAnalytics from '../components/analytics/siteAnalytics/SiteAnalytics';
 
 import Messages from '../components//messages/Messages';
-import ProjectActivityForm from '../components/projects/activities/ProjectActivityForm';
 import ProjectDeadlineForm from '../components/projects/deadlines/ProjectDeadlineForm';
 import TargetForm from '../components/projects/targets/TargetForm';
 
@@ -202,16 +201,6 @@ function Router() {
                     <NarrativeReportUpload />
                 </RedirectIfNoPerm>
             } />
-            <Route path=':id/activities/new' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <ProjectActivityForm />
-                </RedirectIfNoPerm>
-            }/>
-            <Route path=':id/activities/:activityID/edit' element={
-                <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
-                    <ProjectActivityForm />
-                </RedirectIfNoPerm>
-            }/>
             <Route path=':id/deadlines/new' element={
                 <RedirectIfNoPerm level={['admin', 'meofficer', 'manager']}>
                     <ProjectDeadlineForm />

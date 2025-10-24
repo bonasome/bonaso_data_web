@@ -14,6 +14,7 @@ import modalStyles from '../../styles/modals.module.css';
 
 import { IoIosSave } from 'react-icons/io';
 import { FcCancel } from 'react-icons/fc';
+import theme from '../../../theme/theme';
 
 /*
 A set of special helper models used for selecting tasks/organizations. Since these need to be modals,
@@ -91,7 +92,7 @@ export function AssignChild({ organization, project, onUpdate , onClose}){
         }
     } 
     return(
-        <div>
+        <div style={{ backgroundColor: theme.colors.bonasoDarkAccent, padding: '3vh' }}>
             <h3>Assigning subgrantees to {organization.name}</h3>
             <Messages errors={errors} />
             <ModelMultiSelect IndexComponent={OrganizationsIndex} projAdd={project.id} name={organization.name} label={organization.name}
@@ -189,9 +190,8 @@ export function AssignTask({ organization, project, onUpdate, onClose, type='ass
     if(type == 'indicator'){
         params.push({field: 'category', value: 'assessment'})
     }
-    console.log(params)
     return(
-        <div>
+        <div style={{ backgroundColor: theme.colors.bonasoDarkAccent, padding: '3vh' }}>
             <h3>Assigning {type}s to {organization.name}</h3>
             <Messages errors={errors} />
             <ModelMultiSelect label={organization.name} IndexComponent={type == 'assessment' ? AssessmentsIndex : IndicatorsIndex} excludeParams={params} onChange={(vals) => setIndicators(vals)} value={indicators} callbackText='Assign as Task' />
@@ -271,7 +271,7 @@ export function AssignOrgToProject({ project, onUpdate, onClose}){
         }
     } 
     return(
-        <div>
+        <div style={{ backgroundColor: theme.colors.bonasoDarkAccent, padding: '3vh' }}>
             <h3>Assigning organization to {project.name}</h3>
             <Messages errors={errors} />
             <ModelMultiSelect name={project.name} label={project.name}
