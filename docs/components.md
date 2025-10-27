@@ -16,6 +16,7 @@ For consistency and maintnance, some components are shared across numerous pages
 - [ConfirmDelete](#confirm)
 - [ReturnLink](#returnlink)
 - [Messages](#messages)
+- [AssessmentIndicatorsModal](#assessmentindicatorsmodal)
 - [Tooltip](#tooltip)
 - [UpdateRecord](#updaterecord)
 
@@ -147,6 +148,8 @@ This component is designed to display all errors, warnings, and success messages
 ```jsx
 <Messages errors={errors} warnings={warnings} success={success} ref={alertRef} /> //with errors, warnings, and success each being an array
 ```
+## [AssessmentIndicatorsModal](/src/components/indicators/assessment/AssessmentIndicatorsModal.jsx)
+This component shows a user an assessment, including logic/options. To allow them to see a full assessment before completing it (while also restricting access to the assessment page to just admins). Used in Tasks and AssessmentForm, and can be expanded elsewhere. 
 
 ## [Tooltip](/src/components/reuseables/Tooltip.jsx)
 This component displays a small info icon that shows helpful text when hovered over (mostly used with RHF forms to explain inputs).

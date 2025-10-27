@@ -233,6 +233,7 @@ export default function AssessmentForm(){
 
     const [responseMap, setResponseMap] = useState({});
 
+    //if a child comp passes a change up, update the response map for logic checks
     const handleFieldChange = useCallback((id, value) => {
         setResponseMap(prev => {
             // avoid unnecessary re-renders if the value hasn’t changed
@@ -241,6 +242,7 @@ export default function AssessmentForm(){
         });
     }, []);
 
+    //control field visibility
     const visibilityMap = useMemo(() => {
         if (!assessment || !respondent) return null;
         const map = {};

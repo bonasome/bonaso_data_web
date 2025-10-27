@@ -7,6 +7,9 @@ export default function AssessmentIndicatorsModal({ assessment, meta, onClose}){
     Modal that will provide a list of assessment indicators with information about 
     options/logic, so that users can see what an assessment is about when completing it
     or reviewing tasks.
+    - assessment (object): assessment to review
+    - meta (object): model information
+    - onClose(function): close the modal
     */
 
     //helper function that converts db values to labels

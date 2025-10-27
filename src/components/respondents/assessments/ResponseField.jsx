@@ -11,7 +11,9 @@ export default function ResponseField ({ indicator, defaultVal, isVisible, onFie
     /*
     Displays a response field for a specific indicator within an assessment.
     - indicator (object): indicator being responded to
-    - shouldShow(object): should this question be visible based on logic rules
+    - defaultVal (object): default values to use, either from existing or initialize with correct data type
+    - isVisible (object): should this question be visible based on logic rules
+    - onFieldChange (function): when value changes send it to the parent for logic checks
     - options(array): options to use, if applicable
     */
     const [expanded, setExpanded] = useState(false); //show meta fields (date/location)
@@ -43,6 +45,7 @@ export default function ResponseField ({ indicator, defaultVal, isVisible, onFie
     // calculate default value for this question
    const value = useWatch({ control, name: `response_data.${indicator.id}` });
 
+   //send changes to parent comp
     useEffect(() => {
     if (!indicator) return;
         onFieldChange(indicator.id, value);
@@ -55,6 +58,7 @@ export default function ResponseField ({ indicator, defaultVal, isVisible, onFie
         }
     }, [isVisible, unregister, indicator.id]);
 
+    //reset field when default val loads (if existing)
     useEffect(() => {
         if (defaultVal && isVisible) {
             resetField(`response_data.${indicator.id}`, { defaultValue: defaultVal });

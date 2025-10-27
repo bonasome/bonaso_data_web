@@ -27,7 +27,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose nginx port (should match nginx.conf and docker-compose.yaml)
-EXPOSE 80
+EXPOSE 443
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
