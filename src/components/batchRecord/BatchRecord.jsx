@@ -159,7 +159,7 @@ export default function BatchRecord(){
                 method: 'POST',
                 body: formData,
             });
-            const data = await response.json();
+            let data = await response.json();
             if(response.ok){
                 if(data.errors.length == 0 && data.warnings.length ==0){
                     setSuccess(['Uploaded with no errors. Great work!']);
