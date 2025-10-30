@@ -223,7 +223,7 @@ export default function AssessmentForm(){
             </div>
             {del && <ConfirmDelete onCancel={() => setDel(false)} onConfirm={handleDelete} name={`the assessment "${assessment.display_name}"`} />}
             <div style={{ margin: '5vh', padding: '2vh', backgroundColor: theme.colors.bonasoDarkAccent  }}>
-                <h2>Questions</h2>
+                <h2>Indicators</h2>
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext items={indicators.map((i) => i.id)} strategy={verticalListSortingStrategy}>
                         {indicators.sort((a, b) => a.order - b.order).map((ind) => (<AssessmentIndicator meta={indicatorsMeta} assessment={assessment} existing={ind} onUpdate={getAssessmentDetail} />))}

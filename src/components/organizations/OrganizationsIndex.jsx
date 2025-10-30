@@ -18,6 +18,7 @@ import Filter from '../reuseables/Filter';
 
 import styles from '../../styles/indexView.module.css'
 import errorStyles from '../../styles/errors.module.css';
+
 import { ImPencil } from 'react-icons/im';
 import { GiJumpAcross } from 'react-icons/gi';
 import { BsBuildingFillAdd } from "react-icons/bs";
@@ -136,7 +137,6 @@ export default function OrganizationsIndex( { callback=null, includeParams=[], e
         .join('') ?? '';
 
         return include + exclude
-
     }, [includeParams, excludeParams]);
 
     //load the list of orgs
@@ -156,7 +156,7 @@ export default function OrganizationsIndex( { callback=null, includeParams=[], e
                 const data = await response.json();
                 setEntries(data.count);
                 setOrganizations(data.results);
-            } 
+            }
             catch (err) {
                 console.error('Failed to fetch projects: ', err)
                 setErrors(['Something went wrong, Please try again later.']);

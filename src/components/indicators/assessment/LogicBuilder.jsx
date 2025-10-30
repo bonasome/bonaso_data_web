@@ -29,7 +29,7 @@ export default function LogicBuilder({ order, meta, assessment }) {
     
     return (
         <div className={styles.formSection}>
-            <h3>Show Question If</h3>
+            <h3>Show Indicator If</h3>
             {/* This only needs to be answered if there is more than one. Otherwise we can just default to AND */}
             {fields.length > 1 && <Field control={control} field={{ name: `logic_data.group_operator`, label: 'Group Operator', type: "select", 
                 rules: { required: "Required"}, options: meta?.group_operators,

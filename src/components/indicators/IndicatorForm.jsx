@@ -224,7 +224,6 @@ export default function IndicatorForm(){
     ]
 
 
-
     if(loading || !indicatorsMeta?.category) return <Loading />
     return(
         <div className={styles.form}>

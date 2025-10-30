@@ -9,7 +9,6 @@ import UpdateBox from './UpdateBox';
 import styles from './home.module.css';
 import modalStyles from '../../styles/modals.module.css';
 
-
 function PopUp({ onClose }){
     //modal to cover our bases
     return(
