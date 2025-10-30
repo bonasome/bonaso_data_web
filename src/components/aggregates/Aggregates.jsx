@@ -163,7 +163,7 @@ export default function Aggregates() {
                     <div>
                         <GrTableAdd style={{ fontSize: '150px', margin: 30, opacity: '75%' }} />
                     </div>
-                    <h1>Select or create a an aggregate to begin.</h1>
+                    <h1>Select or create an aggregate to begin.</h1>
                     <p>
                         Aggregates allow you to record data in a tabular form, without having to 
                         enter individual names. Please note that we strongly recommend always recording data
