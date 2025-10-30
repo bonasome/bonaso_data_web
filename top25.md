@@ -1,25 +1,27 @@
-Miami
 Ohio State
-Texas A&M
-Oklahoma
-Ole Miss
-Oregon
-Alabama
 Indiana
-Texas Tech
-Georgia Tech
-Missouri
+Texas A&M
+Alabama
 Georgia
-Tennessee
-LSU
-Vanderbilt
-Arizona State
-Illinois
+Georgia Tech
 BYU
-Michigan
-Nebraska
+Miami
+Vanderbilt
+Ole Miss
+Texas Tech
+Oregon
 Cincinnatti
-Iowa State
-USF
+Virginia
+Louisville
 Notre Dame
+Missouri
+Tennessee
+Houston
 Memphis
+Navy
+Texas
+Oklahoma
+Michigan
+USC
+
+Just Missed: Washington, Texas, Utah, SDSU JMU, Boise State, SDSU, Utah, Pitt, USF
