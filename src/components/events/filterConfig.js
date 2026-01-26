@@ -12,7 +12,7 @@ export function filterConfig(meta, orgs, searchCallback){
     Config function that tells the filter component (src/components/reuseables/Filter.jsx) what inputs to build
     - meta (object): the events meta for building options
     - orgs (array): an array of organizations for constructing the host filter
-    - searchCallaback (function): a function that passes value from the select component to the api that 
+    - searchCallback (function): a function that passes value from the select component to the api that 
         gets the organizations.
     */
 
