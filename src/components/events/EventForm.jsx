@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useForm,  useWatch } from "react-hook-form";
+import { useParams, useNavigate } from 'react-router-dom';
+import { useForm } from "react-hook-form";
 
 import { useEvents } from '../../contexts/EventsContext';
 
@@ -23,118 +23,93 @@ import { IoIosSave } from "react-icons/io";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 
 export default function EventForm(){
-    /*
-    Form that allows a user to create or edit a form. Passing a valid ID param in the url will fetch an 
-    existing record for editing. 
-    */
     const navigate = useNavigate();
-    
-    //param to get indicator (blank if creating a record)
     const { id } = useParams();
-    //context
     const { eventDetails, setEventDetails, eventsMeta, setEventsMeta } = useEvents();
 
-    //existing values to start with
     const [existing, setExisting] = useState(null);
-
-    //page meta
     const [loading, setLoading] = useState(true);
     const [submissionErrors, setSubmissionErrors] = useState([]);
     const [success, setSuccess] = useState([]);
     const [saving, setSaving] = useState(false);
 
-    //ref to scroll to errors
     const alertRef = useRef(null);
     useEffect(() => {
         if (submissionErrors.length > 0 && alertRef.current) {
-        alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        alertRef.current.focus({ preventScroll: true });
+            alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            alertRef.current.focus({ preventScroll: true });
         }
     }, [submissionErrors]);
 
-    //fetch the meta
     useEffect(() => {
         const getMeta = async () => {
             if(Object.keys(eventsMeta).length !== 0){
                 setLoading(false);
                 return;
             }
-            else{
-                try{
-                    console.log('fetching events meta...');
-                    const response = await fetchWithAuth(`/api/activities/events/meta/`);
-                    const data = await response.json();
-                    setEventsMeta(data);
-                }
-                catch(err){
-                    setSubmissionErrors(['Something went wrong. Please try again later.']);
-                    console.error('Failed to fetch event model information: ', err);
-                }
-                finally{
-                    setLoading(false);
-                }
+            try{
+                const response = await fetchWithAuth(`/api/activities/events/meta/`);
+                const data = await response.json();
+                setEventsMeta(data);
             }
-        }
+            catch(err){
+                setSubmissionErrors(['Something went wrong. Please try again later.']);
+                console.error('Failed to fetch event model information: ', err);
+            }
+            finally{
+                setLoading(false);
+            }
+        };
         getMeta();
-    }, []);
+    }, [eventsMeta, setEventsMeta]);
 
-    //get the existing event if an ID param is passed
     useEffect(() => {
         const getEvent = async () => {
-            if(!id) return; //if not ID do nothing
-           const found = eventDetails.find(e => e.id.toString() === id.toString());
+            if(!id) return;
+            const found = eventDetails.find(e => e.id.toString() === id.toString());
             if (found) {
                 setExisting(found);
                 return;
             }
-            else{
-                try {
-                    console.log('fetching event details...');
-                    const response = await fetchWithAuth(`/api/activities/events/${id}/`);
-                    const data = await response.json();
-                    if(response.ok){
-                        //update the context
-                        setEventDetails(prev => [...prev, data]);
-                        console.log(data)
-                        setExisting(data);
-                    }
-                    else{
-                        //if a bad ID is provided, navigate to 404
-                        navigate(`/not-found`);
-                    }
-                } 
-                catch (err) {
-                    setSubmissionErrors(['Something went wrong. Please try again later.']);
-                    console.error('Failed to fetch event: ', err);
-                } 
+            try {
+                const response = await fetchWithAuth(`/api/activities/events/${id}/`);
+                const data = await response.json();
+                if(response.ok){
+                    setEventDetails(prev => [...prev, data]);
+                    setExisting(data);
+                } else {
+                    navigate(`/not-found`);
+                }
+            } catch (err) {
+                setSubmissionErrors(['Something went wrong. Please try again later.']);
+                console.error('Failed to fetch event: ', err);
             }
         };
         getEvent();
-    }, [id]);   
+    }, [id, eventDetails, setEventDetails, navigate]);   
 
-    //handle form submission
     const onSubmit = async(data, e) => {
         setSubmissionErrors([]);
         setSuccess([]);
-        //check action to see if this should redirect back to the detail or create page
         const action = e.nativeEvent.submitter.value;
-        //model selects send objects, so just get the id for the backend
         data.host_id = data.host_id?.id ?? null;
         data.task_ids = data?.task_ids?.map((t) => (t.id)) ?? [];
         data.organization_ids = data?.organization_ids?.map((o) => (o.id)) ?? [];
-        if((!data.task_ids ||data.task_ids?.length > 0) && !data.project_id?.id){
+
+        // Require task OR project
+        if((!data.task_ids || data.task_ids.length === 0) && !data.project_id?.id){
             setSubmissionErrors(['Task or project is required.']);
             return;
         }
-        if(data.task_ids?.length > 0){
-            data.project_id = null
+
+        if(data.task_ids && data.task_ids.length > 0){
+            data.project_id = null;
         }
-        if(data.project_id){
-            data.project_id = data.project_id.id
+        else if(data.project_id){
+            data.project_id = data.project_id.id ?? data.project_id;
         }
         try{
             setSaving(true);
-            console.log('submitting data...', data);
             const url = id ? `/api/activities/events/${id}/` : `/api/activities/events/`;
             const response = await fetchWithAuth(url, {
                 method: id ? 'PATCH' : 'POST',
@@ -145,47 +120,41 @@ export default function EventForm(){
             });
             const returnData = await response.json();
             if(response.ok){
-                setSuccess(['Event created successfuly!']);
+                const msg = id ? 'Event updated successfully!' : 'Event created successfully!';
+                setSuccess([msg]);
                 setEventDetails(prev => {
                     const others = prev.filter(r => r.id !== returnData.id);
                     return [...others, returnData];
-                }); //update context
+                }); 
 
-                //depending on the button clicked, redirect the user to the appropriate page
-                if(action === 'create_another'){
+                if(action === 'create_another'){ 
                     setExisting(null);
                     reset();
                     navigate('/events/new');
-                }
-                else{
+                } else {
                     navigate(`/events/${returnData.id}`);
                 }
-            }
-            else{
-                const serverResponse = []
+            } else {
+                const serverResponse = [];
                 for (const field in returnData) {
                     if (Array.isArray(returnData[field])) {
                         returnData[field].forEach(msg => {
-                        serverResponse.push(`${field}: ${msg}`);
+                            serverResponse.push(`${field}: ${msg}`);
                         });
-                    } 
-                    else {
+                    } else {
                         serverResponse.push(`${returnData[field]}`);
                     }
                 }
-                setSubmissionErrors(serverResponse); //on server error, alert the user
+                setSubmissionErrors(serverResponse);
             }
-        }
-        catch(err){
+        } catch(err){
             setSubmissionErrors(['Something went wrong. Please try again later.']);
-            console.error('Could not record event: ', err)
-        }
-        finally{
+            console.error('Could not record event: ', err);
+        } finally{
             setSaving(false);
         }
-    }
-    
-    //set default values based on existing if an ID is provided
+    };
+
     const defaultValues = useMemo(() => {
         return {
             name: existing?.name ?? '',
@@ -196,41 +165,34 @@ export default function EventForm(){
             host_id: existing?.host ?? null,
             status: existing?.status ?? 'planned',
             event_type: existing?.event_type ?? '',
-            
             task_ids: existing?.tasks ?? [],
             project_id: existing?.project ?? null,
             organization_ids: existing?.organizations ?? [],
         }
     }, [existing]);
 
-    //construct RHF variables
     const { register, control, handleSubmit, reset, watch, setFocus, formState: { errors } } = useForm({ defaultValues });
 
-    //scroll to field errors
     const onError = (errors) => {
         const firstError = Object.keys(errors)[0];
         if (firstError) {
-            setFocus(firstError); // sets cursor into the field
-            // scroll the element into view smoothly
+            setFocus(firstError);
             const field = document.querySelector(`[name="${firstError}"]`);
             if (field && field.scrollIntoView) {
-            field.scrollIntoView({ behavior: "smooth", block: "center" });
+                field.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         }
     };
 
-    //try to set default values once existing has loaded
     useEffect(() => {
         if (existing) {
             reset(defaultValues);
         }
     }, [existing, reset, defaultValues]);
 
-    //watches to help with form logic
-    const start = watch("start"); //for validating the end date is after the start
-    const hostOrg = watch('host_id'); //for determining validOrgs
-    const selectedTasks = watch('task_ids');
-    
+    const start = watch("start");
+    const hostOrg = watch('host_id') ?? null;
+    const selectedTasks = watch('task_ids') ?? [];
     const basics = [
         { name: 'name', label: 'Event Name (Required)', type: "text", rules: { required: "Required", maxLength: { value: 255, message: 'Maximum length is 255 characters.'} },
             placeholder: 'ex. World AIDS Day, Counselling Session, Blood Drive...'
@@ -238,10 +200,10 @@ export default function EventForm(){
         { name: 'description', label: "Event Description", type: "textarea",
             placeholder: 'Any notes about the purpose or function of this event...'
         },
-    ]
+    ];
     const info = [
         { name: 'start', label: "Event Start (Required)", type: "date", rules: { required: "Required" }},
-        { name: 'end', label: "Event End (Required)", type: "date", rules: { required: "Required" ,
+        { name: 'end', label: "Event End (Required)", type: "date", rules: { required: "Required",
             validate: value => !start || value >= start || "This event cannot end before it starts."
         }},
         { name: 'location', label: "Event Location (Required)", type: "text", rules: { required: "Required" },
@@ -261,26 +223,26 @@ export default function EventForm(){
             options: eventsMeta?.event_types,  rules: { required: "Required" }, 
             tooltip: 'What kind of event was this? This is just for your own record.'
         },
-        ]
+    ];
     const participants = [
         {name: 'organization_ids', label: 'Participating Organizations', type: 'multimodel', IndexComponent: OrganizationsIndex,
             labelField: 'name', tooltip: `Did any of your subgrantees attend this event? You can include any 
             subgrantees you may have trained. `
          },
-    ]
+    ];
     const tasks = [
         {name: 'task_ids', label: 'Linked to Tasks (Required)', type: 'multimodel', IndexComponent: Tasks,
             includeParams: [{field: 'organization', value: hostOrg?.id}, {field: 'for_event', value: 'true'}],
             tooltip: `What tasks does this event contribute to?`
         },
-    ]
+    ];
     const project = [
         {name: 'project_id', label: 'For Project', type: 'model', IndexComponent: ProjectIndex,
             tooltip: `If not attached to one or more tasks, what project is the event for?`
         },
-    ]
+    ];
 
-    if(loading || !eventsMeta?.statuses) return <Loading />
+    if(loading || !eventsMeta?.statuses) return <Loading />;
     return(
         <div className={styles.form}>
             <ReturnLink url={id ? `/events/${id}` : '/events'} display={id ? 'Return to detail page' : 'Return to events overview'} />
@@ -291,16 +253,16 @@ export default function EventForm(){
                 <FormSection fields={info} control={control} header='Event Information' />
                 {hostOrg && <FormSection fields={participants} control={control} header='Participants' />}
                 {hostOrg && <FormSection fields={tasks} control={control} header='Associated with Task' />}
-                {selectedTasks.length == 0 && hostOrg && <FormSection fields={project} control={control} header='Associated with Project' />}
+                {selectedTasks.length === 0 && hostOrg && <FormSection fields={project} control={control} header='Associated with Project' />}
                 {!saving && <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <button type="submit" value='normal'><IoIosSave /> Save</button>
                     {!id && <button type="submit" value='create_another'><BsDatabaseFillAdd /> Save and Create Another</button>}
-                    <Link to={id ? `/events/${id}` : '/events'}><button type="button">
+                    <button type="button" onClick={() => navigate(id ? `/events/${id}` : '/events')}>
                         <FcCancel /> Cancel
-                    </button></Link>
+                    </button>
                 </div>}
                 {saving && <ButtonLoading />}
             </form>
         </div>
-    )
-}
+    );
+} /* Updated with cleanup: fixed task/project validation logic, safe watch fallbacks, success messages, proper useEffect dependencies, removed unused imports, simplified cancel button to use navigate. */
