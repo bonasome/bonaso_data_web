@@ -127,7 +127,7 @@ export default function EventForm(){
             return;
         }
         if(data.task_ids?.length > 0){
-            data.project_id = nulll
+            data.project_id = null
         }
         if(data.project_id){
             data.project_id = data.project_id.id
