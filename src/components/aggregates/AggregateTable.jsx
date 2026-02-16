@@ -155,86 +155,127 @@ export default function AggregateTable({ id, meta, onDelete }){
             </div>}
             
             {/* If there is only one count in the group (one number), just display the number. */}
-            {count?.counts?.length > 1 && <table style={{  marginLeft: 'auto', marginRight: 'auto', border: `solid 2px ${theme.colors.bonasoLightAccent}` }}>
-                <thead>
-                    {/* Top-left corner: show row dims labels stacked vertically */}
-                    <tr>
-                    <th colSpan={dims.rowDims.length || 1} style={{ textAlign: 'left' }}>
-                        {dims.rowDims.length ? dims.rowDims.map(d => cleanLabels(d)).join(' , ') : 'Rows'}
-                    </th>
-                        {theadRows.length === 0 ? (
-                            // single header row when there are no column dims
-                            <th >{dims.colDims.length ? dims.colDims.join(' , ') : 'Columns'}</th>
-                        ) : (
-                            // render top row cells that span the full header height (we'll render headerRows next)
-                            <th colSpan={colKeys.length} style={{ textAlign: 'center' }}>Columns</th>
-                        )}
-                    </tr>
-
-
-                    {/* If we have multi-level column headers, render them */}
-                    {theadRows.length > 0 && theadRows.map((level, ri) => (
-                        <tr key={`col-level-${ri}`}>
-                            {/* left corner blank cells to align with row header depth */}
-                                <th className="border p-1 bg-gray-50" colSpan={dims.rowDims.length || 1}></th>
-                                {level.map((cell, ci) => (
-                                    <th key={cell.key} className="border p-2 bg-white" colSpan={cell.span} style={{ textAlign: 'center' }}>
-                                    {dims.colDims[ri] != 'option' ?  getLabelFromValue(dims.colDims[ri], cell.label) : cell.label}
-                                </th>
-                            ))}
+            {count?.counts?.length > 1 && (
+                  <div className={styles.matrixWrap}>
+                    <table className={styles.matrixTable}>
+                      <thead className={styles.matrixThead}>
+                        {/* Top-left corner */}
+                        <tr>
+                          <th
+                            colSpan={dims.rowDims.length || 1}
+                            className={`${styles.matrixTh} ${styles.matrixThLeft}`}
+                          >
+                            {dims.rowDims.length ? dims.rowDims.map(d => cleanLabels(d)).join(' , ') : 'Rows'}
+                          </th>
+                
+                          {theadRows.length === 0 ? (
+                            <th className={`${styles.matrixTh} ${styles.matrixThCenter}`}>
+                              {dims.colDims.length ? dims.colDims.join(' , ') : 'Columns'}
+                            </th>
+                          ) : (
+                            <th
+                              colSpan={colKeys.length}
+                              className={`${styles.matrixTh} ${styles.matrixThCenter}`}
+                            >
+                              Columns
+                            </th>
+                          )}
                         </tr>
-                    ))}
-                </thead>
-
-
-                <tbody>
-                    {rowTree.map((r, ri) => (
-                        <tr key={`row-${ri}`}>
-                            {/* render each row's label parts into separate cells (nested row headers) */}
+                
+                        {/* Multi-level column headers */}
+                        {theadRows.length > 0 && theadRows.map((level, ri) => (
+                          <tr key={`col-level-${ri}`}>
+                            <th
+                              colSpan={dims.rowDims.length || 1}
+                              className={`${styles.matrixTh} ${styles.matrixThSpacer}`}
+                            />
+                            {level.map((cell) => (
+                              <th
+                                key={cell.key}
+                                colSpan={cell.span}
+                                className={`${styles.matrixTh} ${styles.matrixThCenter}`}
+                              >
+                                {dims.colDims[ri] != 'option'
+                                  ? (getLabelFromValue(dims.colDims[ri], cell.label) ?? cell.label)
+                                  : cell.label}
+                              </th>
+                            ))}
+                          </tr>
+                        ))}
+                      </thead>
+                
+                      <tbody>
+                        {rowTree.map((r, ri) => (
+                          <tr key={`row-${ri}`} className={styles.matrixRow}>
+                            {/* row header parts */}
                             {r.labelParts.map((part, pi) => (
-                                <td key={`r-${ri}-p-${pi}`} style={{ padding: '1vh', textAlign: 'center' }}>
-                                    {(dims.rowDims[pi] != 'option' ? getLabelFromValue(dims.rowDims[pi], part) : part) || ''}
-                                </td>
+                              <td
+                                key={`r-${ri}-p-${pi}`}
+                                className={`${styles.matrixTd} ${styles.matrixTdLabel}`}
+                              >
+                                {(dims.rowDims[pi] != 'option'
+                                  ? getLabelFromValue(dims.rowDims[pi], part)
+                                  : part) || ''}
+                              </td>
                             ))}
-
-                            {/* If row dims are fewer than a typical column, make sure table cell alignment remains */}
-                            {r.labelParts.length === 0 && <td />}
-
-                            {/* data cells for each column key */}
+                
+                            {r.labelParts.length === 0 && (
+                              <td className={`${styles.matrixTd} ${styles.matrixTdLabel}`} />
+                            )}
+                
+                            {/* data cells */}
                             {colKeys.map((ck, ci) => {
-                                if(cells[r.rowKey] && cells[r.rowKey][ck]?.id){
-                                    const found = count.counts.find(c => c.id == cells[r.rowKey][ck]?.id);
-                                    if(found.flags.length > 0){
-                                        if(found.flags.filter(f => (!f.resolved)).length > 0){
-                                            return(<td key={`cell-${ri}-${ci}`} style={{ backgroundColor: theme.colors.warning, cursor: 'pointer', textAlign: 'center' }} onClick={() => setViewingFlag(cells[r.rowKey][ck]?.id)}>
-                                                {Number((cells[r.rowKey] && cells[r.rowKey][ck]?.value) || 0) || '-'}
-                                                <Tooltip msg={'This count has been flagged. Click the cell to find out more.'} />
-                                            </td>)
-                                        }
-                                        else if(found.flags.filter(f => (!f.resolved)).length == 0){
-                                            return(<td key={`cell-${ri}-${ci}`} style={{ textAlign: 'center', backgroundColor: theme.colors.bonasoLightAccent , cursor: 'pointer' }} onClick={() => setViewingFlag(cells[r.rowKey][ck]?.id)}>
-                                                {Number((cells[r.rowKey] && cells[r.rowKey][ck]?.value) || 0) || '-'}
-                                                <Tooltip msg={'This count was previously flagged. Click the cell to find out more.'} />
-                                            </td>)
-                                        }
-                                    }
+                              const cell = cells?.[r.rowKey]?.[ck];
+                              const cellId = cell?.id;
+                
+                              let flaggedClass = '';
+                              let tooltipMsg = '';
+                
+                              if (cellId) {
+                                const found = count.counts.find(c => c.id == cellId);
+                                const flags = found?.flags || [];
+                                if (flags.length > 0) {
+                                  const unresolved = flags.some(f => !f.resolved);
+                                  flaggedClass = unresolved ? styles.matrixFlagUnresolved : styles.matrixFlagResolved;
+                                  tooltipMsg = unresolved
+                                    ? 'This count has been flagged. Click the cell to find out more.'
+                                    : 'This count was previously flagged. Click the cell to find out more.';
                                 }
-                                return(<td key={`cell-${ri}-${ci}`} style={{ textAlign: 'center' }}>
+                              }
+                
+                              const clickable = Boolean(flaggedClass);
+                
+                              return (
+                                <td
+                                  key={`cell-${ri}-${ci}`}
+                                  className={`${styles.matrixTd} ${flaggedClass} ${clickable ? styles.matrixClickable : ''}`}
+                                  onClick={() => clickable && cellId && setViewingFlag(cellId)}
+                                >
+                                  <div className={styles.matrixPill}>
                                     {Number((cells[r.rowKey] && cells[r.rowKey][ck]?.value) || 0) || '-'}
-                                </td>)
+                                  </div>
+                                  {clickable && <Tooltip msg={tooltipMsg} />}
+                                </td>
+                              );
                             })}
-                        </tr>
-                    ))}
+                          </tr>
+                        ))}
+                
+                        {rowTree.length === 0 && (
+                          <tr>
+                            <td
+                              className={styles.matrixEmpty}
+                              colSpan={(dims.rowDims.length || 1) + (colKeys.length || 1)}
+                            >
+                              No data
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
 
-
-                    {/* If no rows exist, render a placeholder */}
-                    {rowTree.length === 0 && (
-                    <tr>
-                        <td colSpan={(dims.rowDims.length || 1) + (colKeys.length || 1)}>No data</td>
-                    </tr>
-                    )}
-                </tbody>
-            </table>}
             {!['client'].includes(user.role) && <div style={{ display: 'flex', flexDirection: 'row'}}> 
                 <Link to={`/aggregates/${id}/edit`}> <ButtonHover noHover={<ImPencil />} hover={'Edit Counts'} /></Link>
                 <ButtonHover callback={() => setDel(true)} noHover={<FaTrashAlt />} hover={'Delete Count'} forDelete={true} />
