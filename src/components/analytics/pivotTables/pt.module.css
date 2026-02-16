@@ -4,9 +4,84 @@
     padding: 3vh;
 }
 
-.table{
+/* ===== MATRIX TABLE LOOK ===== */
+.table {
     background-color: var(--bonaso-dark-accent);
     margin: 3vh;
     padding: 3vh;
-    overflow-x: scroll;
+
+    overflow-x: auto;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+}
+
+/* main table */
+.table table {
+    width: 100%;
+    min-width: 1100px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 14px;
+    font-size: 14px;
+}
+
+/* header */
+.table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    background: #ffffff;
+    font-weight: 700;
+    text-align: center;
+    padding: 14px 16px;
+
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+/* body cells */
+.table tbody td {
+    padding: 10px 12px;
+    text-align: center;
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    background: #ffffff;
+}
+
+/* hover row */
+.table tbody tr:hover td {
+    background: #f9fafb;
+}
+
+/* first columns (labels) */
+.table tbody td:first-child,
+.table thead th:first-child {
+    text-align: left;
+    font-weight: 600;
+}
+
+/* INPUT-LIKE pill look (like your screenshot) */
+.table tbody td > * {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 88px;
+    height: 40px;
+    padding: 0 14px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    background: white;
+
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+}
+
+/* flagged cells (your inline colors still work) */
+.table tbody td[style*="cursor: pointer"] {
+    cursor: pointer;
 }
